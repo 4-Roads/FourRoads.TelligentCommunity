@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project name="FourRoads.NAnt" default="help">
+	<description>Dummy build file for the FourRoads.NAnt.Tests project</description>
+	
+	<property name="nant.onfailure" value="fail" />
+	
+	<target name="fail">
+		<!-- Enter tasks for fail target -->
+		<echo message="Fail target not implemented." />
+	</target>
+
+	<target name="help">
+		<echo message="The skeleton file for the build process is designed to execute the following targets in turn:" />
+	</target>
+	
+</project>

@@ -1,0 +1,92 @@
+﻿<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:BlogSubscriptionDefaults_Name}" cssClass="subscription-defaults" description="${resource:BlogSubscriptionDefaults_Description}" instanceIdentifier="71c7b6f757bc4d159d8c69eb5a8a8db6" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false">
+    <contentScript>
+      <![CDATA[
+      #set ($blog = $core_v2_blog.Current)
+      #set ($defaultSettingName = $core_v2_widget.UniqueId('defaultSettingName'))
+      #set ($resetSite = $core_v2_widget.UniqueId('resetSite'))  
+        
+      #if ($blog && $core_v2_nodePermission.Get("blogs", $blog.Id, "Blog_ModifyBlog").IsAllowed)
+      
+          ##get the current setting from extended attributes
+          #set($defaultSubscriptionSetting = "unset")
+          #foreach($attribute in $blog.ExtendedAttributes)
+            #if ($attribute.Key == "DefaultSubscriptionSetting")
+              #set($defaultSubscriptionSetting = $attribute.Value)
+            #end
+          #end
+          
+          <section >
+            <p>Select the default action for all users that either join this group or the site</p>
+            <fieldset class="field-list">
+              <span class="field-item" style="display:none"><input name="$defaultSettingName" type="radio" value="unset" #if ($defaultSubscriptionSetting == "unset")checked="checked"#end /><label>unset</label></span>
+              <span class="field-item"><input name="$defaultSettingName" type="radio" value="subscribed" #if ($defaultSubscriptionSetting == "subscribed")checked="checked"#end /><label>$core_v2_language.GetResource("Subscribed")</label></span>
+              <span class="field-item"><input name="$defaultSettingName" type="radio" value="unsubscribed" #if ($defaultSubscriptionSetting == "unsubscribed")checked="checked"#end /><label>$core_v2_language.GetResource("Unsubscribed")</label></span>
+              
+              <input type="button" value="$core_v2_encoding.HtmlAttributeEncode($core_v2_language.GetResource("Reset"))" id="$resetSite" />
+              
+             </fieldset>
+          </section>
+          
+        #registerEndOfPageHtml('fourroads.widgets.blogSubscriptionDefaults')
+          <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('subscriptiondefaults.js'))"></script>
+        #end
+      
+        #registerEndOfPageHtml()
+        <script type="text/javascript">
+        jQuery(function(){
+	        jQuery.fourroads.widgets.subscriptionDefaults.register({
+            wrapperId : '$core_v2_encoding.JavascriptEncode($core_v2_widget.WrapperElementId)',
+            blogId :  $blog.Id,
+            selectors : {
+                defaultSettingsRadio :  "input[name='$defaultSettingName']",
+                resetSiteButton: '#$core_v2_encoding.JavascriptEncode($resetSite)'
+            },
+            resources : {
+				        areYouSure: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource("AreYouSure"))',
+                updatedMessage: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource("UpdatedMessage"))'
+            },
+            urls : {
+                updateSettings : '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('updateSettings.vm'))',
+                resetSettings : '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('resetSettings.vm'))'
+            }
+	        });
+        });
+        </script>
+        #end
+      
+      #else
+        	$core_v2_widget.Hide()
+      #end
+			]]>
+    </contentScript>
+    <headerScript>
+      <![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:BlogSubscriptionDefaults_Header}'))
+			]]>
+    </headerScript>
+    <requiredContext>
+      <context id="94b4a7db70934b0abcce06169b6f2272" />
+    </requiredContext>
+    <configuration>
+      <![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="BlogSubscriptionDefaults_Name" dataType="string" defaultValue="${resource:BlogSubscriptionDefaults_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+</propertyGroup>
+]]>
+    </configuration>
+    <languageResources>
+      <language key="en-us">
+        <resource name="BlogSubscriptionDefaults_Name">4 Roads - Blog Advanced Options</resource>
+        <resource name="BlogSubscriptionDefaults_Header">Advanced Options</resource>
+        <resource name="BlogSubscriptionDefaults_Description">Allows a user with Edit Setting permission of the blog to configure default settings.</resource>
+        <resource name="Options">Options</resource>
+        <resource name="AreYouSure">Are you sure you want to reset all of the settings for all users?</resource>
+        <resource name="Subscribed">Blog notifications on</resource>
+        <resource name="Unsubscribed">Blog notifications off</resource>
+        <resource name="UpdatedMessage">Default forum subscription settings updated</resource>
+        <resource name="Reset">Reset All Blog Users</resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

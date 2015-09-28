@@ -1,0 +1,16 @@
+#if ($core_v2_page.IsPost)
+	## check for administrator
+	#set($roles = $core_v2_utility.MakeList("Administrators"))
+	#set($accessingUserIsAdministrator = $core_v2_roleUsers.IsUserInRoles($core_v2_user.Accessing.Username, $roles))
+
+	#if($accessingUserIsAdministrator)
+		#set($notificationTypeId = false)
+		#set($enable = false)
+		#set($notificationTypeId = $core_v2_page.GetFormValue('notificationType'))
+		#set($distributionTypes = $core_v2_page.GetFormValue("distributionTypes"))
+		#set($enable = $core_v2_utility.ParseBool($core_v2_page.GetFormValue('enable')))
+
+		$frcommon_v1_configurationExtensions.ResetUserNotifications($notificationTypeId, $distributionTypes)
+	#end
+
+#end

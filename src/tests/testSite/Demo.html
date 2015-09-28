@@ -1,0 +1,32 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head><title>
+	Untitled Page
+</title></head>
+<body id="AmChartTest">
+    <form name="form1" method="post" action="ChartTest.aspx" id="form1">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKMTk0MzkxMDY2OA9kFgICAw9kFgICAQ8WAh4QQXV0b21hdGVkVmlzaWJsZWdkZA2IljW9ISu0rSMrQv6dQIKQD/mu" />
+</div>
+		<script type="text/javascript" src="/testSite/Utility/swfobject.js">
+		</script>
+		<div id="AmChart_flashcontent">
+			<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this chart.
+		</div>
+		<script type='text/javascript' language='javascript'>
+
+			var flashvars = { path:"/testSite/Utility/amCharts/" , chart_data:"<?xml version='1.0' encoding='utf-16'?><chart>  <series>    <value xid='Question1' bg_alpha='0'>Question1</value>    <value xid='Question2' bg_alpha='0'>Question2</value>  </series>  <graphs>    <graph gid='1' title='Test Graph'>      <value xid='Question1' start='0'>100</value>    </graph>  </graphs></chart>" , chart_settings:"<?xml version='1.0' encoding='utf-16'?><settings>  <skip_rows>0</skip_rows>  <text_size>0</text_size>  <redraw>false</redraw>  <reload_data_interval>0</reload_data_interval>  <add_time_stamp>false</add_time_stamp>  <precision>0</precision></settings>" ,  preloader_color:"Black"  };
+			var params = {  }; 
+			var attributes = { };
+
+			swfobject.embedSWF("/testSite/Utility/amCharts/amcolumn.swf", "AmChart_flashcontent", "300px","420px", "9.0.0" , "expressInstall.swf", flashvars, params, attributes);
+		</script>
+	
+    <div>
+    </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,21 @@
+﻿$core_v2_page.SetContentType('application/json')
+
+
+#if($core_v2_page.IsPost &&  $core_v2_roleUsers.IsUserInRoles($core_v2_user.Accessing.Username,  $core_v2_utility.Split(",", "Administrators")) )
+  #set($blogId = false)
+  #set($forumId = false)
+  #set($forumId = $core_v2_page.GetFormValue('forumId'))
+  #set($blogId = $core_v2_page.GetFormValue('blogId'))
+  #set($wikiId = $core_v2)
+  #if($forumId && $blogId)
+	#set($blog = $core_v2_blog.Get("%{Id = $blogId}"))
+	#if($blog)
+		#set($updatedBlog = $core_v2_blog.Update($blog.Id, "%{_ExtendedAttributes_TargetForumId=$forumId}"))
+		{"success": "true"}
+	#end
+  #else 
+	{"success": "false"}
+  #end
+  #else 
+	{"success": "false" , "error" : "access denied"}
+#end

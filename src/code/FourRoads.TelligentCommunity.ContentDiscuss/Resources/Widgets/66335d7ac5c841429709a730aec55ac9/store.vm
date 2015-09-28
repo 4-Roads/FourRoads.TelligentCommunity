@@ -1,0 +1,29 @@
+﻿#if($core_v2_page.IsPost)
+  $core_v2_page.SetContentType('application/json')
+
+  #set($title = false)
+  #set($body = false)
+  #set($author = false)
+  #set($forumId = false)
+  #set($contentId = false)
+  #set($contentTypeId = false)
+
+  #set($title = $core_v2_page.GetFormValue('title'))
+  #set($body = $core_v2_page.GetFormValue('body'))
+  #set($url = $core_v2_page.GetFormValue('url'))
+  #set($author = $core_v2_page.GetFormValue('authorName'))
+  #set($forumId = $core_v2_utility.ParseInt($core_v2_page.GetFormValue('forumId')))
+  #set($contentId = $core_v2_page.GetFormValue('contentId'))
+  #set($contentTypeId = $core_v2_page.GetFormValue('contentTypeId'))
+
+  #set($data = $core_v2_page.MakeQueryString("%{}"))
+  $data.Add('title', $title)
+  #set($dq = '"')
+  $data.Add('body', "[quote user=${dq}${author}${dq}]${body}.......<a href='$url'>from this post</a>[/quote]")
+
+  #set($storeId = $core_v2_utility.StoreTemporaryData($data.ToString()))
+
+  #set($url = $core_v2_page.AdjustQueryString($core_v2_forumUrls.AddThread($forumId, $storeId), "originalContentId=${contentId}&originalContentTypeId=${contentTypeId}"))
+  { "threadUrl":"$core_v2_encoding.JavaScriptEncode($url)" }
+
+#end

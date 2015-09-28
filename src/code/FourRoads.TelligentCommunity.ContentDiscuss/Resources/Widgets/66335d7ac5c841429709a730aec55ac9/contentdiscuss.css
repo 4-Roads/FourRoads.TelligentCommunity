@@ -1,0 +1,17 @@
+﻿.start-discussion-menu {
+    background-color: #fff;
+    position: absolute;
+    display: none;
+    z-index: 9999;
+    border: 1px outset ButtonShadow;
+}
+.start-discussion-menu a {
+    display: block;
+    padding: 5px 10px 5px 10px;
+    border-radius: 5px;
+    color:GrayText;
+}
+
+.related-threads .abbreviated-post {
+    padding: 0;
+}

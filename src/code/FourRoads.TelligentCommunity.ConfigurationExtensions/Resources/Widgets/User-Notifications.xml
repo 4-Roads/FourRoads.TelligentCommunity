@@ -1,0 +1,167 @@
+﻿<scriptedContentFragments><scriptedContentFragment instanceIdentifier="16bc0d7a0c844642a282822d91a3e01d" name="${resource:UserNotifications_Name}" version="8.0.4.40784" description="${UserNotifications_Description}" theme="" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false" cssClass="user-notifications">
+<contentScript>
+<![CDATA[
+## check if user is administrator, if not then they can't use this widget
+  
+#set($roles = $core_v2_utility.MakeList("Administrators"))
+#set($accessingUserIsAdministrator = $core_v2_roleUsers.IsUserInRoles($core_v2_user.Accessing.Username, $roles))
+  
+#if(!$accessingUserIsAdministrator)
+  $core_v2_widget.Hide()
+#end
+
+#set ($notificationTypes = $core_v2_notificationType.List())
+#set ($notificationDistributionTypes = $core_v2_notificationDistributionType.List())
+##set ($userPreferences = $core_v2_notificationUserPreference.List())
+#set($userPreferences = $frcommon_v1_configurationExtensions.GetSystemDefaultNotifications())
+#set ($distributionTypeCount = false)
+#set ($distributionTypeCount = $notificationDistributionTypes.count)
+#set ($distributionColumns = $distributionTypeCount * 1)
+#set ($totalColumns = 3 + $distributionColumns)
+#set ($category = "")
+
+#set($wrapperId = $core_v2_widget.UniqueId('wrapper'))
+#set($setAsDefaultId = $core_v2_widget.UniqueId('set-default'))
+#set($applyToCurrentUsersId = $core_v2_ui.MakeCssClassName($core_v2_widget.UniqueId("apply-to-current")))
+
+<style>
+  #$core_v2_encoding.HtmlAttributeEncode($wrapperId) th {
+    padding-right: 30px;
+  }
+  #$core_v2_encoding.HtmlAttributeEncode($wrapperId) a {
+    padding-right: 5px;
+  }
+</style>
+
+<div id="$core_v2_encoding.HtmlAttributeEncode($wrapperId)">
+<h1>Default Notifications for new users</h1>
+#foreach ($notificationType in $notificationTypes)
+  #set ($notificationTypeEnabled = false)
+  #foreach($preference in $userPreferences)
+		#if ($preference.NotificationTypeId == $notificationType.NotificationTypeId && !$preference.DistributionType)
+			#set($notificationTypeEnabled = $preference.IsEnabled)
+		#end
+	#end
+  #if ($notificationType.Category != $category)
+  #if ($category != '')
+								</tbody>
+							</table>
+						</span>
+					</li>
+				</ul>
+			</fieldset>
+		#end
+
+    #set ($category = $notificationType.Category)
+	  <fieldset>
+	    <h3>$notificationType.Category</h3>
+	    <ul class="field-list">
+		<li class="field-item">
+			<span class="field-item-input">
+            <table class="form">
+		<thead>
+	            <tr>
+	                <th>
+			    $core_v2_language.GetResource('Notifications_NotifyWhen')
+	                </th>
+	                #foreach ($distributionType in $notificationDistributionTypes)
+	                    <th  class="notification-distribution-type-header">
+	                        <span>$distributionType.Name</span>
+	                    </th>
+	                #end
+                  <th>
+                    Current Users
+                  </th>
+	            </tr>
+		</thead>
+		<tbody>
+        #end
+        <tr #if (!$notificationTypeEnabled) class="disabled" #end
+            class="notification-setting-item">
+            #set ($notificationTypeName = $core_v2_widget.UniqueId("notificationType:${notificationType.NotificationTypeId}"))
+            <td style="width: 100%;">
+
+                <label for="$core_v2_encoding.HtmlAttributeEncode($notificationTypeName)">$notificationType.Description</label>
+            </td>
+            #foreach ($distributionType in $notificationDistributionTypes)
+                #set ($distributionTypeEnabled = false)
+                #foreach($preference in $userPreferences)
+			            #if ($preference.NotificationTypeId == $notificationType.NotificationTypeId && $preference.DistributionTypeId == $distributionType.DistributionTypeId)
+				            #set($distributionTypeEnabled = $preference.IsEnabled)
+			            #end
+		            #end
+                <td>
+                    <input type="checkbox" #if($distributionTypeEnabled) checked #end data-enabled="$distributionTypeEnabled" data-notificationtype="$notificationType.NotificationTypeId" data-distributiontype="$distributionType.DistributionTypeId" />
+                    ##<a href="javascript:void(0);" class="$core_v2_encoding.HtmlAttributeEncode($buttonId) #if($distributionTypeEnabled) disabled #end" data-enable="true" data-notificationtype="$notificationType.NotificationTypeId" data-distributiontype="$distributionType.DistributionTypeId">On</a>
+                    ##<a href="javascript:void(0);" class="$core_v2_encoding.HtmlAttributeEncode($buttonId) #if(!$distributionTypeEnabled) disabled #end" data-enable="false" data-notificationtype="$notificationType.NotificationTypeId" data-distributiontype="$distributionType.DistributionTypeId">Off</a>
+                </td>
+            #end
+            <td>
+              <a href="javascript:void(0);" class="$core_v2_encoding.HtmlAttributeEncode($applyToCurrentUsersId)" data-notificationtype="$notificationType.NotificationTypeId">Apply</a>
+              <span class="in-progress" style="display:none;"><img src="$core_v2_page.AbsoluteUrl('~/Utility/spinner.gif')"/></span>
+            </td>
+        </tr>
+    #end
+
+#if ($category != '')
+						</tbody>
+					</table>
+				</span>
+			</li>
+		</ul>
+	</fieldset>
+#end
+<a href="javascript:void(0);" id="$core_v2_encoding.HtmlAttributeEncode($setAsDefaultId)">Apply for all new Users</a>
+<span class="working" style="display:none;"><img src="$core_v2_page.AbsoluteUrl('~/Utility/spinner.gif')"/></span>
+</div>
+
+#registerEndOfPageHtml('user-notifications')
+  <script type="text/javascript" src="$core_v2_encoding.JavascriptEncode($core_v2_widget.GetFileUrl('notifications.js'))"></script>
+#end
+  
+#registerEndOfPageHtml() 
+  <script type="text/javascript">
+    jQuery(document).ready(function(j){
+      j.fourroads.widgets.userNotifications.register({
+        wrapper: '#$core_v2_encoding.JavascriptEncode($wrapperId)',
+        elements: {
+          setAsDefault: '#$core_v2_encoding.JavascriptEncode($setAsDefaultId)',
+          applyToAllusers: '.$core_v2_encoding.JavascriptEncode($applyToCurrentUsersId)'
+        },
+        urls : {
+          reset: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl("reset.vm"))',
+          updateDefaults: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl("update.defaults.vm"))'
+        },
+        resources: {
+          userUpdateQueued: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource("User_Update_Queued"))',
+          defaultsUpdated: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource("Defaults_Updated"))'
+        }
+      });
+    });
+  </script>
+#end
+
+]]>
+</contentScript>
+<headerScript>
+<![CDATA[
+  $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:ForumNotifications_Name}'))
+]]>
+</headerScript><configuration>
+<![CDATA[
+  <propertyGroup id="options" resourceName="Options">
+      <property id="fragmentHeader" resourceName="Title" dataType="string" defaultValue="${resource:UserNotifications_Name}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+  </propertyGroup>
+]]>
+</configuration>
+  <languageResources>
+    <language key="en-us">
+      <resource name="UserNotifications_Name">4 Roads - User Notifications</resource>
+      <resource name="UserNotifications_Description">Enable/Disable notifications for all site users or set defaults for all new users</resource>
+      <resource name="Notifications_NotifyWhen">Notify when</resource>
+      <resource name="User_Update_Queued">User update notifications job queued</resource>
+      <resource name="Defaults_Updated">User default notifications updated</resource>
+    </language>
+  </languageResources>
+</scriptedContentFragment>
+</scriptedContentFragments>

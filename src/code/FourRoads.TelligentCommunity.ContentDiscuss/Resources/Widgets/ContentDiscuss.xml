@@ -1,0 +1,162 @@
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:ContentDiscuss_Name}" cssClass="content-discussions" description="${resource:ContentDiscuss_Description}" instanceIdentifier="66335d7ac5c841429709a730aec55ac9" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false">
+    <contentScript>
+      <![CDATA[
+    
+#set($setForumId = $core_v2_widget.UniqueId('set-forum'))
+#set($selectForumId = $core_v2_widget.UniqueId('select-forum'))
+         
+<style type="text/css" scoped>
+    $core_v2_widget.RenderFile('contentdiscuss.css')
+</style>
+
+#set($textAreaSelector = false)
+#set($textAreaSelector = $core_v2_widget.GetStringValue('textAreaSelector', ''))
+#set($textSelectionMenuId = $core_v2_widget.UniqueId('selection-menu'))
+#set($threadId = false)
+#set($targetForumId = false)
+
+#if($core_v2_blog.Current) 
+  #set($targetForumId = $core_v2_utility.ParseInt($core_v2_blog.Current.ExtendedAttributes.get_item('TargetForumId').Value))
+#elseif($core_v2_wiki.Current)
+  ## wikis don't have extended attributes
+#end
+
+#if ($targetForumId && $targetForumId > 0)     
+      #set($hasPermissionToPost = false)
+      #set($hasPermissionToPost = $core_v2_forumUrls.AddThread($targetForumId, True))
+      
+      #set($application = $core_v2_application.Current)
+      #if($application.ApplicationTypeId == $core_v2_blog.ApplicationTypeId) 
+        #set($blogPost = $core_v2_blogPost.Current)
+        #set($author = $blogPost.Author.UserName)
+        #set($title = $blogPost.Title)
+        #set($contentId = $blogPost.ContentId)
+        #set($contentTypeId = $core_v2_blogPost.ContentTypeId)
+        #set($url = $blogPost.Url)
+      #elseif($application.ApplicationTypeId == $core_v2_wiki.ApplicationTypeId)
+        #set($wikiPage = $core_v2_wikiPage.Current)
+        #set($author = $wikiPage.User.UserName)
+        #set($title = $wikiPage.Title)
+        #set($contentId = $wikiPage.ContentId)
+        #set($contentTypeId = $core_v2_wikiPage.ContentTypeId)
+        #set($url = $wikiPage.Url)
+      #end
+      
+      #if ($hasPermissionToPost && $application.ApplicationTypeId == $core_v2_blog.ApplicationTypeId)
+        <div id="$textSelectionMenuId" class="start-discussion-menu">
+          <ul class="navigation-list">
+            <li class="navigation-item">
+              <a href="javascript:void(0)" class="start-discussion" data-author="$author" data-forumid="$targetForumId" data-title="$title" data-contenttypeid="$contentTypeId" data-contentid="$contentId">Start Discussion</a>
+            </li>
+          </ul>
+        </div>
+      #end
+      
+     <div class="related-threads">
+        #set ($query = 'type:forum and createdfrom_t:')
+        #set($query = "${query}$contentId")
+        #set($discussions = false)
+        #set($discussions = $core_v2_searchResult.List("%{Query=$query}"))
+          #foreach($item in $discussions)
+          #beforeAll
+          <ul class="content-list">
+          #each
+            <li class="ontent-item simple">
+			        <div class="abbreviated-post-header"></div>
+			        <div class="abbreviated-post">
+				        <h4 class="post-name">
+					        <a href="$core_v2_encoding.HtmlAttributeEncode($item.Url)" class="view-item">
+						        <span></span>$core_v2_encoding.HtmlEncode($item.Title)
+					        </a>
+				        </h4>
+               <div class="post-content user-defined-markup">$core_v2_language.Truncate($item.Body,100, "...")</div>
+				        <div class="post-date">
+					        <span class="value">$core_v2_language.FormatAgoDate($item.Date)</span>
+				        </div>
+			        </div>
+			        <div class="abbreviated-post-footer"></div>
+		        </li>
+          #nodata
+            <p>No discussions on this post</p>
+          #afterall
+          </ul>
+          #end
+    </div>
+    #end
+    
+    #set($isSiteAdmin = $core_v2_roleUsers.IsUserInRoles($core_v2_user.Accessing.Username,  $core_v2_utility.Split(",", "Administrators")))
+
+    #if($isSiteAdmin)
+
+    <div class="admin-section">
+      #set($forums = $core_v2_forum.List("%{GroupId=$core_v2_group.Root.Id, IncludeSubGroups='True', PageIndex=0, PageSize=1000, SortBy='Name', SortOrder='Ascending'}"))
+      <h4>$core_v2_language.GetResource("Target_Forum_Description")</h4>
+      <select id="$core_v2_encoding.HtmlAttributeEncode($selectForumId)">
+        <option value="" #if(!$targetForumId) selected #end></option>
+        #foreach($forum in $forums)
+          <option value="$forum.Id" #if($targetForumId == $forum.Id) selected #end>$forum.Name</option>
+        #end
+      </select>
+      <a id="$core_v2_encoding.HtmlAttributeEncode($setForumId)" href="javascript:void(0);" class="set-forum" data-blogid="$core_v2_blog.Current.Id" data-wikiid="$core_v2_wiki.Current.Id">Set</a>
+    </div>
+    #elseif(!$targetForumId || $targetForumId == 0)
+      	$core_v2_widget.Hide()
+    #end
+ 
+      #registerEndOfPageHtml('fourroads.widgets.contentDiscuss')
+	      <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('contentDiscuss.js'))"></script>
+      #end
+      
+      #registerEndOfPageHtml()
+	      <script type="text/javascript">
+		      jQuery(function(){
+			      jQuery.fourroads.widgets.contentDiscuss.register({
+              wrapperId : '$core_v2_encoding.JavascriptEncode($core_v2_widget.WrapperElementId)',
+              url :  '$core_v2_encoding.JavascriptEncode($url)',
+              selectors : {
+                  renderResultsContainer :  '.related-threads',
+                  textAreaSelector: '$core_v2_encoding.JavascriptEncode($textAreaSelector)',
+                  textAreaMenu: '#$core_v2_encoding.JavascriptEncode($textSelectionMenuId)',
+                  setForum: '#$core_v2_encoding.JavascriptEncode($setForumId)',
+                  selectForum: '#$core_v2_encoding.JavascriptEncode($selectForumId)'
+              },
+              urls : {
+				          renderResultsUrl: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('renderResults.vm'))',
+                  storeTempDataUrl: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl("store.vm"))',
+                  setForum: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('setforum.vm'))'
+              }
+			      });
+		      });
+	      </script>
+      #end
+ 
+			]]>
+    </contentScript>
+    <headerScript>
+      <![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:ContentDiscuss_Header}'))
+			]]>
+    </headerScript>
+    <configuration>
+      <![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="ContentDiscuss_Name" dataType="string" defaultValue="${resource:ContentDiscuss_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+  <property id="textAreaSelector" resourceName="TextArea_Selector" dataType="string" defaultValue=".blog-post .post-content.user-defined-markup" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+</propertyGroup>
+]]>
+    </configuration>
+    <languageResources>
+      <language key="en-us">
+        <resource name="ContentDiscuss_Name">4 Roads - Content Discussions</resource>
+        <resource name="ContentDiscuss_Header">Related Discussions</resource>
+        <resource name="ContentDiscuss_Description">Adds support for linked content on blogs into discussions.</resource>
+        <resource name="Options">Options</resource>
+        <resource name="TextArea_Selector">JQuery selector for text display area</resource>
+        <resource name="Target_Forum_Name">Target forum</resource>
+        <resource name="Target_Forum_Description">The forum where new discussions will be placed, this option is only available to site administrators</resource>
+        <resource name="Discussion">Discussion</resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

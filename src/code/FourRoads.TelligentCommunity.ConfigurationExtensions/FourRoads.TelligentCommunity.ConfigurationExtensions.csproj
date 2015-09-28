@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{571BC785-5F45-40B9-949C-E33A882CEAE1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FourRoads.TelligentCommunity.ConfigurationExtensions</RootNamespace>
+    <AssemblyName>FourRoads.TelligentCommunity.ConfigurationExtensions</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FourRoads.Common, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.Sql, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.TelligentCommunity">
+      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.TelligentCommunity.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.Templates, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.Templates.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.Web, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject, Version=2.3.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject.Extensions.Xml, Version=2.1.0.1, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\Ninject.Extensions.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Telligent.DynamicConfiguration, Version=1.0.231.37416, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.DynamicConfiguration.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Api">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Blogs">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Components">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Components.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Core, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Discussions, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Discussions.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.MediaGalleries, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.ScriptedContentFragments">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.ScriptedContentFragments.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.VelocityExtensions">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.VelocityExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Jobs, Version=1.0.53.36856, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Jobs.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Api\Internal\Data\DefaultSystemNotifications.cs" />
+    <Compile Include="Api\Public\Entities\SystemNotificationPreference.cs" />
+    <Compile Include="Enumerations\BlogEnumerate.cs" />
+    <Compile Include="ConfigurationExtensions.cs" />
+    <Compile Include="ConfigurationExtensionsPlugin.cs" />
+    <Compile Include="DefaultForumSubscriptionEventHandler.cs" />
+    <Compile Include="Jobs\DefaultSubscriptionUpdateJob.cs" />
+    <Compile Include="EmbeddedResources.cs" />
+    <Compile Include="ConfigurationExtensionsExtension.cs" />
+    <Compile Include="FactoryDefaultWidgetProviderInstaller.cs" />
+    <Compile Include="Enumerations\ForumEnumerate.cs" />
+    <Compile Include="Enumerations\GenericEnumerate.cs" />
+    <Compile Include="Enumerations\GroupEnumerate.cs" />
+    <Compile Include="Interfaces\IApplicationPlugin.cs" />
+    <Compile Include="Interfaces\IConfigurationExtensionsPlugin.cs" />
+    <Compile Include="Jobs\ResetNotificationsJob.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Enumerations\UserEnumerate.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\71c7b6f757bc4d159d8c69eb5a8a8db6\subscriptiondefaults.js" />
+    <EmbeddedResource Include="Resources\Widgets\BlogSubscriptionDefaults.xml" />
+    <EmbeddedResource Include="Resources\Widgets\f5deee7523cd48beb23f20eb88397e77\resetSettings.vm" />
+    <EmbeddedResource Include="Resources\Widgets\f5deee7523cd48beb23f20eb88397e77\updateSettings.vm" />
+    <EmbeddedResource Include="Resources\Widgets\71c7b6f757bc4d159d8c69eb5a8a8db6\resetSettings.vm" />
+    <EmbeddedResource Include="Resources\Widgets\71c7b6f757bc4d159d8c69eb5a8a8db6\updateSettings.vm" />
+    <EmbeddedResource Include="Resources\Widgets\16bc0d7a0c844642a282822d91a3e01d\reset.vm" />
+    <EmbeddedResource Include="Resources\Widgets\16bc0d7a0c844642a282822d91a3e01d\update.defaults.vm" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\16bc0d7a0c844642a282822d91a3e01d\notifications.js" />
+    <EmbeddedResource Include="Resources\Widgets\User-Notifications.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\ForumSubscriptionDefaults.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\f5deee7523cd48beb23f20eb88397e77\subscriptiondefaults.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

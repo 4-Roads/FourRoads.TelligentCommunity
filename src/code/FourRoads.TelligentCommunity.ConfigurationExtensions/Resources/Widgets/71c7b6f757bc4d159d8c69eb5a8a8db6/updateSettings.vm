@@ -1,0 +1,17 @@
+﻿$core_v2_page.SetContentType('application/json')
+#set($success= false)
+
+#if($core_v2_page.IsPost)
+	#set($blogId = false)
+	#set($blogId = $core_v2_page.GetFormValue('blogId'))
+	#set($newSetting = $core_v2_page.GetFormValue('setting'))
+
+	#set($blog = $core_v2_blog.Get("%{Id = $blogId}"))
+
+	#if ($blog && $core_v2_nodePermission.Get("blogs", $blog.Id, "Blog_ModifyBlog").IsAllowed)
+		#set($result = $frcommon_v1_configurationExtensions.UpdateDefaultBlogSubscripiton($blog.Id , $newSetting))
+		#set($success= true)
+	#end
+#end
+
+{"success": #if ($success)"true"#else"false"#end}

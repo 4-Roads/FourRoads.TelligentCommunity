@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<trees>
+	<tree name="ExecuteTaskWithDeletionsTest">
+		<source>
+			<directory name="SubDirectory1">
+				<directory name="SubSubDirectory2">
+					<file name="File1.txt" />
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<directory name="SubDirectory3">
+				<directory name="SubSubDirectory2">
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<file name="File2.txt" />
+		</source>
+		<destination>
+			<directory name="SubDirectory1">
+				<directory name="SubSubDirectory2">
+					<file name="File1.txt" />
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<directory name="SubDirectory2">
+				<file name="File1.txt" />
+				<file name="File2.txt" />
+				<file name="File3.txt" />
+			</directory>
+			<directory name="SubDirectory3">
+				<directory name="SubSubDirectory1">
+					<file name="File1.txt" />
+				</directory>
+				<directory name="SubSubDirectory2">
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<file name="File1.txt" />
+			<file name="File2.txt" />
+		</destination>
+	</tree>
+	
+	<tree name="ExecuteTaskWithCopiesTest">
+		<source>
+			<directory name="SubDirectory1">
+				<directory name="SubSubDirectory2">
+					<file name="File1.txt" />
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<directory name="SubDirectory2">
+				<file name="File1.txt" />
+				<file name="File2.txt" />
+				<file name="File3.txt" />
+			</directory>
+			<directory name="SubDirectory3">
+				<directory name="SubSubDirectory1">
+					<file name="File1.txt" />
+				</directory>
+				<directory name="SubSubDirectory2">
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<file name="File1.txt" />
+			<file name="File2.txt" />
+		</source>
+		<destination>
+			<directory name="SubDirectory1">
+				<directory name="SubSubDirectory2">
+					<file name="File1.txt" />
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<directory name="SubDirectory3">
+				<directory name="SubSubDirectory2">
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<file name="File2.txt" />
+		</destination>
+	</tree>
+	
+	<tree name="ExecuteTaskWithDeletionsAndCopiesTest">
+		<source>
+			<directory name="SubDirectory1">
+				<directory name="SubSubDirectory2"></directory>
+			</directory>
+			<directory name="SubDirectory3">
+				<directory name="SubSubDirectory1">
+					<file name="File1.txt" />
+				</directory>
+				<directory name="SubSubDirectory2">
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<file name="File1.txt" />
+		</source>
+		<destination>
+			<directory name="SubDirectory1">
+				<directory name="SubSubDirectory1">
+					<file name="File1.txt" />
+					<file name="File2.txt" />
+				</directory>
+				<directory name="SubSubDirectory2">
+					<file name="File1.txt" />
+				</directory>
+			</directory>
+			<directory name="SubDirectory2">
+				<file name="File1.txt" />
+				<file name="File2.txt" />
+				<file name="File3.txt" />
+			</directory>
+			<directory name="SubDirectory3"></directory>
+			<file name="File1.txt" />
+			<file name="File2.txt" />
+		</destination>
+	</tree>
+
+	<tree name="PurgeTaskTest">
+		<source>
+			<directory name="SubDirectory1">
+				<directory name="SubSubDirectory2">
+					<file name="File1.txt" />
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<directory name="SubDirectory2">
+				<file name="File1.txt" />
+				<file name="File2.txt" />
+				<file name="File3.txt" />
+				<file name="File4.txt" />
+				<file name="File5.txt" />
+			</directory>
+			<directory name="SubDirectory3">
+				<directory name="SubSubDirectory1">
+					<file name="File1.txt" />
+				</directory>
+				<directory name="SubSubDirectory2">
+					<file name="File2.txt" />
+				</directory>
+			</directory>
+			<file name="File1.txt" />
+			<file name="File2.txt" />
+			<file name="File3.txt" />
+			<file name="File4.txt" />
+			<file name="File5.txt" />
+			<file name="File6.txt" />
+			<file name="File7.txt" />
+			<file name="File8.txt" />
+		</source>
+	</tree>
+</trees>

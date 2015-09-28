@@ -1,0 +1,17 @@
+﻿$core_v2_page.SetContentType('application/json')
+#set($success= false)
+
+#if($core_v2_page.IsPost)
+	#set($forumId = false)
+	#set($forumId = $core_v2_page.GetFormValue('forumId'))
+	#set($newSetting = $core_v2_page.GetFormValue('setting'))
+
+	#set($forum = $core_v2_forum.Get($core_v2_utility.ParseInt($forumId)))
+
+	#if ($forum && $core_v2_nodePermission.Get("forums", $forum.Id, "Forum_ModifyForum").IsAllowed)
+		#set($result = $frcommon_v1_configurationExtensions.UpdateDefaultForumSubscripiton($forum.Id , $newSetting))
+		#set($success= true)
+	#end
+#end
+
+{"success": #if ($success)"true"#else"false"#end}
