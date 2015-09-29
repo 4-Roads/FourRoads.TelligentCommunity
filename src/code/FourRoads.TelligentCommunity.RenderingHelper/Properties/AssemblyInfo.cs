@@ -7,7 +7,7 @@ using System.Web;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.RenderingHelper")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Allows other plugins access to the rendering pipeline after all content is rendered")]
 
 
 [assembly: PreApplicationStartMethod(typeof(FourRoads.TelligentCommunity.RenderingHelper.RenderingHelperApplicationStart), "Start")]

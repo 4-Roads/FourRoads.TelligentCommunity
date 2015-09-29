@@ -25,7 +25,7 @@ namespace FourRoads.TelligentCommunity.GroupMentionActivity
         {
             if (maca.MentionedContentTypeId == ContentTypeIds[0])
             {
-                //SPecial case if this is an activity feed stoiry mention then change it to the group.
+                // Special case if this is an activity feed story mention then change it to the group.
                 Guid mentioningId = maca.MentioningContentId;
                 Guid mentioningTypeId = maca.MentioningContentTypeId;
 

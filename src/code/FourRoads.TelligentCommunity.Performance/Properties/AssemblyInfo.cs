@@ -6,4 +6,4 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.Performance")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Improves page rendering speed by bundling and minifying CSS and Javascript assets")]

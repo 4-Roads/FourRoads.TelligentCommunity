@@ -13,6 +13,7 @@ using System.Reflection;
 [assembly: AssemblyCompany("4 Roads Ltd")]
 [assembly: AssemblyCopyright("Copyright © 4 Roads Ltd 2012-2015")]
 [assembly: AssemblyTrademark("All rights reserved.")]
+[assembly: AssemblyCulture("")]
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
 #else

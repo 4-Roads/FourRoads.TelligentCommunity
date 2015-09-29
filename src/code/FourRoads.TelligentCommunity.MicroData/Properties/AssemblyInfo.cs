@@ -7,7 +7,7 @@ using System.Web.UI;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.MicroData")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Provides extensions to include schema.org microdata elements in web page markup")]
 
 
 [assembly: WebResource("FourRoads.TelligentCommunity.MicroData.edit.png", "image/png")]

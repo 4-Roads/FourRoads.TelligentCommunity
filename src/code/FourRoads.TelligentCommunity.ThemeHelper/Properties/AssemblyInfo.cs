@@ -4,10 +4,9 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity.DeveloperTools")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyProduct("FourRoads.TelligentCommunity.DeveloperTools")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity.ThemeHelper")]
+[assembly: AssemblyDescription("A collection of tools to help developers create and customise community themes")]
+[assembly: AssemblyProduct("FourRoads.TelligentCommunity.ThemeHelper")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

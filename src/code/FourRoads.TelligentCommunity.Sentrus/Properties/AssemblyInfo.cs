@@ -6,8 +6,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("FourRoads.Sentrus")]
-[assembly: AssemblyDescription("Sentrus client plugin for Telligent Evolution")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyDescription("Provides several features to enhance community performance")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

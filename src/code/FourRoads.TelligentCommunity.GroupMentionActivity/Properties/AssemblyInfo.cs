@@ -6,5 +6,5 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.GroupMentionActivity")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Enables activity story messages within a group when it is mentioned elsewhere")]
 

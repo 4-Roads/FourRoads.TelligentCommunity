@@ -7,12 +7,5 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.ContentDiscuss")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.ContentDiscuss")]
-
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
-[assembly: ComVisible(false)]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("83b41c6c-fafe-41ba-91b0-12e7f2c8ae41")]
+[assembly: AssemblyDescription("Provides the ability to link discussions to other content within the community")]
 
