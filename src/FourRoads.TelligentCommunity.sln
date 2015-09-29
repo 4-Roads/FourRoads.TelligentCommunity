@@ -36,9 +36,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.GroupMentionActivity", "code\FourRoads.TelligentCommunity.GroupMentionActivity\FourRoads.TelligentCommunity.GroupMentionActivity.csproj", "{5CA9A695-520F-488B-837E-E9E3580C5C34}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FourRoads.TelligentCommunity.CommunityExtensions", "FourRoads.TelligentCommunity.CommunityExtensions", "{3735ED34-C87C-4D88-A055-8F8A2F5E000A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Community plugins", "Community plugins", "{3735ED34-C87C-4D88-A055-8F8A2F5E000A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FourRoads.TelligentCommunity.AdminExtensions", "FourRoads.TelligentCommunity.AdminExtensions", "{5286FE7A-78EF-4AB5-B3EB-474C88218A37}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Administration plugins", "Administration plugins", "{5286FE7A-78EF-4AB5-B3EB-474C88218A37}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.ThemeHelper", "code\FourRoads.TelligentCommunity.ThemeHelper\FourRoads.TelligentCommunity.ThemeHelper.csproj", "{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}"
 EndProject
