@@ -10,3 +10,6 @@ You can use the [issues section](https://github.com/4-Roads/FourRoads.Common.Tel
 
 ####Can I contribute?
 Yes, we will have more details soon on how you can contribute.
+
+####Build status
+[![TeamCity (simple build status)](https://img.shields.io/teamcity/https/ci.4-roads.com/s/FourRoadsTelligentCommunity_Build.svg?style=plastic)](https://ci.4-roads.com/viewType.html?buildTypeId=FourRoadsTelligentCommunity_Build&guest=1)
