@@ -34,6 +34,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                 List<string> elements = new List<string>();
                 elements.Add("UserName");
                 elements.Add("DisplayName");
+                elements.Add("Account Email");
                 elements.Add("LastLoginDate");
                 elements.Add("Language");
                 elements.Add("AccountStatus");
@@ -63,6 +64,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
                         elements.Add(user.Username);
                         elements.Add(user.DisplayName);
+                        elements.Add(user.PrivateEmail);
                         elements.Add(PublicApi.Language.FormatDateAndTime(user.LastLoginDate.GetValueOrDefault(DateTime.MinValue)));
                         elements.Add(user.Language);
                         elements.Add(user.AccountStatus);
