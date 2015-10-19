@@ -8,7 +8,7 @@ using Ninject.Modules;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions
 {
-    public class ConfigurationExtensionsPlugin : IConfigurationExtensionsPlugin
+    public class ConfigurationExtensionsPlugin : IConfigurationExtensionsPlugin, ICategorizedPlugin
     {
         private PluginGroupLoader _pluginGroupLoader;
 
@@ -57,6 +57,18 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
                 }
 
                 return _pluginGroupLoader.GetPlugins();
+            }
+        }
+
+
+        public string[] Categories
+        {
+            get
+            {
+                return new[]
+                {
+                    "Notifications"
+                };
             }
         }
     }

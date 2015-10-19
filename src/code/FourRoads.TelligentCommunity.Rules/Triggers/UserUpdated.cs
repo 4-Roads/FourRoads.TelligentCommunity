@@ -13,7 +13,7 @@ using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
-    public class UserUpdated : IRuleTrigger, ITranslatablePlugin , IConfigurablePlugin , ISingletonPlugin
+    public class UserUpdated : IRuleTrigger, ITranslatablePlugin , IConfigurablePlugin , ISingletonPlugin , ICategorizedPlugin
     {
         private static object _lockObj = new object();
         private IRuleController _ruleController;
@@ -253,6 +253,17 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
                 return new [] {group};
             } 
+        }
+
+        public string[] Categories
+        {
+            get
+            {
+                return new[]
+                {
+                    "Rules"
+                };
+            }
         }
     }
 }

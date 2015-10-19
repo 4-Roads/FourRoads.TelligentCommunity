@@ -12,7 +12,7 @@ using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Actions
 {
-    public class UnjoinAllGroups : IConfigurableRuleAction, ITranslatablePlugin
+    public class UnjoinAllGroups : IConfigurableRuleAction, ITranslatablePlugin, ICategorizedPlugin
     {
         private ITranslatablePluginController _translationController;
         private Guid _componentId = new Guid("{8CF1F489-A812-46C0-BEC1-A63F421365ED}");
@@ -76,6 +76,18 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
                 group.Properties.Add(userProp);
 
                 return new[] {group};
+            }
+        }
+
+
+        public string[] Categories
+        {
+            get
+            {
+                return new[]
+                {
+                    "Rules"
+                };
             }
         }
     }
