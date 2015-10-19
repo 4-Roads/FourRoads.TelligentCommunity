@@ -35,9 +35,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DynamicRest">
-      <HintPath>..\..\packages\FourRoads.Common.3.2.0.11\lib\DynamicRest.dll</HintPath>
-    </Reference>
     <Reference Include="FourRoads.Common, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.dll</HintPath>
@@ -56,12 +53,6 @@
     <Reference Include="FourRoads.Common.Web, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.Web.dll</HintPath>
-    </Reference>
-    <Reference Include="FourRoads.Math">
-      <HintPath>..\..\packages\FourRoads.Common.3.2.0.11\lib\FourRoads.Math.dll</HintPath>
-    </Reference>
-    <Reference Include="FourRoads.Media">
-      <HintPath>..\..\packages\FourRoads.Common.3.2.0.11\lib\FourRoads.Media.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Ninject, Version=2.3.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
