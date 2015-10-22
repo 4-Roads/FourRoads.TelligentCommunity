@@ -29,7 +29,6 @@ namespace FourRoads.TelligentCommunity.Emoticons.Logic
         {
             get
             {
-
                 if (_emoticonStore == null)
                 {
                     _emoticonStore = CentralizedFileStorage.GetFileStore(EmoticonsStore.FILESTORE_KEY);
@@ -50,11 +49,12 @@ namespace FourRoads.TelligentCommunity.Emoticons.Logic
                 InitializeRegularExpressionAndCss(smileyWidth, smileyHeight);
             }
 
-            if (_emoticonReplacementMatch != null)
+            if (_emoticonReplacementMatch != null && !string.IsNullOrWhiteSpace(renderedHtml))
             {
                 renderedHtml = _emoticonReplacementMatch.Replace(renderedHtml, Evaluator);
             }
-        return renderedHtml;
+            
+            return renderedHtml;
         }
 
         public string GetFilestoreCssPath()
