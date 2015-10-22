@@ -24,7 +24,8 @@ namespace FourRoads.TelligentCommunity.Performance
     {
         private readonly ScriptBundle _scriptBundle;
         private readonly BundledFileFactory _bundledFileFactory = new BundledFileFactory();
-        private static Selector _selector = new Selector("script[type='text/javascript']");
+        private static string _selector = "script[type='text/javascript']";
+        //private static Selector _selector = new Selector("script[type='text/javascript']"); //this will improve performance but requires csquery 1.3.5-beta and above
 
         public StandardScriptBundle(string basePath)
         {
@@ -96,7 +97,8 @@ namespace FourRoads.TelligentCommunity.Performance
             get { return string.Format("script[type='text/javascript'][src*='WebResource.axd'],script[type='text/javascript'][src*='/utility/jquery/'],script[type='text/javascript'][src*='{0}/utility/jquery/'],script[type='text/javascript'][src*=' /__key/defaultwidgets/'],script[type='text/javascript'][src*=' /__key/widgetfiles/']", PublicApi.Url.Absolute("~")); }
         }
 
-        private Selector ReplaceSelector
+        //private Selector ReplaceSelector  //this will improve performance but requires csquery 1.3.5-beta and above
+        private string ReplaceSelector
         {
             get { return _selector; }
         }
@@ -139,5 +141,5 @@ namespace FourRoads.TelligentCommunity.Performance
                 }
             }
         }
-                            }
+     }
 }
