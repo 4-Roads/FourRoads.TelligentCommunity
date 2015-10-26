@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resource name="mediagallery">Media Gallery</resource>
+  <resource name="mediagalleries">Media Galleries</resource>
+
+  <!-- START TagBrowser -->
+
+  <!-- END TagBrowser -->
+
+  <!-- Start of control fields -->
+
+  <resource name="MediaGalleryPostAdmin_Categories">Tags</resource>
+  <resource name="MediaGalleryPostAdmin_Categories_Detail">Tags help keep your files organized and allow your viewers to find files relevant to them. Select existing tags or enter comma-separated tags into the text box below.</resource>
+  <resource name="MediaGalleryPostAdmin_Name">Name</resource>
+  <resource name="MediaGalleryPostAdmin_Name_Detail">Choose a concise, but descriptive, name</resource>
+  <resource name="MediaGalleryPostAdmin_Desc">Description</resource>
+  <resource name="MediaGalleryPostAdmin_Desc_Detail">A full description of the file</resource>
+  <resource name="MediaGalleryPostAdmin_FileOrUrl">File/URL</resource>
+  <resource name="MediaGalleryPostAdmin_FileOrUrl_Upload">Specify File/URL</resource>
+  <resource name="MediaGalleryPostAdmin_MissingName">* Please enter a name for this file</resource>
+  <resource name="MediaGalleryPostAdmin_MissingFile">* Please upload or link to a file</resource>
+  <resource name="MediaGalleryPostAdmin_StorageQuotaExceeded">The total size of files in this media gallery has exceeded the gallery's quota. The file cannot be saved.</resource>
+  <resource name="MediaGalleryPostAdmin_FileCountQuotaExceeded">The total number of files in this media gallery has exceeded the gallery's quota. The file cannot be saved.</resource>
+  <resource name="MediaGalleryPostAdmin_RestrictedFileType">The media gallery does not allow that file type.</resource>
+  <resource name="MediaGalleryPostAdmin_NoFileUploaded">Please select the file or URL you want to upload.</resource>
+  <resource name="MediaGalleryPostAdmin_PreviewLoading">Loading...</resource>
+  <resource name="MediaGalleryPostAdmin_PreviewError">An error occurred while loading the preview of this file.</resource>
+  <resource name="MediaGalleryPostAdmin_SaveError">An error occurred while saving this file.</resource>
+
+  <!-- End of control fields -->
+
+  <resource name="MediaGalleries_UploadFile">Upload File</resource>
+  <resource name="MediaGalleries_Button_Edit">Edit</resource>
+  <resource name="MediaGalleries_Button_Delete">Delete</resource>
+  <resource name="MediaGalleries_Button_Upload">Upload</resource>
+  <resource name="MediaGalleries_Button_Download">Download</resource>
+  <resource name="MediaGalleries_Comment_Pending">Thanks for sharing your comment! If your comment doesn't appear right away, please be patient as it may take a few minutes to publish or may require moderation.</resource>
+  <resource name="CommentListing_Body">Comment</resource>
+  <resource name="CommentListing_Name">Name</resource>
+  <resource name="CommentListing_Website">Web Site</resource>
+  <resource name="Edit">Edit</resource>
+  <resource name="Save">Save</resource>
+  <resource name="Cancel">Cancel</resource>
+  <resource name="Delete">Delete</resource>
+  <resource name="Create">Create</resource>
+  <resource name="Page">Page</resource>
+  <resource name="Add">Add</resource>
+  <resource name="Name">Name</resource>
+  <resource name="NoRecords">No files have been uploaded to this gallery.</resource>
+  <resource name="Moderation">Moderation</resource>
+  <resource name="BreadCrumb_Seperator"> » </resource>
+  <resource name="Navigation_JumpDropDownList_Indent1">|- </resource>
+  <resource name="Navigation_JumpDropDownList_Indent2">|-- </resource>
+  <resource name="PostRating_Zero">Terrible</resource>
+  <resource name="PostRating_One">Poor</resource>
+  <resource name="PostRating_Two">Fair</resource>
+  <resource name="PostRating_Three">Average</resource>
+  <resource name="PostRating_Four">Good</resource>
+  <resource name="PostRating_Five">Excellent</resource>
+  <resource name="None">None</resource>
+  <resource name="Admin_Title">Zimbra Social :: Administration</resource>
+  <resource name="Actions">Actions</resource>
+  <resource name="Accept">I Accept</resource>
+  <resource name="Decline">I Decline</resource>
+  <resource name="MediaGalleries_Disclaimer_Title">Download Agreement</resource>
+  <resource name="MediaGalleries_Disclaimer_Detail"><![CDATA[
+ The requested software has specific conditions of use. The following information applies to your use of the software made available to you through this web site.
+  <p />
+  <div style="overflow: auto; width: 80%; height: 300px; border-style: solid; border-color: #cccccc; border-width: 1px; margin: 16px; margin-left: auto; margin-right: auto; padding: 8px;">
+ Last Updated: November 17, 2004
+  <p />
+ This license governs use of the accompanying software (“Software”), and your use of the Software constitutes acceptance of this license.
+  <p />
+ Subject to the restrictions below, you may use the Software for any commercial or noncommercial purpose.
+  <p />
+ In return, we require that you agree:
+  <ol>
+  <li>Not to remove any copyright or other notices from the Software.</li>
+  <li>That you are not allowed to combine or distribute the Software with other software that is licensed under terms that seek to require that the Software (or any intellectual property in it) be provided in source code form, licensed to others to allow the creation or distribution of derivative works, or distributed without charge.</li>
+  <li>You may not distribute the Software in source code form, and if you distribute the Software in object form you only do so under a license that complies with this license.</li>
+  <li>With the exception of (1) that you will
+  <ol type="a">
+  <li>not use Zimbra’s name, logo, or trademarks in association with any use of the Software unless otherwise permitted in writing;</li>
+  <li>display your own valid copyright notice which must be sufficient to protect Zimbra’s copyright in the Software; and</li>
+  <li>indemnify, hold harmless, and defend Zimbra from and against any claims or lawsuits, including attorneys’ fees, that arise or result from the use or distribution of your modifications to the Software and any additional software you distribute along with the Software.</li>
+  </ol>
+  </li>
+  <li>That the Software comes "as is", with no warranties. None whatsoever. This means no express, implied or statutory warranty, including without limitation, warranties of merchantability or fitness for a particular purpose or any warranty of title or non-infringement. Also, you must pass this disclaimer on whenever you distribute the Software or derivative works.</li>
+  <li>That neither Zimbra nor its suppliers will be liable for any of those types of damages known as indirect, special, consequential, or incidental related to the Software or this license, to the maximum extent the law permits, no matter what legal theory it’s based on. Also, you must pass this limitation of liability on whenever you distribute the Software or derivative works.</li>
+  <li>That if you sue anyone over patents that you think may apply to the Software for a person's use of the Software, your license to the Software ends automatically.</li>
+  <li>That the patent rights, if any, granted in this license only apply to the Software, not to any derivative works you make.</li>
+  <li>That the Software is subject to U.S. export jurisdiction at the time it is licensed to you, and it may be subject to additional export or import laws in other places. You agree to comply with all such laws and regulations that may apply to the Software after delivery of the software to you.</li>
+  <li>That if you are an agency of the U.S. Government, (i) Software provided pursuant to a solicitation issued on or after December 1, 1995, is provided with the commercial license rights set forth in this license, and (ii) Software provided pursuant to a solicitation issued prior to December 1, 1995, is provided with “Restricted Rights” as set forth in FAR, 48 C.F.R. 52.227-14 (June 1987) or DFAR, 48 C.F.R. 252.227-7013 (Oct 1988), as applicable.</li>
+  <li>That your rights under this license end automatically if you breach it in any way.</li>
+  <li>That this license contains the only rights associated with the Software and Zimbra reserves all rights not expressly granted to you in this license</li>
+  </ol>
+  </div>
+ ]]></resource>
+  <resource name="MediaGalleries_Title_UploadFile">Upload File</resource>
+
+  <!-- Media Gallery View Types -->
+
+  <resource name="MediaGalleryViewType_List">List View</resource>
+  <resource name="MediaGalleryViewType_Thumbnail">Thumbnail View</resource>
+  <resource name="MediaGalleryViewType_Thumbnail_Link">&lt;span&gt;&lt;/span&gt;Thumbnail View</resource>
+  <resource name="MediaGalleryViewType_List_Link">&lt;span&gt;&lt;/span&gt;List View</resource>
+
+  <!-- End Media Gallery View Types -->
+
+  <!-- Media File List -->
+
+  <resource name="MediaGalleries_FileList_Type">Type</resource>
+  <resource name="MediaGalleries_FileList_Title">Title</resource>
+  <resource name="MediaGalleries_FileList_Date">Date</resource>
+  <resource name="MediaGalleries_FileList_Downloads">Downloads</resource>
+  <resource name="MediaGalleries_FileList_Rating">Rating</resource>
+
+  <!-- End Media File List -->
+
+</root>

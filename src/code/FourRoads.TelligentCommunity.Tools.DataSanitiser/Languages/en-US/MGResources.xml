@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+
+  <resource name="CP_Settings_Email_EnableMG">Enable Mail Gateway</resource>
+  <resource name="CP_Settings_Email_EnableMG_Descr">Enable or disable the Mail Gateway add-on for this site.</resource>
+  <resource name="CP_Settings_Email_MG_RemoteAccessCode">Remote Access Code</resource>
+  <resource name="CP_Settings_Email_MG_RemoteAccessCode_Descr">The security code required for a Remote Mail Gateway to communicate with this server</resource>
+  <resource name="CP_Settings_Email_MG_EmailDomain">Email Domain</resource>
+  <resource name="CP_Settings_Email_MG_EmailDomain_Descr">This is the domain name that all email addresses will be used in. IE, "mysite.com" if a sample email address would be "forum@mysite.com".</resource>
+  <resource name="CP_Settings_Email_MG_EmailDomain_InvalidDomain">Invalid domain name.</resource>
+  <resource name="CP_Settings_Email_MG_Accounts">Incoming Mail Accounts</resource>
+  <resource name="CP_Settings_Email_MG_Accounts_CreateNew">Add New Mailbox</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountEnabled">Enabled</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountTypeList">Mailbox Type</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountTypeList_Pop3">POP3</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountTypeList_IMAP">IMAP</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountTypeList_Pop3SSL">POP3 SSL</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountTypeList_IMAPSSL">IMAP SSL</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountPassword">Password</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountUserName">Username</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountUrl">Host Name</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountUrlValidate">You must provide a server name</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_AccountUserNameValidate">You must provide a username</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_Title">Mail Gateway Mailbox Setup</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_UseApopAuthentication">Use APOP Authentication</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_DeleteConfirmation">Are you sure you want to delete the mail account settings &lt;strong&gt;[hostname], [username]&lt;/strong&gt;? This action can not be undone</resource>
+  <resource name="CP_Settings_Email_MG_AccountsForm_DeleteIndexError">Account Settings ID &lt;strong&gt;[accountid]&lt;/strong&gt; is out of range, please refresh the list and try again.</resource>
+  <resource name="CP_Settings_Email_MG_Accounts_Account_HostName">Server</resource>
+  <resource name="CP_Settings_Email_MG_Accounts_Account_UserName">Username</resource>
+  <resource name="CP_Settings_Email_MG_Accounts_Account_Enabled">Enabled</resource>
+  <resource name="CP_Settings_Email_MG_Accounts_Account_Actions">Actions</resource>
+	<resource name="CP_Settings_Email_MG_MaxAttachmentBytes">Max Attachment Size (in bytes)</resource>
+	<resource name="CP_Settings_Email_MG_MaxAttachmentBytes_Descr">Allow only attachments less than or equal to this many bytes.</resource>
+
+</root>

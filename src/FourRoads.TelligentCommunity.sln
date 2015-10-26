@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.RenderingHelper", "code\FourRoads.TelligentCommunity.RenderingHelper\FourRoads.TelligentCommunity.RenderingHelper.csproj", "{20BC9498-6E57-4F6E-BB23-38BFEF110161}"
 EndProject
@@ -68,6 +68,10 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "TelligentCommunity", "http:
 		SlnRelativePath = "code\TelligentCommunity\"
 		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools And Utilities", "Tools And Utilities", "{056047F9-8792-43BF-A2A7-F66A82F66098}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Tools.DataSanitiser", "code\FourRoads.TelligentCommunity.Tools.DataSanitiser\FourRoads.TelligentCommunity.Tools.DataSanitiser.csproj", "{568AF2B1-099E-4C4B-8645-676CEC9BB243}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -231,6 +235,15 @@ Global
 		{95361670-3B1C-4F0E-A102-E732621D6B5E}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{95361670-3B1C-4F0E-A102-E732621D6B5E}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{95361670-3B1C-4F0E-A102-E732621D6B5E}.Release|x86.ActiveCfg = Debug|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Release Output|Any CPU.Build.0 = Release|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Release Output|x86.ActiveCfg = Release|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Release|Any CPU.Build.0 = Release|Any CPU
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -252,6 +265,7 @@ Global
 		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{2090D715-FFD1-4548-96A4-A978D4A48A92} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
+		{568AF2B1-099E-4C4B-8645-676CEC9BB243} = {056047F9-8792-43BF-A2A7-F66A82F66098}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		VisualSVNWorkingCopyRoot = ..

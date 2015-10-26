@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+<!-- 
+Specify enabled languages here
+-->
+  <language name="U.S. English" key="en-US" />
+
+</root>
