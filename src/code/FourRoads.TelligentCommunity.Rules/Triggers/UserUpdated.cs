@@ -30,42 +30,56 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         private void EventsOnBeforeUpdate(UserBeforeUpdateEventArgs userBeforerUpdateEventArgs)
         {
-            if (userBeforerUpdateEventArgs.Id.HasValue)
+            try
             {
-                if (!userBeforerUpdateEventArgs.IsSystemAccount.GetValueOrDefault(true))
+                if (userBeforerUpdateEventArgs.Id.HasValue)
                 {
-                    int userId = userBeforerUpdateEventArgs.Id.Value;
-
-                    if (!_beforeUpdateCache.ContainsKey(userId))
+                    if (!userBeforerUpdateEventArgs.IsSystemAccount.GetValueOrDefault(true))
                     {
-                        User user = PublicApi.Users.Get(new UsersGetOptions() {Id = userId});
+                        int userId = userBeforerUpdateEventArgs.Id.Value;
 
-                        if (!user.HasErrors())
-                            _beforeUpdateCache.Add(userId, user);
+                        if (!_beforeUpdateCache.ContainsKey(userId))
+                        {
+                            User user = PublicApi.Users.Get(new UsersGetOptions() {Id = userId});
+
+                            if (!user.HasErrors())
+                                _beforeUpdateCache.Add(userId, user);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                new CSException("Triggers", string.Format("EventsOnBeforeUpdate failed for userid:{0}", userBeforerUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
             }
         }
 
         private void EventsOnAfterUpdate(UserAfterUpdateEventArgs userAfterUpdateEventArgs)
         {
-            if (userAfterUpdateEventArgs.Id.HasValue)
+            try
             {
-                int userId = userAfterUpdateEventArgs.Id.Value;
-
-                if (_beforeUpdateCache.ContainsKey(userId))
+                if (userAfterUpdateEventArgs.Id.HasValue)
                 {
-                    if (_ruleController != null && ProfileChanged(userAfterUpdateEventArgs))
+                    int userId = userAfterUpdateEventArgs.Id.Value;
+
+                    if (_beforeUpdateCache.ContainsKey(userId))
                     {
-                        _ruleController.ScheduleTrigger(new Dictionary<string, string>()
+                        if (_ruleController != null && ProfileChanged(userAfterUpdateEventArgs))
                         {
+                            _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
-                                "UserId", userId.ToString()
-                            }
-                        });
+                                {
+                                    "UserId", userId.ToString()
+                                }
+                            });
+                        }
+                        _beforeUpdateCache.Remove(userId);
                     }
-                    _beforeUpdateCache.Remove(userId);
                 }
+            }
+            catch(Exception ex)
+            {
+                new CSException("Triggers", string.Format("EventsOnAfterUpdate failed for userid:{0}", userAfterUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
             }
         }
 

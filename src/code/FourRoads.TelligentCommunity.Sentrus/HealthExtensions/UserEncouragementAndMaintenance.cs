@@ -10,7 +10,8 @@ using  FourRoads.TelligentCommunity.Sentrus.Controls;
     using  FourRoads.TelligentCommunity.Sentrus.Interfaces;
     using Telligent.Common;
     using Telligent.DynamicConfiguration.Components;
-    using Telligent.Evolution.Extensibility.Api.Entities.Version1;
+using Telligent.Evolution.Components;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
     using Telligent.Evolution.Extensibility.Api.Version1;
     using Telligent.Evolution.Extensibility.Version1;
     using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
@@ -153,19 +154,27 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
         private void UpdateLoginDate(Guid contentId)
         {
-            var lastLoginData = Telligent.Evolution.Extensibility.Caching.Version1.CacheService.Get(LastLoginDetails.CacheKey(contentId), Telligent.Evolution.Extensibility.Caching.Version1.CacheScope.All) as LastLoginDetails;
-
-            if (lastLoginData == null || lastLoginData.LastLogonDate < DateTime.Now.AddHours(-1))
+            //In the event that exception occurs we do not want this to prevent authentication, it is not system critical
+            try
             {
-                lastLoginData = UserHealth.GetLastLoginDetails(contentId) ?? new LastLoginDetails { MembershipId = contentId };
+                var lastLoginData = Telligent.Evolution.Extensibility.Caching.Version1.CacheService.Get(LastLoginDetails.CacheKey(contentId), Telligent.Evolution.Extensibility.Caching.Version1.CacheScope.All) as LastLoginDetails;
 
-                lastLoginData.LastLogonDate = DateTime.Now;
-                lastLoginData.EmailCountSent = 0;
-                lastLoginData.FirstEmailSentAt = null;
+                if (lastLoginData == null || lastLoginData.LastLogonDate < DateTime.Now.AddHours(-1))
+                {
+                    lastLoginData = UserHealth.GetLastLoginDetails(contentId) ?? new LastLoginDetails {MembershipId = contentId};
 
-                UserHealth.CreateUpdateLastLoginDetails(lastLoginData);
+                    lastLoginData.LastLogonDate = DateTime.Now;
+                    lastLoginData.EmailCountSent = 0;
+                    lastLoginData.FirstEmailSentAt = null;
 
-                Telligent.Evolution.Extensibility.Caching.Version1.CacheService.Put(LastLoginDetails.CacheKey(contentId), lastLoginData, Telligent.Evolution.Extensibility.Caching.Version1.CacheScope.All);
+                    UserHealth.CreateUpdateLastLoginDetails(lastLoginData);
+
+                    Telligent.Evolution.Extensibility.Caching.Version1.CacheService.Put(LastLoginDetails.CacheKey(contentId), lastLoginData, Telligent.Evolution.Extensibility.Caching.Version1.CacheScope.All);
+                }
+            }
+            catch (Exception ex)
+            {
+                new CSException("Sentrus", string.Format("UpdateLoginDate failed for contentid:{0}", contentId), ex).Log();
             }
         }
 
