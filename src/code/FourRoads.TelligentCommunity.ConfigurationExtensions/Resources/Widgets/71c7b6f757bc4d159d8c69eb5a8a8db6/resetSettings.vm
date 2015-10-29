@@ -4,10 +4,12 @@
 #if($core_v2_page.IsPost)
 	#set($blogId = false)
 	#set($blogId = $core_v2_page.GetFormValue('blogId'))
+	#set($groupId = false)
+	#set($groupId = $core_v2_utility.ParseInt($core_v2_page.GetFormValue('groupId')))
 	#set($blog = $core_v2_forum.Get($core_v2_utility.ParseInt($blogId)))
 
-	#if ($blog && $core_v2_nodePermission.Get("blogs", $blog.Id, "Blog_ModifyBlog").IsAllowed)
-		#set($result = $frcommon_v1_configurationExtensions.ResetDefaultBlogSubscripiton($blog.Id , $blog.Group.Id))
+	#if ($groupId && $blog && $core_v2_nodePermission.Get("blogs", $blog.Id, "Blog_ModifyBlog").IsAllowed)
+		#set($result = $frcommon_v1_configurationExtensions.ResetDefaultBlogSubscripiton($blog.Id ,$groupId))
 		#set($success= true)
 	#end
 #end
