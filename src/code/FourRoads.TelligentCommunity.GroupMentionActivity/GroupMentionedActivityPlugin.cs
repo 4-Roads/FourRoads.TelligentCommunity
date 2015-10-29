@@ -161,7 +161,7 @@ namespace FourRoads.TelligentCommunity.GroupMentionActivity
                     {
 
                         return string.Format(_translatablePluginController.GetLanguageResourceValue("GroupMentioned"),  PublicApi.Html.EncodeAttribute(user.Url) , user.DisplayName,
-                            PublicApi.Html.EncodeAttribute(content.Url), PublicApi.Html.Encode(content.HtmlName("web")));
+                            PublicApi.Html.EncodeAttribute(content.Url), content.HtmlName("web"));
                     }
                 }
 
