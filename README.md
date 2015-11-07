@@ -1,6 +1,6 @@
 # Telligent Community Extensions
 ####Compatibility 
-This version is currently built against version 8.5 of Telligent Community Server.
+This version is the development branch for Telligent 9 pre-release
 
 ####Dependencies
 The Telligent Community Extensions require that you have installed and are running Telligent Community.  As such, this library has dependencies on assemblies that for licensing reasons are not made available as part of this solution.  You will need to obtain these assemblies from the \Web\bin folder under the installation directory and copy all the dlls to the \src\lib\Telligent folder before compiling.  If you would like to develop please add your Telligent web project to the folder  \src\code\TelligentCommunity
