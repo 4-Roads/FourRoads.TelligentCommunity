@@ -119,8 +119,8 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <Resource Include="Resources\Widgets\f83a20b3310940e087bdc6c9658409c7\submitForm.vm" />
-    <Resource Include="Resources\Widgets\f83a20b3310940e087bdc6c9658409c7\testaccess.vm" />
+    <EmbeddedResource Include="Resources\Widgets\f83a20b3310940e087bdc6c9658409c7\submitForm.vm" />
+    <EmbeddedResource Include="Resources\Widgets\f83a20b3310940e087bdc6c9658409c7\testaccess.vm" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Themes\Site-Theme.xml" />
@@ -132,7 +132,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Widgets\f83a20b3310940e087bdc6c9658409c7\splash.js" />
+    <EmbeddedResource Include="Resources\Widgets\f83a20b3310940e087bdc6c9658409c7\splash.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
