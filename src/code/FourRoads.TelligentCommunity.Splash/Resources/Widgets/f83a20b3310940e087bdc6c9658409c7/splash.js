@@ -6,10 +6,10 @@
     if (typeof $.fourroads.widgets === 'undefined')
         $.fourroads.widgets = {};
 
-    var attachHandlers = function(context) {
+    var attachHandlers = function (context) {
+
             context.selectors.termsLink.click(function(e) {
-
-
+                context.selectors.termsLink.parent().find('.terms-container').slideDown();
             });
 
             context.selectors.email.blur(function (e) {

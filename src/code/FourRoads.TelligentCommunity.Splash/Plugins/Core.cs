@@ -77,7 +77,6 @@ namespace FourRoads.TelligentCommunity.Splash.Plugins
 
                 plugins.AddRange( new[]
                 {
-                    typeof (RegisteredEmail),
                     typeof (FactoryDefaultPageLayoutInstaller),
                     typeof (FactoryDefaultWidgetProviderInstaller),
                     typeof (ScriptedFragment),
