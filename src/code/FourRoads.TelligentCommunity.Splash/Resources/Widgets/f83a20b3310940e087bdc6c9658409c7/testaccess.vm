@@ -1,0 +1,15 @@
+$core_v2_page.SetContentType('application/json')
+#if ($core_v2_page.IsPost)
+
+	#set($response = $core_v2_user.Get("%{Email = $core_v2_page.GetFormValue('email')}"))
+
+	#if (!$response)
+		{"result":"false"}
+	#else
+		#if ($response.Errors.Count == 0)
+			{"result":"true"}
+		#else
+			$core_v2_page.SendJsonError($response.Errors)
+		#end
+	#end
+#end

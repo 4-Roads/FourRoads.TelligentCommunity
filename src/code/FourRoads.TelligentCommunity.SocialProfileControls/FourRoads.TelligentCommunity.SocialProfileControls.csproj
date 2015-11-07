@@ -32,31 +32,37 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FourRoads.Common, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.dll</HintPath>
+    <Reference Include="FourRoads.Common">
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FourRoads.Common.Sql">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.Sql.dll</HintPath>
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Sql.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FourRoads.Common.TelligentCommunity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.TelligentCommunity.dll</HintPath>
     </Reference>
     <Reference Include="FourRoads.Common.Templates">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.Templates.dll</HintPath>
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Templates.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="FourRoads.Common.Web, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\FourRoads.Common.Web.dll</HintPath>
+    <Reference Include="FourRoads.Common.Web">
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Web.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Ninject, Version=2.3.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\Ninject.dll</HintPath>
+    <Reference Include="Ninject">
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\Ninject.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Ninject.Extensions.Xml, Version=2.1.0.1, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.1\lib\Ninject.Extensions.Xml.dll</HintPath>
+    <Reference Include="Ninject.Extensions.Xml">
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\Ninject.Extensions.Xml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NVelocity">
+      <HintPath>..\..\packages\Castle.NVelocity.1.1.1\lib\net40\NVelocity.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
