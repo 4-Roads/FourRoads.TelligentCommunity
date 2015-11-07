@@ -151,7 +151,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
                     //Add in the headers
                     headerBuffer.AppendLine(string.Join(",", EnumerateFieldsIntoList(additionalFields , (dictionary, field) => field).Concat(new []{"email"}).Select(Csv.Escape)));
 
-                    WriteFileToCfs(headerBuffer, "", "header,txt");
+                    WriteFileToCfs(headerBuffer, "", "header.txt");
                 }
 
                 StringBuilder responseBuffer = new StringBuilder();
