@@ -142,9 +142,6 @@
     <Reference Include="Telligent.DynamicConfiguration">
       <HintPath>..\..\lib\Telligent\Telligent.DynamicConfiguration.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Evolution.AnalyticsUrls">
-      <HintPath>..\..\lib\Telligent\Telligent.Evolution.AnalyticsUrls.dll</HintPath>
-    </Reference>
     <Reference Include="Telligent.Evolution.Api">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
     </Reference>
@@ -165,9 +162,6 @@
     </Reference>
     <Reference Include="Telligent.Evolution.Discussions">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Discussions.dll</HintPath>
-    </Reference>
-    <Reference Include="Telligent.Evolution.ExtendedAnalytics">
-      <HintPath>..\..\lib\Telligent\Telligent.Evolution.ExtendedAnalytics.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Extensions.Calendar">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Extensions.Calendar.dll</HintPath>
@@ -213,9 +207,6 @@
     </Reference>
     <Reference Include="Telligent.Evolution.SecurityModules">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.SecurityModules.dll</HintPath>
-    </Reference>
-    <Reference Include="Telligent.Evolution.Spam">
-      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Spam.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Tenancy">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Tenancy.dll</HintPath>

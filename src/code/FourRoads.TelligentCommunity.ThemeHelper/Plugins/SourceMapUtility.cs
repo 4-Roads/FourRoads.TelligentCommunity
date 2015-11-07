@@ -185,7 +185,7 @@ namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
             {
                 "h",
                 GetCurrentHostVersionKey(),
-                ThemeFiles.MakePath(themeTypeId, themeContextId, themeName, propertyName)
+                ThemeFiles.MakePath(themeTypeId, themeContextId, themeName, propertyName , false)
             });
         }
     }

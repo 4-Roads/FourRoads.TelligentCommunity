@@ -62,6 +62,9 @@
     <Reference Include="Telligent.Evolution.Core">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Jobs">
+      <HintPath>..\..\lib\Telligent\Telligent.Jobs.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">

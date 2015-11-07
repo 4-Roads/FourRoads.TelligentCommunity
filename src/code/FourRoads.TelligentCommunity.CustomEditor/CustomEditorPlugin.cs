@@ -347,11 +347,9 @@ namespace FourRoads.TelligentCommunity.CustomEditor
 
             ICentralizedFile uploadedCfsFile = null;
 
-            var fm = new Telligent.Evolution.Components.MultipleUploadFileManager();
-            
-            fm.AddFile(fname, uploadedFile.InputStream, contextId);
+            Telligent.Evolution.Components.MultipleUploadFileManager.AddFile(fname, uploadedFile.InputStream, contextId);
 
-            uploadedCfsFile = fm.GetCfsFile(fname, contextId);
+            uploadedCfsFile = Telligent.Evolution.Components.MultipleUploadFileManager.GetCfsFile(fname, contextId);
 
             if (uploadedCfsFile != null)
             {

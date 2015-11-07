@@ -56,14 +56,14 @@ namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
                     foreach (string folder in _themeFileFolders)
                     {
                         _themeFileInfos.AddRange(
-                            ThemeFiles.GetFiles(_siteThemeTypeId, _themeContextId, _siteThemeName, folder)
+                            ThemeFiles.GetFiles(_siteThemeTypeId, _themeContextId, _siteThemeName, folder, false)
                                 .Select(f =>
                                 {
                                     List<ThemeFile> themeFiles = (_themeConfigurationData != null)
                                         ? ThemeFiles.DeserializeThemeFiles(_siteThemeTypeId,
                                             _themeContextId, _siteThemeName,
                                             folder,
-                                            _themeConfigurationData.GetStringValue(folder, ""))
+                                            _themeConfigurationData.GetStringValue(folder, "") , false)
                                             .ToList()
                                         : null;
                                     return new ThemeFileInfo
@@ -72,7 +72,7 @@ namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
                                         HasConfiguredVersion =
                                             ThemeFiles.GetConfiguredFile(_siteThemeTypeId, _themeContextId,
                                                 _siteThemeName,
-                                                folder, f.FileName) != null,
+                                                folder, f.FileName , false) != null,
                                         HasDeletedConfiguredVersion =
                                             (themeFiles != null && !themeFiles.Exists(
                                                 t => t.FileName == f.FileName && t.PropertyName == f.PropertyName))
@@ -251,7 +251,7 @@ namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
                 {
                     ThemeFiles.DeleteFile(info.ThemeFile.ThemeTypeID,
                         info.ThemeFile.ThemeContextID, info.ThemeFile.ThemeName,
-                        info.ThemeFile.PropertyName, info.ThemeFile.FileName);
+                        info.ThemeFile.PropertyName, info.ThemeFile.FileName , false);
 
                     return;
                 }
@@ -260,7 +260,7 @@ namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
                 {
                     IEnumerable<ThemeFile> themeFiles = ThemeFiles.DeserializeThemeFiles(configuration,
                         info.ThemeFile.PropertyName,
-                        configuration.GetCustomValue(info.ThemeFile.PropertyName, String.Empty));
+                        configuration.GetCustomValue(info.ThemeFile.PropertyName, String.Empty) , false);
                     ThemeFile themeFile =
                         themeFiles.FirstOrDefault(
                             t =>
@@ -272,7 +272,7 @@ namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
                         IList<ThemeFile> list = ThemeFiles.DeserializeThemeFiles(_siteThemeTypeId,
                             _themeContextId, _siteThemeName, info.ThemeFile.PropertyName,
                             _themeConfigurationData.GetCustomValue(
-                                info.ThemeFile.PropertyName, String.Empty));
+                                info.ThemeFile.PropertyName, String.Empty),false);
 
                         list.Add(themeFile);
 
