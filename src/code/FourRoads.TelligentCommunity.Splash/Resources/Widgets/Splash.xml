@@ -70,6 +70,11 @@
 	          <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('splash.js'))"></script>
           #end
       
+          #set($returnUrl = $core_v2_page.GetQueryStringValue("returnUrl"))
+          #if (!$returnUrl)
+            #set($returnUrl = $core_v2_urls.Home())
+          #end
+          
           #registerEndOfPageHtml()
 	          <script type="text/javascript">
 		          jQuery(function(){
@@ -84,7 +89,8 @@
                   },
                   urls : {
 				              testAccess: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('testaccess.vm'))',
-                      submitForm: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl("submitForm.vm"))'
+                      submitForm: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl("submitForm.vm"))',
+                      returnUrl: '$core_v2_encoding.JavascriptEncode($returnUrl)'
                   },
                   resources : {
                      requiredField: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Required'))',

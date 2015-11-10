@@ -97,8 +97,15 @@
                 dataType: 'json',
                 success: function(response) {
                     if (response.result == "true") {
-                        context.selectors.submit.closest('.form').replaceWith('<div>' + context.resources.thankYou + '</div>');
+                        if (response.redirect !== undefined) {
+                            window.location = context.urls.returnUrl;
+                        } else {
+                            context.selectors.submit.closest('.form').replaceWith('<div>' + context.resources.thankYou + '</div>');
+                        }
+                    } else {
+                        window.location = context.urls.returnUrl;
                     }
+
                 }
             });
         };

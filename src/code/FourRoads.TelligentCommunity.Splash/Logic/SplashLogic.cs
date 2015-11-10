@@ -21,6 +21,9 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
         private SplashConfigurationDetails ?_configuration = null;
         private static bool _initialized =false;
         private static object _syncLock = new object();
+        private static readonly string _headerFileName = "header.txt";
+        private static readonly string _responsesFolder = "responses";
+        private static readonly string _pageName = "splash";
 
         public SplashLogic()
         {
@@ -38,7 +41,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
 
                     var pageContext = PublicApi.Url.ParsePageContext(HttpContext.Current.Request.Url.OriginalString);
 
-                    if (pageContext != null && pageContext.PageName != "splash" && !CentralizedFileStorage.IsCentralizedFileUrl(urlRequest) && !(urlRequest.EndsWith(".js") || urlRequest.EndsWith(".axd") || urlRequest.EndsWith(".ashx") || urlRequest.IndexOf("socket.ashx") >= 0))
+                    if (pageContext != null && pageContext.PageName != _pageName && !CentralizedFileStorage.IsCentralizedFileUrl(urlRequest) && !(urlRequest.EndsWith(".js") || urlRequest.EndsWith(".axd") || urlRequest.EndsWith(".ashx") || urlRequest.IndexOf("socket.ashx") >= 0))
                     {
                         HttpCookie cookie = HttpContext.Current.Request.Cookies["Splash"];
 
@@ -97,7 +100,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
 
         public void RegisterUrls(IUrlController controller)
         {
-            controller.AddPage("splash", "splash", new SiteRootRouteConstraint(), null, "splash", new PageDefinitionOptions
+            controller.AddPage(_pageName, _pageName, new SiteRootRouteConstraint(), null, _pageName, new PageDefinitionOptions
             {
                 HasApplicationContext = false,
                 SetCustomPageOutput = (context, outputController) =>
@@ -143,7 +146,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
             ICentralizedFileStorageProvider fs = CentralizedFileStorage.GetFileStore(Constants.FILESTOREKEY);
             if (fs != null)
             {
-                var header = fs.GetFile("" , "header.txt");
+                var header = fs.GetFile("" , _headerFileName);
 
                 if (header == null)
                 {
@@ -151,14 +154,14 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
                     //Add in the headers
                     headerBuffer.AppendLine(string.Join(",", EnumerateFieldsIntoList(additionalFields , (dictionary, field) => field).Concat(new []{"email"}).Select(Csv.Escape)));
 
-                    WriteFileToCfs(headerBuffer, "", "header.txt");
+                    WriteFileToCfs(headerBuffer, "", _headerFileName);
                 }
 
                 StringBuilder responseBuffer = new StringBuilder();
 
                 responseBuffer.AppendLine(string.Join(",", EnumerateFieldsIntoList(additionalFields, (dictionary, field) => dictionary[field].ToString()).Concat(new []{email}).Select(Csv.Escape)));
 
-                WriteFileToCfs(responseBuffer, "responses", Guid.NewGuid().ToString());
+                WriteFileToCfs(responseBuffer, _responsesFolder, Guid.NewGuid().ToString());
 
                 return true;
             }
@@ -183,7 +186,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
             ICentralizedFileStorageProvider fs = CentralizedFileStorage.GetFileStore(Constants.FILESTOREKEY);
             if (fs != null)
             {
-                var header = fs.GetFile("" , "header.txt");
+                var header = fs.GetFile("" , _headerFileName);
 
                 if (header != null)
                 {
@@ -195,7 +198,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
                     }
 
                     //Build a new csv file
-                    foreach (var response in fs.GetFiles("responses", PathSearchOption.AllPaths))
+                    foreach (var response in fs.GetFiles(_responsesFolder, PathSearchOption.AllPaths))
                     {
                         using (StreamReader sr = new StreamReader(response.OpenReadStream()))
                         {
@@ -233,7 +236,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
             {
                 var pageContext = PublicApi.Url.ParsePageContext(HttpContext.Current.Request.Url.OriginalString);
 
-                if (pageContext != null && pageContext.PageName == "splash")
+                if (pageContext != null && pageContext.PageName == _pageName)
                 {
                     if (_configuration.Value.RemoveHeader)
                     {
