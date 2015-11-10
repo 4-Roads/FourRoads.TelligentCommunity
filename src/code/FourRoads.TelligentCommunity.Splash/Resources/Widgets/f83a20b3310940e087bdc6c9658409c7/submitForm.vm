@@ -23,7 +23,7 @@ $core_v2_page.SetContentType('application/json')
 				
 				$core_v2_page.SetCookieValue("hash", $hash, "%{CookieName = 'Splash'}")
 
-				{"result":"true"}
+				{"result":"true" , "redirect":"true"}
 			#else
 				{"result":"false"}
 			#end
