@@ -1,9 +1,9 @@
 ﻿using System.Web;
-using FourRoads.TelligentCommunity.DeveloperTools;
-using FourRoads.TelligentCommunity.DeveloperTools.Modules;
+using FourRoads.TelligentCommunity.ThemeHelper;
+using FourRoads.TelligentCommunity.ThemeHelper.Modules;
 
 [assembly: PreApplicationStartMethod(typeof(PreApplicationStart), "Start")]
-namespace FourRoads.TelligentCommunity.DeveloperTools
+namespace FourRoads.TelligentCommunity.ThemeHelper
 {
 	public class PreApplicationStart
 	{

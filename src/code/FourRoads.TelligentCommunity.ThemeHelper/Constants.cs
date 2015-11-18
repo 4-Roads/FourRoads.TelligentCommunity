@@ -1,4 +1,4 @@
-﻿namespace FourRoads.TelligentCommunity.DeveloperTools
+﻿namespace FourRoads.TelligentCommunity.ThemeHelper
 {
     public class Constants
     {
