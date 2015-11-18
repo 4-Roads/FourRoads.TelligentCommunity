@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FourRoads.TelligentCommunity.DeveloperTools
+namespace FourRoads.TelligentCommunity.ThemeHelper
 {
     [Flags]
     public enum ReversionType

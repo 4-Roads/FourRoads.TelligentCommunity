@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Telligent.Evolution.Extensibility.Version1;
+﻿using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
+namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
 {
-    public interface IThemeUtilities :  IPluginGroup , ISingletonPlugin
+    public interface IThemeUtilities :  IPluginGroup, IConfigurablePlugin, ISingletonPlugin
     {
         bool EnableSourceMap { get; set; }
         bool EnableFileSystemWatcher { get; set; }

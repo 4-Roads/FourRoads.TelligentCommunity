@@ -11,7 +11,7 @@ using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 
-namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
+namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
 {
     public class FileSystemUtility: ISingletonPlugin
     {
