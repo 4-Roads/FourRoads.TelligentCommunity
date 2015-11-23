@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.RenderingHelper", "code\FourRoads.TelligentCommunity.RenderingHelper\FourRoads.TelligentCommunity.RenderingHelper.csproj", "{20BC9498-6E57-4F6E-BB23-38BFEF110161}"
 EndProject
@@ -74,6 +74,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Tools.DataSanitiser", "code\FourRoads.TelligentCommunity.Tools.DataSanitiser\FourRoads.TelligentCommunity.Tools.DataSanitiser.csproj", "{568AF2B1-099E-4C4B-8645-676CEC9BB243}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Splash", "code\FourRoads.TelligentCommunity.Splash\FourRoads.TelligentCommunity.Splash.csproj", "{B2927439-EF5E-4895-A46A-8B5167A326BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Nexus2", "code\FourRoads.TelligentCommunity.Nexus2\FourRoads.TelligentCommunity.Nexus2.csproj", "{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -255,6 +257,15 @@ Global
 		{B2927439-EF5E-4895-A46A-8B5167A326BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2927439-EF5E-4895-A46A-8B5167A326BA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B2927439-EF5E-4895-A46A-8B5167A326BA}.Release|x86.ActiveCfg = Release|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Release Output|Any CPU.Build.0 = Release|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Release Output|x86.ActiveCfg = Release|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -278,6 +289,7 @@ Global
 		{2090D715-FFD1-4548-96A4-A978D4A48A92} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{568AF2B1-099E-4C4B-8645-676CEC9BB243} = {056047F9-8792-43BF-A2A7-F66A82F66098}
 		{B2927439-EF5E-4895-A46A-8B5167A326BA} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
+		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		VisualSVNWorkingCopyRoot = ..
