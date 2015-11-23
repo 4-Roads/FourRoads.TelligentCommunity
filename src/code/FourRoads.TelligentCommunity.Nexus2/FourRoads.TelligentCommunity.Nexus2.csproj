@@ -81,25 +81,25 @@
     <Reference Include="System.Xml" />
     <Reference Include="Telligent.Common, Version=1.0.39.29854, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\CS\Telligent.Common.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Common.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.DynamicConfiguration">
-      <HintPath>..\..\lib\CS\Telligent.DynamicConfiguration.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.DynamicConfiguration.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Api">
-      <HintPath>..\..\lib\CS\Telligent.Evolution.Api.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Components">
-      <HintPath>..\..\lib\CS\Telligent.Evolution.Components.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Components.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Controls">
-      <HintPath>..\..\lib\CS\Telligent.Evolution.Controls.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Controls.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Core">
-      <HintPath>..\..\lib\CS\Telligent.Evolution.Core.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.OAuth">
-      <HintPath>..\..\lib\CS\Telligent.Evolution.OAuth.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.OAuth.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

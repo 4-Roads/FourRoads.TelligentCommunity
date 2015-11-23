@@ -63,7 +63,7 @@ namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
                                         ? ThemeFiles.DeserializeThemeFiles(_siteThemeTypeId,
                                             _themeContextId, _siteThemeName,
                                             folder,
-                                            _themeConfigurationData.GetStringValue(folder, "") , false)
+                                            _themeConfigurationData.GetStringValue(folder, "") , false , true)
                                             .ToList()
                                         : null;
                                     return new ThemeFileInfo
@@ -260,7 +260,7 @@ namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
                 {
                     IEnumerable<ThemeFile> themeFiles = ThemeFiles.DeserializeThemeFiles(configuration,
                         info.ThemeFile.PropertyName,
-                        configuration.GetCustomValue(info.ThemeFile.PropertyName, String.Empty) , false);
+                        configuration.GetCustomValue(info.ThemeFile.PropertyName, String.Empty), false, true);
                     ThemeFile themeFile =
                         themeFiles.FirstOrDefault(
                             t =>
@@ -272,7 +272,7 @@ namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
                         IList<ThemeFile> list = ThemeFiles.DeserializeThemeFiles(_siteThemeTypeId,
                             _themeContextId, _siteThemeName, info.ThemeFile.PropertyName,
                             _themeConfigurationData.GetCustomValue(
-                                info.ThemeFile.PropertyName, String.Empty),false);
+                                info.ThemeFile.PropertyName, String.Empty), false, true);
 
                         list.Add(themeFile);
 
