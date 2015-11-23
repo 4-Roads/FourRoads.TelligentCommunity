@@ -2,7 +2,7 @@
 using System.Reflection;
 using FourRoads.Common.TelligentCommunity.Components;
 
-namespace FourRoads.TelligentCommunity.DeveloperTools
+namespace FourRoads.TelligentCommunity.ThemeHelper
 {
 	internal sealed class EmbeddedResources: EmbeddedResourcesBase
 	{
@@ -17,7 +17,7 @@ namespace FourRoads.TelligentCommunity.DeveloperTools
 		/// </summary>
 		/// <param name="path">The path.</param>
 		/// <returns></returns>
-		internal static string GetString(string path)
+		new internal static string GetString(string path)
 		{
 			return GetResourceString(Assembly, path);
 		}
@@ -27,7 +27,7 @@ namespace FourRoads.TelligentCommunity.DeveloperTools
 		/// </summary>
 		/// <param name="path">The path.</param>
 		/// <returns></returns>
-		internal static Stream GetStream(string path)
+		new internal static Stream GetStream(string path)
 		{
 			return GetResourceStream(Assembly, path);
 		}

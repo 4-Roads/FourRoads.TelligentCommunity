@@ -1,9 +1,9 @@
 ﻿using System;
-using FourRoads.TelligentCommunity.DeveloperTools.Api.Rest;
+using FourRoads.TelligentCommunity.ThemeHelper.Api.Rest;
 using Telligent.Evolution.Extensibility.Rest.Version2;
 using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.TelligentCommunity.DeveloperTools.Plugins
+namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
 {
     public class RestEndpoints: ISingletonPlugin, IRestEndpoints
     {

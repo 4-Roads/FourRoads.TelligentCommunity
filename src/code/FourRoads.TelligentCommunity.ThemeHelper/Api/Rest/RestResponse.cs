@@ -1,6 +1,6 @@
 ﻿using Telligent.Evolution.Extensibility.Rest.Version2;
 
-namespace FourRoads.TelligentCommunity.DeveloperTools.Api.Rest
+namespace FourRoads.TelligentCommunity.ThemeHelper.Api.Rest
 {
     public class RestResponse: IRestResponse
     {
