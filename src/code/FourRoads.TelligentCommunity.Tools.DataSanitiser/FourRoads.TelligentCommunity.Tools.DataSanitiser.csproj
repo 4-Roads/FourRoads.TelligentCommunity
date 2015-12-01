@@ -261,11 +261,30 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="connectionStrings.config.template" />
+    <Content Include="Languages\en-US\ApiErrorMessages.xml" />
+    <Content Include="Languages\en-US\ApiWarningMessages.xml" />
+    <Content Include="Languages\en-US\ControlPanelResources.xml" />
+    <Content Include="Languages\en-US\errors\BlockedIpAddress.htm" />
+    <Content Include="Languages\en-US\errors\DataProvider.htm" />
+    <Content Include="Languages\en-US\errors\DataStoreUnavailable.htm" />
+    <Content Include="Languages\en-US\errors\EmailProvider.htm" />
+    <Content Include="Languages\en-US\errors\SiteIDUnavailable.htm" />
+    <Content Include="Languages\en-US\errors\SiteUrlData.htm" />
+    <Content Include="Languages\en-US\errors\UrlReWriteProvider.htm" />
+    <Content Include="Languages\en-US\MediaGallery.xml" />
+    <Content Include="Languages\en-US\Messages.xml" />
+    <Content Include="Languages\en-US\metadata\ExifMetadata.xml" />
+    <Content Include="Languages\en-US\metadata\LinkRelations.xml" />
+    <Content Include="Languages\en-US\MGResources.xml" />
+    <Content Include="Languages\en-US\Resources.xml" />
+    <Content Include="Languages\en-US\Templates.xml" />
+    <Content Include="Languages\en-US\ThemeResources.xml" />
+    <Content Include="Languages\languages.xml" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(ProjectDir)Languages" "$(TargetDir)" /S /E /Y /V 
+    <PostBuildEvent>xcopy "$(ProjectDir)Languages" "$(TargetDir)Languages" /S /E /Y /V /I
 xcopy "$(ProjectDir)*.config" "$(TargetDir)" /Y /V
 </PostBuildEvent>
   </PropertyGroup>

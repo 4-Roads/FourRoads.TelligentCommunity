@@ -87,7 +87,14 @@ namespace FourRoads.TelligentCommunity.Tools.DataSanitiser
                     try
                     {
                         Services.Get<IUserAvatarService>().DeleteUserAvatar(user.UserID);
+                    }
+                    catch (Exception exception)
+                    {
+                        Log.Error(string.Format("Could not delete avatar for user Id {0}", user.UserID), exception);
+                    }
 
+                    try
+                    {
                         var writable = userService.GetUserWithWriteableProfile(user.UserID, user.Username);
                         writable.Email = string.Format("{0}@localhost.local", string.Format(userNameFormat, user.UserID));
                         writable.Password = "123456";
