@@ -91,7 +91,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
         {
             foreach(var file in Filestore().GetFiles(PathSearchOption.AllPaths))
             {
-                Filestore().Delete(file.FileName);
+                Filestore().Delete(file.Path, file.FileName);
             }
         }
 
