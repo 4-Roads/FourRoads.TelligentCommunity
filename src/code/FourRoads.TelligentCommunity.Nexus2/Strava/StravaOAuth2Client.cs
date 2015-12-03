@@ -43,7 +43,7 @@ namespace FourRoads.TelligentCommunity.Nexus2.Strava
 
         public virtual string FileStoreKey
         {
-            get { return "customoauthimages"; }
+            get { return FileInstaller.FILESTOREKEY; }
         }
 
         public string RefreshTokenUrl
@@ -142,7 +142,7 @@ namespace FourRoads.TelligentCommunity.Nexus2.Strava
             {
                 try
                 {
-                    ICentralizedFile file = CentralizedFileStorage.GetFileStore("customoauthimages").GetFile(string.Empty, "strava.png");
+                    ICentralizedFile file = CentralizedFileStorage.GetFileStore(FileInstaller.FILESTOREKEY).GetFile(string.Empty, "strava.png");
                     if (file != null)
                         return file.GetDownloadUrl();
                     return null;
