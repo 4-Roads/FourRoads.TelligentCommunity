@@ -4,12 +4,15 @@ using System.Linq;
 using System.Text;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using Telligent.Evolution.Extensibility.Storage.Version1;
 
 
 namespace FourRoads.TelligentCommunity.Nexus2
 {
-    public class FileInstaller : CfsFilestoreInstaller
+    public class FileInstaller : CfsFilestoreInstaller , ICentralizedFileStore
     {
+        public const string FILESTOREKEY = "customoauthimages";
+
         private EmbeddedResources _resources = new EmbeddedResources();
 
         protected override string ProjectName
@@ -25,6 +28,10 @@ namespace FourRoads.TelligentCommunity.Nexus2
         protected override EmbeddedResourcesBase EmbeddedResources
         {
             get { return _resources; }
+        }
+
+        public string FileStoreKey {
+            get { return FILESTOREKEY; }
         }
     }
 }
