@@ -93,6 +93,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Discussions.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Extensions.Calendar">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Extensions.Calendar.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.MediaGalleries, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
@@ -118,6 +121,7 @@
     <Compile Include="ConfigurationExtensions.cs" />
     <Compile Include="ConfigurationExtensionsPlugin.cs" />
     <Compile Include="DefaultForumSubscriptionEventHandler.cs" />
+    <Compile Include="Enumerations\CalendarEnumerate.cs" />
     <Compile Include="Jobs\DefaultSubscriptionUpdateJob.cs" />
     <Compile Include="EmbeddedResources.cs" />
     <Compile Include="ConfigurationExtensionsExtension.cs" />
@@ -153,6 +157,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\resetSettings.vm" />
+    <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\updateSettings.vm" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\CalendarSubscriptionDefaults.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\subscriptiondefaults.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -6,7 +6,7 @@
 	#set($blogId = $core_v2_page.GetFormValue('blogId'))
 	#set($groupId = false)
 	#set($groupId = $core_v2_utility.ParseInt($core_v2_page.GetFormValue('groupId')))
-	#set($blog = $core_v2_forum.Get($core_v2_utility.ParseInt($blogId)))
+	#set($blog = $core_v2_blog.Get("%{Id = $core_v2_utility.ParseInt($blogId)}"))
 
 	#if ($groupId && $blog && $core_v2_nodePermission.Get("blogs", $blog.Id, "Blog_ModifyBlog").IsAllowed)
 		#set($result = $frcommon_v1_configurationExtensions.ResetDefaultBlogSubscripiton($blog.Id ,$groupId))
