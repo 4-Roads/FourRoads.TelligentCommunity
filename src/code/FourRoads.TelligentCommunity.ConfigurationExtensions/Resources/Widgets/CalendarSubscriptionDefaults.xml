@@ -1,17 +1,19 @@
 ﻿<scriptedContentFragments>
-  <scriptedContentFragment name="${resource:BlogSubscriptionDefaults_Name}" cssClass="subscription-defaults" description="${resource:BlogSubscriptionDefaults_Description}" instanceIdentifier="71c7b6f757bc4d159d8c69eb5a8a8db6" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false">
+  <scriptedContentFragment name="${resource:CalendarSubscriptionDefaults_Name}" cssClass="subscription-defaults" description="${resource:CalendarSubscriptionDefaults_Description}" instanceIdentifier="4a653667e34e47b6b13bfa6e7eb67398" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false">
     <contentScript>
       <![CDATA[
-      #set ($blog = $core_v2_blog.Current)
+      #set ($calendar = $calendar_v1_calendars.Current)
       #set ($defaultSettingName = $core_v2_widget.UniqueId('defaultSettingName'))
       #set ($resetSite = $core_v2_widget.UniqueId('resetSite'))  
         
-      #if ($blog && $core_v2_nodePermission.Get("blogs", $blog.Id, "Blog_ModifyBlog").IsAllowed)
+      #if ($calendar && $calendar_v1_calendars.HasPermission($calendar.Id, "Calendar_EditCalendar"))
       
           ##get the current setting from extended attributes
           #set($defaultSubscriptionSetting = "unset")
-          #foreach($attribute in $blog.ExtendedAttributes)
-            #if ($attribute.Key == "DefaultSubscriptionSetting")
+          #set($key = "DefaultSubscriptionSetting$calendar.ContentId")
+          
+          #foreach($attribute in $calendar.Group.ExtendedAttributes)
+            #if ($attribute.Key == $key)
               #set($defaultSubscriptionSetting = $attribute.Value)
             #end
           #end
@@ -28,7 +30,7 @@
              </fieldset>
           </section>
           
-        #registerEndOfPageHtml('fourroads.widgets.blogSubscriptionDefaults')
+        #registerEndOfPageHtml('fourroads.widgets.forumSubscriptionDefaults')
           <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('subscriptiondefaults.js'))"></script>
         #end
       
@@ -37,8 +39,8 @@
         jQuery(function(){
 	        jQuery.fourroads.widgets.subscriptionDefaults.register({
             wrapperId : '$core_v2_encoding.JavascriptEncode($core_v2_widget.WrapperElementId)',
-            blogId :  $blog.Id,
-            groupId : $blog.Group.Id,
+            calendarId :  $calendar.Id,
+            groupId : $calendar.Group.Id,
             selectors : {
                 defaultSettingsRadio :  "input[name='$defaultSettingName']",
                 resetSiteButton: '#$core_v2_encoding.JavascriptEncode($resetSite)'
@@ -63,30 +65,30 @@
     </contentScript>
     <headerScript>
       <![CDATA[
-$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:BlogSubscriptionDefaults_Header}'))
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:CalendarSubscriptionDefaults_Header}'))
 			]]>
     </headerScript>
     <requiredContext>
-      <context id="94b4a7db70934b0abcce06169b6f2272" />
+      <context id="ca1a6951ab1244f5be3df20cc46b361b"  />
     </requiredContext>
     <configuration>
       <![CDATA[
 <propertyGroup id="options" resourceName="Options">
-	<property id="fragmentHeader" resourceName="BlogSubscriptionDefaults_Name" dataType="string" defaultValue="${resource:BlogSubscriptionDefaults_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+	<property id="fragmentHeader" resourceName="CalendarSubscriptionDefaults_Name" dataType="string" defaultValue="${resource:CalendarSubscriptionDefaults_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
 </propertyGroup>
 ]]>
     </configuration>
     <languageResources>
       <language key="en-us">
-        <resource name="BlogSubscriptionDefaults_Name">4 Roads - Blog Advanced Options</resource>
-        <resource name="BlogSubscriptionDefaults_Header">Advanced Options</resource>
-        <resource name="BlogSubscriptionDefaults_Description">Allows a user with Edit Setting permission of the blog to configure default settings.</resource>
+        <resource name="CalendarSubscriptionDefaults_Name">4 Roads - Calendar Advanced Options</resource>
+        <resource name="CalendarSubscriptionDefaults_Header">Advanced Options</resource>
+        <resource name="CalendarSubscriptionDefaults_Description">Allows a user with Edit Setting permission of the calendar to configure default settings.</resource>
         <resource name="Options">Options</resource>
         <resource name="AreYouSure">Are you sure you want to reset all of the settings for all users?</resource>
-        <resource name="Subscribed">Blog notifications on</resource>
-        <resource name="Unsubscribed">Blog notifications off</resource>
-        <resource name="UpdatedMessage">Default blog subscription settings updated</resource>
-        <resource name="Reset">Reset All Blog Users</resource>
+        <resource name="Subscribed">Calendar notifications on</resource>
+        <resource name="Unsubscribed">Calendar notifications off</resource>
+        <resource name="UpdatedMessage">Default calendar subscription settings updated</resource>
+        <resource name="Reset">Reset All Calendar Users</resource>
       </language>
     </languageResources>
   </scriptedContentFragment>
