@@ -1,3 +1,4 @@
+using FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProcessors;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs

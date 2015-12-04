@@ -135,11 +135,11 @@
     <Compile Include="Jobs\ResetNotificationsJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Enumerations\UserEnumerate.cs" />
-    <Compile Include="SubscriptionBlogUpdateProcessor.cs" />
-    <Compile Include="SubscriptionCalendarUpdateProcessor.cs" />
-    <Compile Include="SubscriptionForumUpdateProcessor.cs" />
-    <Compile Include="SubscriptionUpdateProcessor.cs" />
-    <Compile Include="SubscriptionUpdatProcessingFactory.cs" />
+    <Compile Include="SubscriptionProcessors\SubscriptionBlogUpdateProcessor.cs" />
+    <Compile Include="SubscriptionProcessors\SubscriptionCalendarUpdateProcessor.cs" />
+    <Compile Include="SubscriptionProcessors\SubscriptionForumUpdateProcessor.cs" />
+    <Compile Include="SubscriptionProcessors\SubscriptionUpdateProcessor.cs" />
+    <Compile Include="SubscriptionProcessors\SubscriptionUpdatProcessingFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\71c7b6f757bc4d159d8c69eb5a8a8db6\subscriptiondefaults.js" />
