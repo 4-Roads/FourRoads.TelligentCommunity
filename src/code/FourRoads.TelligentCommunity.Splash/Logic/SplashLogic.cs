@@ -41,7 +41,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
 
                     var pageContext = PublicApi.Url.ParsePageContext(HttpContext.Current.Request.Url.OriginalString);
 
-                    if (pageContext != null && pageContext.PageName != _pageName && !CentralizedFileStorage.IsCentralizedFileUrl(urlRequest) && !(urlRequest.EndsWith(".js") || urlRequest.EndsWith(".axd") || urlRequest.EndsWith(".ashx") || urlRequest.IndexOf("socket.ashx") >= 0))
+                    if (pageContext != null && pageContext.PageName != _pageName && !CentralizedFileStorage.IsCentralizedFileUrl(urlRequest) && !(urlRequest.EndsWith(".js") || urlRequest.EndsWith(".axd") || urlRequest.EndsWith(".ashx") || urlRequest.IndexOf("socket.ashx") >= 0 || urlRequest.StartsWith("/resized-image/__size/")))
                     {
                         HttpCookie cookie = HttpContext.Current.Request.Cookies["Splash"];
 
