@@ -45,6 +45,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                 elements.Add("Birthday");
                 elements.Add("Bio");
                 elements.Add("Location");
+                elements.Add("TotalPosts");
 
                 foreach (var profileFeild in PublicApi.UserProfileFields.List())
                 {
@@ -75,6 +76,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                         elements.Add(PublicApi.Language.FormatDateAndTime(user.Birthday.GetValueOrDefault(DateTime.MinValue)));
                         elements.Add(user.Bio(""));
                         elements.Add(user.Location);
+                        elements.Add(user.TotalPosts.ToString());
 
                         var profileFeilds = user.ProfileFields.ToLookup(l => l.Label);
 
