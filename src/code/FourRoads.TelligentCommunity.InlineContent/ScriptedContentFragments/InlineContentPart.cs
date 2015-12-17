@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web.UI;
@@ -23,13 +22,10 @@ using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
-using Telligent.Evolution.CoreServices.WebContext.Services;
-using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
-using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 
@@ -112,13 +108,15 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
         public override PropertyGroup[] GetPropertyGroups()
         {
-            PropertyGroup group = new PropertyGroup("GeneralSettings",TranslatablePluginController.GetLanguageResourceValue("fragment_property_general"), 0);
+            PropertyGroup group = new PropertyGroup("GeneralSettings",TranslatablePluginController.GetLanguageResourceValue("fragment_propertygroup_general"), 0);
 
             Property headerTitle = new Property("headerTitle",
                 TranslatablePluginController.GetLanguageResourceValue("fragment_property_title"), PropertyType.String, 0, "${resource:default_property_title}") 
                                             {ControlType = typeof (ContentFragmentTokenStringControl)};
 
-             group.Properties.Add(headerTitle);
+            group.Properties.Add(headerTitle);
+
+            PropertyGroup defaultContent = new PropertyGroup("DefaultContent", TranslatablePluginController.GetLanguageResourceValue("fragment_propertygroup_defaultContent"), 0);
 
         	Property property = new Property("default_content",TranslatablePluginController.GetLanguageResourceValue(
         	                                 	"fragment_property_content"), PropertyType.Html, 1, ""){ControlType = typeof (HtmlEditorStringControl)};
@@ -128,7 +126,21 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             property.Attributes["height"] = "300px";
             property.Attributes["enablehtmlediting"] = "true";
             property.Attributes["ContentTypeId"] = InlineContentPart.InlineContentContentTypeId.ToString();
-            group.Properties.Add(property);
+            defaultContent.Properties.Add(property);
+
+
+            PropertyGroup anoymousContent = new PropertyGroup("AnonymousContent", TranslatablePluginController.GetLanguageResourceValue("fragment_propertygroup_anonymousContent"), 0);
+
+            property = new Property("anonymous_content", TranslatablePluginController.GetLanguageResourceValue(
+                                    "fragment_property_content"), PropertyType.Html, 1, "") { ControlType = typeof(HtmlEditorStringControl) };
+
+            property.Attributes["EnableHtmlScrubbing"] = "false";
+            property.Attributes["width"] = "100%";
+            property.Attributes["height"] = "300px";
+            property.Attributes["enablehtmlediting"] = "true";
+            property.Attributes["ContentTypeId"] = InlineContentPart.InlineContentContentTypeId.ToString();
+            anoymousContent.Properties.Add(property);
+
 
             property = new Property("inlinecontenttype",
                 TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_type"),
@@ -136,12 +148,10 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             {
                 DescriptionResourceName ="fragment_property_inlinecontent_type_description"
             };
+
             property.SelectableValues.Add(new PropertyValue("Contextual", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_contextual"), (int)ContextMode.Context));
             property.SelectableValues.Add(new PropertyValue("GroupContextual", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_groupcontextual"), (int)ContextMode.GroupContext));
             property.SelectableValues.Add(new PropertyValue("ByName", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_byname"), (int)ContextMode.Name));
-
-            //property.SelectableValues[0].Attributes["propertiesToHide"] = "inlinecontentname";
-            //property.SelectableValues[1].Attributes["propertiesToShow"] = "inlinecontentname";
 
             group.Properties.Add(property);
 
@@ -155,12 +165,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             property = new Property("inlinecontentname", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_name"), PropertyType.String, 4, string.Empty);
             group.Properties.Add(property);
 
-            return new[] { group };
-        }
-
-        protected override void InternalCommit()
-        {
-            base.InternalCommit();
+            return new[] { group , defaultContent , anoymousContent };
         }
 
         protected void ContextualItem(Action<IApplication> applicationUse, Action<IContainer> containerUse, Action<string[]> tagsUse)
@@ -186,7 +191,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
                 
                 var container = PluginManager.Get<IContainerType>().FirstOrDefault(a => a.ContainerTypeId == contextItem.ContainerTypeId);
 
-                if (container != null && contextItem.ContainerId.HasValue)
+                if (container != null && contextItem.ContainerId.HasValue && contextItem.ContainerTypeId == PublicApi.Groups.ContainerTypeId)
                 {
                     currentContainer = container.Get(contextItem.ContainerId.Value);
                 }
@@ -240,6 +245,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
                 contentControl.ID = "inlinecontent";
                 contentControl.DefaultContent = GetContentText();
+                contentControl.DefaultAnonymousContent = GetAnonymousContentText();
 
                 if (DynamicName)
                 {
@@ -334,6 +340,11 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             return GetHtmlValue("default_content", "");
         }
 
+        public string GetAnonymousContentText()
+        {
+            return GetHtmlValue("anonymous_content", "");
+        }
+
         public void Initialize()
         {
             
@@ -363,7 +374,9 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
                 defaultTranslation[0].Set("fragment_name", "4 Roads - Inline Content");
                 defaultTranslation[0].Set("fragment_description", "Provides an inline content widget for users with the Manage Content permission");
-                defaultTranslation[0].Set("fragment_property_general", "General");
+                defaultTranslation[0].Set("fragment_propertygroup_general", "General");
+                defaultTranslation[0].Set("fragment_propertygroup_defaultContent", "Default Content");
+                defaultTranslation[0].Set("fragment_propertygroup_anonymousContent", "Anonymous Override Content");
                 defaultTranslation[0].Set("fragment_property_content", "Default Content Markup");
                 defaultTranslation[0].Set("fragment_property_inlinecontent_name", "Inline Content Name");
                 defaultTranslation[0].Set("fragment_property_css", "CSS Markup");

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
@@ -27,6 +30,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
         private HtmlButton _cancelButton;
         private HtmlButton _updateButton;
         private HtmlEditorStringControl _editorContent;
+        private HtmlEditorStringControl _editorAnonymousContent;
         private ConfigurationDataBase _configurationDataBase;
 
         public InlineContentControl(ConfigurationDataBase configurationDataBase)
@@ -54,8 +58,28 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
         {
             base.CreateChildControls();
 
+            var customContent = _inlineContentLogic.GetInlineContent(InlineContentName);
+            string contentToDisplay = null;
+
+            if (customContent != null)
+            {
+                if (IsAnonymous())
+                {
+                    contentToDisplay = customContent.AnonymousContent ?? customContent.Content;
+                }
+                else
+                {
+                    contentToDisplay = customContent.Content;
+                }
+            }
+
             //Add the dynamic content in here
-            Controls.Add(new Literal() { Text = _inlineContentLogic.GetInlineContent(InlineContentName) ?? DefaultContent});
+            Controls.Add(new Literal() { Text = contentToDisplay ?? (IsAnonymous() ? DefaultAnonymousContent : DefaultContent) });
+        }
+
+        private bool IsAnonymous()
+        {
+            return (PublicApi.Users.AnonymousUserName == PublicApi.Users.AccessingUser.Username);
         }
 
         protected override void EnsureChildControls()
@@ -64,6 +88,8 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
 
             if (!ReadOnly)
             {
+                var customContent = _inlineContentLogic.GetInlineContent(InlineContentName);
+
                 //Is the any content that is waiting to be published with a newer date, if so add an extra class
                 Control[] tempCollection = new Control[Controls.Count];
                 Controls.CopyTo(tempCollection, 0);
@@ -98,15 +124,30 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
                 _editor.Attributes.Add("style", "display:none");
                 _editor.Attributes.Add("class", "fourroads-inline-content");
                 _editor.ID = "editor";
+
+                _editor.Controls.Add(new LiteralControl("<label>Default Content</Label>"));
+
                 _editorContent = new HtmlEditorStringControl();
                 _editorContent.ConfigurationData = _configurationDataBase;
                 _editorContent.ContentTypeId = InlineContentPart.InlineContentContentTypeId;
 
                 _editor.Controls.Add(_editorContent);
 
-                _editorContent.Text = _inlineContentLogic.GetInlineContent(InlineContentName) ?? DefaultContent;
+                _editorContent.Text = customContent != null ? customContent.Content ?? DefaultContent : DefaultContent;
                 _editorContent.CssClass = "editor";
                 _editorContent.ID = "editorcontent";
+
+                _editor.Controls.Add(new LiteralControl("<label>Anonymous Content Override</Label>"));
+
+                _editorAnonymousContent= new HtmlEditorStringControl();
+                _editorAnonymousContent.ConfigurationData = _configurationDataBase;
+                _editorAnonymousContent.ContentTypeId = InlineContentPart.InlineContentContentTypeId;
+
+                _editor.Controls.Add(_editorAnonymousContent);
+
+                _editorAnonymousContent.Text = customContent != null ? customContent.AnonymousContent ?? DefaultAnonymousContent : DefaultAnonymousContent;
+                _editorAnonymousContent.CssClass = "editor";
+                _editorAnonymousContent.ID = "editoranonymouscontent";
 
                 HtmlGenericControl actions = new HtmlGenericControl("div");
                 actions.Attributes.Add("style", "float:right");
@@ -176,12 +217,12 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
                         $('#{3}').click(function(e){{
                             e.preventDefault();
                             $(this).attr('disabled', true);
-                            var args = {5};
+                            var args = ""{{'content':'"" + {5} + ""','anonymousConent':'"" + {6} + ""'}}"";
                             {4};
                             return false;
                         }});
                    }});
-                ", _editAnchor.ClientID, _editor.ClientID, _cancelButton.ClientID, _updateButton.ClientID, Page.ClientScript.GetPostBackEventReference(this, "args", false).Replace("'args'", "args"), _editorContent.GetContentScript()), true);
+                ", _editAnchor.ClientID, _editor.ClientID, _cancelButton.ClientID, _updateButton.ClientID, Page.ClientScript.GetPostBackEventReference(this, "args", false).Replace("'args'", "args"), _editorContent.GetContentScript(), _editorAnonymousContent.GetContentScript()), true);
             }
 
             base.OnPreRender(e);
@@ -202,6 +243,12 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
         {
             get { return (string)(ViewState["DefaultContent"] ?? string.Empty); }
             set { ViewState["DefaultContent"] = value; }
+        }
+
+        public string DefaultAnonymousContent
+        {
+            get { return (string)(ViewState["DefaultAnonymousContent"] ?? string.Empty); }
+            set { ViewState["DefaultAnonymousContent"] = value; }
         }
 
         public string InlineContentName
@@ -230,7 +277,6 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
             set { ViewState["ModalHeight"] = value; }
         }
 
-
         protected virtual bool ReadOnly
         {
             get { return !_inlineContentLogic.CanEdit; }
@@ -240,7 +286,9 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
         {
             if (!string.IsNullOrEmpty(InlineContentName))
             {
-                _inlineContentLogic.UpdateInlineContent(InlineContentName, eventArgument);
+                dynamic data = Json.Decode(eventArgument);
+
+                _inlineContentLogic.UpdateInlineContent(InlineContentName, data.content, data.anonymousConent);
             }
         }
     }
