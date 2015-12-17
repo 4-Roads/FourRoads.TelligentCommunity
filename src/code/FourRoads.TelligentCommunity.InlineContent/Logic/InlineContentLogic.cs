@@ -53,12 +53,12 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
         }
 
 
-        public string GetInlineContent(string contentName)
+        public InlineContentData GetInlineContent(string contentName)
         {
             contentName = MakeSafeFileName(contentName);
 
             string cacheKey = GetCacheKey(contentName);
-            string result = CacheService.Get(cacheKey, CacheScope.All) as string;
+            InlineContentData result = CacheService.Get(cacheKey, CacheScope.All) as InlineContentData;
 
             if (result == null && InlineContentStore != null)
             {
@@ -68,7 +68,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
                 {
                     using (Stream stream = file.OpenReadStream())
                     {
-                        result = ((InlineContentData)_inlineContentSerializer.Deserialize(stream)).Content;
+                        result = ((InlineContentData)_inlineContentSerializer.Deserialize(stream));
 
                         CacheService.Put(cacheKey, result , CacheScope.All);
                     }
@@ -77,7 +77,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
             return result;
         }
 
-        public void UpdateInlineContent(string contentName, string content)
+        public void UpdateInlineContent(string contentName, string content, string anonymousContent)
         {
             contentName = MakeSafeFileName(contentName);
 
@@ -88,7 +88,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
                 //Translate the URL's if any have been uploaded
                 content = PluginManager.GetSingleton<InlineContentPart>().UpdateInlineContentFiles(content);
 
-                _inlineContentSerializer.Serialize(buffer , new InlineContentData(){Content = content });
+                _inlineContentSerializer.Serialize(buffer, new InlineContentData() { Content = content, AnonymousContent = anonymousContent });
 
                 buffer.Seek(0, SeekOrigin.Begin);
 
@@ -119,6 +119,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
         public class InlineContentData
         {
             public string Content;
+            public string AnonymousContent;
         }
     }
 }
