@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Web;
-using System.Web.Helpers;
+using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
@@ -204,7 +204,9 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
 
                                 modal.css({{
                                     top:top + $(window).scrollTop(), 
-                                    left:left + $(window).scrollLeft()
+                                    left:left + $(window).scrollLeft(),
+                                    height: Math.min($(window).height(), modal.outerHeight()),
+                                    overflow: 'scroll'
                                 }});
 
                                 modal.show();
@@ -286,9 +288,11 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
         {
             if (!string.IsNullOrEmpty(InlineContentName))
             {
-                dynamic data = Json.Decode(eventArgument);
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
 
-                _inlineContentLogic.UpdateInlineContent(InlineContentName, data.content, data.anonymousConent);
+                dynamic item = serializer.Deserialize<object>(eventArgument);
+
+                _inlineContentLogic.UpdateInlineContent(InlineContentName, item["content"], item["anonymousConent"]);
             }
         }
     }
