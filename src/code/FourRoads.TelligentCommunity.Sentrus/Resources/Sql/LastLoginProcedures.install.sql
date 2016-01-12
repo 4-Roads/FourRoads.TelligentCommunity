@@ -15,7 +15,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE fr_LastLogin_CreateUpdate
+CREATE PROCEDURE [dbo].[fr_LastLogin_CreateUpdate]
 	@MembershipId uniqueidentifier,
 	@LastLogonDate datetime,
 	@EmailCountSent int,
@@ -40,7 +40,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE fr_LastLogin_Get
+CREATE PROCEDURE [dbo].[fr_LastLogin_Get]
 	@MembershipId uniqueidentifier
 AS
 BEGIN
@@ -59,7 +59,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE fr_LastLogin_List
+CREATE PROCEDURE [dbo].[fr_LastLogin_List]
 	@LastLogonDate datetime,
 	@excludeIgnored bit
 AS
@@ -76,4 +76,9 @@ END
 GO
 
 
-
+GRANT EXECUTE ON  [dbo].[fr_LastLogin_List] TO [public]
+GO
+GRANT EXECUTE ON  [dbo].[fr_LastLogin_Get] TO [public]
+GO
+GRANT EXECUTE ON  [dbo].[fr_LastLogin_CreateUpdate] TO [public]
+GO

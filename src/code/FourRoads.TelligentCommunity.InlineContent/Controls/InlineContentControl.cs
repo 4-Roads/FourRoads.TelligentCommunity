@@ -27,10 +27,8 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
         private HtmlGenericControl _editor;
         private HtmlGenericControl _editItem;
         private HtmlAnchor _editAnchor;
-        private HtmlButton _cancelButton;
-        private HtmlButton _updateButton;
-        private HtmlEditorStringControl _editorContent;
-        private HtmlEditorStringControl _editorAnonymousContent;
+        private HtmlButton _updateButton,_revertButton,_cancelButton ;
+        private HtmlEditorStringControl _editorContent,_editorAnonymousContent;
         private ConfigurationDataBase _configurationDataBase;
 
         public InlineContentControl(ConfigurationDataBase configurationDataBase)
@@ -65,7 +63,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
             {
                 if (IsAnonymous())
                 {
-                    contentToDisplay = customContent.AnonymousContent ?? customContent.Content;
+                    contentToDisplay = string.IsNullOrWhiteSpace(customContent.AnonymousContent) ? customContent.Content : customContent.AnonymousContent;
                 }
                 else
                 {
@@ -166,6 +164,13 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
 
                 actions.Controls.Add(_updateButton);
 
+                _revertButton = new HtmlButton();
+                _revertButton.ID = "revert";
+                _revertButton.Attributes.Add("class", "button revert");
+                _revertButton.InnerText = "Revert";
+
+                actions.Controls.Add(_revertButton);
+
                 Controls.Add(c);
 
                 c.Controls.Add(new HtmlGenericControl("div") { InnerText = "click to edit" });
@@ -179,7 +184,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
 
         protected override void OnPreRender(EventArgs e)
         {
-            if (_editAnchor != null && _editor != null && _cancelButton != null && _updateButton != null)
+            if (_editAnchor != null && _editor != null && _cancelButton != null && _updateButton != null && _revertButton != null)
             {
 
                 Page.ClientScript.RegisterClientScriptBlock(GetType(), "inlinecontent-center-func" , @"
@@ -223,8 +228,16 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
                             {4};
                             return false;
                         }});
+
+                        $('#{7}').click(function(e){{
+                            e.preventDefault();
+                            $(this).attr('disabled', true);
+                            var args = ""{{'content':null,'anonymousConent':null}}"";
+                            {4};
+                            return false;
+                        }});
                    }});
-                ", _editAnchor.ClientID, _editor.ClientID, _cancelButton.ClientID, _updateButton.ClientID, Page.ClientScript.GetPostBackEventReference(this, "args", false).Replace("'args'", "args"), _editorContent.GetContentScript(), _editorAnonymousContent.GetContentScript()), true);
+                ", _editAnchor.ClientID, _editor.ClientID, _cancelButton.ClientID, _updateButton.ClientID, Page.ClientScript.GetPostBackEventReference(this, "args", false).Replace("'args'", "args"), _editorContent.GetContentScript(), _editorAnonymousContent.GetContentScript() , _revertButton.ClientID), true);
             }
 
             base.OnPreRender(e);
