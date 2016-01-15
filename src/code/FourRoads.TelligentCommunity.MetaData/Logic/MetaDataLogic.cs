@@ -175,6 +175,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 { 
                    // PublicApi.Eventlogs.Write("opened file ", new EventLogEntryWriteOptions() { Category = "MetaData" });
 
+                   // PublicApi.Eventlogs.Write("opened file ", new EventLogEntryWriteOptions() { Category = "MetaData" });
+
                     using (Stream stream = file.OpenReadStream())
                     {
                         result = ((MetaData) _metaDataSerializer.Deserialize(stream));
