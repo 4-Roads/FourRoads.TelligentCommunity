@@ -160,23 +160,31 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             contentName = MakeSafeFileName(contentName);
 
+           // PublicApi.Eventlogs.Write(contentName, new EventLogEntryWriteOptions() {Category = "MetaData"});
+           
             string cacheKey = GetCacheKey(contentName);
             MetaData result = CacheService.Get(cacheKey, CacheScope.All) as MetaData;
 
             if (result == null && MetaDataStore != null)
             {
+                //PublicApi.Eventlogs.Write("try get file:" + contentName, new EventLogEntryWriteOptions() { Category = "MetaData" });
+
                 ICentralizedFile file = MetaDataStore.GetFile("", contentName + ".xml");
 
                 if (file != null)
-                {
+                { 
+                   // PublicApi.Eventlogs.Write("opened file ", new EventLogEntryWriteOptions() { Category = "MetaData" });
+
                     using (Stream stream = file.OpenReadStream())
                     {
                         result = ((MetaData) _metaDataSerializer.Deserialize(stream));
 
+                        //PublicApi.Eventlogs.Write("Deserialized", new EventLogEntryWriteOptions() { Category = "MetaData" });
+
                         //FIlter out any tags that have oreviously been configured but then removed
                         var lookup = _metaConfig.ExtendedEntries.ToLookup(f => f);
 
-                        foreach (var tag  in result.ExtendedMetaTags.Keys)
+                        foreach (var tag in result.ExtendedMetaTags.Keys)
                         {
                             if (!lookup.Contains(tag))
                                 result.ExtendedMetaTags.Remove(tag);
@@ -186,6 +194,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
                 CacheService.Put(cacheKey, result, CacheScope.All);
             }
+
+            //PublicApi.Eventlogs.Write("Returned " + result.Title, new EventLogEntryWriteOptions() { Category = "MetaData" });
+
             return result;
         }
 
