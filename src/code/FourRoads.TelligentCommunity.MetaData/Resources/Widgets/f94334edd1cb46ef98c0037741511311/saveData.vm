@@ -1,0 +1,18 @@
+$core_v2_page.SetContentType('application/json')
+#if ($core_v2_page.IsPost)
+
+	#set($avaialbleTags = $frcommon_v1_metaData.GetAvailableExtendedMetaTags())
+	#set($extraTags = "%{}")
+
+	#foreach($tag in $avaialbleTags)
+		#set($added = $extraTags.Add($tag, $core_v2_page.GetFormValue($tag)))
+	#end
+
+	#set($result = $frcommon_v1_metaData.SaveMetaDataConfiguration($core_v2_page.GetFormValue('title') , $core_v2_page.GetFormValue('description') , $core_v2_page.GetFormValue('keywords') , $extraTags))
+
+	#if (!$result.HasErrors())
+		{"result":"true"}
+	#else
+		$core_v2_page.SendJsonError($response.Errors)
+	#end
+#end

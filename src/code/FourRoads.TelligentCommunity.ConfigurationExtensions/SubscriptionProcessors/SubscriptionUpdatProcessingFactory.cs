@@ -14,7 +14,8 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProce
 
         public static List<ISubscriptionUpdateProcessor> GetProcessors(JobData jobData)
         {
-            return PluginManager.Get<ISubscriptionUpdateProcessor>().Where(p => p.CanProcess(jobData)).ToList();
+            List<ISubscriptionUpdateProcessor> retval = PluginManager.Get<ISubscriptionUpdateProcessor>().Where(p => p.CanProcess(jobData)).ToList();
+            return retval;
         }
     }
 }

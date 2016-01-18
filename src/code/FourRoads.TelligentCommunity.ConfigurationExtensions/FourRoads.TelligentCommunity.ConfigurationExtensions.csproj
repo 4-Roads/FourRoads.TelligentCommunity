@@ -137,6 +137,7 @@
     <Compile Include="SubscriptionProcessors\SubscriptionBlogUpdateProcessor.cs" />
     <Compile Include="SubscriptionProcessors\SubscriptionCalendarUpdateProcessor.cs" />
     <Compile Include="SubscriptionProcessors\SubscriptionForumUpdateProcessor.cs" />
+    <Compile Include="SubscriptionProcessors\GroupDigestUpdateProcessor.cs" />
     <Compile Include="SubscriptionProcessors\SubscriptionUpdateProcessor.cs" />
     <Compile Include="SubscriptionProcessors\SubscriptionUpdatProcessingFactory.cs" />
   </ItemGroup>
@@ -164,12 +165,22 @@
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\resetSettings.vm" />
     <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\updateSettings.vm" />
+    <EmbeddedResource Include="Resources\Widgets\52fcdd61ca2f4783a331628681290210\resetSettings.vm" />
+    <EmbeddedResource Include="Resources\Widgets\52fcdd61ca2f4783a331628681290210\updateSettings.vm" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\CalendarSubscriptionDefaults.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\subscriptiondefaults.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\GroupDigestSubscriptionDefaults.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\52fcdd61ca2f4783a331628681290210\subscriptiondefaults.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments;
@@ -22,21 +23,31 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
         {
             get
             {
-                if (PublicApi.Url.CurrentContext != null && PublicApi.Url.CurrentContext.ContextItems != null)
+                if (PublicApi.Url.CurrentContext != null && PublicApi.Url.CurrentContext.ContextItems != null && PublicApi.Users.AccessingUser != null)
                 {
-                    foreach (var context in PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems())
+                    var items  = PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems();
+
+                    if (items.Any())
                     {
-                        if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && PublicApi.Users.AccessingUser.Id.HasValue)
+                        foreach (var context in items)
                         {
-                            if (PublicApi.Permissions.Get(PermissionRegistrar.EditInlineContentPermission, PublicApi.Users.AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
+                            if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && PublicApi.Users.AccessingUser.Id.HasValue)
                             {
-                                return true;
+                                if (PublicApi.Permissions.Get(PermissionRegistrar.EditInlineContentPermission, PublicApi.Users.AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
+                                {
+                                    return true;
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        return PublicApi.Permissions.Get(PermissionRegistrar.EditInlineContentPermission, PublicApi.Users.AccessingUser.Id.GetValueOrDefault(0)).IsAllowed;
+                    }
+
                 }
 
-                return false;
+                    return false;
             }
         }
 
@@ -79,23 +90,26 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
 
         public void UpdateInlineContent(string contentName, string content, string anonymousContent)
         {
-            contentName = MakeSafeFileName(contentName);
-
-            string cacheKey = GetCacheKey(contentName);
-
-            using (MemoryStream buffer = new MemoryStream(10000))
+            if (CanEdit)
             {
-                //Translate the URL's if any have been uploaded
-                content = PluginManager.GetSingleton<InlineContentPart>().UpdateInlineContentFiles(content);
+                contentName = MakeSafeFileName(contentName);
 
-                _inlineContentSerializer.Serialize(buffer, new InlineContentData() { Content = content, AnonymousContent = anonymousContent });
+                string cacheKey = GetCacheKey(contentName);
 
-                buffer.Seek(0, SeekOrigin.Begin);
+                using (MemoryStream buffer = new MemoryStream(10000))
+                {
+                    //Translate the URL's if any have been uploaded
+                    content = PluginManager.GetSingleton<InlineContentPart>().UpdateInlineContentFiles(content);
 
-                InlineContentStore.AddFile("", contentName + ".xml", buffer, false);
+                    _inlineContentSerializer.Serialize(buffer, new InlineContentData() {Content = content, AnonymousContent = anonymousContent});
+
+                    buffer.Seek(0, SeekOrigin.Begin);
+
+                    InlineContentStore.AddFile("", contentName + ".xml", buffer, false);
+                }
+
+                CacheService.Remove(cacheKey, CacheScope.All);
             }
-
-            CacheService.Remove(cacheKey , CacheScope.All);
         }
 
         private static string GetCacheKey(string contentName)
