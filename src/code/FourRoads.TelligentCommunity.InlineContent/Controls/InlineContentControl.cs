@@ -224,7 +224,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
                         $('#{3}').click(function(e){{
                             e.preventDefault();
                             $(this).attr('disabled', true);
-                            var args = ""{{'content':'"" + {5} + ""','anonymousConent':'"" + {6} + ""'}}"";
+                            var args = ""{{'content':"" + JSON.stringify({5}) + "",'anonymousConent':"" + JSON.stringify({6}) + ""}}"";
                             {4};
                             return false;
                         }});
