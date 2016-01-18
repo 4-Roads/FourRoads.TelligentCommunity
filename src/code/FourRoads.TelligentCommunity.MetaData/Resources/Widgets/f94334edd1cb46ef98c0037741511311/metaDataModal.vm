@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+		$core_v2_language.GetResource('EditMetaData')
+    </title>
+    $core_v2_page.RenderThemeHeaders("%{ IsModal =  'true' }")
+</head>
+<body>
+<form>
+<div class="content-fragment">
+	#set($saveId = $core_v2_widget.UniqueId('save'))
+	#set($metaForm = $frcommon_v1_metaData.GetDynamicFormXml())
+	#set($formId =  $core_v2_widget.UniqueId('formId'))
+
+    $core_v2_dynamicForm.RenderForm($formId, $metaForm)
+
+	<a class="internal-link button" href="javascript:void(0)" id="$core_v2_encoding.HtmlAttributeEncode($saveId)">$core_v2_language.GetResource('Save')</a>
+
+	#registerEndOfPageHtml('fourroads.widgets.metadata')
+		<script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('metadata.js'))"></script>
+	#end
+
+	#registerEndOfPageHtml()
+	    <script type="text/javascript">
+		    jQuery(function(){
+			    jQuery.fourroads.widgets.metaDataUpdate.register({
+				    getData : function() {return $core_v2_dynamicForm.GetValuesScript($formId);},
+					selectors : {
+						save : '#$core_v2_encoding.JavascriptEncode($saveId)'
+					},
+					urls : {
+						saveDataCallback:'$core_v2_encoding.JavascriptEncode( $core_v2_widget.GetExecutedFileUrl("saveData.vm"))'
+					}
+				});
+		    });
+	    </script>
+    #end
+</div>
+</form>
+</body>
+</html>
