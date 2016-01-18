@@ -1,0 +1,18 @@
+﻿$core_v2_page.SetContentType('application/json')
+#set($success = false)
+
+#if($core_v2_page.IsPost)
+	#set($groupId = false)
+	#set($groupId = $core_v2_utility.ParseInt($core_v2_page.GetFormValue('groupId')))
+	#set($newSetting = $core_v2_page.GetFormValue('setting'))
+
+	#set($group = $core_v2_group.Get("%{Id=$groupId}"))
+
+	#if ($group && $core_v2_nodePermission.Get("groups", $group.Id, "Group_ModifyGroup").IsAllowed)
+		#set($result = $frcommon_v1_configurationExtensions.UpdateDefaultGroupDigestSubscripiton($group.Id , $newSetting))
+		#set($success = true)
+	#end
+#end
+
+{"success": #if ($success)"true"#else"false"#end}
+

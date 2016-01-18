@@ -74,6 +74,31 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
             });
         }
 
+        public void UpdateDefaultGroupDigestSubscripiton(int groupId, string newState)
+        {
+            var group = PublicApi.Groups.Get(new GroupsGetOptions(){Id=groupId});
+            ExtendedAttribute currentSetting = group.ExtendedAttributes.Get("DefaultDigestSetting");
+            if (currentSetting == null)
+            {
+                group.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "DefaultDigestSetting", Value = newState });
+            }
+            else
+            {
+                currentSetting.Value = newState;
+            }
+
+            PublicApi.Groups.Update(groupId, new GroupsUpdateOptions() { ExtendedAttributes = group.ExtendedAttributes });
+        }
+
+        public void ResetDefaultGroupDigestSubscripiton(int groupId)
+        {
+            PublicApi.JobService.Schedule(typeof(SubscriptionUpdateJob), DateTime.UtcNow, new Dictionary<string, string>()
+            {
+                {"GroupId" , groupId.ToString()},
+                {"processGroups" , bool.TrueString},
+            });
+        }
+
         public void UpdateUserDefaultNotifications(String notificationType, String distributionType, bool enable)
         {
             if (PublicApi.RoleUsers.IsUserInRoles(PublicApi.Users.AccessingUser.Username, new string[] { "Administrators" }))

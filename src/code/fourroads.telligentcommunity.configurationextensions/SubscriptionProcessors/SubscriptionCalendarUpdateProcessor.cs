@@ -6,6 +6,7 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensions.Calendar.Extensibility.Api.Entities.Version1;
+using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProcessors
 {
@@ -13,7 +14,13 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProce
     {
         public override bool CanProcess(JobData jobData)
         {
-            return jobData.Data.ContainsKey("processCalendars");
+            bool retval = false;
+            IPlugin calendars = PluginManager.Get<Telligent.Evolution.Extensions.Calendar.CalendarApplicationType>().FirstOrDefault();
+            if(calendars != null && PluginManager.IsEnabled(calendars) && jobData.Data.ContainsKey("processCalendars"))
+            {
+                retval = true;
+            }
+            return retval;
         }
 
         protected override void InternalProcess(User user, Group @group, JobData jobData)

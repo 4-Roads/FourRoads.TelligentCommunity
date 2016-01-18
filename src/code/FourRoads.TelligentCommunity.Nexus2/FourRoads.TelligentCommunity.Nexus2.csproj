@@ -50,9 +50,8 @@
     <Reference Include="FourRoads.Common.Web">
       <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\FourRoads.Common.Web.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\CS\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\lib\Telligent\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Ninject">
       <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\Ninject.dll</HintPath>
