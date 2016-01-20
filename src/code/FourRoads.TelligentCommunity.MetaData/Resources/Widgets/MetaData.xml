@@ -24,23 +24,45 @@
           }
           </style>
           #set($currentMetaData = $frcommon_v1_metaData.GetCurrentMetaData())
-
           #if ($currentMetaData)
+            
+           #set($parameters = "%{}")
+
+           #set($added = $parameters.Add("SiteName" , $core_v2_configuration.SiteName ))
+           #set($added = $parameters.Add("SiteLogoUrl" , $core_v2_configuration.SiteLogoUrl ))
+
+          #set($added = $parameters.Add("ContainerName" , $core_v2_container.Current.HtmlName("web") ))
+           #set($added = $parameters.Add("ContainerDescription" , $core_v2_container.Current.HtmlDescription("web") ))
+           
+           #set($added = $parameters.Add("PageImage" , $currentMetaData.GetBestImageUrlForCurrent()))
+           
+           #if ($core_v2_application.Current)
+             #set($added = $parameters.Add("ApplicationName" , $!core_v2_application.Current.HtmlName("web") ))
+             #set($added = $parameters.Add("ApplicationDescription" , $!core_v2_application.Current.HtmlDescription("web") ))
+             #set($added = $parameters.Add("ApplicationrImage" , $!core_v2_application.Current.AvatarUrl)) 
+           #else
+             #set($added = $parameters.Add("ApplicationName" , "" ))
+             #set($added = $parameters.Add("ApplicationDescription" ,""))
+             #set($added = $parameters.Add("ApplicationrImage" ,"")) 
+           #end
+
+            #set($seperator = $core_v2_widget.GetStringValue('seperator' , " "))
+            
             #if ($currentMetaData.Title && $currentMetaData.Title != "")
-              #set($added = $core_v2_page.SetTitle($currentMetaData.Title, false, false))
+              #set($added = $core_v2_page.SetTitle($frcommon_v1_metaData.FormatMetaString($currentMetaData.Title,$seperator , $parameters), false, false))
             #end
             
             #if ($currentMetaData.Description && $currentMetaData.Description != "")
-              #set($added = $core_v2_page.AddMetaDescription($currentMetaData.Description))
+              #set($added = $core_v2_page.AddMetaDescription($frcommon_v1_metaData.FormatMetaString($currentMetaData.Description,$seperator , $parameters)))
             #end
          
             #if ($currentMetaData.Keywords && $currentMetaData.Keywords != "")
-              #set($added = $core_v2_page.AddMetaKeywords($currentMetaData.Keywords))
+              #set($added = $core_v2_page.AddMetaKeywords($frcommon_v1_metaData.FormatMetaString($currentMetaData.Keywords,$seperator , $parameters)))
             #end
     
             #foreach($keyValue in $currentMetaData.ExtendedMetaTags)
                 #if ($keyValue.Value && $keyValue.Value != "")
-                  #set($added = $core_v2_page.AddMetaTag($keyValue.Key, $keyValue.Value))
+                  #set($added = $core_v2_page.AddMetaTag($keyValue.Key, $frcommon_v1_metaData.FormatMetaString($keyValue.Value,$seperator , $parameters)))
                 #end
             #end
           #end
@@ -83,6 +105,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
       <![CDATA[
 <propertyGroup id="options" resourceName="Options">
 	<property id="fragmentHeader" resourceName="MetaData_Name" dataType="string" defaultValue="${resource:MetaData_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+  <property id="seperator" resourceName="MetaData_Seperator" dataType="string" defaultValue=" " />
 </propertyGroup>
 ]]>
     </configuration>
@@ -91,6 +114,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
         <resource name="MetaData_Name">4 Roads - MetaData Configuration</resource>
         <resource name="MetaData_Header">MetaData Widget</resource>
         <resource name="MetaData_Description">Adds support for configurable meta data.</resource>
+        <resource name="MetaData_Seperator">Dynamic Property Seperator</resource>
         <resource name="Options">Options</resource>
         <resource name="Save">Save</resource>
         <resource name="MetaData">Meta Data</resource>

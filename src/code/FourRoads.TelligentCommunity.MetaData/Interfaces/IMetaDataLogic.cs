@@ -9,7 +9,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Interfaces
         Logic.MetaData GetCurrentMetaData();
         string GetDynamicFormXml();
         string[] GetAvailableExtendedMetaTags();
-        void SaveMetaDataConfiguration(string title, string description, string keywords, IDictionary extendedTags);
+        void SaveMetaDataConfiguration(string title, string description, string keywords,bool inherit, IDictionary extendedTags);
         bool CanEdit { get; }
+        string FormatMetaString(string rawFieldValue, string seperator, IDictionary namedParameters);
+        string GetBestImageUrlForCurrent();
     }
 }

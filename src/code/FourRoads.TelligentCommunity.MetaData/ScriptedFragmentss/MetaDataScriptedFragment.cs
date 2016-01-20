@@ -44,11 +44,16 @@ namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
             return MetaDataLogic.GetDynamicFormXml();
         }
 
-        public string SaveMetaDataConfiguration(string title, string description, string keywords , IDictionary extendedTags )
+        public string GetBestImageUrlForCurrent()
+        {
+            return MetaDataLogic.GetBestImageUrlForCurrent();
+        }
+
+        public string SaveMetaDataConfiguration(string title, string description, string keywords, bool ignore , IDictionary extendedTags )
         {
             try
             {
-                MetaDataLogic.SaveMetaDataConfiguration(title, description, keywords, extendedTags);
+                MetaDataLogic.SaveMetaDataConfiguration(title, description, keywords, ignore, extendedTags);
             }
             catch (Exception ex)
             {
@@ -60,9 +65,15 @@ namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
             return string.Empty;
         }
 
+        public string FormatMetaString(string rawFieldValue, string seperator, IDictionary namedParameters)
+        {
+            return MetaDataLogic.FormatMetaString(rawFieldValue, seperator, namedParameters);
+        }
+
         public ApiMetaData GetCurrentMetaData()
         {
             Logic.MetaData metaData;
+
             try
             {
                 metaData = MetaDataLogic.GetCurrentMetaData();
