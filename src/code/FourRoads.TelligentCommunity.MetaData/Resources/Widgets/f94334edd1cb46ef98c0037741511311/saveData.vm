@@ -8,7 +8,7 @@ $core_v2_page.SetContentType('application/json')
 		#set($added = $extraTags.Add($tag, $core_v2_page.GetFormValue($tag)))
 	#end
 
-	#set($result = $frcommon_v1_metaData.SaveMetaDataConfiguration($core_v2_page.GetFormValue('title') , $core_v2_page.GetFormValue('description') , $core_v2_page.GetFormValue('keywords') , $extraTags))
+	#set($result = $frcommon_v1_metaData.SaveMetaDataConfiguration($core_v2_page.GetFormValue('title') , $core_v2_page.GetFormValue('description') , $core_v2_page.GetFormValue('keywords') ,  $core_v2_utility.ParseBool($core_v2_page.GetFormValue('inherit')), $extraTags))
 
 	#if (!$result.HasErrors())
 		{"result":"true"}
