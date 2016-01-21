@@ -63,7 +63,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             }
         }
 
-        private static Regex matchFields = new Regex("{([^{}]*})", RegexOptions.Compiled);
+        private static Regex matchFields = new Regex(@"({(?!{)\w+}(?!}))", RegexOptions.Compiled);
 
         public string FormatMetaString(string rawFieldValue, string seperator, IDictionary namedParameters)
         {
@@ -73,7 +73,12 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
                 if (namedParameters.Contains(trimmend))
                 {
-                    return seperator + namedParameters[trimmend] + (match.Value.EndsWith(" ") ? " " : string.Empty);
+                    string repsonse = string.Empty;
+
+                    if (match.Index > 0 && string.IsNullOrEmpty((string)namedParameters[trimmend]))
+                        repsonse += seperator;
+
+                    return repsonse + namedParameters[trimmend];
                 }
 
                 return match.Value;
@@ -93,7 +98,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
                 if (!content.HasErrors())
                 {
-                    imageUrl = ExtractImage(content.HtmlDescription("web"));
+                    imageUrl = ExtractImage(content.HtmlDescription(""));
                 }
             }
 
@@ -104,7 +109,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
                 if (!app.HasErrors())
                 {
-                    imageUrl = ExtractImage(app.HtmlDescription("web"));
+                    imageUrl = ExtractImage(app.HtmlDescription(""));
                 }
             }
 
