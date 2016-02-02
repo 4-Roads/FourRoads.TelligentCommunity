@@ -11,7 +11,7 @@ namespace FourRoads.TelligentCommunity.MetaData
 {
     public class FactoryDefaultWidgetProviderInstaller : Common.TelligentCommunity.Plugins.Base.FactoryDefaultWidgetProviderInstaller, IApplicationPlugin
     {
-        private readonly Guid _scriptedContentFragmentFactoryDefaultIdentifier = new Guid("{2584523C-F405-4159-A205-5322F5957F27}");
+        public static Guid _scriptedContentFragmentFactoryDefaultIdentifier = new Guid("{2584523C-F405-4159-A205-5322F5957F27}");
 
         public override Guid ScriptedContentFragmentFactoryDefaultIdentifier
         {

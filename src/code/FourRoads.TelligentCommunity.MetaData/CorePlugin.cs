@@ -77,6 +77,7 @@ namespace FourRoads.TelligentCommunity.MetaData
                 {
                     Type[] priorityPlugins =
                     {
+                        typeof (DependencyInjectionPlugin),
                         typeof (FactoryDefaultWidgetProviderInstaller)
                     };
 

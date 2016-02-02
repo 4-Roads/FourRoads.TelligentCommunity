@@ -6,18 +6,7 @@
     if (typeof $.fourroads.widgets === 'undefined')
         $.fourroads.widgets = {};
 
-    var attachHandlers = function (context) {
-            context.selectors.editMeta.click(function(e) {
-                e.preventDefault();
-
-                $.glowModal(context.urls.metaDataModal, {
-                    onClose: function() {
-
-                    },
-                });
-            });
-    },
-    attachUpdateHandlers = function(context) {
+    var attachUpdateHandlers = function(context) {
         context.selectors.save.click(function (e) {
             e.preventDefault();
 
@@ -54,11 +43,4 @@
         }
     };
 
-    $.fourroads.widgets.metaData = {
-        register: function(context) {
-            scrapeElements(context);
-
-            attachHandlers(context);
-        }
-    };
 })(jQuery, window);

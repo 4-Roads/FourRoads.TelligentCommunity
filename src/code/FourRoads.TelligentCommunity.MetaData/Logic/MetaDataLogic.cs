@@ -242,7 +242,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             foreach (var contextItem in PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems())
             {
-                var container = PluginManager.Get<IContainerType>().FirstOrDefault(a => a.ContainerTypeId == contextItem.ContainerTypeId);
+                var container = PluginManager.Get<IWebContextualContainerType>().FirstOrDefault(a => a.ContainerTypeId == contextItem.ContainerTypeId);
 
                 if (container != null && contextItem.ContainerId.HasValue && contextItem.ContainerTypeId == PublicApi.Groups.ContainerTypeId)
                 {
@@ -253,7 +253,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                     break;
                 }
 
-                var app = PluginManager.Get<IApplicationType>().FirstOrDefault(a => a.ApplicationTypeId == contextItem.ApplicationTypeId && a.ContainerTypes.Any(ct => ct == contextItem.ContainerTypeId));
+                var app = PluginManager.Get<IWebContextualApplicationType>().FirstOrDefault(a => a.ApplicationTypeId == contextItem.ApplicationTypeId && a.ContainerTypes.Any(ct => ct == contextItem.ContainerTypeId));
 
                 if (app != null && contextItem.ApplicationId.HasValue)
                 {

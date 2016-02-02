@@ -108,20 +108,24 @@
     <Compile Include="Logic\MetaDataLogic.cs" />
     <Compile Include="Logic\MetaData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScriptedFragmentss\AdministrationPanel.cs" />
     <Compile Include="ScriptedFragmentss\MetaDataScriptedFragment.cs" />
     <Compile Include="Security\PermissionRegistrar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <EmbeddedResource Include="Resources\Widgets\f94334edd1cb46ef98c0037741511311\metaDataModal.vm" />
-    <EmbeddedResource Include="Resources\Widgets\f94334edd1cb46ef98c0037741511311\saveData.vm" />
+    <EmbeddedResource Include="Resources\ScriptablePlugin\411f7656968348e1906a695a01b5f56c\saveData.vm" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\f94334edd1cb46ef98c0037741511311\metadata.js" />
+    <EmbeddedResource Include="Resources\ScriptablePlugin\411f7656968348e1906a695a01b5f56c\metadata.js" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\MetaData.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ScriptablePlugin\MetaDataAdministration.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

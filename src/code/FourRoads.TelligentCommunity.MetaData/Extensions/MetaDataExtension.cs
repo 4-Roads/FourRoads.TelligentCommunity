@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using FourRoads.Common;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
