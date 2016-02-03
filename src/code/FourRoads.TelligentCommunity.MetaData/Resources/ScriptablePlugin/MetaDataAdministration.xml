@@ -1,8 +1,7 @@
 <scriptedContentFragments>
-  <scriptedContentFragment name="${resource:MetaData_Name}" cssClass="metadata" description="${resource:MetaData_Description}" instanceIdentifier="411f7656968348e1906a695a01b5f56c" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false">
+  <scriptedContentFragment name="${resource:MetaData_Name}" cssClass="metadata" description="${resource:MetaData_Description}" instanceIdentifier="411f7656968348e1906a695a01b5f56c" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false">
     <contentScript>
       <![CDATA[
-     dfgdfgdfgfgdf
       #set($hasPermission = $frcommon_v1_metaData.CanEdit)
       
       #if($hasPermission) 
@@ -12,8 +11,6 @@
 
           $core_v2_dynamicForm.RenderForm($formId, $metaForm)
 
-	        <a class="internal-link button" href="javascript:void(0)" id="$core_v2_encoding.HtmlAttributeEncode($saveId)">$core_v2_language.GetResource('Save')</a>
-
 	        #registerEndOfPageHtml('fourroads.widgets.metadata')
 		        <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('metadata.js'))"></script>
 	        #end
@@ -22,10 +19,11 @@
 	            <script type="text/javascript">
 		            jQuery(function(){
 			            jQuery.fourroads.widgets.metaDataUpdate.register({
-				            getData : function() {return $core_v2_dynamicForm.GetValuesScript($formId);},
-					        selectors : {
-						        save : '#$core_v2_encoding.JavascriptEncode($saveId)'
-					        },
+				          getData : function() {return $core_v2_dynamicForm.GetValuesScript($formId);},
+                  resources : {
+                    save:'$core_v2_encoding.JavascriptEncode( $core_v2_language.GetResource("Save"))',
+                    updated:'$core_v2_encoding.JavascriptEncode( $core_v2_language.GetResource("Updated"))'
+                  },
 					        urls : {
 						        saveDataCallback:'$core_v2_encoding.JavascriptEncode( $core_v2_widget.GetExecutedFileUrl("saveData.vm"))'
 					        }
@@ -36,19 +34,6 @@
         #end
 			]]>
     </contentScript>
-    <headerScript>
-      <![CDATA[
-$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:MetaData_Header}'))
-			]]>
-    </headerScript>
-    <configuration>
-      <![CDATA[
-<propertyGroup id="options" resourceName="Options">
-	<property id="fragmentHeader" resourceName="MetaData_Name" dataType="string" defaultValue="${resource:MetaData_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
-  <property id="seperator" resourceName="MetaData_Seperator" dataType="string" defaultValue=" " />
-</propertyGroup>
-]]>
-    </configuration>
     <languageResources>
       <language key="en-us">
         <resource name="MetaData_Name">4 Roads - MetaData Administration</resource>
@@ -58,6 +43,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
         <resource name="Options">Options</resource>
         <resource name="Save">Save</resource>
         <resource name="MetaData">Meta Data</resource>
+        <resource name="Updated">Meta Data updated for page</resource>
         <resource name="EditMetaData">Edit Meta Data</resource>
       </language>
     </languageResources>

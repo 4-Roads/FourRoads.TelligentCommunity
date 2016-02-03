@@ -45,13 +45,14 @@ namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
 
         public void Register(IScriptedContentFragmentController controller)
         {
-            var options = new ScriptedContentFragmentOptions(ScriptedContentFragmentFactoryDefaultIdentifier)
+            var options = new ScriptedContentFragmentOptions(_instanceIdentifier)
             {
                 CanBeThemeVersioned = false,
                 CanHaveHeader = false,
                 CanHaveWrapperCss = false,
                 CanReadPluginConfiguration = false,
-                IsEditable = true
+                IsEditable = true,
+                
             };
             options.Extensions.Add(new PanelContext());
 
