@@ -24,7 +24,8 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                 {
                     PageIndex = 0,
                     PageSize = 100,
-                    IncludeHidden = true
+                    IncludeHidden = true,
+                    AccountStatus = "All"
                 };
 
                 StringBuilder resultCsv = new StringBuilder(100000);
