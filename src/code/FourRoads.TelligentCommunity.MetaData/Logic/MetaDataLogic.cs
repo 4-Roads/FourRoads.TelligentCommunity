@@ -206,10 +206,10 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                     details.ContainerId = c.ContainerId;
                     details.ContainerTypeId = c.ContainerTypeId;
 
-                    if (PublicApi.Groups.GetRootGroup().ContainerId == c.ContainerId)
-                    {
-                        details.PageName = "siteroot";
-                    }
+                    //if (PublicApi.Groups.GetRootGroup().ContainerId == c.ContainerId)
+                    //{
+                    //    details.PageName = "siteroot";
+                    //}
                 });
             }
 
@@ -336,10 +336,15 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 //Once we start inheriting we go to the group home page
                 if (!container.HasErrors())
                 {
+                    if (container.ContainerId == PublicApi.Groups.Root.ContainerId)
+                        break;
+
                     var context = PublicApi.Url.ParsePageContext(container.Url);
 
                     if (context != null && container.ParentContainer != null)
                     {
+                        details.ApplicationId = Guid.Empty;
+                        details.ApplicationTypeId = Guid.Empty; 
                         details.ContainerId = container.ParentContainer.ContainerId;
                         details.ContainerTypeId = container.ParentContainer.ContainerTypeId;
                         details.PageName = context.PageName;
