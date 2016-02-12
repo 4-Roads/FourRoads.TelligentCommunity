@@ -46,6 +46,14 @@
              #set($added = $parameters.Add("ApplicationrImage" ,"")) 
            #end
 
+           #if ($core_v2_content.Current)
+             #set($added = $parameters.Add("ContentName" , $!core_v2_content.Current.HtmlName("web") ))
+             #set($added = $parameters.Add("ContentDescription" , $!core_v2_content.Current.HtmlDescription("web") ))
+           #else
+             #set($added = $parameters.Add("ContentName" , "" ))
+             #set($added = $parameters.Add("ContentDescription" ,""))
+           #end
+
             #set($seperator = $core_v2_widget.GetStringValue('seperator' , " "))
             
             #if ($currentMetaData.Title && $currentMetaData.Title != "")
