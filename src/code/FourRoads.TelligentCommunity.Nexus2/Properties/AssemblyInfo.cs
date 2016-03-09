@@ -6,8 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.Nexus2")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyProduct("FourRoads.TelligentCommunity.Nexus2")]
+[assembly: AssemblyDescription("Enables a custom OAuth provider for Strava")]
 
 
 
