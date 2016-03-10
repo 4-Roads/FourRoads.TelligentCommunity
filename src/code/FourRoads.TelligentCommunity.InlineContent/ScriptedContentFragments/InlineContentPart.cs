@@ -28,13 +28,15 @@ using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
+using Telligent.Evolution.Extensibility.EmbeddableContent.Version1;
 
 namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 {
-    public class InlineContentPart : ConfigurableContentFragmentBase, ITranslatablePlugin, IPluginGroup, IFileEmbeddableContentType,ISingletonPlugin
+    public class InlineContentPart : ConfigurableContentFragmentBase, ITranslatablePlugin, IPluginGroup, IFileEmbeddableContentType,ISingletonPlugin, IContentEmbeddableContentType
     {
         private ITranslatablePluginController _translatablePluginController;
         private IFileEmbeddableContentTypeController _ftController;
+        private IContentEmbeddableContentTypeController _contentEmbedController;
 
         public override bool HasRequiredContext(Control control)
         {
@@ -433,6 +435,13 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
         {
            var fs =  CentralizedFileStorage.GetFileStore(InlineContentLogic.FILESTORE_KEY);
 
+            var contentItem = GetContentItem();
+
+            if (contentItem != null)
+            {
+                _contentEmbedController.AddUpdateEmbeddableContent(contentItem.ContentId, contentItem.ContentTypeId, sourceContent);
+            }
+
             return _ftController.SaveFilesInHtml(sourceContent, file =>
             {
                 using (Stream contentStream = file.OpenReadStream())
@@ -472,6 +481,45 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
         public Telligent.Evolution.Extensibility.Content.Version1.IContent Get(Guid contentId)
         {
             return null;
+        }
+
+        public void SetController(IContentEmbeddableContentTypeController controller)
+        {
+            _contentEmbedController = controller;
+        }
+
+        private ContentItemDetails GetContentItem()
+        {
+            if (ContextualMode == ContextMode.Name)
+            {
+                return new ContentItemDetails(PublicApi.Groups.Root.ContainerId, PublicApi.Groups.ContentTypeId);
+            }
+
+            ContentItemDetails contentItem = null;
+
+            ContextualItem(a =>
+            {
+                contentItem = new ContentItemDetails(a.ApplicationId, a.ApplicationTypeId);
+            },
+            c =>
+            {
+                contentItem = new ContentItemDetails(c.ContainerId, c.ContainerTypeId);
+            }, t => { });
+
+            return contentItem;
+        }
+
+        private class ContentItemDetails
+        {
+            public ContentItemDetails(Guid contentId, Guid contentTypeId)
+            {
+                ContentId = contentId;
+                ContentTypeId = contentTypeId;
+            }
+
+            public Guid ContentId { get; private set; }
+
+            public Guid ContentTypeId { get; private set; }
         }
     }
 }
