@@ -1,5 +1,6 @@
 using System.Collections;
 using FourRoads.TelligentCommunity.MetaData.Logic;
+using System;
 
 namespace FourRoads.TelligentCommunity.MetaData.Interfaces
 {
@@ -13,5 +14,6 @@ namespace FourRoads.TelligentCommunity.MetaData.Interfaces
         bool CanEdit { get; }
         string FormatMetaString(string rawFieldValue, string seperator, IDictionary namedParameters);
         string GetBestImageUrlForCurrent();
+        string GetBestImageUrlForContent(Guid contentId, Guid contentTypeId);
     }
 }

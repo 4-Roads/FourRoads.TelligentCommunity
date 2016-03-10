@@ -85,10 +85,22 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             });
         }
 
+        public string GetBestImageUrlForContent(Guid contentId, Guid contentTypeId)
+        {
+            ContentDetails details = GetContentDetails(contentId, contentTypeId);
+
+            return GetBestImageUrlForContentDetails(details);
+        }
+
         public string GetBestImageUrlForCurrent()
         {
             ContentDetails details = GetCurrentContentDetails();
 
+            return GetBestImageUrlForContentDetails(details);
+        }
+
+        private string GetBestImageUrlForContentDetails(ContentDetails details)
+        {
             string imageUrl = string.Empty;
 
             if (details.ContentId.HasValue && details.ContentTypeId.HasValue)
@@ -205,16 +217,38 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 {
                     details.ContainerId = c.ContainerId;
                     details.ContainerTypeId = c.ContainerTypeId;
-
-                    //if (PublicApi.Groups.GetRootGroup().ContainerId == c.ContainerId)
-                    //{
-                    //    details.PageName = "siteroot";
-                    //}
                 });
             }
 
             CacheService.Put("ContentDetails", details , CacheScope.Context);
             
+            return details;
+        }
+
+        private ContentDetails GetContentDetails(Guid contentId, Guid contentTypeId)
+        {
+            string cacheKey = string.Format("ContentDetails::{0}::{1}", contentId, contentTypeId);
+            ContentDetails details = CacheService.Get(cacheKey, CacheScope.Distributed) as ContentDetails;
+
+            if (details == null)
+            {
+                details = new ContentDetails() { PageName = "default" };
+
+                var content = PublicApi.Content.Get(contentId, contentTypeId);
+
+                if (content != null)
+                {
+                    details.ContentId = content.ContentId;
+                    details.ContentTypeId = content.ContentTypeId;
+                    details.ApplicationId = content.Application.ApplicationId;
+                    details.ApplicationTypeId = content.Application.ApplicationTypeId;
+                    details.ContainerId = content.Application.Container.ContainerId;
+                    details.ContainerTypeId = content.Application.Container.ContainerTypeId;
+                }
+            }
+
+            CacheService.Put(cacheKey, details, CacheScope.Distributed, TimeSpan.FromMinutes(5));
+
             return details;
         }
 

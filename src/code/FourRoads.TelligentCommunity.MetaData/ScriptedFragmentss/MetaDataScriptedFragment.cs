@@ -49,6 +49,11 @@ namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
             return MetaDataLogic.GetBestImageUrlForCurrent();
         }
 
+        public string GetBestImageUrlForContent(Guid contentId, Guid contentTypeId)
+        {
+            return MetaDataLogic.GetBestImageUrlForContent(contentId, contentTypeId);
+        }
+
         public string SaveMetaDataConfiguration(string title, string description, string keywords, bool ignore , IDictionary extendedTags )
         {
             try
