@@ -24,6 +24,8 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                 {
                     PageIndex = 0,
                     PageSize = 100,
+                    IncludeHidden = true,
+                    AccountStatus = "All"
                 };
 
                 StringBuilder resultCsv = new StringBuilder(100000);
@@ -44,6 +46,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                 elements.Add("Birthday");
                 elements.Add("Bio");
                 elements.Add("Location");
+                elements.Add("TotalPosts");
 
                 foreach (var profileFeild in PublicApi.UserProfileFields.List())
                 {
@@ -56,7 +59,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                 {
                     var results = PublicApi.Users.List(list);
 
-                    moreRecords = results.TotalCount > (++list.PageIndex * list.PageSize);
+                    moreRecords = results.TotalCount > (++list.PageIndex*list.PageSize);
 
                     foreach (var user in results)
                     {
@@ -74,7 +77,8 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                         elements.Add(PublicApi.Language.FormatDateAndTime(user.Birthday.GetValueOrDefault(DateTime.MinValue)));
                         elements.Add(user.Bio(""));
                         elements.Add(user.Location);
-                       
+                        elements.Add(user.TotalPosts.ToString());
+
                         var profileFeilds = user.ProfileFields.ToLookup(l => l.Label);
 
                         foreach (var profileFeild in PublicApi.UserProfileFields.List())
@@ -106,8 +110,14 @@ namespace FourRoads.TelligentCommunity.UserDataExport
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                PublicApi.Eventlogs.Write("Error exporting users:" + ex, new EventLogEntryWriteOptions() { Category = "User Export" });
+            }
             finally
             {
+                PublicApi.Eventlogs.Write("Finished exporting users", new EventLogEntryWriteOptions() {Category = "User Export"});
+
                 fs.Delete("", "processing.txt");
             }
         }

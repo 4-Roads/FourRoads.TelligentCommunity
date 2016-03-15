@@ -1,0 +1,17 @@
+﻿$core_v2_page.SetContentType('application/json')
+#set($success= false)
+
+#if($core_v2_page.IsPost)
+	#set($calendarId = false)
+	#set($calendarId = $core_v2_page.GetFormValue('calendarId'))
+	#set($newSetting = $core_v2_page.GetFormValue('setting'))
+
+	#set($calendar = $calendar_v1_calendars.Show("%{Id = $calendarId}"))
+
+	#if ($calendar && $calendar_v1_calendars.HasPermission($calendar.Id, "Calendar_EditCalendar"))
+		#set($result = $frcommon_v1_configurationExtensions.UpdateDefaultCalendarSubscripiton($calendar.Id , $newSetting))
+		#set($success= true)
+	#end
+#end
+
+{"success": #if ($success)"true"#else"false"#end}

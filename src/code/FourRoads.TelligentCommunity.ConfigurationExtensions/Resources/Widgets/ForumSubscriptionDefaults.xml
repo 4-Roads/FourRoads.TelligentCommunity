@@ -1,5 +1,5 @@
 ﻿<scriptedContentFragments>
-  <scriptedContentFragment name="${resource:ForumSubscriptionDefaults_Name}" cssClass="content-discussions" description="${resource:ForumSubscriptionDefaults_Description}" instanceIdentifier="f5deee7523cd48beb23f20eb88397e77" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false">
+  <scriptedContentFragment name="${resource:ForumSubscriptionDefaults_Name}" cssClass="subscription-defaults" description="${resource:ForumSubscriptionDefaults_Description}" instanceIdentifier="f5deee7523cd48beb23f20eb88397e77" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false">
     <contentScript>
       <![CDATA[
       #set ($forum = $core_v2_forum.Current)

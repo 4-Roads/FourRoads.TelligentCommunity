@@ -57,7 +57,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
 
                             tmpStream.Seek(0, SeekOrigin.Begin);
 
-                            Config.DomIndexProvider = DomIndexProviders.None;
+                            //Config.DomIndexProvider = DomIndexProviders.None; this will improve performance but requires csquery 1.3.5-beta and above
                             Config.DomRenderingOptions = DomRenderingOptions.RemoveComments;
 
                             CQ document = CQ.CreateDocument(tmpStream, HttpContext.Current.Response.ContentEncoding);

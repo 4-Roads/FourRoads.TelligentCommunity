@@ -108,7 +108,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Logic
                         }
 
            return loginDetails;
-                    }
+        }
 
         public void CreateUpdateLastLoginDetails(Entities.LastLoginDetails lastLoginData)
         {

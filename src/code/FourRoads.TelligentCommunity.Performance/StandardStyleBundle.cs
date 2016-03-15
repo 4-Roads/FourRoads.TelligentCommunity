@@ -15,7 +15,8 @@ namespace FourRoads.TelligentCommunity.Performance
     {
         private readonly StyleBundle _styleBundle;
         private BundledFileFactory _bundledFileFactory = new BundledFileFactory();
-        private static Selector _selector = new Selector("link[type='text/css']");
+        //private static Selector _selector = new Selector("link[type='text/css']");//this will improve performance but requires csquery 1.3.5-beta and above
+        private static string _selector = "link[type='text/css']";
 
         public StandardStyleBundle(string basePath)
         {
@@ -123,7 +124,8 @@ namespace FourRoads.TelligentCommunity.Performance
             get { return "link[type='text/css']"; }
         }
 
-        private Selector ReplaceSelector
+        //private Selector ReplaceSelector  //this will improve performance but requires csquery 1.3.5-beta and above
+        private string ReplaceSelector
         {
             get { return _selector; }
         }

@@ -1,0 +1,133 @@
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:MetaData_Name}" cssClass="metadata" description="${resource:MetaData_Description}" instanceIdentifier="f94334edd1cb46ef98c0037741511311" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false">
+    <contentScript>
+      <![CDATA[
+          <style>
+          .content-fragment.metadata a.settings{
+                position: fixed;
+                top: 40px;
+                left: 10px;
+                background-color: rgb(51, 51, 51);
+                padding: 5px;
+                color: rgb(255, 255, 255);
+                width: 30px;
+          }
+          
+          .content-fragment.metadata a.settings span{
+              overflow:hidden;
+              width:80px;
+              display:block;
+          }
+          
+          .content-fragment.metadata a.settings:hover{
+            width:80px;
+          }
+          </style>
+          #set($currentMetaData = $frcommon_v1_metaData.GetCurrentMetaData())
+          #if ($currentMetaData)
+            
+           #set($parameters = "%{}")
+
+           #set($added = $parameters.Add("SiteName" , $core_v2_configuration.SiteName ))
+           #set($added = $parameters.Add("SiteLogoUrl" , $core_v2_configuration.SiteLogoUrl ))
+
+          #set($added = $parameters.Add("ContainerName" , $core_v2_container.Current.HtmlName("web") ))
+           #set($added = $parameters.Add("ContainerDescription" , $core_v2_container.Current.HtmlDescription("web") ))
+           
+           #set($added = $parameters.Add("PageImage" , $currentMetaData.GetBestImageUrlForCurrent()))
+           
+           #if ($core_v2_application.Current)
+             #set($added = $parameters.Add("ApplicationName" , $!core_v2_application.Current.HtmlName("web") ))
+             #set($added = $parameters.Add("ApplicationDescription" , $!core_v2_application.Current.HtmlDescription("web") ))
+             #set($added = $parameters.Add("ApplicationrImage" , $!core_v2_application.Current.AvatarUrl)) 
+           #else
+             #set($added = $parameters.Add("ApplicationName" , "" ))
+             #set($added = $parameters.Add("ApplicationDescription" ,""))
+             #set($added = $parameters.Add("ApplicationrImage" ,"")) 
+           #end
+
+           #if ($core_v2_content.Current)
+             #set($added = $parameters.Add("ContentName" , $!core_v2_content.Current.HtmlName("web") ))
+             #set($added = $parameters.Add("ContentDescription" , $!core_v2_content.Current.HtmlDescription("web") ))
+           #else
+             #set($added = $parameters.Add("ContentName" , "" ))
+             #set($added = $parameters.Add("ContentDescription" ,""))
+           #end
+
+            #set($seperator = $core_v2_widget.GetStringValue('seperator' , " "))
+            
+            #if ($currentMetaData.Title && $currentMetaData.Title != "")
+              #set($added = $core_v2_page.SetTitle($frcommon_v1_metaData.FormatMetaString($currentMetaData.Title,$seperator , $parameters), false, false))
+            #end
+            
+            #if ($currentMetaData.Description && $currentMetaData.Description != "")
+              #set($added = $core_v2_page.AddMetaDescription($frcommon_v1_metaData.FormatMetaString($currentMetaData.Description,$seperator , $parameters)))
+            #end
+         
+            #if ($currentMetaData.Keywords && $currentMetaData.Keywords != "")
+              #set($added = $core_v2_page.AddMetaKeywords($frcommon_v1_metaData.FormatMetaString($currentMetaData.Keywords,$seperator , $parameters)))
+            #end
+    
+            #foreach($keyValue in $currentMetaData.ExtendedMetaTags)
+                #if ($keyValue.Value && $keyValue.Value != "")
+                  #set($added = $core_v2_page.AddMetaTag($keyValue.Key, $frcommon_v1_metaData.FormatMetaString($keyValue.Value,$seperator , $parameters)))
+                #end
+            #end
+          #end
+      
+      #set($hasPermission = $frcommon_v1_metaData.CanEdit)
+      
+      #if($hasPermission) 
+            #set($editMeta = $core_v2_widget.UniqueId('editMeta'))
+            <a href="javascript:void(0)" class="settings" id="$core_v2_encoding.HtmlAttributeEncode($editMeta)"><span>$core_v2_language.GetResource('MetaData')</span></a>
+
+            #registerEndOfPageHtml('fourroads.widgets.metadata')
+	            <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('metadata.js'))"></script>
+            #end
+
+            #registerEndOfPageHtml()
+	            <script type="text/javascript">
+		            jQuery(function(){
+			            jQuery.fourroads.widgets.metaData.register({
+                    selectors : {
+                        editMeta : '#$core_v2_encoding.JavascriptEncode($editMeta)'
+                    },
+                    urls : {
+                        metaDataModal:'$core_v2_encoding.JavascriptEncode( $core_v2_widget.GetExecutedFileUrl("metaDataModal.vm"))'
+				            },
+                    resources : {
+                    }
+			            });
+		            });
+	            </script>
+            #end
+          #end
+			]]>
+    </contentScript>
+    <headerScript>
+      <![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:MetaData_Header}'))
+			]]>
+    </headerScript>
+    <configuration>
+      <![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="MetaData_Name" dataType="string" defaultValue="${resource:MetaData_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+  <property id="seperator" resourceName="MetaData_Seperator" dataType="string" defaultValue=" " />
+</propertyGroup>
+]]>
+    </configuration>
+    <languageResources>
+      <language key="en-us">
+        <resource name="MetaData_Name">4 Roads - MetaData Configuration</resource>
+        <resource name="MetaData_Header">MetaData Widget</resource>
+        <resource name="MetaData_Description">Adds support for configurable meta data.</resource>
+        <resource name="MetaData_Seperator">Dynamic Property Seperator</resource>
+        <resource name="Options">Options</resource>
+        <resource name="Save">Save</resource>
+        <resource name="MetaData">Meta Data</resource>
+        <resource name="EditMetaData">Edit Meta Data</resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

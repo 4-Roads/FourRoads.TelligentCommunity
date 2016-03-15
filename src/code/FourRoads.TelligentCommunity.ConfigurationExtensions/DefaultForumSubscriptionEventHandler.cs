@@ -26,6 +26,8 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
                 {"UserName" , userAfterCreateEventArgs.Username},
                 {"processForums" , bool.TrueString},
                 {"processBlogs" , bool.TrueString},
+                {"processCalendars" , bool.TrueString},
+                {"processGroups", bool.TrueString}
             });
         }
 
@@ -37,7 +39,8 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
                 {"UserName" , e.User.Username},
                 {"GroupId" , e.Group.Id.ToString()},
                 {"processForums" , bool.TrueString},
-                {"processBlogs" , bool.TrueString},
+                {"processCalendars" , bool.TrueString},
+                {"processGroups", bool.TrueString}
             });
         }
 

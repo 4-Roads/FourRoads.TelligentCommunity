@@ -3,12 +3,12 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Web;
 using System.Web.UI;
-using FourRoads.TelligentCommunity.DeveloperTools.Plugins;
+using FourRoads.TelligentCommunity.ThemeHelper.Plugins;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 
-namespace FourRoads.TelligentCommunity.DeveloperTools.Modules
+namespace FourRoads.TelligentCommunity.ThemeHelper.Modules
 {
     public class ThemeUtilityModule : IHttpModule
     {
@@ -88,7 +88,7 @@ namespace FourRoads.TelligentCommunity.DeveloperTools.Modules
             {
                 NameValueCollection queryString = context.Request.QueryString;
                 string clearCache = queryString["clearcache"] + queryString["cc"];
-                const string cookieName = "FourRoads.TelligentCommunity.DeveloperTools.ThemeConsole";
+                const string cookieName = "FourRoads.TelligentCommunity.ThemeHelper.ThemeConsole";
                 string disableCache = queryString["disablecache"] + queryString["dc"];
 
                 if (string.IsNullOrEmpty(disableCache))

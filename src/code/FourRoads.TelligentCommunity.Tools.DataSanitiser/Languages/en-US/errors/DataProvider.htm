@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Critical Error: DataProvider</title>
+        <link rel="stylesheet" href="Themes/default/style/default.aspx" type="text/css">
+    </head>
+    <body>
+        <center>
+            <table height="40%" width="90%">
+                <tr>
+                    <td align="center" valign="middle">
+                        <h1>Critical Error: DataProvider</h1>
+                        <b>The dataprovider class "[DATAPROVIDERCLASS]" could not be loaded.</b>
+                        <p>
+                            Please contact your site administrator. A technical explanation 
+                            of why this error is caused is below.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="left">
+                        <hr size="1">
+                        Zimbra Community expects to load a data abstraction layer (DAL) class; 
+                        in this case: <font color="red">[DATAPROVIDERCLASS]</font>. This DAL is used to 
+                        communicate to whatever datastore you are using for Zimbra Community 
+                        (the default data store class is SqlDataProvider).
+                        <p>
+                            This class requires that certain methods and properties are implemented as it 
+                            inherits these from the class below:
+                            <br>
+                            <font face="LucidiaConsole"><b>Telligent.Evolution.Components.CommonDataProvider.cs</b></font>
+                        <p>
+                            In this case, the WebCommonSqlDataProvider class defines methods and/or 
+                            properties that <b><u>are missing</u></b> in [DATAPROVIDERCLASS]. Please open 
+                            your data provider class and attempt to recompile. You should get detailed 
+                            compilation errors noting the missing methods/properties.
+                            <hr size="1">
+                            For more information you can also visit <a href="http://zimbra.com">http://zimbra.com</a>
+                        the home of the Zimbra Community development team.
+                    </td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

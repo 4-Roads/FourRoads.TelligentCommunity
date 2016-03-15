@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<tags>
+  <tag type="ApertureValue">
+    <description>ApertureValue</description>
+    <format />
+  </tag>
+  <tag type="Artist">
+    <description>Artist</description>
+    <format />
+  </tag>
+  <tag type="BitsPerSample">
+    <description>BitsPerSample</description>
+    <format />
+  </tag>
+  <tag type="BrightnessValue">
+    <description>BrightnessValue</description>
+    <format />
+  </tag>
+  <tag type="CFAPattern">
+    <description>CFAPattern</description>
+    <format />
+  </tag>
+  <tag type="ColorSpace">
+    <description>ColorSpace</description>
+    <format />
+  </tag>
+  <tag type="ComponentsConfiguration">
+    <description>ComponentsConfiguration</description>
+    <format />
+  </tag>
+  <tag type="CompressedBitsPerPixel">
+    <description>CompressedBitsPerPixel</description>
+    <format />
+  </tag>
+  <tag type="Compression">
+    <description>Compression</description>
+    <format />
+  </tag>
+  <tag type="Contrast">
+    <description>Contrast</description>
+    <format />
+  </tag>
+  <tag type="Copyright">
+    <description>Copyright</description>
+    <format />
+  </tag>
+  <tag type="CustomRendered">
+    <description>CustomRendered</description>
+    <format />
+  </tag>
+  <tag type="DateTime">
+    <description>Date/Time</description>
+    <format style="DateTime" />
+  </tag>
+  <tag type="DateTimeDigitized">
+    <description>DateTimeDigitized</description>
+    <format />
+  </tag>
+  <tag type="DateTimeOriginal">
+    <description>DateTimeOriginal</description>
+    <format />
+  </tag>
+  <tag type="DeviceSettingDescription">
+    <description>DeviceSettingDescription</description>
+    <format />
+  </tag>
+  <tag type="DigitalZoomRatio">
+    <description>DigitalZoomRatio</description>
+    <format />
+  </tag>
+  <tag type="ExifVersion">
+    <description>ExifVersion</description>
+    <format />
+  </tag>
+  <tag type="ExposureBiasValue">
+    <description>ExposureBiasValue</description>
+    <format />
+  </tag>
+  <tag type="ExposureIndex">
+    <description>ExposureIndex</description>
+    <format />
+  </tag>
+  <tag type="ExposureMode">
+    <description>ExposureMode</description>
+    <format />
+  </tag>
+  <tag type="ExposureProgram">
+    <description>ExposureProgram</description>
+    <format />
+  </tag>
+  <tag type="ExposureTime">
+    <description>Shutter</description>
+    <format>{0} sec</format>
+  </tag>
+  <tag type="FileSource">
+    <description>FileSource</description>
+    <format />
+  </tag>
+  <tag type="Flash">
+    <description>Flash</description>
+    <format />
+  </tag>
+  <tag type="FlashEnergy">
+    <description>FlashEnergy</description>
+    <format />
+  </tag>
+  <tag type="FlashPixVersion">
+    <description>FlashPixVersion</description>
+    <format />
+  </tag>
+  <tag type="FNumber">
+    <description>Aperature</description>
+    <format style="Decimal">f/{0}</format>
+  </tag>
+  <tag type="FocalLength">
+    <description>Focal Length</description>
+    <format style="Decimal">{0} mm</format>
+  </tag>
+  <tag type="FocalLengthIn35mmFilm">
+    <description>FocalLengthIn35mmFilm</description>
+    <format />
+  </tag>
+  <tag type="FocalPlaneResolutionUnit">
+    <description>FocalPlaneResolutionUnit</description>
+    <format />
+  </tag>
+  <tag type="FocalPlaneXResolution">
+    <description>FocalPlaneXResolution</description>
+    <format />
+  </tag>
+  <tag type="FocalPlaneYResolution">
+    <description>FocalPlaneYResolution</description>
+    <format />
+  </tag>
+  <tag type="GainControl">
+    <description>GainControl</description>
+    <format />
+  </tag>
+  <tag type="ImageDescription">
+    <description>ImageDescription</description>
+    <format />
+  </tag>
+  <tag type="ImageLength">
+    <description>ImageLength</description>
+    <format />
+  </tag>
+  <tag type="ImageUniqueID">
+    <description>ImageUniqueID</description>
+    <format />
+  </tag>
+  <tag type="ImageWidth">
+    <description>ImageWidth</description>
+    <format />
+  </tag>
+  <tag type="InteroperabilityIndex">
+    <description>InteroperabilityIndex</description>
+    <format />
+  </tag>
+  <tag type="InteroperabilityVersion">
+    <description>InteroperabilityVersion</description>
+    <format />
+  </tag>
+  <tag type="ISOSpeedRatings">
+    <description>ISO</description>
+    <format />
+  </tag>
+  <tag type="JPEGInterchangeFormat">
+    <description>JPEGInterchangeFormat</description>
+    <format />
+  </tag>
+  <tag type="JPEGInterchangeFormatLength">
+    <description>JPEGInterchangeFormatLength</description>
+    <format />
+  </tag>
+  <tag type="LightSource">
+    <description>LightSource</description>
+    <format />
+  </tag>
+  <tag type="Make">
+    <description>Make</description>
+    <format />
+  </tag>
+  <tag type="MakerNote">
+    <description>MakerNote</description>
+    <format />
+  </tag>
+  <tag type="MaxApertureValue">
+    <description>MaxApertureValue</description>
+    <format />
+  </tag>
+  <tag type="MeteringMode">
+    <description>MeteringMode</description>
+    <format />
+  </tag>
+  <tag type="Model">
+    <description>Camera</description>
+    <format />
+  </tag>
+  <tag type="OECF">
+    <description>OECF</description>
+    <format />
+  </tag>
+  <tag type="Orientation">
+    <description>Orientation</description>
+    <format />
+  </tag>
+  <tag type="PhotometricInterpretation">
+    <description>PhotometricInterpretation</description>
+    <format />
+  </tag>
+  <tag type="PixelXDimension">
+    <description>PixelXDimension</description>
+    <format />
+  </tag>
+  <tag type="PixelYDimension">
+    <description>PixelYDimension</description>
+    <format />
+  </tag>
+  <tag type="PlanarConfiguration">
+    <description>PlanarConfiguration</description>
+    <format />
+  </tag>
+  <tag type="PrimaryChromaticities">
+    <description>PrimaryChromaticities</description>
+    <format />
+  </tag>
+  <tag type="ReferenceBlackWhite">
+    <description>ReferenceBlackWhite</description>
+    <format />
+  </tag>
+  <tag type="RelatedImageLength">
+    <description>RelatedImageLength</description>
+    <format />
+  </tag>
+  <tag type="RelatedImageWidth">
+    <description>RelatedImageWidth</description>
+    <format />
+  </tag>
+  <tag type="RelatedSoundFile">
+    <description>RelatedSoundFile</description>
+    <format />
+  </tag>
+  <tag type="ResolutionUnit">
+    <description>ResolutionUnit</description>
+    <format />
+  </tag>
+  <tag type="RowsPerStrip">
+    <description>RowsPerStrip</description>
+    <format />
+  </tag>
+  <tag type="SamplesPerPixel">
+    <description>SamplesPerPixel</description>
+    <format />
+  </tag>
+  <tag type="Saturation">
+    <description>Saturation</description>
+    <format />
+  </tag>
+  <tag type="SceneCaptureType">
+    <description>SceneCaptureType</description>
+    <format />
+  </tag>
+  <tag type="SceneType">
+    <description>SceneType</description>
+    <format />
+  </tag>
+  <tag type="SensingMethod">
+    <description>SensingMethod</description>
+    <format />
+  </tag>
+  <tag type="Sharpness">
+    <description>Sharpness</description>
+    <format />
+  </tag>
+  <tag type="ShutterSpeedValue">
+    <description>ShutterSpeedValue</description>
+    <format />
+  </tag>
+  <tag type="Software">
+    <description>Software</description>
+    <format />
+  </tag>
+  <tag type="SpatialFrequencyResponse">
+    <description>SpatialFrequencyResponse</description>
+    <format />
+  </tag>
+  <tag type="SpectralSensitivity">
+    <description>SpectralSensitivity</description>
+    <format />
+  </tag>
+  <tag type="StripByteCounts">
+    <description>StripByteCounts</description>
+    <format />
+  </tag>
+  <tag type="StripOffsets">
+    <description>StripOffsets</description>
+    <format />
+  </tag>
+  <tag type="SubjectArea">
+    <description>SubjectArea</description>
+    <format />
+  </tag>
+  <tag type="SubjectDistance">
+    <description>SubjectDistance</description>
+    <format />
+  </tag>
+  <tag type="SubjectDistanceRange">
+    <description>SubjectDistanceRange</description>
+    <format />
+  </tag>
+  <tag type="SubjectLocation">
+    <description>SubjectLocation</description>
+    <format />
+  </tag>
+  <tag type="SubsecTime">
+    <description>SubsecTime</description>
+    <format />
+  </tag>
+  <tag type="SubsecTimeDigitized">
+    <description>SubsecTimeDigitized</description>
+    <format />
+  </tag>
+  <tag type="SubsecTimeOriginal">
+    <description>SubsecTimeOriginal</description>
+    <format />
+  </tag>
+  <tag type="TransferFunction">
+    <description>TransferFunction</description>
+    <format />
+  </tag>
+  <tag type="UserComment">
+    <description>UserComment</description>
+    <format />
+  </tag>
+  <tag type="WhiteBalance">
+    <description>WhiteBalance</description>
+    <format />
+  </tag>
+  <tag type="WhitePoint">
+    <description>WhitePoint</description>
+    <format />
+  </tag>
+  <tag type="WindowsAuthor">
+	<description>Author</description>
+	<format />
+  </tag>
+  <tag type="WindowsComments">
+	<description>Comments</description>
+	<format />
+  </tag>
+  <tag type="WindowsKeywords">
+	<description>Keywords</description>
+	<format />
+  </tag>
+  <tag type="WindowsSubject">
+	<description>Subject</description>
+	<format />
+  </tag>
+  <tag type="WindowsTitle">
+	<description>Title</description>
+	<format />
+  </tag>
+  <tag type="XResolution">
+    <description>XResolution</description>
+    <format />
+  </tag>
+  <tag type="YCbCrCoefficients">
+    <description>YCbCrCoefficients</description>
+    <format />
+  </tag>
+  <tag type="YCbCrPositioning">
+    <description>YCbCrPositioning</description>
+    <format />
+  </tag>
+  <tag type="YCbCrSubSampling">
+    <description>YCbCrSubSampling</description>
+    <format />
+  </tag>
+  <tag type="YResolution">
+    <description>YResolution</description>
+    <format />
+  </tag>
+</tags>

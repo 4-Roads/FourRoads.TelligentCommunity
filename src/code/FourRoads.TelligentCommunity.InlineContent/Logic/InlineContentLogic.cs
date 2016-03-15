@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments;
@@ -22,21 +23,31 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
         {
             get
             {
-                if (PublicApi.Url.CurrentContext != null && PublicApi.Url.CurrentContext.ContextItems != null)
+                if (PublicApi.Url.CurrentContext != null && PublicApi.Url.CurrentContext.ContextItems != null && PublicApi.Users.AccessingUser != null)
                 {
-                    foreach (var context in PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems())
+                    var items  = PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems();
+
+                    if (items.Any())
                     {
-                        if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && PublicApi.Users.AccessingUser.Id.HasValue)
+                        foreach (var context in items)
                         {
-                            if (PublicApi.Permissions.Get(PermissionRegistrar.EditInlineContentPermission, PublicApi.Users.AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
+                            if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && PublicApi.Users.AccessingUser.Id.HasValue)
                             {
-                                return true;
+                                if (PublicApi.Permissions.Get(PermissionRegistrar.EditInlineContentPermission, PublicApi.Users.AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
+                                {
+                                    return true;
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        return PublicApi.Permissions.Get(PermissionRegistrar.EditInlineContentPermission, PublicApi.Users.AccessingUser.Id.GetValueOrDefault(0)).IsAllowed;
+                    }
+
                 }
 
-                return false;
+                    return false;
             }
         }
 
@@ -53,12 +64,12 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
         }
 
 
-        public string GetInlineContent(string contentName)
+        public InlineContentData GetInlineContent(string contentName)
         {
             contentName = MakeSafeFileName(contentName);
 
             string cacheKey = GetCacheKey(contentName);
-            string result = CacheService.Get(cacheKey, CacheScope.All) as string;
+            InlineContentData result = CacheService.Get(cacheKey, CacheScope.All) as InlineContentData;
 
             if (result == null && InlineContentStore != null)
             {
@@ -68,7 +79,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
                 {
                     using (Stream stream = file.OpenReadStream())
                     {
-                        result = ((InlineContentData)_inlineContentSerializer.Deserialize(stream)).Content;
+                        result = ((InlineContentData)_inlineContentSerializer.Deserialize(stream));
 
                         CacheService.Put(cacheKey, result , CacheScope.All);
                     }
@@ -77,25 +88,28 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
             return result;
         }
 
-        public void UpdateInlineContent(string contentName, string content)
+        public void UpdateInlineContent(string contentName, string content, string anonymousContent)
         {
-            contentName = MakeSafeFileName(contentName);
-
-            string cacheKey = GetCacheKey(contentName);
-
-            using (MemoryStream buffer = new MemoryStream(10000))
+            if (CanEdit)
             {
-                //Translate the URL's if any have been uploaded
-                content = PluginManager.GetSingleton<InlineContentPart>().UpdateInlineContentFiles(content);
+                contentName = MakeSafeFileName(contentName);
 
-                _inlineContentSerializer.Serialize(buffer , new InlineContentData(){Content = content });
+                string cacheKey = GetCacheKey(contentName);
 
-                buffer.Seek(0, SeekOrigin.Begin);
+                using (MemoryStream buffer = new MemoryStream(10000))
+                {
+                    //Translate the URL's if any have been uploaded
+                    content = PluginManager.GetSingleton<InlineContentPart>().UpdateInlineContentFiles(content);
 
-                InlineContentStore.AddFile("", contentName + ".xml", buffer, false);
+                    _inlineContentSerializer.Serialize(buffer, new InlineContentData() {Content = content, AnonymousContent = anonymousContent});
+
+                    buffer.Seek(0, SeekOrigin.Begin);
+
+                    InlineContentStore.AddFile("", contentName + ".xml", buffer, false);
+                }
+
+                CacheService.Remove(cacheKey, CacheScope.All);
             }
-
-            CacheService.Remove(cacheKey , CacheScope.All);
         }
 
         private static string GetCacheKey(string contentName)
@@ -119,6 +133,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
         public class InlineContentData
         {
             public string Content;
+            public string AnonymousContent;
         }
     }
 }

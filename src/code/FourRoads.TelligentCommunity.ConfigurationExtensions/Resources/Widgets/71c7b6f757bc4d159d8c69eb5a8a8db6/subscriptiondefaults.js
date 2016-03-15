@@ -39,11 +39,13 @@
 	        context.selectors.resetSiteButton.click(function (e) {
 	            e.preventDefault();
 	            var blogId = context.blogId;
+	            var groupId = context.groupId;
 
 	            $.telligent.evolution.post({
 	                url: context.urls.resetSettings,
 	                data: {
-	                    blogId: blogId
+	                    blogId: blogId,
+	                    groupId: groupId
 	                },
 	                success: function (response) {
 	                    $.telligent.evolution.notifications.show(context.resources.updatedMessage, { type: 'success' });

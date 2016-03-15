@@ -1,0 +1,153 @@
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:Splash_Name}" cssClass="splash" description="${resource:Splash_Description}" instanceIdentifier="f83a20b3310940e087bdc6c9658409c7" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false">
+    <contentScript>
+      <![CDATA[
+          
+          #if ($core_v2_roleUsers.IsUserInRoles($core_v2_user.Accessing.userName,  $core_v2_utility.Split(",", "Administrators")))
+            #set($download = $splash_v1.GetUserListDownloadUrl())
+            
+            #if ($download)
+              <a href="$core_v2_encoding.HtmlAttributeEncode($download)">Download User List</a>
+            #else
+              No user data available at the moment
+            #end
+          #else
+              #set($emailId = $core_v2_widget.UniqueId('email'))
+              #set($displayNameId = $core_v2_widget.UniqueId('displayName'))
+              #set($termsId = $core_v2_widget.UniqueId('terms'))
+              #set($termsLinkId = $core_v2_widget.UniqueId('termsLink'))
+              #set($accessCodeId = $core_v2_widget.UniqueId('accessCode'))
+              #set($submit = $core_v2_widget.UniqueId('submit'))
+                                  
+              #if ($core_v2_configuration.SiteLogoUrl)
+              <img src="$core_v2_encoding.HtmlAttributeEncode($core_v2_configuration.SiteLogoUrl)" />
+              #else
+              <h1>$core_v2_configuration.SiteName</h1>
+              #end
+              <p>$core_v2_language.GetResource('Introduction') 
+              </p>
+             <div class="form">
+             <fieldset>
+                <ul class="field-list">
+                  <li class="field-item display-name">
+                    <label for="$core_v2_encoding.HtmlAttributeEncode($displayNameId)">$core_v2_language.GetResource('Name')</label>
+                    <span class="field-item-input"><input type="text" size="30" maxlength="254"  id="$core_v2_encoding.HtmlAttributeEncode($displayNameId)" name="$core_v2_encoding.HtmlAttributeEncode($displayNameId)" /></span>
+                    <span class="field-item-validation" style="display: none;"></span>
+                  </li>
+                  <li class="field-item email">
+                    <label for="$core_v2_encoding.HtmlAttributeEncode($emailId)">$core_v2_language.GetResource('Email')</label>
+                    <span class="field-item-input"><input type="text" size="30" maxlength="254"  type="text" id="$core_v2_encoding.HtmlAttributeEncode($emailId)"  name="$core_v2_encoding.HtmlAttributeEncode($emailId)" /></span>
+                    <span class="field-item-validation" style="display: none;"></span>
+                  </li>
+                  <li class="field-item access-code" style="display:none">
+                    <label for="$core_v2_encoding.HtmlAttributeEncode($accessCodeId)">$core_v2_language.GetResource('AccessCode')</label>
+                    <span class="field-item-input"><input type="text" id="$core_v2_encoding.HtmlAttributeEncode($accessCodeId)" name="$core_v2_encoding.HtmlAttributeEncode($accessCodeId)" /></span>
+                  </li>
+                   <li class="field-item terms">
+                   <span class="field-item-input"> <input type="checkbox" id="$core_v2_encoding.HtmlAttributeEncode($termsId)" name="$core_v2_encoding.HtmlAttributeEncode($termsId)" /></span>
+                    $core_v2_language.FormatString($core_v2_language.GetResource('TermsLink') , $core_v2_encoding.HtmlAttributeEncode($termsLinkId))
+                    <span class="field-item-validation" style="display: none;"></span>
+                    <div class="terms-container" style="display:none;overflow-y:auto;height:300px">
+                      $core_v2_language.GetResource('Terms')
+                    </div>
+                  </li>
+                </ul>
+             </fieldset>   
+            <fieldset class="save-post-form">
+            <ul class="field-list">
+	            <li class="field-item create-post">
+		            <span class="field-item-input">
+			            <a href="javascript:void(0)" id="$core_v2_encoding.HtmlAttributeEncode($submit)" class="internal-link save-post disabled button">
+				            <span></span>$core_v2_language.GetResource('SaveButton')
+			            </a>
+			            <span class="processing" style="visibility: hidden;"></span>
+		            </span>
+	            </li>
+            </ul>
+            </fieldset>
+          </div>
+          #registerEndOfPageHtml('fourroads.widgets.splash')
+	          <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('splash.js'))"></script>
+          #end
+      
+          #set($returnUrl = $core_v2_page.GetQueryStringValue("returnUrl"))
+          #if (!$returnUrl)
+            #set($returnUrl = $core_v2_urls.Home())
+          #end
+          
+          #registerEndOfPageHtml()
+	          <script type="text/javascript">
+		          jQuery(function(){
+			          jQuery.fourroads.widgets.splash.register({
+                  selectors : {
+                      email: '#$core_v2_encoding.JavascriptEncode($emailId)',
+                      displayName: '#$core_v2_encoding.JavascriptEncode($displayNameId)',
+                      accessCode: '#$core_v2_encoding.JavascriptEncode($accessCodeId)',
+                      submit: '#$core_v2_encoding.JavascriptEncode($submit)',
+                      terms: '#$core_v2_encoding.JavascriptEncode($termsId)',
+                      termsLink: '#$core_v2_encoding.JavascriptEncode($termsLinkId)'
+                  },
+                  urls : {
+				              testAccess: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('testaccess.vm'))',
+                      submitForm: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl("submitForm.vm"))',
+                      returnUrl: '$core_v2_encoding.JavascriptEncode($returnUrl)'
+                  },
+                  resources : {
+                     requiredField: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Required'))',
+                     validEmail: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('ValidEmail'))',
+                     terms: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Terms'))',
+                     thankYou: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('ThankYou'))'
+                  }
+			          });
+		          });
+	          </script>
+          #end
+      #end
+			]]>
+    </contentScript>
+    <headerScript>
+      <![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Splash_Header}'))
+			]]>
+    </headerScript>
+    <configuration>
+      <![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="Splash_Name" dataType="string" defaultValue="${resource:Splash_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+</propertyGroup>
+]]>
+    </configuration>
+    <languageResources>
+      <language key="en-us">
+        <resource name="Splash_Name">4 Roads - Splash Page</resource>
+        <resource name="Splash_Header">Splash Page Widget</resource>
+        <resource name="Splash_Description">Adds support for splash page that allows users to register an interest in the site.</resource>
+        <resource name="Options">Options</resource>
+        <resource name="SaveButton">Submit</resource>
+        <resource name="TermsLink">I agree to the &lt;a id="{0}" href="javascript:void(0)"&gt;terms&lt;/a&gt;</resource>
+        <resource name="AccessCode">Code</resource>
+        <resource name="Email">Email Address</resource>
+        <resource name="Name">Name</resource>
+        <resource name="Required">This information is required</resource>
+        <resource name="ValidEmail">Please enter a valid email address</resource>
+        <resource name="ThankYou">Thank you for your details, as soon as the site goes live we will contact you to let you know</resource>
+        <resource name="Introduction">Thank you for visiting the site, we are not live yet but if you would like to be notified when we are please fill in your details below</resource>
+      <resource name="Terms">
+          &lt;p&gt;Welcome to our website. If you continue to browse and use this website, you are agreeing to comply with and be bound by the following terms and conditions of use. If you disagree with any part of these terms and conditions, please do not use our website.&lt;/p&gt;
+          &lt;p&gt;The term 'imconnect.me' or 'us' or 'we' refers to the owner of the website. The term 'you' refers to the user or viewer of our website.&lt;/p&gt;
+          &lt;p&gt;The use of this website is subject to the following terms of use:&lt;/p&gt;
+          &lt;ul&gt;&lt;li&gt;The content of the pages of this website is for your general information and use only. It is subject to change without notice.&lt;/li&gt;
+          &lt;li&gt;This website uses cookies to monitor browsing preferences. If you do allow cookies to be used, the following personal information may be stored by us for use by third parties: [insert list of information].&lt;/li&gt;
+          &lt;li&gt;Neither we nor any third parties provide any warranty or guarantee as to the accuracy, timeliness, performance, completeness or suitability of the information and materials found or offered on this website for any particular purpose. You acknowledge that such information and materials may contain inaccuracies or errors and we expressly exclude liability for any such inaccuracies or errors to the fullest extent permitted by law.&lt;/li&gt;
+          &lt;li&gt;Your use of any information or materials on this website is entirely at your own risk, for which we shall not be liable. It shall be your own responsibility to ensure that any products, services or information available through this website meet your specific requirements.&lt;/li&gt;
+          &lt;li&gt;This website contains material which is owned by or licensed to us. This material includes, but is not limited to, the design, layout, look, appearance and graphics. Reproduction is prohibited other than in accordance with the copyright notice, which forms part of these terms and conditions.&lt;/li&gt;
+          &lt;li&gt;All trade marks reproduced in this website which are not the property of, or licensed to, the operator are acknowledged on the website.&lt;/li&gt;
+          &lt;li&gt;Unauthorised use of this website may give rise to a claim for damages and/or be a criminal offence.&lt;/li&gt;
+          &lt;li&gt;From time to time this website may also include links to other websites. These links are provided for your convenience to provide further information. They do not signify that we endorse the website(s). We have no responsibility for the content of the linked website(s).&lt;/li&gt;
+          &lt;li&gt;Your use of this website and any dispute arising out of such use of the website is subject to the laws of England, Northern Ireland, Scotland and Wales.&lt;/li&gt;
+          &lt;/ul&gt;
+      </resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

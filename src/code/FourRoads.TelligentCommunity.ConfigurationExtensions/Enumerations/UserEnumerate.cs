@@ -28,7 +28,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
                 }
             }
 
-            return PublicApi.Users.List(new UsersListOptions() { Usernames = _userName, PageIndex = pageIndex });
+            return PublicApi.Users.List(new UsersListOptions() { Usernames = _userName, PageIndex = pageIndex , IncludeHidden = false});
         }
     }
 }

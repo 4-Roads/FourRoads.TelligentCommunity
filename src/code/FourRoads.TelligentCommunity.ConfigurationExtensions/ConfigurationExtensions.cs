@@ -9,6 +9,7 @@ using Telligent.Evolution.Extensibility.Version1;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Api.Public.Entities;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Api.Internal.Data;
+using Telligent.Evolution.Extensions.Calendar.Extensibility.Api.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions
 {
@@ -73,6 +74,31 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
             });
         }
 
+        public void UpdateDefaultGroupDigestSubscripiton(int groupId, string newState)
+        {
+            var group = PublicApi.Groups.Get(new GroupsGetOptions(){Id=groupId});
+            ExtendedAttribute currentSetting = group.ExtendedAttributes.Get("DefaultDigestSetting");
+            if (currentSetting == null)
+            {
+                group.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "DefaultDigestSetting", Value = newState });
+            }
+            else
+            {
+                currentSetting.Value = newState;
+            }
+
+            PublicApi.Groups.Update(groupId, new GroupsUpdateOptions() { ExtendedAttributes = group.ExtendedAttributes });
+        }
+
+        public void ResetDefaultGroupDigestSubscripiton(int groupId)
+        {
+            PublicApi.JobService.Schedule(typeof(SubscriptionUpdateJob), DateTime.UtcNow, new Dictionary<string, string>()
+            {
+                {"GroupId" , groupId.ToString()},
+                {"processGroups" , bool.TrueString},
+            });
+        }
+
         public void UpdateUserDefaultNotifications(String notificationType, String distributionType, bool enable)
         {
             if (PublicApi.RoleUsers.IsUserInRoles(PublicApi.Users.AccessingUser.Username, new string[] { "Administrators" }))
@@ -134,6 +160,37 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
         {
             List<SystemNotificationPreference> retval = DefaultSystemNotifications.GetSystemNotificationPreferences();
             return retval;
+        }
+
+
+        public void UpdateDefaultCalendarSubscripiton(int calendarId, string newState)
+        {
+            var calendar = Telligent.Evolution.Extensions.Calendar.Api.PublicApi.Calendars.Show(new CalendarsShowOptions() { Id = calendarId });
+
+            ExtendedAttribute currentSetting = calendar.Group.ExtendedAttributes.Get("DefaultSubscriptionSetting" + calendar.NodeId);
+     
+            if (currentSetting == null)
+            {
+                calendar.Group.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "DefaultSubscriptionSetting" + calendar.NodeId, Value = newState });
+            }
+            else
+            {
+                currentSetting.Value = newState;
+            }
+
+            PublicApi.Groups.Update(calendar.Group.Id.Value, new GroupsUpdateOptions() { ExtendedAttributes = calendar.Group.ExtendedAttributes });
+        }
+
+        public void ResetDefaultCalendarSubscripiton(int calendarId, int groupId)
+        {
+            //Enumerate all of the users and for this forum set there notification setting
+            //Get all of the forums of this group and get the default subscription and assign the user
+            PublicApi.JobService.Schedule(typeof(SubscriptionUpdateJob), DateTime.UtcNow, new Dictionary<string, string>()
+            {
+                {"GroupId" , groupId.ToString()},
+                {"CalendarId" , calendarId.ToString()},
+                {"processCalendars" , bool.TrueString},
+            });
         }
 
     }

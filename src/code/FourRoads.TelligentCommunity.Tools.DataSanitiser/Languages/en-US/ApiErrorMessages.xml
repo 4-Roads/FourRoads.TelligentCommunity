@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <resource name="Evolution.Unknown">Unknown Error.</resource>
+    <resource name="Evolution.ValidationError">A validation error occurred.</resource>
+
+    <resource name="Evolution.User.NotFound">User not found.</resource>
+    <resource name="Evolution.User.DeletePermissionError">Permission to delete user is denied.</resource>
+    <resource name="Evolution.User.InvalidReassignUserName">The username to reassign to this user is invalid.</resource>
+    <resource name="Evolution.User.UnknownDeleteFailure">An unknown error occurred while deleting the user.</resource>
+    <resource name="Evolution.User.CannotBeDeleted">This user cannot be deleted.</resource>
+
+    <resource name="Evolution.Friendships.ModifyAccessDenied">Permission to modify friendships for another user denied.</resource>
+
+    <resource name="Evolution.Group.ReadAccessDenied">Permission to view group denied.</resource>
+    <resource name="Evolution.Group.OverLicense">The maximum number of groups already exist for the installed license.</resource>
+
+    <resource name="Evolution.Search.TypeNotSupported">Search does not support this type.</resource>
+
+    <resource name="Evolution.FeaturedContent.Disabled">Featured Content is disabled.</resource>
+    <resource name="Evolution.FeaturedContent.AccessDenied">Permission to feature content denied.</resource>
+
+    <resource name="Telligent.Forum.NotFound">Forum not found.</resource>
+    <resource name="Telligent.Forum.CreatePostAccessDenied">Accessing user does not have permission to create a thread.</resource>
+    <resource name="Telligent.Forum.DuplicateThread">A thread exists that is a duplicate of this thread.</resource>
+    <resource name="Telligent.Forum.DuplicateReply">A forum reply exists that is a duplicate of this reply.</resource>
+
+    <resource name="Telligent.Wiki.IdMissing">Wiki Id must be specified when searching by PageKey.</resource>
+    <resource name="Telligent.Wiki.PageNotFound">Page not found.</resource>
+
+    <resource name="Telligent.Blog.DuplicateBody">Duplicate Body.</resource>
+    <resource name="Telligent.Blog.DuplicateName">Duplicate Name.</resource>
+    <resource name="Telligent.Blog.PostNotFound">Post not found.</resource>
+
+    <resource name="Telligent.MediaGallery.DuplicateMedia">A media post by this title exists already. Please choose another title for this post.</resource>
+
+	<resource name="Telligent.Content.ContentNotFound">Content not found.</resource>
+	<resource name="Telligent.Content.ContainerNotFound">Container not found.</resource>
+	<resource name="Telligent.Content.ApplicationNotFound">Application not found.</resource>
+
+	<resource name="Telligent.MailingList.EmptyEmailAddress">Email address cannot be empty.</resource>
+
+  <resource name="Evolution.IncludeSubContainers.MissingContainerId">ContainerId must be set if IncludeSubContainer is set.</resource>
+  <resource name="Evolution.IncludeSubContainers.MissingContainerIds">ContainerIds must be set if IncludeSubContainer is set.</resource>
+  <resource name="Evolution.PollError">Poll Error</resource>
+
+  <resource name="Evolution.Achievements.Errors.NotFound">Achievement not found.</resource>
+  <resource name="Evolution.Achievements.Errors.AchievementNull">Achievement cannot be null.</resource>
+  <resource name="Evolution.Achievements.Errors.TitleRequired">Title is required.</resource>
+  <resource name="Evolution.Achievements.Errors.DuplicateId">Id is already in use.</resource>
+  <resource name="Evolution.Achievements.Errors.CriteriaRequired">Criteria is required.</resource>
+  <resource name="Evolution.Achievements.Errors.BadgeIconNameRequired">Badge Icon Name is required.</resource>
+  <resource name="Evolution.Achievements.Errors.BadgeIconDataRequired">Badge Icon Data, Stream, or Upload Context is required.</resource>
+  <resource name="Evolution.Achievements.Errors.BadgeIconDataRequired2">Badge Icon Data or Upload Context is required.</resource>
+  <resource name="Evolution.Achievements.Errors.TemporaryFileNotFound">File not found in Upload Context.</resource>
+  <resource name="Evolution.Achievements.Errors.OptionsRequired">Options is required.</resource>
+  <resource name="Evolution.UserAchievements.Errors.NotFound">User Achievement not found.</resource>
+  <resource name="Evolution.UserAchievements.Errors.AchievementDisabled">Disabled achievements cannot be awarded to users.</resource>
+</root>

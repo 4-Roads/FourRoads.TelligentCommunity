@@ -38,6 +38,7 @@
 	        jQuery.fourroads.widgets.subscriptionDefaults.register({
             wrapperId : '$core_v2_encoding.JavascriptEncode($core_v2_widget.WrapperElementId)',
             blogId :  $blog.Id,
+            groupId : $blog.Group.Id,
             selectors : {
                 defaultSettingsRadio :  "input[name='$defaultSettingName']",
                 resetSiteButton: '#$core_v2_encoding.JavascriptEncode($resetSite)'
@@ -84,7 +85,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
         <resource name="AreYouSure">Are you sure you want to reset all of the settings for all users?</resource>
         <resource name="Subscribed">Blog notifications on</resource>
         <resource name="Unsubscribed">Blog notifications off</resource>
-        <resource name="UpdatedMessage">Default forum subscription settings updated</resource>
+        <resource name="UpdatedMessage">Default blog subscription settings updated</resource>
         <resource name="Reset">Reset All Blog Users</resource>
       </language>
     </languageResources>

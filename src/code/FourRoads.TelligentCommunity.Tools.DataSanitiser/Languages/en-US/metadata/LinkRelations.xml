@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<root>
+	<!-- 
+		Tag used by blog search spiders such as technorati.
+		Indicates that the destination of that hyperlink is an author-designated "tag" (or keyword/subject) 
+		More Info: http://microformats.org/wiki/reltag
+	-->
+	<relation value="tag">tag</relation>
+
+	<!-- 
+		Nofollow used by Google and other search engines.
+		Designates that the engine should not follow the link and not give the URL's page ranking credit for this link
+		More Info: http://googleblog.blogspot.com/2005/01/preventing-comment-spam.html
+	-->
+	<relation value="nofollow">nofollow</relation>
+
+	<!-- 
+		The following rel values are part of XFN (XHTML Friends Network) which is used by some spiders.
+		XFN represents human relationships using hyperlinks.
+		More Info: http://gmpg.org/xfn/
+	-->
+	<!-- friendship -->
+	<relation value="contact">contact</relation>
+	<relation value="acquaintance">acquaintance</relation>
+	<relation value="friend">friend</relation>
+
+	<!-- physical -->
+	<relation value="met">met</relation>
+
+	<!-- professional -->
+	<relation value="co-worker">co-worker</relation>
+	<relation value="colleague">colleague</relation>
+
+	<!-- geographical -->
+	<relation value="co-resident">co-resident</relation>
+	<relation value="neighbor">neighbor</relation>
+
+	<!-- family -->
+	<relation value="child">child</relation>
+	<relation value="parent">parent</relation>
+	<relation value="sibling">sibling</relation>
+	<relation value="spouse">spouse</relation>
+	<relation value="kin">kin</relation>
+
+	<!-- romantic -->
+	<relation value="muse">muse</relation>
+	<relation value="crush">crush</relation>
+	<relation value="date">date</relation>
+	<relation value="sweetheart">sweetheart</relation>
+
+	<!-- identity -->
+	<relation value="me">me</relation>
+
+</root>

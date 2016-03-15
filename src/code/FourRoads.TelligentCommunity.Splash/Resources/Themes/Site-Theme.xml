@@ -1,0 +1,14 @@
+<theme name="3fc3f82483d14ec485ef92e206116d49" version="8.5.1.43931">
+  <contentFragmentPages>
+    <contentFragmentPage pageName="splash" isCustom="false" layout="Content" themeType="0c647246-6735-42f9-875d-c8b991fe739b">
+      <regions>
+        <region regionName="Content">
+          <contentFragments>
+            <contentFragment type="Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.ScriptedContentFragments::f83a20b3310940e087bdc6c9658409c7" showHeader="False" cssClassAddition="no-wrapper with-spacing responsive-1" isLocked="False" configuration="fragmentHeader=%24%7Bresource%3ASplash_Header%7D" />
+          </contentFragments>
+        </region>
+      </regions>
+      <contentFragmentTabs />
+    </contentFragmentPage>
+  </contentFragmentPages>
+</theme>
