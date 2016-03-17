@@ -34,6 +34,10 @@
           #set($added = $parameters.Add("ContainerName" , $core_v2_container.Current.HtmlName("web") ))
            #set($added = $parameters.Add("ContainerDescription" , $core_v2_container.Current.HtmlDescription("web") ))
            
+           #if ($core_v2_container.Current.ParentContainer)
+              #set($added = $parameters.Add("ParentContainerName" , $core_v2_container.Current.ParentContainer.HtmlName("web") ))
+           #end
+           
            #set($added = $parameters.Add("PageImage" , $currentMetaData.GetBestImageUrlForCurrent()))
            
            #if ($core_v2_application.Current)
