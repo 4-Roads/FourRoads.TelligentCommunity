@@ -75,7 +75,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
             Controls.Add(new Literal() { Text = contentToDisplay ?? (IsAnonymous() ? DefaultAnonymousContent : DefaultContent) });
         }
 
-        private bool IsAnonymous()
+        protected bool IsAnonymous()
         {
             return (PublicApi.Users.AnonymousUserName == PublicApi.Users.AccessingUser.Username);
         }
