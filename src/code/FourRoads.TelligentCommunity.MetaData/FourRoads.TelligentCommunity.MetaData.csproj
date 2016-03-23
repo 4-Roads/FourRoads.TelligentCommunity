@@ -87,6 +87,9 @@
     <Reference Include="Telligent.Evolution.Core">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Rest">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Rest.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.ScriptedContentFragments">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.ScriptedContentFragments.dll</HintPath>
     </Reference>
@@ -108,6 +111,8 @@
     <Compile Include="Logic\MetaDataLogic.cs" />
     <Compile Include="Logic\MetaData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rest\Entities\ShowMetaDataResponse.cs" />
+    <Compile Include="Rest\MetaDataRestEndpoints.cs" />
     <Compile Include="ScriptedFragmentss\AdministrationPanel.cs" />
     <Compile Include="ScriptedFragmentss\MetaDataScriptedFragment.cs" />
     <Compile Include="Security\PermissionRegistrar.cs" />
