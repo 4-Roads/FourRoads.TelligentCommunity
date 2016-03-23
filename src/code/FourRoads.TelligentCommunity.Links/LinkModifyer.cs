@@ -20,6 +20,9 @@ namespace FourRoads.TelligentCommunity.Links
 
         public string UpdateHtml(string html)
         {
+            if (string.IsNullOrWhiteSpace(html))
+                return html;
+
             return _elementMatcher.Replace(html, MatchElement);
         }
 
