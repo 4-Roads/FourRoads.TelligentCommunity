@@ -1,27 +1,64 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Web;
 using System.Web.Optimization;
 using CsQuery;
 using CsQuery.Engine;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using FourRoads.TelligentCommunity.Performance.Storage;
+using Microsoft.Ajax.Utilities;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 
 namespace FourRoads.TelligentCommunity.Performance
 {
+
+    public class CustomStyleBuilder : IBundleBuilder
+    {
+        public virtual string BuildBundleContent(Bundle bundle, BundleContext context, IEnumerable<BundleFile> files)
+        {
+            CssSettings settings = new CssSettings();
+            settings.IgnoreAllErrors = true;
+            settings.CommentMode = CssComment.None;
+            var minifier = new Minifier();
+            var content = new StringBuilder(100000);
+
+
+            foreach (var file in files)
+            {
+                FileInfo f = new FileInfo(HttpContext.Current.Server.MapPath(file.VirtualFile.VirtualPath));
+
+                string readFile = Read(f);
+
+                content.Append(minifier.MinifyStyleSheet(readFile, settings));
+                content.AppendLine();
+            }
+
+            return content.ToString();
+        }
+
+        public static string Read(FileInfo file)
+        {
+            using (var r = file.OpenText())
+            {
+                return r.ReadToEnd();
+            }
+        }
+    }
     public class StandardStyleBundle : DynamicBundleBase , IDynamicBundle
     {
         private readonly StyleBundle _styleBundle;
         private BundledFileFactory _bundledFileFactory = new BundledFileFactory();
-        //private static Selector _selector = new Selector("link[type='text/css']");//this will improve performance but requires csquery 1.3.5-beta and above
         private static string _selector = "link[type='text/css']";
 
         public StandardStyleBundle(string basePath)
         {
             _styleBundle = new StyleBundle(basePath + BundlePath);
             _styleBundle.Orderer = new AsIsBundleOrderer();
+            _styleBundle.Builder = new CustomStyleBuilder();
+            _styleBundle.Transforms.Clear();
         }
 
         public override Bundle Bundle
