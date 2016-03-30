@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity.ForumLastPost")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity8.ForumLastPost")]
 [assembly: AssemblyDescription("Allows users to navigate to the last post they read in a forum thread")]
 
 

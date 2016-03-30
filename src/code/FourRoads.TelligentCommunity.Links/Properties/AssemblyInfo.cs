@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity.Links")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity8.Links")]
 [assembly: AssemblyDescription("Provides extensions to modify link targets in user-generated content")]
 
 
