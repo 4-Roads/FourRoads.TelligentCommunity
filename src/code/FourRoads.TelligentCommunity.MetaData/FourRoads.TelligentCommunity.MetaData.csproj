@@ -32,28 +32,28 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FourRoads.Common, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.dll</HintPath>
+    <Reference Include="FourRoads.Common, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.4.0.1\lib\FourRoads.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FourRoads.Common.Sql, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Sql.dll</HintPath>
+    <Reference Include="FourRoads.Common.Sql, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.4.0.1\lib\FourRoads.Common.Sql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FourRoads.Common.Templates, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Templates.dll</HintPath>
+    <Reference Include="FourRoads.Common.Templates, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.4.0.1\lib\FourRoads.Common.Templates.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FourRoads.Common.Web, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Web.dll</HintPath>
+    <Reference Include="FourRoads.Common.Web, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.4.0.1\lib\FourRoads.Common.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Ninject, Version=2.3.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\Ninject.dll</HintPath>
+    <Reference Include="Ninject, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Ninject.2.2.1.4\lib\net40-Full\Ninject.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Ninject.Extensions.Xml, Version=2.1.0.1, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\Ninject.Extensions.Xml.dll</HintPath>
+    <Reference Include="Ninject.Extensions.Xml, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Ninject.Extensions.Xml.2.2.0.6\lib\net40-Full\Ninject.Extensions.Xml.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NVelocity, Version=1.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -114,18 +114,8 @@
     <Compile Include="Security\PermissionRegistrar.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <EmbeddedResource Include="Resources\ScriptablePlugin\411f7656968348e1906a695a01b5f56c\saveData.vm" />
   </ItemGroup>
-<<<<<<< HEAD
-=======
-  <ItemGroup>
-    <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
-      <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
-      <Name>FourRoads.Common.TelligentCommunity</Name>
-    </ProjectReference>
-  </ItemGroup>
->>>>>>> refs/remotes/origin/master
   <ItemGroup>
     <EmbeddedResource Include="Resources\ScriptablePlugin\411f7656968348e1906a695a01b5f56c\metadata.js" />
   </ItemGroup>
@@ -138,6 +128,15 @@
     <EmbeddedResource Include="Resources\ScriptablePlugin\MetaDataAdministration.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
+      <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
+      <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

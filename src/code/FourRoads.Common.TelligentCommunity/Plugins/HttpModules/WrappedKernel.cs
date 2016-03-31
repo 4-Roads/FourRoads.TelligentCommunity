@@ -52,11 +52,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.HttpModules
             throw new NotImplementedException();
         }
 
-        public IBindingToSyntax<T1, T2> Bind<T1, T2>()
-        {
-            throw new NotImplementedException();
-        }
-
         public IBindingToSyntax<object> Bind(params Type[] services)
         {
             throw new NotImplementedException();
@@ -155,6 +150,16 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.HttpModules
 
         public INinjectSettings Settings { get; private set; }
         public IComponentContainer Components { get; private set; }
+
+        #endregion
+
+        #region IBindingRoot Members
+
+
+        public IBindingToSyntax<object> Bind(Type service)
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
     }
