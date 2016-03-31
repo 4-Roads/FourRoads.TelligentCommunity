@@ -40,10 +40,6 @@
       <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Sql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FourRoads.Common.TelligentCommunity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\FourRoads.Common.TelligentCommunity.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FourRoads.Common.Templates, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Templates.dll</HintPath>
       <Private>True</Private>
@@ -116,7 +112,12 @@
     <EmbeddedResource Include="Resources\Widgets\f94334edd1cb46ef98c0037741511311\metaDataModal.vm" />
     <EmbeddedResource Include="Resources\Widgets\f94334edd1cb46ef98c0037741511311\saveData.vm" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
+      <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
+      <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\f94334edd1cb46ef98c0037741511311\metadata.js" />
   </ItemGroup>

@@ -14,6 +14,7 @@
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -142,9 +143,6 @@
     <Reference Include="Telligent.DynamicConfiguration">
       <HintPath>..\..\lib\Telligent\Telligent.DynamicConfiguration.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Evolution.AnalyticsUrls">
-      <HintPath>..\..\lib\Telligent\Telligent.Evolution.AnalyticsUrls.dll</HintPath>
-    </Reference>
     <Reference Include="Telligent.Evolution.Api">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
     </Reference>
@@ -165,9 +163,6 @@
     </Reference>
     <Reference Include="Telligent.Evolution.Discussions">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Discussions.dll</HintPath>
-    </Reference>
-    <Reference Include="Telligent.Evolution.ExtendedAnalytics">
-      <HintPath>..\..\lib\Telligent\Telligent.Evolution.ExtendedAnalytics.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Extensions.Calendar">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Extensions.Calendar.dll</HintPath>
