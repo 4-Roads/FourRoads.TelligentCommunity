@@ -35,29 +35,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FourRoads.Common">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\FourRoads.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="FourRoads.Common.Sql">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\FourRoads.Common.Sql.dll</HintPath>
-    </Reference>
-    <Reference Include="FourRoads.Common.TelligentCommunity">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\FourRoads.Common.TelligentCommunity.dll</HintPath>
-    </Reference>
-    <Reference Include="FourRoads.Common.Templates">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\FourRoads.Common.Templates.dll</HintPath>
-    </Reference>
-    <Reference Include="FourRoads.Common.Web">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\FourRoads.Common.Web.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\lib\Telligent\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Ninject">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\Ninject.dll</HintPath>
-    </Reference>
-    <Reference Include="Ninject.Extensions.Xml">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\Ninject.Extensions.Xml.dll</HintPath>
     </Reference>
     <Reference Include="NVelocity, Version=1.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Castle.NVelocity.1.1.1\lib\net40\NVelocity.dll</HintPath>
@@ -110,7 +89,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
+      <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
+      <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

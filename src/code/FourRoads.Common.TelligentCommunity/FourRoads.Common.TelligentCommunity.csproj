@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8EAD72EC-98CB-49B0-9870-1DE3EEF883F3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FourRoads.Common.TelligentCommunity</RootNamespace>
+    <AssemblyName>FourRoads.Common.TelligentCommunity</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FourRoads.Common, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.Sql, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.Templates, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Templates.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.Web, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject, Version=2.3.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject.Extensions.Xml, Version=2.1.0.1, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\Ninject.Extensions.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="NVelocity, Version=1.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Castle.NVelocity.1.1.1\lib\net40\NVelocity.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Telligent.Caching, Version=1.0.99.35187, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Caching.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Common, Version=1.0.52.37291, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.DynamicConfiguration, Version=1.0.231.37416, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.DynamicConfiguration.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Api, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Components, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Components.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Controls, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Core, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.ScriptedContentFragments, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.ScriptedContentFragments.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.VelocityExtensions">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.VelocityExtensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Components\Extensions\ExtendedAttributeExtensions.cs" />
+    <Compile Include="Components\Interfaces\IContentLogic.cs" />
+    <Compile Include="Components\Logic\ContentLogic.cs" />
+    <Compile Include="Components\TCCache.cs" />
+    <Compile Include="Components\TCPagedQuery.cs" />
+    <Compile Include="Components\Tokenizers\TokenizedTemplateEnumerableToken.cs" />
+    <Compile Include="Components\Utility\EmbeddedResourcesBase.cs" />
+    <Compile Include="Controls\ApiSafeUserLookup.cs" />
+    <Compile Include="Controls\MultiSelectRepeater.cs" />
+    <Compile Include="Controls\PasswordPropertyControl.cs" />
+    <Compile Include="Diagnostics.cs" />
+    <Compile Include="Plugins\Base\CFSFilestoreInstaller.cs" />
+    <Compile Include="Plugins\Base\FactoryDefaultThemeInstaller.cs" />
+    <Compile Include="Plugins\Base\FactoryDefaultWidgetProviderInstaller.cs" />
+    <Compile Include="Plugins\Base\PluginBase.cs" />
+    <Compile Include="Plugins\Base\PluginGroupLoader.cs" />
+    <Compile Include="Plugins\Base\SqlScriptsInstaller.cs" />
+    <Compile Include="Plugins\Base\VideoFileViewerBase.cs" />
+    <Compile Include="Plugins\Extensions\ContentExtension.cs" />
+    <Compile Include="Plugins\HttpModules\DefaultIocHandler.cs" />
+    <Compile Include="Plugins\HttpModules\DefaultNinjectHttpModule.cs" />
+    <Compile Include="Plugins\HttpModules\DefaultNinjectModule.cs" />
+    <Compile Include="Plugins\HttpModules\WrappedKernel.cs" />
+    <Compile Include="Plugins\Interfaces\IBindingsLoader.cs" />
+    <Compile Include="Plugins\ScriptedContentFragments\ContentScriptedContentFragment.cs" />
+    <Compile Include="Plugins\Viewers\BrightcoveMediaViewer.cs" />
+    <Compile Include="Plugins\Viewers\DailyMotionMediaViewer.cs" />
+    <Compile Include="Plugins\Viewers\MediaIconFilestore.cs" />
+    <Compile Include="Plugins\Viewers\VimeoMediaViewer.cs" />
+    <Compile Include="Plugins\Viewers\YouTubeMediaViewer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Controls\MultiSelectRepeater.js" />
+    <Content Include="Plugins\insertmarkup.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

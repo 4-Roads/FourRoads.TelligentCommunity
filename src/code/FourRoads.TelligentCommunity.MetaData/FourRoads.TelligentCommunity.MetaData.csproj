@@ -40,10 +40,6 @@
       <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Sql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FourRoads.Common.TelligentCommunity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.TelligentCommunity.1.0.4.20\lib\FourRoads.Common.TelligentCommunity.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FourRoads.Common.Templates, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FourRoads.Common.3.3.1\lib\FourRoads.Common.Templates.dll</HintPath>
       <Private>True</Private>
@@ -121,6 +117,15 @@
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\ScriptablePlugin\411f7656968348e1906a695a01b5f56c\saveData.vm" />
   </ItemGroup>
+<<<<<<< HEAD
+=======
+  <ItemGroup>
+    <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
+      <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
+      <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
+  </ItemGroup>
+>>>>>>> refs/remotes/origin/master
   <ItemGroup>
     <EmbeddedResource Include="Resources\ScriptablePlugin\411f7656968348e1906a695a01b5f56c\metadata.js" />
   </ItemGroup>
