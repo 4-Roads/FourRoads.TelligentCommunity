@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity.Emoticons")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity8.Emoticons")]
 [assembly: AssemblyDescription("Provides advanced emoticon support; removes the requirement to wrap emoticons in '[]' characters and uses CSS classes and &lt;span /&gt; tags to allow a user to copy and paste text without in-line images")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

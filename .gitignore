@@ -237,5 +237,5 @@ $RECYCLE.BIN/
 # =========================
 
 
-**/lib/Telligent/*.dll
-**/lib/Telligent/*.xml
+**/lib/Telligent*/*.dll
+**/lib/Telligent*/*.xml
