@@ -6,7 +6,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Rest.Entities
     {
         public ShowMetaDataImageResponse()
         {
-            Name = "meta-data-image";
+            Name = "MetaDataImage";
             Errors = new string[0];
         }
     }
