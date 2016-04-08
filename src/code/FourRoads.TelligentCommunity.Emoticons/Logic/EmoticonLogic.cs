@@ -40,6 +40,7 @@ namespace FourRoads.TelligentCommunity.Emoticons.Logic
         public void Reset()
         {
             _emoticonReplacementMatch = null;
+            EmoticonStore.Delete("css", "emoticons.css");
         }
 
         public string UpdateMarkup(string renderedHtml, int smileyWidth, int smileyHeight)
@@ -61,7 +62,7 @@ namespace FourRoads.TelligentCommunity.Emoticons.Logic
         {
             ICentralizedFile file = EmoticonStore.GetFile("css", "emoticons.css");
 
-            if (file == null)
+            if (file == null || file.ContentLength == 0)
             {
                 using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(_cssToRender)))
                 {
