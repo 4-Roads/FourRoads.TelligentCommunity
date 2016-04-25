@@ -37,128 +37,139 @@ namespace FourRoads.TelligentCommunity.Links
             {
                 if (_ensureLocalLinksMatchUriScheme)
                 {
-                    //extract the src or href
                     result = _srcLinkMatcher.Replace(result, delegate(Match uriMatch)
                     {
-                        if (uriMatch.Success)
-                        {
-                            //Is the URI absolute 
-                            string trimmed = uriMatch.Value.ToLower().Replace("src=", "").Trim(new[] {'"', '\'', ' '});
-
-                            //does this match the servers domain
-                            if (HttpContext.Current != null)
-                            {
-                                var url = HttpContext.Current.Request.Url;
-
-                                if (url.IsAbsoluteUri)
-                                {
-                                    Uri thisUri;
-
-                                    if (Uri.TryCreate(trimmed, UriKind.Absolute, out thisUri))
-                                    {
-                                        if (thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped).Equals(url.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped), StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            string scheme = url.GetComponents(UriComponents.Scheme, UriFormat.SafeUnescaped) + "://";
-
-                                            if (!trimmed.StartsWith(scheme))
-                                            {
-                                                trimmed = trimmed.Substring(0, trimmed.IndexOf("://") + 3);
-
-                                                return uriMatch.Value.Replace(trimmed, scheme);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
-                        return uriMatch.Value;
-
+                        return EnsureLocalLinksMatchUriScheme(uriMatch);
                     });
-
                 }
 
-                if (_makeExternalUrlsTragetBlank)
+                if (_makeExternalUrlsTragetBlank || _ensureLocalLinksLowercase)
                 {
-                    //extract the src or href
                     result = _anchorLinkMatcher.Replace(result, delegate(Match uriMatch)
                     {
-                        if (uriMatch.Success && uriMatch.Groups.Count > 4)
+                        var value = uriMatch.Value;
+                        
+                        if (_makeExternalUrlsTragetBlank)
                         {
-                            if (HttpContext.Current != null)
-                            {
-                                var url = HttpContext.Current.Request.Url;
-
-                                if (url.IsAbsoluteUri)
-                                {
-                                    Uri thisUri;
-
-                                    if (uriMatch.Groups["uri"] != null && Uri.TryCreate(uriMatch.Groups["uri"].Value.Trim(new []{'"' , '\''}), UriKind.RelativeOrAbsolute, out thisUri))
-                                    {
-                                        if (thisUri.IsAbsoluteUri && !thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped).Equals(url.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped), StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            return uriMatch.Groups[1].Value + "  target='_blank' " + uriMatch.Groups[2].Value;
-                                        }
-                                    }
-                                }
-                            }
+                            value = SetTargetBlankForExternalLinks(value, uriMatch);
                         }
 
-                        return uriMatch.Value;
+                        if (_ensureLocalLinksLowercase)
+                        {
+                            value = EnsureLocalLinksLowercase(value, uriMatch);
+                        }
+
+                        return value;
                     });
                 }
-            }
-
-            if (_ensureLocalLinksLowercase)
-            {
-                //extract the src or href
-                result = _anchorLinkMatcher.Replace(result, delegate (Match uriMatch)
-                {
-                    if (uriMatch.Success && uriMatch.Groups.Count > 4 && uriMatch.Groups["uri"] != null)
-                    {
-                        var urlString = uriMatch.Groups["uri"].Value.Trim(new[] { '"', '\'' });
-
-                        // Don't lower case query strings as they could be case sensitive
-                        urlString = urlString.IndexOf('?') > 0 ?
-                            urlString.Substring(0, urlString.IndexOf('?')) :
-                            urlString;
-
-                        // Don't lower case anchor values as they could be case sensitive
-                        urlString = urlString.IndexOf('#') > 0 ?
-                            urlString.Substring(0, urlString.IndexOf('#')) :
-                            urlString;
-
-                        if (HttpContext.Current != null)
-                        {
-                            var url = HttpContext.Current.Request.Url;
-                            
-                            if (url.IsAbsoluteUri)
-                            {
-                                Uri thisUri;
-
-                                if (Uri.TryCreate(urlString, UriKind.Absolute, out thisUri))
-                                {
-                                    if (thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped).Equals(url.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped), StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        return uriMatch.Value.Replace(urlString, urlString.ToLower());
-                                    }
-                                }
-                                else if (urlString.StartsWith("/", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return uriMatch.Value.Replace(urlString, urlString.ToLower());
-                                }
-                            }
-                        }
-
-                    }
-                    return uriMatch.Value;
-
-                });
-
-            }
+            }            
 
             return result;
         }
 
+        private static string EnsureLocalLinksMatchUriScheme(Match uriMatch)
+        {
+            if (uriMatch.Success)
+            {
+                //Is the URI absolute 
+                string trimmed = uriMatch.Value.ToLower().Replace("src=", "").Trim(new[] { '"', '\'', ' ' });
+
+                //does this match the servers domain
+                if (HttpContext.Current != null)
+                {
+                    var url = HttpContext.Current.Request.Url;
+
+                    if (url.IsAbsoluteUri)
+                    {
+                        Uri thisUri;
+
+                        if (Uri.TryCreate(trimmed, UriKind.Absolute, out thisUri))
+                        {
+                            if (thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped).Equals(url.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped), StringComparison.OrdinalIgnoreCase))
+                            {
+                                string scheme = url.GetComponents(UriComponents.Scheme, UriFormat.SafeUnescaped) + "://";
+
+                                if (!trimmed.StartsWith(scheme))
+                                {
+                                    trimmed = trimmed.Substring(0, trimmed.IndexOf("://") + 3);
+
+                                    return uriMatch.Value.Replace(trimmed, scheme);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return uriMatch.Value;
+        }
+
+        private static string SetTargetBlankForExternalLinks(string original, Match uriMatch)
+        {
+            if (uriMatch.Success && uriMatch.Groups.Count > 4)
+            {
+                if (HttpContext.Current != null)
+                {
+                    var url = HttpContext.Current.Request.Url;
+
+                    if (url.IsAbsoluteUri)
+                    {
+                        Uri thisUri;
+
+                        if (uriMatch.Groups["uri"] != null && Uri.TryCreate(uriMatch.Groups["uri"].Value.Trim(new[] { '"', '\'' }), UriKind.RelativeOrAbsolute, out thisUri))
+                        {
+                            if (thisUri.IsAbsoluteUri && !thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped).Equals(url.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped), StringComparison.OrdinalIgnoreCase))
+                            {
+                                return uriMatch.Groups[1].Value + "  target='_blank' " + uriMatch.Groups[2].Value;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return original;
+        }
+
+        private static string EnsureLocalLinksLowercase(string original, Match uriMatch)
+        {
+            if (uriMatch.Success && uriMatch.Groups.Count > 4 && uriMatch.Groups["uri"] != null)
+            {
+                var urlString = uriMatch.Groups["uri"].Value.Trim(new[] { '"', '\'' });
+
+                // Don't lower case query strings as they could be case sensitive
+                urlString = urlString.IndexOf('?') > 0 ?
+                    urlString.Substring(0, urlString.IndexOf('?')) :
+                    urlString;
+
+                // Don't lower case anchor values as they could be case sensitive
+                urlString = urlString.IndexOf('#') > 0 ?
+                    urlString.Substring(0, urlString.IndexOf('#')) :
+                    urlString;
+
+                if (HttpContext.Current != null)
+                {
+                    var url = HttpContext.Current.Request.Url;
+
+                    if (url.IsAbsoluteUri)
+                    {
+                        Uri thisUri;
+
+                        if (Uri.TryCreate(urlString, UriKind.Absolute, out thisUri))
+                        {
+                            if (thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped).Equals(url.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped), StringComparison.OrdinalIgnoreCase))
+                            {
+                                return original.Replace(urlString, urlString.ToLower());
+                            }
+                        }
+                        else if (urlString.StartsWith("/", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return original.Replace(urlString, urlString.ToLower());
+                        }
+                    }
+                }
+            }
+
+            return original;
+        }
     }
 }
