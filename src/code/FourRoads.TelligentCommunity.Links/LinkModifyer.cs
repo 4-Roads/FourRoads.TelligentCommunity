@@ -8,14 +8,16 @@ namespace FourRoads.TelligentCommunity.Links
     {
         private bool _ensureLocalLinksMatchUriScheme = true;
         private bool _makeExternalUrlsTragetBlank = true;
+        private bool _ensureLocalLinksLowercase = false;
         private static Regex _elementMatcher = new Regex("((?i)<a([^>]+)>(.+?)</a>)|((?i)<img([^>]+)/>)|((?i)<script([^>]+)/>)", RegexOptions.Compiled | RegexOptions.Multiline);
         private static Regex _anchorLinkMatcher = new Regex("(<a)((.*(href\\s*=\\s*(?<uri>\"([^\"]*\")|'[^']*'|([^>\\s]+))))((?!target)[^>])+?>.*)", RegexOptions.Compiled | RegexOptions.Multiline);
         private static Regex _srcLinkMatcher = new Regex("\\s*(?i)src\\s*=\\s*(\\\"([^\"]*\\\")|'[^']*'|([^'\">\\s]+))", RegexOptions.Compiled | RegexOptions.Multiline);
 
-        public LinkModifyer(bool ensureLocalLinksMatchUriScheme, bool makeExternalUrlsTragetBlank)
+        public LinkModifyer(bool ensureLocalLinksMatchUriScheme, bool makeExternalUrlsTragetBlank, bool ensureLocalLinksLowercase)
         {
             _ensureLocalLinksMatchUriScheme = ensureLocalLinksMatchUriScheme;
             _makeExternalUrlsTragetBlank = makeExternalUrlsTragetBlank;
+            _ensureLocalLinksLowercase = ensureLocalLinksLowercase;
         }
 
         public string UpdateHtml(string html)
@@ -105,6 +107,54 @@ namespace FourRoads.TelligentCommunity.Links
                         return uriMatch.Value;
                     });
                 }
+            }
+
+            if (_ensureLocalLinksLowercase)
+            {
+                //extract the src or href
+                result = _anchorLinkMatcher.Replace(result, delegate (Match uriMatch)
+                {
+                    if (uriMatch.Success && uriMatch.Groups.Count > 4 && uriMatch.Groups["uri"] != null)
+                    {
+                        var urlString = uriMatch.Groups["uri"].Value.Trim(new[] { '"', '\'' });
+
+                        // Don't lower case query strings as they could be case sensitive
+                        urlString = urlString.IndexOf('?') > 0 ?
+                            urlString.Substring(0, urlString.IndexOf('?')) :
+                            urlString;
+
+                        // Don't lower case anchor values as they could be case sensitive
+                        urlString = urlString.IndexOf('#') > 0 ?
+                            urlString.Substring(0, urlString.IndexOf('#')) :
+                            urlString;
+
+                        if (HttpContext.Current != null)
+                        {
+                            var url = HttpContext.Current.Request.Url;
+                            
+                            if (url.IsAbsoluteUri)
+                            {
+                                Uri thisUri;
+
+                                if (Uri.TryCreate(urlString, UriKind.Absolute, out thisUri))
+                                {
+                                    if (thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped).Equals(url.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return uriMatch.Value.Replace(urlString, urlString.ToLower());
+                                    }
+                                }
+                                else if (urlString.StartsWith("/", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return uriMatch.Value.Replace(urlString, urlString.ToLower());
+                                }
+                            }
+                        }
+
+                    }
+                    return uriMatch.Value;
+
+                });
+
             }
 
             return result;
