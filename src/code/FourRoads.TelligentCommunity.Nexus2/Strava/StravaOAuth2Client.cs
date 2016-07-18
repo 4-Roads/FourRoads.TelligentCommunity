@@ -312,7 +312,7 @@ namespace FourRoads.TelligentCommunity.Nexus2.Strava
 
             int num = new Random().Next(9999999);
         
-            while (UserNameExists(num.ToString()) != null)
+            while (UserNameExists(num.ToString()))
                 ++num;
 
             return num.ToString();

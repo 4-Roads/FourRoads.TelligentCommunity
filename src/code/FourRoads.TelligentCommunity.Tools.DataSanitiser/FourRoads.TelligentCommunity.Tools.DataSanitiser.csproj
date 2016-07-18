@@ -57,9 +57,6 @@
     <Reference Include="CommunityServer.Ldap">
       <HintPath>..\..\lib\Telligent\CommunityServer.Ldap.dll</HintPath>
     </Reference>
-    <Reference Include="CookComputing.XmlRpcV2">
-      <HintPath>..\..\lib\Telligent\CookComputing.XmlRpcV2.dll</HintPath>
-    </Reference>
     <Reference Include="DOAP">
       <HintPath>..\..\lib\Telligent\DOAP.dll</HintPath>
     </Reference>
@@ -133,9 +130,6 @@
     </Reference>
     <Reference Include="Telligent.Caching">
       <HintPath>..\..\lib\Telligent\Telligent.Caching.dll</HintPath>
-    </Reference>
-    <Reference Include="Telligent.Caching.AppFabric">
-      <HintPath>..\..\lib\Telligent\Telligent.Caching.AppFabric.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Common">
       <HintPath>..\..\lib\Telligent\Telligent.Common.dll</HintPath>
