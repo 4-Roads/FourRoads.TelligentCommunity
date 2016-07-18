@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity9.SocialProfileControls")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity92.SocialProfileControls")]
 [assembly: AssemblyDescription("Provides enhanced social media profile fields")]
 
 
