@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
@@ -50,7 +51,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             }
             catch (Exception ex)
             {
-                new CSException("Triggers", string.Format("EventsOnBeforeUpdate failed for userid:{0}", userBeforerUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
+                new TCException("Triggers", string.Format("EventsOnBeforeUpdate failed for userid:{0}", userBeforerUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
             }
         }
 
@@ -79,7 +80,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             }
             catch(Exception ex)
             {
-                new CSException("Triggers", string.Format("EventsOnAfterUpdate failed for userid:{0}", userAfterUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
+                new TCException("Triggers", string.Format("EventsOnAfterUpdate failed for userid:{0}", userAfterUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
             }
         }
 

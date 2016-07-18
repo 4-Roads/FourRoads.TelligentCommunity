@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Evolution.Components;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
@@ -48,13 +49,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                         foreach (Exception rtlEx in rtl.LoaderExceptions)
                         {
-                            new CSException(CSExceptionType.UnknownError,
+                            new TCException(CSExceptionType.UnknownError,
                                 string.Format("Failed to load IApplicationPlugin from {0}, because of:", a.FullName), rtlEx).Log();
                         }
                     }
                     else
                     {
-                        new CSException(CSExceptionType.UnknownError,
+                        new TCException(CSExceptionType.UnknownError,
                             string.Format("Failed to load IApplicationPlugin implementation from {0}", a.FullName), ex).Log();
                     }
                 }

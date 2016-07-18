@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProcessors;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Interfaces;
@@ -24,7 +25,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs
                     StringBuilder msg = new StringBuilder(p.Name);
                     msg.Append(" threw Exception ");
                     msg.Append(e.ToString());
-                    new CSException(CSExceptionType.UnknownError, msg.ToString()).Log();
+                    new TCException(CSExceptionType.UnknownError, msg.ToString()).Log();
                 }
             }
         }

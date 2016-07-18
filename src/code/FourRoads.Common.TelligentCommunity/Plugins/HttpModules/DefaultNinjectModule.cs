@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using Ninject.Modules;
 using Telligent.Evolution.Components;
@@ -28,13 +29,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.HttpModules
 
                                 foreach (Exception rtlEx in rtl.LoaderExceptions)
                                 {
-                                    new CSException(CSExceptionType.UnknownError, string.Format("Failed to load bindings extension from {0}, because of:", a.FullName), rtlEx).Log();
+                                    new TCException(CSExceptionType.UnknownError, string.Format("Failed to load bindings extension from {0}, because of:", a.FullName), rtlEx).Log();
                                 }
  
                             }
                             else
                             {
-                                new CSException(CSExceptionType.UnknownError, string.Format("Failed to load bindings extension from {0}", a.FullName), ex).Log();
+                                new TCException(CSExceptionType.UnknownError, string.Format("Failed to load bindings extension from {0}", a.FullName), ex).Log();
                             }
                         }
                         return new Type[0];
@@ -51,7 +52,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.HttpModules
                 }
                 catch (Exception ex)
                 {
-					new CSException(CSExceptionType.UnknownError, string.Format("Failed to load {0} bindings extension", bindingsType.FullName), ex).Log();
+					new TCException(CSExceptionType.UnknownError, string.Format("Failed to load {0} bindings extension", bindingsType.FullName), ex).Log();
                 }
             }
 

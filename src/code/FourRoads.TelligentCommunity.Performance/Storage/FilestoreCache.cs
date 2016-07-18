@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Hosting;
+using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Evolution.Components;
 
 namespace FourRoads.TelligentCommunity.Performance.Storage
@@ -52,7 +53,7 @@ namespace FourRoads.TelligentCommunity.Performance.Storage
                     }
                     catch (Exception ex)
                     {
-                        new CSException(CSExceptionType.UnknownError, "Failed to clean up performance directory", ex).Log();
+                        new TCException(CSExceptionType.UnknownError, "Failed to clean up performance directory", ex).Log();
                     }
                 }
             }

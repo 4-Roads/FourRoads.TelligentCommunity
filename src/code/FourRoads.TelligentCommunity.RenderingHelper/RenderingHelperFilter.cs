@@ -3,6 +3,7 @@ using System.IO;
 using System.Web;
 using CsQuery;
 using CsQuery.ExtensionMethods.Internal;
+using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -78,7 +79,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
                 }
                 catch (Exception ex)
                 {
-                    new CSException(CSExceptionType.UnknownHttpError, "Rendering Helper Failed", ex).Log();
+                    new TCException(CSExceptionType.UnknownHttpError, "Rendering Helper Failed", ex).Log();
                 }
             }
             else if (!_isClosing && !_isClosed)

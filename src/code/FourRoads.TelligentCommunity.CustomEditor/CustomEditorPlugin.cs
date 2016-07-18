@@ -22,6 +22,7 @@ using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using ThemeFiles = Telligent.Evolution.Extensibility.UI.Version1.ThemeFiles;
 using System.Collections.Specialized;
+using FourRoads.Common.TelligentCommunity.Components;
 
 
 namespace FourRoads.TelligentCommunity.CustomEditor
@@ -274,7 +275,7 @@ namespace FourRoads.TelligentCommunity.CustomEditor
             }
             catch (Exception ex)
             {
-                new Telligent.Evolution.Components.CSException(Telligent.Evolution.Components.CSExceptionType.UnknownError, "Failed to install Custom Editor", ex).Log();
+                new TCException(Telligent.Evolution.Components.CSExceptionType.UnknownError, "Failed to install Custom Editor", ex).Log();
             }
 
             HttpRuntime.UnloadAppDomain();

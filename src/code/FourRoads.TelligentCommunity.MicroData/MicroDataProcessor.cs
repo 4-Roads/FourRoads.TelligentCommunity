@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Web;
 using CsQuery;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.RenderingHelper;
 using Microsoft.SqlServer.Server;
 using Telligent.Common;
@@ -82,7 +83,7 @@ namespace FourRoads.TelligentCommunity.MicroData
                 }
                 catch (Exception ex)
                 {
-                    new Telligent.Evolution.Components.CSException(Telligent.Evolution.Components.CSExceptionType.UnknownError, "MicroDataPlugin unkonw error", ex).Log();
+                    new TCException(CSExceptionType.UnknownError, "MicroDataPlugin unknown error", ex).Log();
                 }
             }
         }

@@ -6,6 +6,7 @@
 
 using System;
 using System.Web;
+using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 
@@ -69,7 +70,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
         }
             catch (Exception ex)
             {
-                new CSException(CSExceptionType.UnknownHttpError, "Rendering Helper Module Failed", ex).Log();
+                new TCException(CSExceptionType.UnknownHttpError, "Rendering Helper Module Failed", ex).Log();
             }
    
         }

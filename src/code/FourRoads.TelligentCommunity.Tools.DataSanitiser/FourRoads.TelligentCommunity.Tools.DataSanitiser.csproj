@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.Tools.DataSanitiser</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.Tools.DataSanitiser</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
@@ -273,7 +273,12 @@
     <Content Include="Languages\en-US\ThemeResources.xml" />
     <Content Include="Languages\languages.xml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
+      <Project>{8EAD72EC-98CB-49B0-9870-1DE3EEF883F3}</Project>
+      <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(ProjectDir)Languages" "$(TargetDir)Languages" /S /E /Y /V /I

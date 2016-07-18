@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Web;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.Nexus2.Common;
 using Newtonsoft.Json.Linq;
 using Telligent.DynamicConfiguration.Components;
@@ -241,7 +242,7 @@ namespace FourRoads.TelligentCommunity.Nexus2.Strava
 
         private void AuthenticationFailed()
         {
-            throw new CSException(CSExceptionType.OAuthLoginFailed);
+            throw new TCException(CSExceptionType.OAuthLoginFailed, "OAuth login failed");
         }
 
         private OAuthData ParseUserProfileInformation(dynamic repsonseJObject)

@@ -12,6 +12,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.InlineContent.CentralizedFileStore;
@@ -291,7 +292,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             }
             catch (Exception ex)
             {
-                CSException wrappedEx = new CSException(CSExceptionType.UnknownError, "Inline Content Exception", ex);
+                CSException wrappedEx = new TCException(CSExceptionType.UnknownError, "Inline Content Exception", ex);
                 wrappedEx.Log();
 
                 control.Controls.Add(new LiteralControl(ex.Message));

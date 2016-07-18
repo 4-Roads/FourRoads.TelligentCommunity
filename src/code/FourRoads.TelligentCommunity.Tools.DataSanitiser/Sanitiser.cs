@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using FourRoads.Common.TelligentCommunity.Components;
 using log4net;
 using Telligent.Common;
 using Telligent.Evolution;
@@ -105,7 +106,7 @@ namespace FourRoads.TelligentCommunity.Tools.DataSanitiser
                         RenameUserStatus rus = userService.RenameUser(writable, string.Format(userNameFormat, user.UserID), true, true);
                         if (rus != RenameUserStatus.Success)
                         {
-                            throw new CSException(CSExceptionType.UnknownError, "Could not update username: " + rus);
+                            throw new TCException(CSExceptionType.UnknownError, "Could not update username: " + rus);
                         }
                         Log.Info(msg);
                     }

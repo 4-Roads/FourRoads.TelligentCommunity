@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Web;
 using System.Web.UI;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -47,7 +48,7 @@ namespace FourRoads.TelligentCommunity.Performance.Storage
             }
             catch (Exception ex)
             {
-                new CSException(CSExceptionType.UnknownError, "Failed to build remote file lookup", ex).Log();
+                new TCException(CSExceptionType.UnknownError, "Failed to build remote file lookup", ex).Log();
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CsQuery;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using Telligent.Common;
@@ -47,7 +48,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
             }
             catch(Exception ex)
             {
-                new CSException(CSExceptionType.UnknownError, "Rendering observer plugin error", ex).Log();
+                new TCException(CSExceptionType.UnknownError, "Rendering observer plugin error", ex).Log();
             }
 		}
 

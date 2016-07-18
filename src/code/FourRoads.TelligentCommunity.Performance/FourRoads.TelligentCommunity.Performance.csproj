@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.Performance</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.Performance</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -161,6 +161,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
+      <Project>{8EAD72EC-98CB-49B0-9870-1DE3EEF883F3}</Project>
+      <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FourRoads.TelligentCommunity.RenderingHelper\FourRoads.TelligentCommunity.RenderingHelper.csproj">
       <Project>{20BC9498-6E57-4F6E-BB23-38BFEF110161}</Project>
       <Name>FourRoads.TelligentCommunity.RenderingHelper</Name>

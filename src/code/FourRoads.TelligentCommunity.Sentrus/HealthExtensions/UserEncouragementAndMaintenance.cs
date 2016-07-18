@@ -17,7 +17,8 @@ using Telligent.Evolution.Extensibility.Api.Entities.Version1;
     using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
     using Telligent.Evolution.Extensibility.Email.Version1;
     using System.Linq;
-    using FourRoads.TelligentCommunity.Sentrus.Entities;
+using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.Sentrus.Entities;
     using Telligent.Evolution.Extensibility.Templating.Version1;
     using FourRoads.Common.TelligentCommunity.Components.Extensions;
 
@@ -174,7 +175,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             }
             catch (Exception ex)
             {
-                new CSException("Sentrus", string.Format("UpdateLoginDate failed for contentid:{0}", contentId), ex).Log();
+                new TCException("Sentrus", string.Format("UpdateLoginDate failed for contentid:{0}", contentId), ex).Log();
             }
         }
 
