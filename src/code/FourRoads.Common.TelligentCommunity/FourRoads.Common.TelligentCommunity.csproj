@@ -134,6 +134,7 @@
     <Compile Include="Plugins\HttpModules\DefaultNinjectModule.cs" />
     <Compile Include="Plugins\HttpModules\WrappedKernel.cs" />
     <Compile Include="Plugins\Interfaces\IBindingsLoader.cs" />
+    <Compile Include="Plugins\Interfaces\ICrmPlugin.cs" />
     <Compile Include="Plugins\ScriptedContentFragments\ContentScriptedContentFragment.cs" />
     <Compile Include="Plugins\Viewers\BrightcoveMediaViewer.cs" />
     <Compile Include="Plugins\Viewers\DailyMotionMediaViewer.cs" />

@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Web.Utility;
 using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers

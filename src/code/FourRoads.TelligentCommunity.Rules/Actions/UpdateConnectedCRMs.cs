@@ -1,45 +1,42 @@
-﻿using System;
+﻿using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using System;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
-using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Actions
 {
-
-    public class UnjoinAllGroups : IConfigurableRuleAction, ITranslatablePlugin, ICategorizedPlugin
+    public class UpdateConnectedCRMs : IConfigurableRuleAction, ITranslatablePlugin, ICategorizedPlugin
     {
         private ITranslatablePluginController _translationController;
-        private Guid _componentId = new Guid("{8CF1F489-A812-46C0-BEC1-A63F421365ED}");
+        private Guid _componentId = new Guid("{1B76FAD0-C376-4202-82B3-B872CA26DCFB}");
 
         public void Initialize()
         {
-            
+
         }
 
-        public string Name { get { return "4 Roads - Unjoin All Groups Rule Action"; } }
+        public string Name { get { return "4 Roads - Update CRM Callback"; } }
 
-        public string Description { get{return "Unjoins a user from all groups in the system that they are a member of.";} }
+        public string Description { get { return "Updates any CRM plugins with the user that just got updated."; } }
 
         public Guid RuleComponentId { get { return _componentId; } }
 
-        public string RuleComponentName { get { return _translationController.GetLanguageResourceValue("RuleComponentName"); ;} }
+        public string RuleComponentName { get { return _translationController.GetLanguageResourceValue("RuleComponentName"); ; } }
 
-        public string RuleComponentCategory { get { return _translationController.GetLanguageResourceValue("RuleComponentCategory"); ;} }
+        public string RuleComponentCategory { get { return _translationController.GetLanguageResourceValue("RuleComponentCategory"); ; } }
 
         public void Execute(IRuleExecutionRuntime runtime)
         {
             User user = runtime.GetCustomUser("User");
 
-            if (!user.HasErrors())
+            if ( !user.HasErrors() )
             {
-                var groupMembership = PublicApi.GroupUserMembers.List(new GroupUserMembersListOptions() {UserId = user.Id.Value, PageSize = int.MaxValue});
-
-                foreach (GroupUser groupUser in groupMembership)
+                foreach ( ICrmPlugin plugin in PluginManager.Get<ICrmPlugin>() )
                 {
-                    PublicApi.GroupUserMembers.Delete(groupUser.Group.Id.Value, new GroupUserMembersDeleteOptions() {UserId = user.Id.Value});
+                    plugin.SynchronizeUser(user);
                 }
             }
         }
@@ -56,8 +53,8 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleComponentName", "remove this user from all groups they are a member of");
-                defaultTranslation[0].Set("RuleComponentCategory", "Group");
+                defaultTranslation[ 0 ].Set("RuleComponentName", "Call the update method on all enabled CRM plugins");
+                defaultTranslation[ 0 ].Set("RuleComponentCategory", "CRM");
 
                 return defaultTranslation;
             }
@@ -67,12 +64,12 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
         {
             get
             {
-                PropertyGroup group = new PropertyGroup("settings","settings" ,0);
+                PropertyGroup group = new PropertyGroup("settings", "settings", 0);
                 Property userProp = new Property("User", "User", PropertyType.Custom, 2, "");
-                userProp.ControlType = typeof (UserTokenSelectionControl);
+                userProp.ControlType = typeof(UserTokenSelectionControl);
                 group.Properties.Add(userProp);
 
-                return new[] {group};
+                return new[] { group };
             }
         }
 
@@ -87,5 +84,6 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
                 };
             }
         }
+
     }
 }
