@@ -1,26 +1,17 @@
-﻿using FourRoads.Common.TelligentCommunity.Components;
-using FourRoads.Common.TelligentCommunity.Controls;
-using FourRoads.TelligentCommunity.Rules.Actions;
+﻿using FourRoads.Common.TelligentCommunity.Controls;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using System.Xml;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.DynamicConfiguration.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
-using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
@@ -35,7 +26,6 @@ namespace FourRoads.TelligentCommunity.HubSpot
         string _refreshToken;
         DateTime _expires = DateTime.Now;
         Dictionary<string, string> _mappings;
-        //private static Guid _jobId = new Guid("{8DACFF47-471D-46FB-B408-D2700799F491}");
 
         public string Description
         {
@@ -55,17 +45,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public void Initialize()
         {
-            //PublicApi.Users.Events.AfterCreate += Events_AfterCreate;
-
-            //PublicApi.JobService.Schedule<HubspotCrm>();
-
-            string token = GetAccessToken();
+            PublicApi.JobService.Schedule<HubspotCrm>();
         }
-
-        //private void Events_AfterCreate(UserAfterCreateEventArgs e)
-        //{
-     
-        //}
 
         private static void WriteJsonProp(JsonTextWriter JsonObject , string prop , string value)
         {
@@ -148,31 +129,6 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 return new PropertyGroup[] { pg , pg3, pg2 };
             }
         }
-
-
-        //public Guid JobTypeId
-        //{
-        //    get
-        //    {
-        //        return _jobId;
-        //    }
-        //}
-
-        //public JobSchedule DefaultSchedule
-        //{
-        //    get
-        //    {
-        //        return new JobSchedule(ScheduleType.Hours) { Hours=2 };
-        //    }
-        //}
-
-        //public JobContext SupportedContext
-        //{
-        //    get
-        //    {
-        //        return JobContext.InProcess;
-        //    }
-        //}
 
         private void AddPrivateProp(string propName , string title , PropertyGroup pg)
         {
