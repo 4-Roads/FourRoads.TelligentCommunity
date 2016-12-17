@@ -15,13 +15,14 @@ using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using System.Web.UI.WebControls;
+using System.Web.UI;
 
 namespace FourRoads.TelligentCommunity.HubSpot
 {
-    public class HubspotCrm : IConfigurablePlugin , ISingletonPlugin  , IEvolutionJob , ICrmPlugin
+    public class HubspotCrm : IConfigurablePlugin , ISingletonPlugin  , ICrmPlugin
     {
         IPluginConfiguration _configuration;
-        string _currentCode;
         string _accessToken;
         string _refreshToken;
         DateTime _expires = DateTime.Now;
@@ -45,7 +46,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public void Initialize()
         {
-            PublicApi.JobService.Schedule<HubspotCrm>();
+
         }
 
         private static void WriteJsonProp(JsonTextWriter JsonObject , string prop , string value)
@@ -111,7 +112,10 @@ namespace FourRoads.TelligentCommunity.HubSpot
             {
                 var pg = new PropertyGroup("Options", "Options", 0);
 
-                pg.Properties.Add(new Property("oAuthCode", "oAuth Code", PropertyType.String, 0, string.Empty));
+                var authbtn = new Property("oAuthCode", "Authorize oAuth Code", PropertyType.Custom, 0, string.Empty);
+                authbtn.ControlType = typeof(AuthorizeButton);
+                pg.Properties.Add(authbtn);
+
                 pg.Properties.Add(new Property("ClientId", "Client Id", PropertyType.String, 0, string.Empty));
                 pg.Properties.Add(new Property("ClientSecret", "Client Secret", PropertyType.String, 0, string.Empty));
 
@@ -141,7 +145,6 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             _configuration = configuration;
 
-            _currentCode = _configuration.GetString("oAuthCode");
             _accessToken = _configuration.GetString("AccessToken");
             _refreshToken = _configuration.GetString("RefreshToken");
             _expires = _configuration.GetDateTime("Expires");
@@ -198,7 +201,6 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 // throw new Exception("Hubspot API Issue:" + jsonResponse.error + jsonResponse.error_description);
                 PublicApi.Eventlogs.Write("Hubspot API Issue:" + jsonResponse.error_description, new EventLogEntryWriteOptions());
 
-                _currentCode = string.Empty;
                 _expires = DateTime.Now;
                 _configuration.SetString("AccessToken", string.Empty);
                 _configuration.SetString("RefreshToken", string.Empty);
@@ -207,6 +209,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             if ( jsonResponse.access_token != null )
             {
+                PublicApi.Eventlogs.Write("Obtained access token for Hubspot", new EventLogEntryWriteOptions() { EventType = "Debug" });
+
                 _configuration.SetString("AccessToken", jsonResponse.access_token.ToString());
                 _configuration.SetString("RefreshToken", jsonResponse.refresh_token.ToString());
                 _configuration.SetString("Expires", DateTime.Now.AddHours(4).ToString());
@@ -221,20 +225,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
             if ( PluginManager.IsEnabled(this) )
             {
                 string url = PublicApi.Url.Absolute(PublicApi.Url.ApplicationEscape("~"));
-                if ( string.IsNullOrWhiteSpace(_refreshToken) && _expires < DateTime.Now.AddHours(-1) )
-                {
-                    FormUrlEncodedContent conent = new FormUrlEncodedContent(new Dictionary<string, string> {
-                    {"grant_type","authorization_code"},
-                    {"client_id",_configuration.GetString("ClientId")},
-                    {"client_secret",_configuration.GetString("ClientSecret")},
-                    {"redirect_uri",url},
-                    {"code",_configuration.GetString("oAuthCode")}});
 
-                    dynamic repsonse = CreateOauthRequest(conent);
-
-                    ProcessHubspotRequestRepsonse(repsonse);
-                }
-                else if ( DateTime.Now > _expires.AddHours(-1) )
+                if ( DateTime.Now > _expires.AddHours(-1) && !string.IsNullOrWhiteSpace(_refreshToken) )
                 {
                     FormUrlEncodedContent conent = new FormUrlEncodedContent(new Dictionary<string, string> {
                     {"grant_type","refresh_token"},
@@ -246,57 +238,157 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     dynamic repsonse = CreateOauthRequest(conent);
 
                     ProcessHubspotRequestRepsonse(repsonse);
-
                 }
             }
 
             return _accessToken;
         }
 
-        public void Execute(JobData jobData)
+        public bool InitialLinkoAuth(string authCOde)
         {
-            var _this = PluginManager.GetSingleton<HubspotCrm>();
-
-            if ( _this._currentCode != string.Empty )
+            if ( !string.IsNullOrWhiteSpace(authCOde))
             {
-                string temp = _this.GetAccessToken();
+                string url = PublicApi.Url.Absolute(PublicApi.Url.ApplicationEscape("~"));
 
-                PublicApi.Eventlogs.Write("Refreshed Hubspot Access Token", new EventLogEntryWriteOptions());
+                FormUrlEncodedContent conent = new FormUrlEncodedContent(new Dictionary<string, string> {
+                    {"grant_type","authorization_code"},
+                    {"client_id",_configuration.GetString("ClientId")},
+                    {"client_secret",_configuration.GetString("ClientSecret")},
+                    {"redirect_uri",url},
+                    {"code",authCOde}});
+
+                dynamic repsonse = CreateOauthRequest(conent);
+
+                ProcessHubspotRequestRepsonse(repsonse);
+
+                return repsonse.error != null;
             }
+
+            return false;
         }
 
         public void SynchronizeUser(User u)
         {
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () => { 
-            string parameters = string.Empty;
-            StringBuilder sb = new StringBuilder();
-
-            using ( var tw = new StringWriter(sb) )
+            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
             {
-                using ( var JsonObject = new Newtonsoft.Json.JsonTextWriter(tw) )
+                PublicApi.Eventlogs.Write(string.Format("Syncronizing {0} to Hubspot", u.Username), new EventLogEntryWriteOptions() { EventType = "Information" });
+
+                string parameters = string.Empty;
+                StringBuilder sb = new StringBuilder();
+
+                using ( var tw = new StringWriter(sb) )
                 {
-                    JsonObject.WritePropertyName("properties");
-                    JsonObject.WriteStartArray();
-
-                    WriteJsonProp(JsonObject, "email", u.PrivateEmail);
-
-                    var fields = u.ProfileFields.ToLookup(k => k.Label, v => v.Value);
-
-                    foreach ( string src in Mappings.Keys )
+                    using ( var JsonObject = new Newtonsoft.Json.JsonTextWriter(tw) )
                     {
-                        if ( fields.Contains(src) )
+                        JsonObject.WritePropertyName("properties");
+                        JsonObject.WriteStartArray();
+
+                        WriteJsonProp(JsonObject, "email", u.PrivateEmail);
+
+                        var fields = u.ProfileFields.ToLookup(k => k.Label, v => v.Value);
+
+                        foreach ( string src in Mappings.Keys )
                         {
-                            WriteJsonProp(JsonObject, Mappings[ src ], fields[ src ].First());
+                            if ( fields.Contains(src) )
+                            {
+                                WriteJsonProp(JsonObject, Mappings[ src ], fields[ src ].First());
+                            }
                         }
+
+                        JsonObject.WriteEndArray();
                     }
-
-                    JsonObject.WriteEndArray();
                 }
-            }
 
-            dynamic response = CreateApiRequest(string.Format("contacts/v1/contact/createOrUpdate/email/{0}/", PublicApi.Url.Encode(u.PrivateEmail)), "{" + sb.ToString() + "}");
+                dynamic response = CreateApiRequest(string.Format("contacts/v1/contact/createOrUpdate/email/{0}/", PublicApi.Url.Encode(u.PrivateEmail)), "{" + sb.ToString() + "}");
 
+                if ( response.error != null )
+                {
+                    PublicApi.Eventlogs.Write("Hubspot API Issue:" + response.error_description, new EventLogEntryWriteOptions());
+                }
             });
         }
     }
+
+    public class AuthorizeButton : WebControl, IPropertyControl , INamingContainer
+    {
+        protected Button LinkButton;
+        protected TextBox AuthCode;
+        protected Literal Message; 
+
+        protected override void EnsureChildControls()
+        {
+            base.EnsureChildControls();
+
+            if ( AuthCode == null )
+            {
+                AuthCode = new TextBox();
+                AuthCode.ID = "AuthCode";
+                Controls.Add(AuthCode);
+            }
+
+            if ( Message == null )
+            {
+                Message = new Literal();
+                Message.ID = "Message";
+                Message.Text = "<label>Press this button once you have obtained your authorization code</label>";
+
+                Controls.Add(Message);
+            }
+
+            if ( LinkButton == null )
+            { 
+                LinkButton = new Button();
+                LinkButton.ID = "LinkBtn";
+                LinkButton.Text = "Link oAuth";
+                LinkButton.Click += LinkButton_Click;
+
+                Controls.Add(LinkButton);
+            }
+        }
+
+        private void LinkButton_Click(object sender, EventArgs e)
+        {
+            var plg = PluginManager.GetSingleton<HubspotCrm>();
+
+            if ( plg != null )
+            {
+                if ( !plg.InitialLinkoAuth(AuthCode.Text) )
+                {
+                    Message.Text = "<label style=\"color:red\">Failed to obtain oauth credentials</label>";
+                }
+                else
+                {
+                    Message.Text = "<label style=\"color:green\">oAuth Syncronized</label>";
+                }
+            }
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+        }
+
+        public ConfigurationDataBase ConfigurationData { get; set; }
+
+        public Property ConfigurationProperty
+        { get; set; }
+
+        public event ConfigurationPropertyChanged ConfigurationValueChanged;
+
+        public new Control Control
+        {
+            get { return this; }
+        }
+
+        public object GetConfigurationPropertyValue()
+        {
+            return null;
+        }
+
+        public void SetConfigurationPropertyValue(object value)
+        {
+
+        }
+    }
+
 }

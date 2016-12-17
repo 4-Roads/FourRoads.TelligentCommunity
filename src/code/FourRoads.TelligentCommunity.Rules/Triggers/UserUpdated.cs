@@ -98,8 +98,14 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     {
                         string trimedField = field.TrimStart(new[] { '-' });
 
-                        if (oldDetails.ProfileFields[trimedField].Value != newDetails.ProfileFields[trimedField].Value)
-                            return true; 
+                        if ( oldDetails.ProfileFields != null )
+                        {
+                            if ( oldDetails.ProfileFields[ trimedField ] != null )
+                            {
+                                if ( oldDetails.ProfileFields[ trimedField ].Value != newDetails.ProfileFields[ trimedField ].Value )
+                                    return true;
+                            }
+                        }
                     }
                     else
                     {
