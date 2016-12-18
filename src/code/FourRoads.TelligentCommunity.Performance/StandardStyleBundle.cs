@@ -4,8 +4,6 @@ using System.IO;
 using System.Text;
 using System.Web;
 using System.Web.Optimization;
-
-using CsQuery.Engine;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using FourRoads.TelligentCommunity.Performance.Storage;
 using Microsoft.Ajax.Utilities;
