@@ -1,8 +1,9 @@
 using System;
-using CsQuery;
+
 using Telligent.Evolution.Components;
 using System.Collections.Generic;
 using System.Threading;
+using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {
@@ -10,12 +11,12 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
     {
         private readonly RenderingSubject _renderingObserverSubject = new RenderingSubject();
 
-        public IObservable<CQ> RenderObservable
+        public IObservable<IHtmlDocument> RenderObservable
         {
             get { return _renderingObserverSubject; }
         }
 
-        public void NotifyObservers(CQ document)
+        public void NotifyObservers(IHtmlDocument document)
         {
             _renderingObserverSubject.Notify(document);
         }

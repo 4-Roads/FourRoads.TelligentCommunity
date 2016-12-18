@@ -1,4 +1,5 @@
-﻿using CsQuery;
+﻿using AngleSharp.Dom.Html;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,17 +8,17 @@ using System.Threading;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {
-    public class RenderingSubject : IObservable<CQ>
+    public class RenderingSubject : IObservable<IHtmlDocument>
     {
         private static ReaderWriterLockSlim _observerLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
-        private List<IObserver<CQ>> _observers = new List<IObserver<CQ>>();
-        public void Notify(CQ document)
+        private List<IObserver<IHtmlDocument>> _observers = new List<IObserver<IHtmlDocument>>();
+        public void Notify(IHtmlDocument document)
         {
             _observerLock.EnterReadLock();
 
             try
             {
-                foreach (IObserver<CQ> o in _observers)
+                foreach (IObserver<IHtmlDocument> o in _observers)
                 {
                     try
                     {
@@ -37,7 +38,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
             }
         }
 
-        public void Unsubscribe(IObserver<CQ> observer)
+        public void Unsubscribe(IObserver<IHtmlDocument> observer)
         {
             _observerLock.EnterWriteLock();
 
@@ -51,7 +52,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
             }
         }
 
-        public IDisposable Subscribe(IObserver<CQ> observer)
+        public IDisposable Subscribe(IObserver<IHtmlDocument> observer)
         {
             _observerLock.EnterWriteLock();
 

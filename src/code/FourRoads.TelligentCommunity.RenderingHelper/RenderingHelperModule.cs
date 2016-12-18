@@ -56,7 +56,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
             HttpResponse response = HttpContext.Current.Response;
             HttpRequest  reqeust = HttpContext.Current.Request;
 
-            if (response.ContentType == "text/html" &&
+            if (response.ContentType == "text/html" && !reqeust.Path.StartsWith("/tinymce") &&
                   string.Compare(HttpContext.Current.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) == 0 && //Don't do post backs to avoid issues with callbacks etc
                   (reqeust.CurrentExecutionFilePathExtension == ".aspx" || reqeust.CurrentExecutionFilePathExtension == ".htm" || reqeust.CurrentExecutionFilePathExtension == string.Empty))
             {

@@ -1,13 +1,14 @@
 using System;
 using System.IO;
 using System.Web;
-using CsQuery;
-using CsQuery.ExtensionMethods.Internal;
+
 using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
+using AngleSharp.Parser.Html;
+using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {
@@ -58,16 +59,19 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
 
                             tmpStream.Seek(0, SeekOrigin.Begin);
 
-                            //Config.DomIndexProvider = DomIndexProviders.None; this will improve performance but requires csquery 1.3.5-beta and above
-                            Config.DomRenderingOptions = DomRenderingOptions.RemoveComments;
-
-                            CQ document = CQ.CreateDocument(tmpStream, HttpContext.Current.Response.ContentEncoding);
+                            // Create a new parser front-end (can be re-used)
+                            var parser = new HtmlParser();
+                            
+                            //Just get the DOM representation
+                            IHtmlDocument document = parser.Parse(tmpStream);
+                            //CQ document = CQ.CreateDocument(tmpStream, HttpContext.Current.Response.ContentEncoding);
 
                             _renderingObserverPlugin.NotifyObservers(document);
 
                             using (StreamWriter sw = new StreamWriter(_sink, HttpContext.Current.Response.ContentEncoding,(int) Length + 1000))
                             {
-                                document.Render(OutputFormatters.HtmlEncodingNone, sw);
+                                sw.Write(document.DocumentElement.OuterHtml);
+                                //document.Render(OutputFormatters.HtmlEncodingNone, sw);
                             }
                         }
                     }

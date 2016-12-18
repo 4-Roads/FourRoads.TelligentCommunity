@@ -118,6 +118,8 @@ namespace FourRoads.TelligentCommunity.MicroData
 
                     clearSelection();
 
+                    sumbitHandler_{0}();
+
                     return false;
                 }});
 
@@ -125,6 +127,9 @@ namespace FourRoads.TelligentCommunity.MicroData
                     e.preventDefault();
                    $('#{5} table tr.selected').removeClass('selected');
                    clearSelection();
+
+                    sumbitHandler_{0}();
+
                    return false;
                 }});
 
@@ -132,6 +137,9 @@ namespace FourRoads.TelligentCommunity.MicroData
                     e.preventDefault();
                     $(this).closest('tr').remove();
                     rebuildHighlighting();
+
+                    sumbitHandler_{0}();
+
                     return false;
                 }});
 
@@ -152,6 +160,8 @@ namespace FourRoads.TelligentCommunity.MicroData
                     $('#{4}').val($('td:nth(3)' , row).text());
 
                     $('#{8}').show();
+
+                    sumbitHandler_{0}();
 
                     return false;
                 }});
@@ -387,9 +397,12 @@ namespace FourRoads.TelligentCommunity.MicroData
                 CreateDataSource(_addEditRowControl.GetPostBackData());
             }
 
-            //Set up the grid 
-            _repeater.DataSource = _configurationDataSource;
-            _repeater.DataBind();
+            if ( !string.IsNullOrWhiteSpace(_configurationDataSource.Data) )
+            {
+                //Set up the grid 
+                _repeater.DataSource = _configurationDataSource;
+                _repeater.DataBind();
+            }
         }
 
         private void CreateDataSource(string data)

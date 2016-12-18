@@ -46,64 +46,67 @@ namespace FourRoads.TelligentCommunity.MicroData
         {
             List<MicroDataEntry> results = new List<MicroDataEntry>();
 
-            using (StringReader rd = new StringReader(data))
+            if ( !string.IsNullOrWhiteSpace(data) )
             {
-                using (XmlReader nodereader = XmlReader.Create(rd))
+                using ( StringReader rd = new StringReader(data) )
                 {
-                    nodereader.MoveToContent();
-                    while (!nodereader.EOF)
+                    using ( XmlReader nodereader = XmlReader.Create(rd) )
                     {
-                        if (nodereader.Name == "entry")
+                        nodereader.MoveToContent();
+                        while ( !nodereader.EOF )
                         {
-                            try
+                            if ( nodereader.Name == "entry" )
                             {
-                                MicroDataEntry entry = new MicroDataEntry();
-
-                                XElement el = XNode.ReadFrom(nodereader) as XElement;
-
-                                if (el != null)
+                                try
                                 {
-                                    IEnumerable<XAttribute> attr = el.Attributes();
+                                    MicroDataEntry entry = new MicroDataEntry();
 
-                                    foreach (XAttribute xAttribute in attr)
+                                    XElement el = XNode.ReadFrom(nodereader) as XElement;
+
+                                    if ( el != null )
                                     {
+                                        IEnumerable<XAttribute> attr = el.Attributes();
 
-                                        if (!string.IsNullOrWhiteSpace(xAttribute.Value))
+                                        foreach ( XAttribute xAttribute in attr )
                                         {
-                                            switch (xAttribute.Name.LocalName)
+
+                                            if ( !string.IsNullOrWhiteSpace(xAttribute.Value) )
                                             {
-                                                case "contentType":
+                                                switch ( xAttribute.Name.LocalName )
                                                 {
-                                                    Guid contentType;
-                                                    Guid.TryParse(xAttribute.Value, out contentType);
-                                                    entry.ContentType = contentType;
+                                                    case "contentType":
+                                                        {
+                                                            Guid contentType;
+                                                            Guid.TryParse(xAttribute.Value, out contentType);
+                                                            entry.ContentType = contentType;
+                                                        }
+                                                        break;
+                                                    case "entryType":
+                                                        entry.Type = (MicroDataType)Enum.Parse(typeof(MicroDataType), xAttribute.Value);
+                                                        break;
+                                                    case "value":
+                                                        entry.Value = xAttribute.Value;
+                                                        break;
+                                                    case "selector":
+                                                        entry.Selector = xAttribute.Value;
+                                                        break;
                                                 }
-                                                    break;
-                                                case "entryType":
-                                                    entry.Type = (MicroDataType) Enum.Parse(typeof (MicroDataType), xAttribute.Value);
-                                                    break;
-                                                case "value":
-                                                    entry.Value = xAttribute.Value;
-                                                    break;
-                                                case "selector":
-                                                    entry.Selector = xAttribute.Value;
-                                                    break;
                                             }
                                         }
-                                    }
 
-                                    results.Add(entry);
+                                        results.Add(entry);
+                                    }
+                                }
+                                // ReSharper disable once EmptyGeneralCatchClause
+                                catch
+                                {
+
                                 }
                             }
-// ReSharper disable once EmptyGeneralCatchClause
-                            catch
+                            else
                             {
-                                
+                                nodereader.Read();
                             }
-                        }
-                        else
-                        {
-                            nodereader.Read();
                         }
                     }
                 }

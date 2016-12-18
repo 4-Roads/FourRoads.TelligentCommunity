@@ -60,7 +60,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Jobs
 
         public string Name
         {
-             get { return "Health Maitenance Job";}
+             get { return "Health Maintenance Job"; }
         }
     }
 }

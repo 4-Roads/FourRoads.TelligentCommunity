@@ -1,12 +1,13 @@
 using System;
-using CsQuery;
+
 using Telligent.Evolution.Extensibility.Version1;
+using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {
     public interface IRenderingObserverPlugin : ISingletonPlugin
     {
-        IObservable<CQ> RenderObservable { get; }
-        void NotifyObservers(CQ document);
+        IObservable<IHtmlDocument> RenderObservable { get; }
+        void NotifyObservers(IHtmlDocument document);
     }
 }

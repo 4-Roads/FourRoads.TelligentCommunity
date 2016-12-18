@@ -9,10 +9,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web.Optimization;
-using CsQuery;
+
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
+using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.Performance
 {
@@ -47,13 +48,13 @@ namespace FourRoads.TelligentCommunity.Performance
             });
         }
 
-        public void BuildBundleData(ContentFragmentPageControl contentFragmentPage, CQ parsedContent)
+        public void BuildBundleData(ContentFragmentPageControl contentFragmentPage, IHtmlDocument parsedContent)
         {
             _dynamicBundles.ForEach(b => b.BuildBundleData(contentFragmentPage, parsedContent));
             RegisterBundles();
         }
 
-        public void ProcessDisplayElement(CQ parsedContent)
+        public void ProcessDisplayElement(IHtmlDocument parsedContent)
         {
             _dynamicBundles.ForEach(b => b.ProcessDisplayElement(parsedContent));
         }

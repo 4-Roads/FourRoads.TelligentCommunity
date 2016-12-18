@@ -5,16 +5,17 @@
 // -----------------------------------------------------------------------------
 
 using System.Web.Optimization;
-using CsQuery;
+
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
+using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.Performance.Interfaces
 {
     public interface IDynamicBundle
     {
-        void BuildBundleData(ContentFragmentPageControl contentFragmentPage, CQ parsedContent);
-        void ProcessDisplayElement(CQ parsedContent);
+        void BuildBundleData(ContentFragmentPageControl contentFragmentPage, IHtmlDocument parsedContent);
+        void ProcessDisplayElement(IHtmlDocument parsedContent);
         Bundle Bundle { get; }
     }
 }

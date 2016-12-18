@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CsQuery;
+
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using Telligent.Common;
 using Telligent.Evolution.Components;
+using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {
     public interface ICQProcessor 
     {
-        void Process(CQ document);
+        void Process(IHtmlDocument document);
     }
 
 	public abstract class CQObserverPluginBase : ICQObserverPlugin
@@ -36,7 +37,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
 		{
 		}
 
-		public void OnNext(CQ value)
+		public void OnNext(IHtmlDocument value)
 		{
             try
             {

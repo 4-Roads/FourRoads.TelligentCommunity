@@ -6,13 +6,14 @@
 
 using System;
 using System.Collections.Generic;
-using CsQuery;
+
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Semaphore = System.Threading.Semaphore;
 using FourRoads.TelligentCommunity.Performance.Storage;
 using FourRoads.TelligentCommunity.RenderingHelper;
+using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.Performance
 {
@@ -29,7 +30,7 @@ namespace FourRoads.TelligentCommunity.Performance
             get { return _bundleDictionary; }
         }
 
-        public void Process(CQ parsedContent)
+        public void Process(IHtmlDocument parsedContent)
         {
             ContentFragmentPageControl contentFragmentPage = ContentFragmentPageControl.GetCurrentContentFragmentPage();
 

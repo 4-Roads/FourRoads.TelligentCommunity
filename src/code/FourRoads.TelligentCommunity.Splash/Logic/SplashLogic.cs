@@ -6,13 +6,14 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
-using CsQuery;
+
 using FourRoads.TelligentCommunity.Splash.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Urls.Routing;
+using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.Splash.Logic
 {
@@ -230,22 +231,32 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
             }
         }
 
-        public void Process(CQ document)
+        public void Process(IHtmlDocument document)
         {
             if (_configuration.HasValue)
             {
-                var pageContext = PublicApi.Url.ParsePageContext(HttpContext.Current.Request.Url.OriginalString);
+                var pageContext = PublicApi.Url.ParsePageContext(HttpContext.Current.Request.Url.PathAndQuery);
 
                 if (pageContext != null && pageContext.PageName == _pageName)
                 {
                     if (_configuration.Value.RemoveHeader)
                     {
-                        document.Select(".header-fragments").Remove();
+                        var elems = document.QuerySelectorAll(".header-fragments");
+
+                        foreach(var elem in elems )
+                        {
+                            elem.Remove();
+                        }
                     }
 
                     if (_configuration.Value.RemoveFooter)
                     {
-                        document.Select(".footer-fragments").Remove();
+                        var elems = document.QuerySelectorAll(".footer-fragments");
+
+                        foreach ( var elem in elems )
+                        {
+                            elem.Remove();
+                        }
                     }
                 }
             }

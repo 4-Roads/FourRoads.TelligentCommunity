@@ -4,13 +4,15 @@ using System.IO;
 using System.Text;
 using System.Web;
 using System.Web.Optimization;
-using CsQuery;
+
 using CsQuery.Engine;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using FourRoads.TelligentCommunity.Performance.Storage;
 using Microsoft.Ajax.Utilities;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
+using AngleSharp.Dom.Html;
+using AngleSharp.Dom;
 
 namespace FourRoads.TelligentCommunity.Performance
 {
@@ -66,14 +68,14 @@ namespace FourRoads.TelligentCommunity.Performance
             get { return _styleBundle; }
         }
 
-        public void BuildBundleData(ContentFragmentPageControl contentFragmentPage, CQ parsedContent)
+        public void BuildBundleData(ContentFragmentPageControl contentFragmentPage, IHtmlDocument parsedContent)
         {
             if (Configuration.OptomizeGlobalCss)
             {
                 //Get the themes CSS files
-                CQ elements = parsedContent.Select(BuildSelector);
+                var elements = parsedContent.QuerySelectorAll(BuildSelector);
 
-                foreach (IDomObject element in elements)
+                foreach (var element in elements)
                 {
                     string mediaType = element.GetAttribute("media") ?? "screen";
 
@@ -118,13 +120,13 @@ namespace FourRoads.TelligentCommunity.Performance
             }
         }
 
-        public void ProcessDisplayElement(CQ parsedContent)
+        public void ProcessDisplayElement(IHtmlDocument parsedContent)
         {
-            CQ elements = parsedContent.Select(ReplaceSelector);
+            var elements = parsedContent.QuerySelectorAll(ReplaceSelector);
             bool foundFirst = false;
 
             ////WE can minify the inline javascript, however this costs more than the time it saves from the bytes saved not sent over the network
-            foreach (IDomObject element in elements)
+            foreach (var element in elements)
             {
                 string path = element.GetAttribute("href") ?? string.Empty;
 
@@ -139,7 +141,7 @@ namespace FourRoads.TelligentCommunity.Performance
         }
 
 
-        private bool UpdateCssPath(bool foundFirstCss, IDomObject element)
+        private bool UpdateCssPath(bool foundFirstCss, IElement element)
         {
             if (foundFirstCss == false)
             {

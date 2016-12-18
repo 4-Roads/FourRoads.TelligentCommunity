@@ -1,21 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Globalization;
 using System.Linq;
-using System.Threading;
 using System.Web;
-using CsQuery;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.RenderingHelper;
-using Microsoft.SqlServer.Server;
-using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using IContent = Telligent.Evolution.Extensibility.Content.Version1.IContent;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
+using AngleSharp.Dom.Html;
+using AngleSharp.Dom;
 
 namespace FourRoads.TelligentCommunity.MicroData
 {
@@ -50,37 +47,41 @@ namespace FourRoads.TelligentCommunity.MicroData
         }
 
 
-        public void Process(CQ parsedContent)
+        public void Process(IHtmlDocument parsedContent)
         {
             if (_microDataEntries != null)
             {
                 try
                 {
-                    var body = parsedContent.Select("body");
-                    Dictionary<Guid, IContent> contentLookup = new Dictionary<Guid, IContent>();
+                    var body = parsedContent.QuerySelectorAll("body").FirstOrDefault();
 
-                    foreach (MicroDataEntry semanticEntry in _microDataEntries)
+                    if ( body != null )
                     {
-                        Guid semanticType = semanticEntry.ContentType.GetValueOrDefault(Guid.Empty);
+                        Dictionary<Guid, IContent> contentLookup = new Dictionary<Guid, IContent>();
 
-                        if (semanticType == Guid.Empty)
+                        foreach ( MicroDataEntry semanticEntry in _microDataEntries )
                         {
-                            ProcessSymanticEntry(semanticEntry, body);
-                        }
-                        else if (WebContextualContentTypes.ContainsKey(semanticType))
-                        {
-                            if (!contentLookup.ContainsKey(semanticType))
-                            {
-                                contentLookup.Add(semanticType, WebContextualContentTypes[semanticType].GetCurrentContent(new WebContext()));
-                            }
+                            Guid semanticType = semanticEntry.ContentType.GetValueOrDefault(Guid.Empty);
 
-                            if (contentLookup[semanticType] != null)
+                            if ( semanticType == Guid.Empty )
                             {
                                 ProcessSymanticEntry(semanticEntry, body);
                             }
+                            else if ( WebContextualContentTypes.ContainsKey(semanticType) )
+                            {
+                                if ( !contentLookup.ContainsKey(semanticType) )
+                                {
+                                    contentLookup.Add(semanticType, WebContextualContentTypes[ semanticType ].GetCurrentContent(new WebContext()));
+                                }
+
+                                if ( contentLookup[ semanticType ] != null )
+                                {
+                                    ProcessSymanticEntry(semanticEntry, body);
+                                }
+                            }
                         }
-                    }
-                }
+
+                    }                }
                 catch (Exception ex)
                 {
                     new TCException(CSExceptionType.UnknownError, "MicroDataPlugin unknown error", ex).Log();
@@ -148,21 +149,23 @@ namespace FourRoads.TelligentCommunity.MicroData
             }
         }
 
-        private void ProcessSymanticEntry(MicroDataEntry semanticEntry, CQ body)
+        private void ProcessSymanticEntry(MicroDataEntry semanticEntry, IElement body)
         {
-            if (semanticEntry.Type == MicroDataType.itemprop ||
-                semanticEntry.Type == MicroDataType.rel)
+            foreach ( var entry in body.QuerySelectorAll(semanticEntry.Selector) )
             {
-                body.Select(semanticEntry.Selector).Attr(semanticEntry.Type.ToString(), semanticEntry.Value);
-            }
-            else if (semanticEntry.Type == MicroDataType.itemscope)
-            {
-                body.Select(semanticEntry.Selector).Each(node => node.SetAttribute("itemscope"));
-                body.Select(semanticEntry.Selector).Attr("itemtype", semanticEntry.Value);
-            }
-            else
-            {
-                body.Select(semanticEntry.Selector).Attr(semanticEntry.Value, semanticEntry.Value);
+                if ( semanticEntry.Type == MicroDataType.itemprop || semanticEntry.Type == MicroDataType.rel )
+                {
+                    entry.SetAttribute(semanticEntry.Type.ToString(), semanticEntry.Value);
+                }
+                else if ( semanticEntry.Type == MicroDataType.itemscope )
+                {
+                    entry.SetAttribute("itemtype", semanticEntry.Value);
+                    entry.SetAttribute("itemscope", string.Empty);
+                }
+                else
+                {
+                    entry.SetAttribute(semanticEntry.Value, semanticEntry.Value);
+                }
             }
         }
     }

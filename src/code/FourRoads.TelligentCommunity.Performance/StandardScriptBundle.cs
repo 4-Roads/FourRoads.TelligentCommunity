@@ -1,6 +1,6 @@
 using System.IO;
 using System.Web.Optimization;
-using CsQuery;
+
 using CsQuery.Engine;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using FourRoads.TelligentCommunity.Performance.Storage;
@@ -8,6 +8,8 @@ using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using System.Collections.Generic;
+using AngleSharp.Dom.Html;
+using AngleSharp.Dom;
 
 namespace FourRoads.TelligentCommunity.Performance
 {
@@ -41,18 +43,18 @@ namespace FourRoads.TelligentCommunity.Performance
         }
         }
 
-        public void BuildBundleData(ContentFragmentPageControl contentFragmentPage, CQ parsedContent)
+        public void BuildBundleData(ContentFragmentPageControl contentFragmentPage, IHtmlDocument parsedContent)
         {
             HandleInlineScripts(parsedContent , contentFragmentPage);
         }
 
-        public void ProcessDisplayElement(CQ parsedContent)
+        public void ProcessDisplayElement(IHtmlDocument parsedContent)
         {
-            CQ elements = parsedContent.Select(ReplaceSelector);
+            var elements = parsedContent.QuerySelectorAll(ReplaceSelector);
             bool foundFirstScript = false;
 
             ////WE can minify the inline javascript, however this costs more than the time it saves from the bytes saved not sent over the network
-            foreach (IDomObject element in elements)
+            foreach (IElement element in elements)
             {
                 string path = element.GetAttribute("src") ?? string.Empty;
 
@@ -66,7 +68,7 @@ namespace FourRoads.TelligentCommunity.Performance
             }
         }
 
-        private bool UpdateJavascriptPath(bool foundFirstScript, IDomObject element)
+        private bool UpdateJavascriptPath(bool foundFirstScript, IElement element)
         {
             if (foundFirstScript == false)
             {
@@ -103,14 +105,14 @@ namespace FourRoads.TelligentCommunity.Performance
             get { return _selector; }
         }
 
-        private void HandleInlineScripts(CQ parsedContent, ContentFragmentPageControl contentFragmentPage)
+        private void HandleInlineScripts(IHtmlDocument parsedContent, ContentFragmentPageControl contentFragmentPage)
         {
             if (Configuration.OptomizeGlobalJs)
             {
                 //Get the themes CSS files
-                CQ elements = parsedContent.Select(BuildSelector);
+                var elements = parsedContent.QuerySelectorAll(BuildSelector);
 
-                foreach (IDomObject element in elements)
+                foreach (var element in elements)
                 {
                     string src = element.GetAttribute("src");
 
@@ -123,9 +125,9 @@ namespace FourRoads.TelligentCommunity.Performance
                     }
                 }
                 //Get the themes axd files
-                elements = parsedContent.Select(BuildAxdSelector);
+                elements = parsedContent.QuerySelectorAll(BuildAxdSelector);
                 int i = 0;
-                foreach (IDomObject element in elements)
+                foreach (var element in elements)
                 {
                     string src = element.GetAttribute("src");
 
