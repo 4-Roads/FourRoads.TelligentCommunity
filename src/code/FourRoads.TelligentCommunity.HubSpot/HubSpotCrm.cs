@@ -226,18 +226,25 @@ namespace FourRoads.TelligentCommunity.HubSpot
             {
                 string url = PublicApi.Url.Absolute(PublicApi.Url.ApplicationEscape("~"));
 
-                if ( DateTime.Now > _expires.AddHours(-1) && !string.IsNullOrWhiteSpace(_refreshToken) )
+                if ( !string.IsNullOrWhiteSpace(_refreshToken) )
                 {
-                    FormUrlEncodedContent conent = new FormUrlEncodedContent(new Dictionary<string, string> {
-                    {"grant_type","refresh_token"},
-                    {"client_id",_configuration.GetString("ClientId")},
-                    {"client_secret",_configuration.GetString("ClientSecret")},
-                    {"redirect_uri",url},
-                    {"refresh_token",_refreshToken}});
+                    if ( DateTime.Now > _expires.AddHours(-1) )
+                    {
+                        FormUrlEncodedContent conent = new FormUrlEncodedContent(new Dictionary<string, string> {
+                            {"grant_type","refresh_token"},
+                            {"client_id",_configuration.GetString("ClientId")},
+                            {"client_secret",_configuration.GetString("ClientSecret")},
+                            {"redirect_uri",url},
+                            {"refresh_token",_refreshToken}});
 
-                    dynamic repsonse = CreateOauthRequest(conent);
+                        dynamic repsonse = CreateOauthRequest(conent);
 
-                    ProcessHubspotRequestRepsonse(repsonse);
+                        ProcessHubspotRequestRepsonse(repsonse);
+                    }
+                }
+                else
+                {
+                    PublicApi.Eventlogs.Write("Hubspot API Issue: Refresh token blank, youn need to re-link your account", new EventLogEntryWriteOptions());
                 }
             }
 
@@ -262,6 +269,10 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 ProcessHubspotRequestRepsonse(repsonse);
 
                 return repsonse.error != null;
+            }
+            else
+            {
+                PublicApi.Eventlogs.Write("Hubspot API Issue: auth code blank, youn need to link your account", new EventLogEntryWriteOptions());
             }
 
             return false;
