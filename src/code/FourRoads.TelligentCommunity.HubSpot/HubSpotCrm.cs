@@ -71,7 +71,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 {
                     if ( rd.ReadToNextSibling("Fields") )
                     {
-                        while ( rd.ReadToDescendant("Field") )
+                        while ( rd.ReadToNextSibling("Field") )
                         {
                             string srcField = rd.GetAttribute("src_field");
                             string destField = rd.GetAttribute("dest_field");
@@ -312,7 +312,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                 dynamic response = CreateApiRequest(string.Format("contacts/v1/contact/createOrUpdate/email/{0}/", PublicApi.Url.Encode(u.PrivateEmail)), "{" + sb.ToString() + "}");
 
-                if ( response.error != null )
+                if ( response.status != null && response.status == "error")
                 {
                     PublicApi.Eventlogs.Write("Hubspot API Issue:" + response.error_description, new EventLogEntryWriteOptions());
                 }
@@ -363,7 +363,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             if ( plg != null )
             {
-                if ( !plg.InitialLinkoAuth(AuthCode.Text) )
+                if ( plg.InitialLinkoAuth(AuthCode.Text) )
                 {
                     Message.Text = "<label style=\"color:red\">Failed to obtain oauth credentials</label>";
                 }
