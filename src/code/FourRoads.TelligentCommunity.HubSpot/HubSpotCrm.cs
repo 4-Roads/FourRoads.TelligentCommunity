@@ -71,7 +71,9 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 {
                     if ( rd.ReadToNextSibling("Fields") )
                     {
-                        while ( rd.ReadToNextSibling("Field") )
+                        rd.Read();
+
+                        while ( rd.ReadToFollowing("Field") )
                         {
                             string srcField = rd.GetAttribute("src_field");
                             string destField = rd.GetAttribute("dest_field");
@@ -82,7 +84,6 @@ namespace FourRoads.TelligentCommunity.HubSpot
                             }
                         }
                     }
-
                 }
             }
 
@@ -302,7 +303,14 @@ namespace FourRoads.TelligentCommunity.HubSpot
                         {
                             if ( fields.Contains(src) )
                             {
-                                WriteJsonProp(JsonObject, Mappings[ src ], fields[ src ].First());
+                                string data = fields[ src ].First();
+
+                                if ( PublicApi.UserProfileFields.Get(src).HasMultipleValues??false )
+                                {
+                                    data = data.Replace(",", ";");
+                                }
+
+                                WriteJsonProp(JsonObject, Mappings[ src ], data);
                             }
                         }
 
@@ -314,7 +322,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                 if ( response.status != null && response.status == "error")
                 {
-                    PublicApi.Eventlogs.Write("Hubspot API Issue:" + response.error_description, new EventLogEntryWriteOptions());
+                    PublicApi.Eventlogs.Write("Hubspot API Issue:" + response, new EventLogEntryWriteOptions());
                 }
             });
         }
