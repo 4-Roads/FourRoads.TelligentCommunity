@@ -12,29 +12,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
     {
         private ITranslatablePluginController _translatablePluginController;
 
-        public string Description
-        {
-            get
-            {
-                return "Logon Navigation link";
-            }
-        }
+        public string Description => "Logon Navigation link";
 
-        public string Name
-        {
-            get
-            {
-                return "4 Roads - Navigation Logon";
-            }
-        }
+        public string Name => "4 Roads - Navigation Logon";
 
-        public string NavigationTypeName
-        {
-            get
-            {
-                return "Logon";
-            }
-        }
+        public string NavigationTypeName => "Logon";
 
         public PropertyGroup[] GetConfigurationProperties()
         {
@@ -46,7 +28,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
             return new CustomNavigationItem(id,
                         () => _translatablePluginController.GetLanguageResourceValue("Logon"),
                         () => PublicApi.CoreUrls.LogIn(new CoreUrlLoginOptions { ReturnToCurrentUrl = true}), i => PublicApi.Users.AccessingUser.Username == PublicApi.Users.AnonymousUserName,
-                        () => PublicApi.Url.CurrentContext.PageName == "common-login")
+                        () =>
+                        {
+                            if (PublicApi.Url.CurrentContext != null &&
+                                !string.IsNullOrWhiteSpace(PublicApi.Url.CurrentContext.PageName))
+                                return PublicApi.Url.CurrentContext.PageName == "common-login";
+                            return false;
+                        })
             {
                 Plugin = this,
                 Children = new ICustomNavigationItem[ 0 ],
@@ -85,29 +73,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
     {
         private ITranslatablePluginController _translatablePluginController;
 
-        public string Description
-        {
-            get
-            {
-                return "Register Navigation link";
-            }
-        }
+        public string Description => "Register Navigation link";
 
-        public string Name
-        {
-            get
-            {
-                return "4 Roads - Navigation Register";
-            }
-        }
+        public string Name => "4 Roads - Navigation Register";
 
-        public string NavigationTypeName
-        {
-            get
-            {
-                return "Register";
-            }
-        }
+        public string NavigationTypeName => "Register";
 
         public PropertyGroup[] GetConfigurationProperties()
         {
