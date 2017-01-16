@@ -11,16 +11,13 @@ using System.Xml;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.DynamicConfiguration.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
-using System.Web.UI.WebControls;
-using System.Web.UI;
 
 namespace FourRoads.TelligentCommunity.HubSpot
 {
-    public class HubspotCrm : IConfigurablePlugin , ISingletonPlugin  , ICrmPlugin
+    public class HubspotCrm : IConfigurablePlugin , ISingletonPlugin  , ICrmPlugin , IPluginGroup
     {
         IPluginConfiguration _configuration;
         string _accessToken;
@@ -28,21 +25,9 @@ namespace FourRoads.TelligentCommunity.HubSpot
         DateTime _expires = DateTime.Now;
         Dictionary<string, string> _mappings;
 
-        public string Description
-        {
-            get
-            {
-                return "Hubspot plugin";
-            }
-        }
+        public string Description => "Hubspot plugin";
 
-        public string Name
-        {
-            get
-            {
-                return "4 Roads - Hubspot Core";
-            }
-        }
+        public string Name => "4 Roads - Hubspot Core";
 
         public void Initialize()
         {
@@ -283,7 +268,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
             {
-                PublicApi.Eventlogs.Write(string.Format("Syncronizing {0} to Hubspot", u.Username), new EventLogEntryWriteOptions() { EventType = "Information" });
+                PublicApi.Eventlogs.Write($"Syncronizing {u.Username} to Hubspot", new EventLogEntryWriteOptions() { EventType = "Information" });
 
                 string parameters = string.Empty;
                 StringBuilder sb = new StringBuilder();
@@ -318,7 +303,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     }
                 }
 
-                dynamic response = CreateApiRequest(string.Format("contacts/v1/contact/createOrUpdate/email/{0}/", PublicApi.Url.Encode(u.PrivateEmail)), "{" + sb.ToString() + "}");
+                dynamic response = CreateApiRequest($"contacts/v1/contact/createOrUpdate/email/{PublicApi.Url.Encode(u.PrivateEmail)}/", "{" + sb + "}");
 
                 if ( response.status != null && response.status == "error")
                 {
@@ -326,88 +311,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 }
             });
         }
+
+        public IEnumerable<Type> Plugins => new Type[] {typeof(PingJob) };
     }
-
-    public class AuthorizeButton : WebControl, IPropertyControl , INamingContainer
-    {
-        protected Button LinkButton;
-        protected TextBox AuthCode;
-        protected Literal Message; 
-
-        protected override void EnsureChildControls()
-        {
-            base.EnsureChildControls();
-
-            if ( AuthCode == null )
-            {
-                AuthCode = new TextBox();
-                AuthCode.ID = "AuthCode";
-                Controls.Add(AuthCode);
-            }
-
-            if ( Message == null )
-            {
-                Message = new Literal();
-                Message.ID = "Message";
-                Message.Text = "<label>Press this button once you have obtained your authorization code</label>";
-
-                Controls.Add(Message);
-            }
-
-            if ( LinkButton == null )
-            { 
-                LinkButton = new Button();
-                LinkButton.ID = "LinkBtn";
-                LinkButton.Text = "Link oAuth";
-                LinkButton.Click += LinkButton_Click;
-
-                Controls.Add(LinkButton);
-            }
-        }
-
-        private void LinkButton_Click(object sender, EventArgs e)
-        {
-            var plg = PluginManager.GetSingleton<HubspotCrm>();
-
-            if ( plg != null )
-            {
-                if ( plg.InitialLinkoAuth(AuthCode.Text) )
-                {
-                    Message.Text = "<label style=\"color:red\">Failed to obtain oauth credentials</label>";
-                }
-                else
-                {
-                    Message.Text = "<label style=\"color:green\">oAuth Syncronized</label>";
-                }
-            }
-        }
-
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-        }
-
-        public ConfigurationDataBase ConfigurationData { get; set; }
-
-        public Property ConfigurationProperty
-        { get; set; }
-
-        public event ConfigurationPropertyChanged ConfigurationValueChanged;
-
-        public new Control Control
-        {
-            get { return this; }
-        }
-
-        public object GetConfigurationPropertyValue()
-        {
-            return null;
-        }
-
-        public void SetConfigurationPropertyValue(object value)
-        {
-
-        }
-    }
-
 }

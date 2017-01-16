@@ -60,7 +60,9 @@
     <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AuthorizeButton.cs" />
     <Compile Include="HubSpotCrm.cs" />
+    <Compile Include="PingJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
