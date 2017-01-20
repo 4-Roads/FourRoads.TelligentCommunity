@@ -7,25 +7,33 @@ using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Logic;
 using FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss;
+using FourRoads.TelligentCommunity.RenderingHelper;
 using Ninject.Modules;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.DynamicConfiguration.Controls;
 using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Extensibility.Api.Version1;
 
 namespace FourRoads.TelligentCommunity.MetaData
 {
-    public class CorePlugin : IBindingsLoader, IPluginGroup,IConfigurablePlugin
+    public class CorePlugin : CQObserverPluginBase, IBindingsLoader, IPluginGroup,IConfigurablePlugin
     {
         private IMetaDataLogic _metaDataLogic;
         private PluginGroupLoader _pluginGroupLoader;
         private MetaDataConfiguration _metaConfig = null;
 
-        public void Initialize()
+        public override void Initialize()
         {
+            base.Initialize();
             if (_metaConfig != null)
             {
                 MetaDataLogic.UpdateConfiguration(_metaConfig);
             }
+        }
+
+        protected override ICQProcessor GetProcessor()
+        {
+            return (ICQProcessor) MetaDataLogic;
         }
 
         protected internal IMetaDataLogic MetaDataLogic
@@ -40,12 +48,12 @@ namespace FourRoads.TelligentCommunity.MetaData
             }
         }
 
-        public string Name
+        public override string Name
         {
             get { return "4 Roads - MetaData Plugin"; }
         }
 
-        public string Description
+        public override string Description
         {
             get { return "This plugin allows a user to specify metadata overrides for any specific page in the site"; }
         }
@@ -69,7 +77,7 @@ namespace FourRoads.TelligentCommunity.MetaData
             }
         }
 
-        public IEnumerable<Type> Plugins
+        public override IEnumerable<Type> Plugins
         {
             get
             {
@@ -78,7 +86,8 @@ namespace FourRoads.TelligentCommunity.MetaData
                     Type[] priorityPlugins =
                     {
                         typeof (DependencyInjectionPlugin),
-                        typeof (FactoryDefaultWidgetProviderInstaller)
+                        typeof (FactoryDefaultWidgetProviderInstaller),
+                        typeof (RenderingObserverPlugin)
                     };
 
                     _pluginGroupLoader = new PluginGroupLoader();
@@ -98,6 +107,8 @@ namespace FourRoads.TelligentCommunity.MetaData
             }
 
             _metaConfig.ExtendedEntries = configuration.GetString("extendedtags").Split(new[] {','} , StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+            _metaConfig.GoogleTagHead = configuration.GetString("gtmHeadTag").Trim();
+            _metaConfig.GoogleTagBody = configuration.GetString("gtmBodyTag").Trim();
         }
 
         public PropertyGroup[] ConfigurationOptions
@@ -111,8 +122,18 @@ namespace FourRoads.TelligentCommunity.MetaData
 
                 var property1 = new Property("extendedtags", "Additional Tags", PropertyType.Custom, 0, "og:title,og:type,og:image,og:url,og:description,fb:admins,twitter:card,twitter:url,twitter:title,twitter:description,twitter:image");
                 property1.DescriptionText = "Provide a list of comma seperated meta tags that will be available to the end user to configure";
-                property1.ControlType = typeof (MultilineStringControl); 
-                
+                property1.ControlType = typeof (MultilineStringControl);
+
+                propertyGroupArray[0].Properties.Add(property1);
+
+                property1 = new Property("gtmHeadTag", "GTM Head tag", PropertyType.Custom, 1, "");
+                property1.DescriptionText = "Google tag manager head tag";
+                property1.ControlType = typeof(MultilineStringControl);
+                propertyGroupArray[0].Properties.Add(property1);
+
+                property1 = new Property("gtmBodyTag", "GTM Body tag", PropertyType.Custom, 2, "");
+                property1.DescriptionText = "Google tag manager body tag";
+                property1.ControlType = typeof(MultilineStringControl);
                 propertyGroupArray[0].Properties.Add(property1);
 
                 return propertyGroupArray;

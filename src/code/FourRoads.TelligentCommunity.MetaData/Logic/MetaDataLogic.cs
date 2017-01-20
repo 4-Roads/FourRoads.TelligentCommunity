@@ -9,9 +9,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using CsQuery;
 using FourRoads.Common;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Security;
+using FourRoads.TelligentCommunity.RenderingHelper;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -22,7 +24,7 @@ using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.MetaData.Logic
 {
-    public class MetaDataLogic : IMetaDataLogic
+    public class MetaDataLogic : ICQProcessor, IMetaDataLogic
     {
         private static string _imageRegEx = @"<img[^>]*src=(?:(""|')(?<url>[^\1]*?)\1|(?<url>[^\s|""|'|>]+))";
         private static Regex _regex = new Regex(_imageRegEx, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -31,6 +33,22 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         private readonly XmlSerializer _metaDataSerializer = new XmlSerializer(typeof(MetaData));
         private static readonly Regex MakeSafeFileNameRegEx = new Regex(CentralizedFileStorage.ValidFileNameRegexPattern, RegexOptions.Compiled);
         private MetaDataConfiguration _metaConfig;
+
+        public void Process(CQ parsedContent)
+        {
+            if(!String.IsNullOrEmpty(_metaConfig.GoogleTagHead) && !String.IsNullOrEmpty(_metaConfig.GoogleTagBody))
+            {
+                CQ head = parsedContent["head"];
+                CQ fragment = CQ.CreateFragment(_metaConfig.GoogleTagHead);
+                CQ firstChild = head.Find(":first");
+                fragment.InsertBefore(firstChild);
+
+                CQ body = parsedContent.Select("body");
+                firstChild = body.Find(":first");
+                fragment = CQ.CreateFragment(_metaConfig.GoogleTagBody);
+                fragment.InsertBefore(firstChild);
+            }
+        }
 
         public  bool CanEdit
         {
