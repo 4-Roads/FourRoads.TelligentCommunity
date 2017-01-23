@@ -57,10 +57,6 @@
              
                   #if ($core_v2_utility.IsMatch($keyValue.Value, "og:"))
                     #set($added =  $core_v2_page.AddOpenGraphMetaTag($keyValue.Value, $value))
-                  #elseif($core_v2_utility.IsMatch($keyValue.Key, "gtm:head"))
-                    #registerEndOfPageHtml("gtm-head")
-                      $value
-                    #end
                   #elseif($core_v2_utility.IsMatch($keyValue.Key, "gtm:frame"))
                     #registerEndOfPageHtml("gtm-frame")
                       $value
