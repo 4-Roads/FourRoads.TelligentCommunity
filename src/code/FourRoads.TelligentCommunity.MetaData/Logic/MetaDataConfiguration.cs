@@ -11,7 +11,6 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         }
 
         public List<string> ExtendedEntries;
-        public string GoogleTagHead;
-        public string GoogleTagBody;
+
     }
 }

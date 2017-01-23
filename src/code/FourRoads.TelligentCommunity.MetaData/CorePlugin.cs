@@ -107,8 +107,6 @@ namespace FourRoads.TelligentCommunity.MetaData
             }
 
             _metaConfig.ExtendedEntries = configuration.GetString("extendedtags").Split(new[] {','} , StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
-            _metaConfig.GoogleTagHead = configuration.GetString("gtmHeadTag").Trim();
-            _metaConfig.GoogleTagBody = configuration.GetString("gtmBodyTag").Trim();
         }
 
         public PropertyGroup[] ConfigurationOptions
@@ -126,19 +124,7 @@ namespace FourRoads.TelligentCommunity.MetaData
 
                 propertyGroupArray[0].Properties.Add(property1);
 
-                property1 = new Property("gtmHeadTag", "GTM Head tag", PropertyType.Custom, 1, "");
-                property1.DescriptionText = "Google tag manager head tag";
-                property1.ControlType = typeof(MultilineStringControl);
-                propertyGroupArray[0].Properties.Add(property1);
-
-                property1 = new Property("gtmBodyTag", "GTM Body tag", PropertyType.Custom, 2, "");
-                property1.DescriptionText = "Google tag manager body tag";
-                property1.ControlType = typeof(MultilineStringControl);
-                propertyGroupArray[0].Properties.Add(property1);
-
                 return propertyGroupArray;
-
-
             }
         }
     }

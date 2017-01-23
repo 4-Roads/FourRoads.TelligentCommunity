@@ -20,7 +20,6 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         public Guid ContainerId { get; set; }
         public bool InheritData { get; set; }
         public Guid ContainerTypeId { get; set; }
-        public String GoogleTagHead { get; set; }
-        public String GoogleTagBody { get; set; }
+
     }
 }
