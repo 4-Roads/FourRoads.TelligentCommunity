@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.Sentrus</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.Sentrus</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -81,6 +81,9 @@
     <Reference Include="Telligent.Evolution.Api">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Blogs">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.Components">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Components.dll</HintPath>
     </Reference>
@@ -90,8 +93,20 @@
     <Reference Include="Telligent.Evolution.Core">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Forums">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Forums.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.MailGateway.MailRoom">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.MailGateway.MailRoom.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.MediaGalleries">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Platform">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Wikis">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Wikis.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Glow">
       <HintPath>..\..\lib\Telligent\Telligent.Glow.dll</HintPath>

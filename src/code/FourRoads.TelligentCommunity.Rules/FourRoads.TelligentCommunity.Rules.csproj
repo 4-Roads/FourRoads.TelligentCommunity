@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.Rules</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.Rules</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -58,6 +58,9 @@
     </Reference>
     <Reference Include="Telligent.Evolution.Core">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Platform">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Rest">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Rest.dll</HintPath>

@@ -9,7 +9,6 @@ using Telligent.Caching.Web;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.CoreServices.WebContext.Services;
-using Telligent.Evolution.Discussions.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Caching.Version1;

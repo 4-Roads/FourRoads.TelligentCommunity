@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<connectionStrings>
-  <add name="SiteSqlServer" connectionString="server=(local);uid=;pwd=;Trusted_Connection=yes;database=TelligentCommunity" />
-</connectionStrings>

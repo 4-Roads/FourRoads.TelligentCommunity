@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.ConfigurationExtensions</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.ConfigurationExtensions</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -78,6 +78,9 @@
     <Reference Include="Telligent.Evolution.Blogs">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Calendar">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Calendar.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.Components">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Components.dll</HintPath>
     </Reference>
@@ -92,9 +95,15 @@
     <Reference Include="Telligent.Evolution.Extensions.Calendar">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Extensions.Calendar.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Forums">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Forums.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.MediaGalleries, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Platform">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.ScriptedContentFragments">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.ScriptedContentFragments.dll</HintPath>

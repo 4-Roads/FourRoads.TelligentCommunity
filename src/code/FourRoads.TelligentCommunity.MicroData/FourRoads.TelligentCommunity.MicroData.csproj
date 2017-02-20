@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.MicroData</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.MicroData</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -98,6 +98,9 @@
     <Reference Include="Telligent.Evolution.Blogs">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Calendar">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Calendar.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.Components">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Components.dll</HintPath>
     </Reference>
@@ -107,8 +110,14 @@
     <Reference Include="Telligent.Evolution.Discussions">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Discussions.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Forums">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Forums.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.MediaGalleries">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Platform">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Wikis, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

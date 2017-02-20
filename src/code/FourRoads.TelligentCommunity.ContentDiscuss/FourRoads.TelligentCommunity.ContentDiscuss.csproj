@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.ContentDiscuss</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.ContentDiscuss</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
@@ -80,8 +80,7 @@
     <Reference Include="Telligent.Evolution.Api">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Evolution.Blogs, Version=7.5.0.32466, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Telligent.Evolution.Blogs">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Components">
@@ -98,8 +97,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Discussions.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Forums">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Forums.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Platform">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.ScriptedContentFragments">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.ScriptedContentFragments.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Wikis">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Wikis.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
