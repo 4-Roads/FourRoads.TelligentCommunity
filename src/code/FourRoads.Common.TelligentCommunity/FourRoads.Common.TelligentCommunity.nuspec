@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
-        <id>FourRoads.TelligentCommunity92.Common</id>
+        <id>FourRoads.TelligentCommunity10.Common</id>
         <version>$version$</version>
-		<title>FourRoads.TelligentCommunity92.Common</title>
+		<title>FourRoads.TelligentCommunity10.Common</title>
         <authors>$author$</authors>
         <owners>$author$</owners>
         <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
