@@ -20,5 +20,6 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         public Guid ContainerId { get; set; }
         public bool InheritData { get; set; }
         public Guid ContainerTypeId { get; set; }
+
     }
 }

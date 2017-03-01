@@ -32,13 +32,13 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         private static readonly Regex MakeSafeFileNameRegEx = new Regex(CentralizedFileStorage.ValidFileNameRegexPattern, RegexOptions.Compiled);
         private MetaDataConfiguration _metaConfig;
 
-        public  bool CanEdit
+        public bool CanEdit
         {
             get
             {
                 if (PublicApi.Url.CurrentContext != null && PublicApi.Url.CurrentContext.ContextItems != null && PublicApi.Users.AccessingUser != null)
                 {
-                    var items  = PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems();
+                    var items = PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems();
 
                     if (items.Any())
                     {
@@ -67,9 +67,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
         public string FormatMetaString(string rawFieldValue, string seperator, IDictionary namedParameters)
         {
-            return matchFields.Replace(rawFieldValue , match =>
+            return matchFields.Replace(rawFieldValue, match =>
             {
-                string trimmend = match.Value.Trim(new char[]{' ' , '}', '{' });
+                string trimmend = match.Value.Trim(new char[] { ' ', '}', '{' });
 
                 if (namedParameters.Contains(trimmend))
                 {
@@ -199,7 +199,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
         private ContentDetails GetCurrentContentDetails()
         {
-            ContentDetails details = (ContentDetails)CacheService.Get("ContentDetails", CacheScope.Context) ?? new ContentDetails() {PageName = "default"};
+            ContentDetails details = (ContentDetails)CacheService.Get("ContentDetails", CacheScope.Context) ?? new ContentDetails() { PageName = "default" };
 
             if (PublicApi.Url.CurrentContext != null && details.PageName == "default")
             {
@@ -209,7 +209,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 {
                     details.ContentId = coa.ContentId;
                     details.ContentTypeId = coa.ContentTypeId;
-                },a =>
+                }, a =>
                 {
                     details.ApplicationId = a.ApplicationId;
                     details.ApplicationTypeId = a.ApplicationTypeId;
@@ -220,8 +220,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 });
             }
 
-            CacheService.Put("ContentDetails", details , CacheScope.Context);
-            
+            CacheService.Put("ContentDetails", details, CacheScope.Context);
+
             return details;
         }
 
@@ -261,7 +261,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         public static string GetHashString(string inputString)
         {
             StringBuilder sb = new StringBuilder();
-     
+
             foreach (byte b in GetHash(inputString))
                 sb.Append(b.ToString("X2"));
 
@@ -310,10 +310,10 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             if (currentApplication != null)
                 applicationUse(currentApplication);
-            
+
             if (currentContent != null)
                 contentUse(currentContent);
-            
+
             if (currentContainer != null)
                 containerUse(currentContainer);
         }
@@ -378,7 +378,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                     if (context != null && container.ParentContainer != null)
                     {
                         details.ApplicationId = Guid.Empty;
-                        details.ApplicationTypeId = Guid.Empty; 
+                        details.ApplicationTypeId = Guid.Empty;
                         details.ContainerId = container.ParentContainer.ContainerId;
                         details.ContainerTypeId = container.ParentContainer.ContainerTypeId;
                         details.PageName = context.PageName;
@@ -424,7 +424,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         public string[] GetAvailableExtendedMetaTags()
         {
             return _metaConfig.ExtendedEntries.ToArray();
-        } 
+        }
 
         public void SaveMetaDataConfiguration(string title, string description, string keywords, bool inherit, IDictionary extendedTags)
         {
@@ -492,7 +492,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             StringBuilder sb = new StringBuilder();
 
-            using(StringWriter sw = new StringWriter(sb))
+            using (StringWriter sw = new StringWriter(sb))
             using (XmlTextWriter tw = new XmlTextWriter(sw))
                 group.Serialize(tw);
 
