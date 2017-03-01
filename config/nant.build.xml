@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project name="FourRoads.Common" default="help" xmlns="http://nant.sf.net/release/0.85/nant.xsd">
+	<description>Build file for the "4 Roads Telligent Community" solution.</description>
+	<include buildfile="common\build.properties.xml" />
+	<include buildfile="common\build.targets.xml" />
+
+	<!-- NAnt properties -->
+	<property name="nant.settings.targetframework" value="net-4.6" />
+	<property name="nant.settings.currentframework" value="net-4.5" />
+	
+	<target name="all"
+					description="The main target for full build process execution."
+					depends="clean get compile publish" />
+
+	<target name="distribute" description="Distribute assets">
+		<echo message="Calling 'distribute' target" />
+	</target>
+
+	<target name="help">
+		<echo message="The skeleton file for the build process is designed to execute the following targets in turn:" />
+		<echo message="-- clean" />
+		<echo message="-- get" />
+		<echo message="-- version" />
+		<echo message="-- dbbuild" />
+		<echo message="-- compile" />
+		<echo message="-- compile-tests" />
+		<echo message="-- test" />
+		<echo message="-- document" />
+		<echo message="-- distribute" />
+		<echo message="-- revert" />
+		<echo message="-- publish" />
+	</target>
+
+</project>
