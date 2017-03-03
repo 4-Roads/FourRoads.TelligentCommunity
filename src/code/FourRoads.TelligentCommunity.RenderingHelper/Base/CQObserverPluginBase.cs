@@ -49,7 +49,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
             }
             catch(Exception ex)
             {
-                new TCException(CSExceptionType.UnknownError, "Rendering observer plugin error", ex).Log();
+                new TCException( "Rendering observer plugin error", ex).Log();
             }
 		}
 

@@ -5,45 +5,140 @@
 // //  ------------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
-using FourRoads.Common.TelligentCommunity.Plugins.HttpModules;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using DryIoc;
+using FourRoads.Common.Interfaces;
+using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using Telligent.Common;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api;
 using Telligent.Evolution.Extensibility.Version1;
+using FourRoads.Common.Sql;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
-    /// <summary>
-    ///   Plugin base class that loads Four Roads dependency injection correctly
-    /// </summary>
-    public abstract class PluginBase<T> : IPlugin where T : Settings<T>, new()
+    public class Injector : IObjectFactory
     {
-        protected PluginBase()
+        public static T Get<T>()
         {
-            Debug.Assert(Settings<T>.Instance() != null);
-
-            Injector.LoadBindingsFromSettings(Settings<T>.Instance());
+            return DependencyInjectionPlugin._container.Resolve<T>();
         }
 
-        #region IPlugin Members
+        public object Get(Type type)
+        {
+            return DependencyInjectionPlugin._container.Resolve(type);
+        }
 
-        public abstract string Description { get; }
-
-        public virtual void Initialize() {}
-
-        public abstract string Name { get; }
-
-        #endregion
+        T IObjectFactory.Get<T>()
+        {
+            return DependencyInjectionPlugin._container.Resolve<T>();
+        }
     }
 
-    public class DependencyInjectionPlugin : PluginBase<DefaultIocHandler> , ISingletonPlugin
+    public class DependencyInjectionPlugin : ISingletonPlugin
     {
-        public override string Name
+        internal static Container _container;
+
+        private static object _initializedLock = new object();
+        private static bool _initialized = false;
+
+        public DependencyInjectionPlugin()
         {
-            get { return "4-Roads DI"; }
+            lock (_initializedLock)
+            {
+                if (!_initialized)
+                {
+                    _initialized = true;
+                    // Only include one instance of common bindings
+                    Type type = typeof(IBindingsLoader);
+
+                    IEnumerable<Type> types = AppDomain.CurrentDomain.GetAssemblies().ToList().SelectMany(a =>
+                    {
+                        try
+                        {
+                            return a.GetTypes();
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ex is ReflectionTypeLoadException)
+                            {
+                                ReflectionTypeLoadException rtl = ex as ReflectionTypeLoadException;
+
+                                foreach (Exception rtlEx in rtl.LoaderExceptions)
+                                {
+                                    new TCException(string.Format("Failed to load bindings extension from {0}, because of:", a.FullName), rtlEx).Log();
+                                }
+
+                            }
+                            else
+                            {
+                                new TCException(string.Format("Failed to load bindings extension from {0}", a.FullName), ex).Log();
+                            }
+                        }
+                        return new Type[0];
+                    }
+                        ).
+                        Where(t => type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                    List<IBindingsLoader> bindingsLoaders = new List<IBindingsLoader>();
+
+                    foreach (var bindingsType in types)
+                    {
+                        try
+                        {
+                            bindingsLoaders.Add(AppDomain.CurrentDomain.CreateInstanceAndUnwrap(bindingsType.Assembly.FullName, bindingsType.FullName) as IBindingsLoader);
+                        }
+                        catch (Exception ex)
+                        {
+                            new TCException(string.Format("Failed to load {0} bindings extension", bindingsType.FullName), ex).Log();
+                        }
+                    }
+
+                    bindingsLoaders.Sort((a, b) => a.LoadOrder - b.LoadOrder);
+
+                    _container = new Container(rules => rules.WithAutoConcreteTypeResolution().With(FactoryMethod.ConstructorWithResolvableArguments).WithUnknownServiceResolvers(request =>
+                        new DelegateFactory(_ =>
+                        {
+                            if ( request.ServiceType.GetInterfaces().Contains(typeof(IApi)) )
+                            {
+                                // Get the generic type definition
+                                MethodInfo method = typeof(Apis).GetMethod("Get", BindingFlags.Public | BindingFlags.Static);
+
+                                // Build a method with the specific type argument you're interested in
+                                method = method.MakeGenericMethod(request.ServiceType);
+                                // The "null" is because it's a static method
+                                return method.Invoke(null, null);
+                            }
+
+                            return Services.Get(request.ServiceType);
+                        }
+                    )));
+
+                    foreach ( IBindingsLoader bindingsLoader in bindingsLoaders)
+                    {
+                        bindingsLoader.LoadBindings(_container);
+                    }
+
+                    _container.Register<FourRoads.Common.Interfaces.ICache , TCCache>();
+                    _container.Register<FourRoads.Common.Interfaces.IObjectFactory, Injector>();
+                    _container.Register<FourRoads.Common.Interfaces.IPagedCollectionFactory, PagedCollectionFactory>();
+                    _container.Register<FourRoads.Common.Sql.IDataHelper, SqlDataHelper>();
+                    _container.Register<FourRoads.Common.Sql.IDBFactory, SqlDataLayer>();
+                }
+            }
         }
 
-        public override string Description
+        public void Initialize()
         {
-            get { return "This plugin ensures that dependency injection has been initialized"; }
+            
+
         }
+
+        public string Name => "4-Roads DI";
+
+        public string Description => "This plugin ensures that dependency injection has been initialized";
     }
 }

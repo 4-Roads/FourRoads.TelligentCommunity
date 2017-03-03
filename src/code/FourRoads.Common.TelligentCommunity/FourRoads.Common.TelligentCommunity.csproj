@@ -33,28 +33,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FourRoads.Common, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.4.0.1\lib\FourRoads.Common.dll</HintPath>
+    <Reference Include="FourRoads.Common, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FourRoads.Common.Sql, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.4.0.1\lib\FourRoads.Common.Sql.dll</HintPath>
+    <Reference Include="FourRoads.Common.Sql, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.Sql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FourRoads.Common.Templates, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.4.0.1\lib\FourRoads.Common.Templates.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FourRoads.Common.Web, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.4.0.1\lib\FourRoads.Common.Web.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Ninject, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Ninject.2.2.1.4\lib\net40-Full\Ninject.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Ninject.Extensions.Xml, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Ninject.Extensions.Xml.2.2.0.6\lib\net40-Full\Ninject.Extensions.Xml.dll</HintPath>
+    <Reference Include="FourRoads.Common.Web, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NVelocity, Version=1.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -124,6 +112,10 @@
     <Compile Include="Controls\MultiSelectRepeater.cs" />
     <Compile Include="Controls\PasswordPropertyControl.cs" />
     <Compile Include="Diagnostics.cs" />
+    <Compile Include="DryIoc\AsyncExecutionFlowScopeContext.cs" />
+    <Compile Include="DryIoc\Container.cs" />
+    <Compile Include="DryIoc\FastExpressionCompiler.cs" />
+    <Compile Include="DryIoc\ImTools.cs" />
     <Compile Include="Plugins\Base\CFSFilestoreInstaller.cs" />
     <Compile Include="Plugins\Base\FactoryDefaultThemeInstaller.cs" />
     <Compile Include="Plugins\Base\FactoryDefaultWidgetProviderInstaller.cs" />
@@ -132,10 +124,6 @@
     <Compile Include="Plugins\Base\SqlScriptsInstaller.cs" />
     <Compile Include="Plugins\Base\VideoFileViewerBase.cs" />
     <Compile Include="Plugins\Extensions\ContentExtension.cs" />
-    <Compile Include="Plugins\HttpModules\DefaultIocHandler.cs" />
-    <Compile Include="Plugins\HttpModules\DefaultNinjectHttpModule.cs" />
-    <Compile Include="Plugins\HttpModules\DefaultNinjectModule.cs" />
-    <Compile Include="Plugins\HttpModules\WrappedKernel.cs" />
     <Compile Include="Plugins\Interfaces\IBindingsLoader.cs" />
     <Compile Include="Plugins\Interfaces\ICrmPlugin.cs" />
     <Compile Include="Plugins\Navigation\NavigationExtensions.cs" />

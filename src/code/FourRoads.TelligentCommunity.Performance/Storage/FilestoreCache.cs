@@ -53,7 +53,7 @@ namespace FourRoads.TelligentCommunity.Performance.Storage
                     }
                     catch (Exception ex)
                     {
-                        new TCException(CSExceptionType.UnknownError, "Failed to clean up performance directory", ex).Log();
+                        new TCException( "Failed to clean up performance directory", ex).Log();
                     }
                 }
             }

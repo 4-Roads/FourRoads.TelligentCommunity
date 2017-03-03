@@ -84,7 +84,7 @@ namespace FourRoads.TelligentCommunity.MicroData
                     }                }
                 catch (Exception ex)
                 {
-                    new TCException(CSExceptionType.UnknownError, "MicroDataPlugin unknown error", ex).Log();
+                    new TCException( "MicroDataPlugin unknown error", ex).Log();
                 }
             }
         }

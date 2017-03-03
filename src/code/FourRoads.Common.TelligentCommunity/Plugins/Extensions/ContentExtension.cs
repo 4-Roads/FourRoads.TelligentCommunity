@@ -4,16 +4,20 @@
 // //  </copyright>
 // //  ------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using DryIoc;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.Common.TelligentCommunity.Plugins.ScriptedContentFragments;
-using Ninject.Modules;
 using Telligent.Evolution.Extensibility.UI.Version1;
+using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Extensions
 {
-    public class ContentExtension : IScriptedContentFragmentExtension  , IBindingsLoader
+    public class ContentExtension : IScriptedContentFragmentExtension  , IBindingsLoader , IPluginGroup
     {
         #region IScriptedContentFragmentExtension Members
 
@@ -32,9 +36,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Extensions
             get { return "Enables scripted content fragments to access and manipulate extended information for content items"; }
         }
 
-        public void LoadBindings(NinjectModule module)
+        public void LoadBindings(IContainer container)
         {
-            module.Rebind<IContentLogic>().To<ContentLogic>().InSingletonScope();
+            container.Register<IContentLogic, ContentLogic>(Reuse.Singleton);
         }
 
         public int LoadOrder {
@@ -49,5 +53,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Extensions
         }
 
         #endregion
+
+        public IEnumerable<Type> Plugins
+        {
+            get { return new[] {typeof(DependencyInjectionPlugin)}; }
+        }
     }
 }

@@ -292,9 +292,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             }
             catch (Exception ex)
             {
-                CSException wrappedEx = new TCException(CSExceptionType.UnknownError, "Inline Content Exception", ex);
-                wrappedEx.Log();
-
+                new TCException( "Inline Content Exception", ex).Log();
                 control.Controls.Add(new LiteralControl(ex.Message));
             }
         }

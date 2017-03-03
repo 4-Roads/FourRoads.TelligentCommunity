@@ -49,13 +49,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                         foreach (Exception rtlEx in rtl.LoaderExceptions)
                         {
-                            new TCException(CSExceptionType.UnknownError,
+                            new TCException(
                                 string.Format("Failed to load IApplicationPlugin from {0}, because of:", a.FullName), rtlEx).Log();
                         }
                     }
                     else
                     {
-                        new TCException(CSExceptionType.UnknownError,
+                        new TCException(
                             string.Format("Failed to load IApplicationPlugin implementation from {0}", a.FullName), ex).Log();
                     }
                 }

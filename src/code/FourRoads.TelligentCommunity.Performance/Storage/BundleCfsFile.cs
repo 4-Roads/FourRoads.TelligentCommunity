@@ -27,7 +27,7 @@ namespace FourRoads.TelligentCommunity.Performance.Storage
             }
             catch (Exception ex)
             {
-                new TCException(CSExceptionType.UnknownError, "Failed to build remote file lookup", ex).Log();
+                new TCException( "Failed to build remote file lookup", ex).Log();
             }
         }
 

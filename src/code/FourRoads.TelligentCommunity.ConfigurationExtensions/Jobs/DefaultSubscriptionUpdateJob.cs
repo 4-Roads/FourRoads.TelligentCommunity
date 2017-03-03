@@ -25,7 +25,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs
                     StringBuilder msg = new StringBuilder(p.Name);
                     msg.Append(" threw Exception ");
                     msg.Append(e.ToString());
-                    new TCException(CSExceptionType.UnknownError, msg.ToString()).Log();
+                    new TCException( msg.ToString()).Log();
                 }
             }
         }

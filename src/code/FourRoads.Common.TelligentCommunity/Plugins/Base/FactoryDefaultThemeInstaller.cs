@@ -60,7 +60,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
                     catch (Exception exception)
                     {
-                        new TCException(CSExceptionType.UnknownError,
+                        new TCException(
                             string.Format("Couldn't load theme from '{0}' embedded resource.", resourceName), exception).Log();
                     }
                 });
@@ -110,7 +110,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
                     catch (Exception exception)
                     {
-                        new TCException(CSExceptionType.UnknownError,string.Format("Couldn't load page from '{0}' embedded resource.", resourceName), exception).Log();
+                        new TCException(string.Format("Couldn't load page from '{0}' embedded resource.", resourceName), exception).Log();
                     }
                 });
 
@@ -160,7 +160,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
                     catch (Exception exception)
                     {
-                        new TCException(CSExceptionType.UnknownError,
+                        new TCException(
                             string.Format("Couldn't delete page from '{0}' embedded resource.", resourceName), exception)
                             .Log();
                     }

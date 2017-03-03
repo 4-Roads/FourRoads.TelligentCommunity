@@ -94,7 +94,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
                     catch (Exception exception)
                     {
-                        new TCException(CSExceptionType.UnknownError,string.Format("Couldn't load widget from '{0}' embedded resource.", resourceName), exception).Log();
+                        new TCException(string.Format("Couldn't load widget from '{0}' embedded resource.", resourceName), exception).Log();
                     }
                 });
             }
@@ -111,7 +111,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
                 catch (Exception exception)
                 {
-                    new TCException(CSExceptionType.UnknownError, string.Format("Couldn't delete factory default widgets from provider ID: '{0}'.", ScriptedContentFragmentFactoryDefaultIdentifier), exception).Log();
+                    new TCException( string.Format("Couldn't delete factory default widgets from provider ID: '{0}'.", ScriptedContentFragmentFactoryDefaultIdentifier), exception).Log();
                 }
             }
         }
