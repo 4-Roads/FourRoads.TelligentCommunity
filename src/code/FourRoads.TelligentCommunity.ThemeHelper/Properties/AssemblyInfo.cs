@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity92.ThemeHelper")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity100.ThemeHelper")]
 [assembly: AssemblyDescription("A collection of tools to help developers create and customise community themes")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.ThemeHelper")]
 

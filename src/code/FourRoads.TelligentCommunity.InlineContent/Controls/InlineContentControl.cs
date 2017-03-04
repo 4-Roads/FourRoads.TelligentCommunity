@@ -6,10 +6,14 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
 using FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments;
+using Telligent.Common;
 using Telligent.Common.Diagnostics.Tracing.Web;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.ScriptedContentFragments.Implementations;
+using Telligent.Evolution.ScriptedContentFragments.Model;
+using Telligent.Evolution.ScriptedContentFragments.Services;
 
 namespace FourRoads.TelligentCommunity.InlineContent.Controls
 {
@@ -186,7 +190,6 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
         {
             if (_editAnchor != null && _editor != null && _cancelButton != null && _updateButton != null && _revertButton != null)
             {
-
                 Page.ClientScript.RegisterClientScriptBlock( GetType(), "inlinecontent-center-func" , @"
                     jQuery.fn.inlineCenter = function ()
                     {{
