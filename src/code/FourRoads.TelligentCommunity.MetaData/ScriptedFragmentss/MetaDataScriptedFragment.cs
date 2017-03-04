@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FourRoads.Common;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.MetaData.Api;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
@@ -63,7 +57,7 @@ namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
             }
             catch (Exception ex)
             {
-                new TCException("MetaData Plugin" , "Save Failed" , ex).Log();
+                new TCException("Save Failed" , ex).Log();
 
                 return "Save Meta Data failed";
             }

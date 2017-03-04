@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using FourRoads.Common;
 
 namespace FourRoads.TelligentCommunity.MetaData.Logic

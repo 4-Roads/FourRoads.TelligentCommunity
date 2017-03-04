@@ -5,8 +5,6 @@
 // -----------------------------------------------------------------------------
 
 using System.Web.Optimization;
-
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 using AngleSharp.Dom.Html;
 

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Telligent.DynamicConfiguration.Components;
+using DryIoc;
 using Telligent.Evolution.Extensibility.Version1;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Interfaces;
-using Ninject.Modules;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions
 {
@@ -27,7 +26,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
             get { return "This plugin provides configuration extensions so a user is able to specify advanced default options for individual areas of the site"; }
         }
 
-        public void LoadBindings(NinjectModule module)
+        public void LoadBindings(IContainer module)
         {
             
         }

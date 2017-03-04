@@ -8,8 +8,6 @@
 
 using System;
 using System.Linq;
-using System.Web.Caching;
-using Telligent.Common;
 using FourRoads.Common.Interfaces;
 using ICache = FourRoads.Common.Interfaces.ICache;
 using Telligent.Evolution.Extensibility.Caching.Version1;

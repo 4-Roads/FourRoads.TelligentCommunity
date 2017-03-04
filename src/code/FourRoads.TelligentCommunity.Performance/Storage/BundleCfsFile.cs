@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 

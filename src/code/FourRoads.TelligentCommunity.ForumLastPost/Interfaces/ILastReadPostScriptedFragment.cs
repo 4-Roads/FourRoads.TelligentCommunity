@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Telligent.Evolution.Extensibility.Api.Version1;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.Interfaces
 {

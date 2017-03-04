@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.RenderingHelper;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Extensibility.Api.Version1;
 
 namespace FourRoads.TelligentCommunity.MicroData
 {

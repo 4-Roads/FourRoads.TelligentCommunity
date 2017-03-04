@@ -83,7 +83,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
                 }
                 catch (Exception ex)
                 {
-                    new TCException(CSExceptionType.UnknownHttpError, "Rendering Helper Failed", ex).Log();
+                    new TCException( "Rendering Helper Failed", ex).Log();
                 }
             }
             else if (!_isClosing && !_isClosed)

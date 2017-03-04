@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.MicroData

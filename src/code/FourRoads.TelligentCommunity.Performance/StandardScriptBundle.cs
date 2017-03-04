@@ -1,4 +1,3 @@
-using System.IO;
 using System.Web.Optimization;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using FourRoads.TelligentCommunity.Performance.Storage;

@@ -242,7 +242,7 @@ namespace FourRoads.TelligentCommunity.Nexus2.Strava
 
         private void AuthenticationFailed()
         {
-            throw new TCException(CSExceptionType.OAuthLoginFailed, "OAuth login failed");
+            throw new TCException("OAuth login failed");
         }
 
         private OAuthData ParseUserProfileInformation(dynamic repsonseJObject)

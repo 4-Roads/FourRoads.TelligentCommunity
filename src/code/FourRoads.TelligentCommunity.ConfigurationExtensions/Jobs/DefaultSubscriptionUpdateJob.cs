@@ -5,7 +5,6 @@ using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProcessors;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Interfaces;
-using Telligent.Evolution.Components;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs
 {

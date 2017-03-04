@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Interfaces;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs;
-using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 

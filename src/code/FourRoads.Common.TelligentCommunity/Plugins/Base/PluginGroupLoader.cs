@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using FourRoads.Common.TelligentCommunity.Components;
-using Telligent.Evolution.Components;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {

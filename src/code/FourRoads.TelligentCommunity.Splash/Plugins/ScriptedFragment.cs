@@ -1,4 +1,4 @@
-﻿using FourRoads.Common;
+﻿using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.Splash.Extensions;
 using Telligent.Evolution.Extensibility.UI.Version1;
 

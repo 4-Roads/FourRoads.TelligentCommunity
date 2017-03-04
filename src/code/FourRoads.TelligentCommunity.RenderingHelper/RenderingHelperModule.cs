@@ -70,7 +70,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
         }
             catch (Exception ex)
             {
-                new TCException(CSExceptionType.UnknownHttpError, "Rendering Helper Module Failed", ex).Log();
+                new TCException("Rendering Helper Module Failed", ex).Log();
             }
    
         }

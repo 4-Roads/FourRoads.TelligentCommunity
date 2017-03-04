@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Threading.Tasks;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Web.Hosting;
 using System.Xml;
 using Telligent.DynamicConfiguration.Components;
@@ -16,7 +14,6 @@ using Telligent.DynamicConfiguration.Controls;
 using FourRoads.TelligentCommunity.CustomEditor.Interfaces;
 using FourRoads.TelligentCommunity.CustomEditor.CentralizedFileStore;
 using FourRoads.TelligentCommunity.CustomEditor.Controls;
-using Telligent.Common;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
@@ -275,7 +272,7 @@ namespace FourRoads.TelligentCommunity.CustomEditor
             }
             catch (Exception ex)
             {
-                new TCException(Telligent.Evolution.Components.CSExceptionType.UnknownError, "Failed to install Custom Editor", ex).Log();
+                new TCException("Failed to install Custom Editor", ex).Log();
             }
 
             HttpRuntime.UnloadAppDomain();

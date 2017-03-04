@@ -1,18 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Web;
-using System.Web.Hosting;
-using Ninject.Modules;
-using Telligent.Evolution.Components;
+using DryIoc;
 using Telligent.Evolution.Extensibility.Version1;
 using FourRoads.TelligentCommunity.Sentrus.Interfaces;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.Sentrus.Logic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.TelligentCommunity.Sentrus.Resources;
 using FourRoads.TelligentCommunity.Sentrus.Jobs;
 
 namespace FourRoads.TelligentCommunity.Sentrus
@@ -22,9 +15,9 @@ namespace FourRoads.TelligentCommunity.Sentrus
     {
         private PluginGroupLoader _pluginGroupLoader;
 
-        public void LoadBindings(NinjectModule module)
+        public void LoadBindings(IContainer module)
         {
-            module.Bind<IUserHealth>().To<UserHealth>();
+            module.Register<IUserHealth, UserHealth>();
         }
 
         public int LoadOrder

@@ -8,14 +8,10 @@
 
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using System;
-using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Web;
-using System.Web.UI;
 using Telligent.Evolution.Components;
 using System.Xml;
-using System.Xml.Linq;
 
 #endregion
 

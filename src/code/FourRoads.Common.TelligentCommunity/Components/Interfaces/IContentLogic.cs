@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Components.Interfaces
 {

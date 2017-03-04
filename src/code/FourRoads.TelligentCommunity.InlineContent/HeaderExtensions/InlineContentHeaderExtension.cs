@@ -3,8 +3,6 @@ using System.IO;
 using System.Text;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
 using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Components;
-using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;

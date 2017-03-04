@@ -1,5 +1,3 @@
-using System.IO;
-using System.Web;
 using System.Web.Hosting;
 using Telligent.Evolution.Components;
 

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using FourRoads.Common;
+using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Logic;
 using FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss;
-using Ninject.Modules;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.DynamicConfiguration.Controls;
 using Telligent.Evolution.Extensibility.Version1;
@@ -55,10 +54,10 @@ namespace FourRoads.TelligentCommunity.MetaData
             get { return 0; }
         }
 
-        public void LoadBindings(NinjectModule module)
+        public void LoadBindings(IContainer module)
         {
-            module.Bind<IMetaDataLogic>().To<MetaDataLogic>().InSingletonScope();
-            module.Bind<IMetaDataScriptedFragment>().To<MetaDataScriptedFragment>().InSingletonScope();
+            module.Register<IMetaDataLogic, MetaDataLogic>(Reuse.Singleton);
+            module.Register<IMetaDataScriptedFragment, MetaDataScriptedFragment>(Reuse.Singleton);
         }
 
         private class PluginGroupLoaderTypeVisitor : Common.TelligentCommunity.Plugins.Base.PluginGroupLoaderTypeVisitor

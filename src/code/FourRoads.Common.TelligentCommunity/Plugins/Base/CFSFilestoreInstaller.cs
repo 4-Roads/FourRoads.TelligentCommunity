@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using FourRoads.Common.TelligentCommunity.Components;
-using FourRoads.Common.TelligentCommunity.Controls;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 

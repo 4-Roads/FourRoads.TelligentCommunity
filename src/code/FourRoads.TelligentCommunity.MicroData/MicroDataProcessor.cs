@@ -5,7 +5,6 @@ using System.Linq;
 using System.Web;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.RenderingHelper;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;

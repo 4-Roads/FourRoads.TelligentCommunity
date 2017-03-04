@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Web;
 using System.Web.Hosting;
 using FourRoads.Common.TelligentCommunity.Components;
-using Telligent.Evolution.Components;
 
 namespace FourRoads.TelligentCommunity.Performance.Storage
 {

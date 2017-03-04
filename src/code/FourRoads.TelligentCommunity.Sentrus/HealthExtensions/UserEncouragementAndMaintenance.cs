@@ -1,16 +1,11 @@
 ﻿using System.IO;
-using System.Net.Mail;
-using System.Net.Mime;
 using System.Text;
     using System;
     using System.Collections.Generic;
-using FourRoads.Common;
 using FourRoads.Common.TelligentCommunity.Components.Tokenizers;
 using  FourRoads.TelligentCommunity.Sentrus.Controls;
     using  FourRoads.TelligentCommunity.Sentrus.Interfaces;
-    using Telligent.Common;
-    using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Components;
+using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
     using Telligent.Evolution.Extensibility.Api.Version1;
     using Telligent.Evolution.Extensibility.Version1;
@@ -18,9 +13,9 @@ using Telligent.Evolution.Extensibility.Api.Entities.Version1;
     using Telligent.Evolution.Extensibility.Email.Version1;
     using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.Sentrus.Entities;
     using Telligent.Evolution.Extensibility.Templating.Version1;
-    using FourRoads.Common.TelligentCommunity.Components.Extensions;
 
 namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 {
@@ -175,7 +170,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             }
             catch (Exception ex)
             {
-                new TCException("Sentrus", string.Format("UpdateLoginDate failed for contentid:{0}", contentId), ex).Log();
+                new TCException(string.Format("UpdateLoginDate failed for contentid:{0}", contentId), ex).Log();
             }
         }
 

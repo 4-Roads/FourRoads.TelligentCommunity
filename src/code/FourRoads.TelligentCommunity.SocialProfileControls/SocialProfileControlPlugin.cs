@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Version1;
-using System.Linq.Expressions;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 
 namespace FourRoads.TelligentCommunity.SocialProfileControls

@@ -48,7 +48,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             }
             catch (Exception ex)
             {
-                new TCException("Triggers", string.Format("EventsOnBeforeUpdate failed for userid:{0}", userBeforerUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
+                new TCException( string.Format("EventsOnBeforeUpdate failed for userid:{0}", userBeforerUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
             }
         }
 
@@ -77,7 +77,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             }
             catch(Exception ex)
             {
-                new TCException("Triggers", string.Format("EventsOnAfterUpdate failed for userid:{0}", userAfterUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
+                new TCException(string.Format("EventsOnAfterUpdate failed for userid:{0}", userAfterUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
             }
         }
 

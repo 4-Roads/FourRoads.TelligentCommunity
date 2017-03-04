@@ -5,17 +5,8 @@
 // -----------------------------------------------------------------------------
 
 using System;
-using System.Text;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using Telligent.Common;
-using Telligent.Common.Security;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.DynamicConfiguration.Controls;
 using Telligent.Evolution.Components;
-using Telligent.Evolution.Controls;
-using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.SocialProfileControls

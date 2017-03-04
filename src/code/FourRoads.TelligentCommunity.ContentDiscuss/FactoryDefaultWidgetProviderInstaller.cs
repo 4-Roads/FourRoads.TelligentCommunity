@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 
 namespace FourRoads.TelligentCommunity.ContentDiscuss

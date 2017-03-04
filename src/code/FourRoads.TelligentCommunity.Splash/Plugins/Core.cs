@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using FourRoads.Common;
+using DryIoc;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.RenderingHelper;
 using FourRoads.TelligentCommunity.Splash.Interfaces;
 using FourRoads.TelligentCommunity.Splash.Logic;
-using Ninject.Modules;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -87,9 +87,9 @@ namespace FourRoads.TelligentCommunity.Splash.Plugins
             }
         }
 
-        public void LoadBindings(NinjectModule module)
+        public void LoadBindings(IContainer module)
         {
-            module.Bind<ISplashLogic>().To<SplashLogic>().InSingletonScope();
+            module.Register<ISplashLogic, SplashLogic>(Reuse.Singleton);
         }
 
         public int LoadOrder

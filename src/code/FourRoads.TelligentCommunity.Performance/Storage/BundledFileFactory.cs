@@ -3,7 +3,6 @@ using System.IO;
 using System.Web;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
@@ -54,7 +53,7 @@ namespace FourRoads.TelligentCommunity.Performance.Storage
             }
             catch(Exception ex)
             {
-                new TCException(CSExceptionType.UnknownHttpError, string.Format("Unable to bundle file type:{0} url:{1} page:{2}", type, url, contentFragmentPage.ContentFragmentContainer.ContainerName), ex).Log();
+                new TCException(string.Format("Unable to bundle file type:{0} url:{1} page:{2}", type, url, contentFragmentPage.ContentFragmentContainer.ContainerName), ex).Log();
             }
 
             return null;

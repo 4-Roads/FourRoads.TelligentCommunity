@@ -1,7 +1,7 @@
-﻿using FourRoads.Common;
-using FourRoads.TelligentCommunity.MetaData.Interfaces;
+﻿using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Rest.Entities;
 using System;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using Telligent.Evolution.Extensibility.Rest.Version2;
 
 namespace FourRoads.TelligentCommunity.MetaData.Rest

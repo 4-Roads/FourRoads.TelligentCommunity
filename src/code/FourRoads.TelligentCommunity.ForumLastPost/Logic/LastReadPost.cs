@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using FourRoads.TelligentCommunity.ForumLastPost.Interfaces;
-using Telligent.Caching.Web;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.CoreServices.WebContext.Services;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.Extensibility.Caching.Version1;
 using CacheScope = Telligent.Caching.CacheScope;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.Logic

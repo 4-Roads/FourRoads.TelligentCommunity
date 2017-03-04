@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using DryIoc;
-using Telligent.Evolution.Extensibility.Version1;
+﻿using DryIoc;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Interfaces
 {

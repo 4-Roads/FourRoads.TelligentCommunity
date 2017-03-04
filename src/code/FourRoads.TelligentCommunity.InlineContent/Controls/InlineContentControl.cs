@@ -1,34 +1,28 @@
 ﻿using System;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
-using FourRoads.TelligentCommunity.InlineContent.Controls;
 using FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments;
-using FourRoads.TelligentCommunity.InlineContent.Security;
-using Microsoft.Web.Infrastructure.DynamicModuleHelper;
-using Telligent.Common;
 using Telligent.Common.Diagnostics.Tracing.Web;
 using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
 
 namespace FourRoads.TelligentCommunity.InlineContent.Controls
 {
-    public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
+  
+
+public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
     {
         private InlineContentLogic _inlineContentLogic = new InlineContentLogic();
         private HtmlGenericControl _editor;
         private HtmlGenericControl _editItem;
         private HtmlAnchor _editAnchor;
         private HtmlButton _updateButton,_revertButton,_cancelButton ;
-        private HtmlEditorStringControl _editorContent,_editorAnonymousContent;
+        private TinyMCE _editorContent,_editorAnonymousContent;
         private ConfigurationDataBase _configurationDataBase;
 
         public InlineContentControl(ConfigurationDataBase configurationDataBase)
@@ -115,7 +109,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
 
                 _editItem.Controls.Add(_editAnchor);
                 ul.Controls.Add(_editItem);
-
+           
                 //Build the editor modal div
                 _editor = new HtmlGenericControl("div");
                 c.Controls.Add(_editor);
@@ -125,8 +119,11 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
 
                 _editor.Controls.Add(new LiteralControl("<label>Default Content</Label>"));
 
-                _editorContent = new HtmlEditorStringControl();
-                _editorContent.ConfigurationData = _configurationDataBase;
+                _editorContent = new TinyMCE();
+                _editorContent.ClientIDMode = ClientIDMode.Static;
+                _editorContent.SupportFileUpload = true;
+                _editorContent.Submittable = false;
+                //_editorContent.ConfigurationData = _configurationDataBase;
                 _editorContent.ContentTypeId = InlineContentPart.InlineContentContentTypeId;
 
                 _editor.Controls.Add(_editorContent);
@@ -137,8 +134,11 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
 
                 _editor.Controls.Add(new LiteralControl("<label>Anonymous Content Override</Label>"));
 
-                _editorAnonymousContent= new HtmlEditorStringControl();
-                _editorAnonymousContent.ConfigurationData = _configurationDataBase;
+                _editorAnonymousContent= new TinyMCE();
+                _editorAnonymousContent.ClientIDMode = ClientIDMode.Static;
+                _editorAnonymousContent.SupportFileUpload = true;
+                _editorAnonymousContent.Submittable = false;
+                //_editorAnonymousContent.ConfigurationData = _configurationDataBase;
                 _editorAnonymousContent.ContentTypeId = InlineContentPart.InlineContentContentTypeId;
 
                 _editor.Controls.Add(_editorAnonymousContent);
@@ -187,7 +187,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
             if (_editAnchor != null && _editor != null && _cancelButton != null && _updateButton != null && _revertButton != null)
             {
 
-                Page.ClientScript.RegisterClientScriptBlock(GetType(), "inlinecontent-center-func" , @"
+                Page.ClientScript.RegisterClientScriptBlock( GetType(), "inlinecontent-center-func" , @"
                     jQuery.fn.inlineCenter = function ()
                     {{
                         this.css('position','fixed');
@@ -196,7 +196,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
                         return this;
                     }}",true);
 
-            Page.ClientScript.RegisterClientScriptBlock(GetType(), "inlinecontent-initialization" + ClientID, string.Format(@"
+                Page.ClientScript.RegisterClientScriptBlock(GetType(), "inlinecontent-initialization" + ClientID, string.Format(@"
                     $(function(){{ 
                         $('#{0}').click(function(e){{
                             e.preventDefault();
@@ -251,7 +251,8 @@ namespace FourRoads.TelligentCommunity.InlineContent.Controls
                 base.Render(tw);
             }
 
-            writer.Write(PublicApi.UI.Render(sb.ToString() , new UiRenderOptions()));
+            //writer.Write(PublicApi.UI.Render(sb.ToString() , new UiRenderOptions()));
+            writer.Write(sb.ToString());
         }
 
         public string DefaultContent

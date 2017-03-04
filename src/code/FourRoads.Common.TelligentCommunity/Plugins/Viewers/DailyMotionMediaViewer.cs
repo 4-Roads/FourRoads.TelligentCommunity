@@ -12,12 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
-using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
-using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.Extensibility.Storage.Version1;
-using Telligent.Evolution.Extensibility.UI.Version1;
-using Telligent.Evolution.Extensibility.Version1;
 
 #endregion
 

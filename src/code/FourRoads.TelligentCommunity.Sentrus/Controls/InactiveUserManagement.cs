@@ -1,8 +1,6 @@
-﻿using FourRoads.Common.TelligentCommunity.Components.Extensions;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Data.SqlClient;
-using Telligent.Common;
-using Telligent.Evolution.Components;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 
 namespace FourRoads.TelligentCommunity.Sentrus.Controls
 {
@@ -16,7 +14,6 @@ namespace FourRoads.TelligentCommunity.Sentrus.Controls
     using System.Web.UI.WebControls;
     using System.Xml;
     using System.Xml.XPath;
-    using Common;
     using Interfaces;
     using Telligent.DynamicConfiguration.Components;
     using Telligent.Evolution.Controls.Extensions;

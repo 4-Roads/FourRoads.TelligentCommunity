@@ -4,10 +4,7 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using System.Xml.XPath;
-using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Extensibility.Api.Entities.Version1;
-using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 

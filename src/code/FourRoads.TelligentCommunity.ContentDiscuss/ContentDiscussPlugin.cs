@@ -1,15 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Reflection;
+using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
-using Ninject.Modules;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Entities = Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
@@ -22,7 +17,7 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
 
         #region IBindingsLoader Members
 
-        public void LoadBindings(NinjectModule module)
+        public void LoadBindings(IContainer module)
         {
 
         }

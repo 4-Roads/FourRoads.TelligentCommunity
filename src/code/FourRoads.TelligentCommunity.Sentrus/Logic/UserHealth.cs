@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using FourRoads.Common.TelligentCommunity.Components.Extensions;
-using Telligent.Common;
 using System.Configuration;
 using System.Data.SqlClient;
-using System.Data.SqlTypes;
 using FourRoads.TelligentCommunity.Sentrus.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;

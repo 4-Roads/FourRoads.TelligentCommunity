@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using FourRoads.Common;
+using DryIoc;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
@@ -8,7 +8,6 @@ using FourRoads.TelligentCommunity.ForumLastPost.DataProvider;
 using FourRoads.TelligentCommunity.ForumLastPost.Interfaces;
 using FourRoads.TelligentCommunity.ForumLastPost.Logic;
 using FourRoads.TelligentCommunity.ForumLastPost.ScriptedFragmentss;
-using Ninject.Modules;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -70,11 +69,11 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
             get { return 0; }
         }
 
-        public void LoadBindings(NinjectModule module)
+        public void LoadBindings(IContainer module)
         {
-            module.Rebind<ILastReadPostDataProvider>().To<LastReadPostDataProvider>().InSingletonScope();
-            module.Rebind<ILastReadPostLogic>().To<LastReadPost>().InSingletonScope();
-            module.Rebind<ILastReadPostScriptedFragment>().To<LastReadPostScriptedFragment>().InSingletonScope(); 
+            module.Register<ILastReadPostDataProvider, LastReadPostDataProvider>(Reuse.Singleton);
+            module.Register<ILastReadPostLogic, LastReadPost>(Reuse.Singleton);
+            module.Register<ILastReadPostScriptedFragment, LastReadPostScriptedFragment>(Reuse.Singleton);
         }
 
         public string ExtensionName {

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Interfaces;
-using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions

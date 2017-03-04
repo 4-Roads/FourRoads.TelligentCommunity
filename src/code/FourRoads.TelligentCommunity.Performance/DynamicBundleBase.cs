@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Web.Optimization;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 
