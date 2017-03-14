@@ -19,6 +19,6 @@ using System.Reflection;
 #else
 [assembly: AssemblyConfiguration("Release")]
 #endif
-[assembly: AssemblyVersion("14.1.0.0")]
-[assembly: AssemblyFileVersion("14.1.0.0")]
-[assembly: AssemblyInformationalVersion("14.1.0.0")]
+[assembly: AssemblyVersion("15.0.0.0")]
+[assembly: AssemblyFileVersion("15.0.0.0")]
+[assembly: AssemblyInformationalVersion("15.0.0.0")]

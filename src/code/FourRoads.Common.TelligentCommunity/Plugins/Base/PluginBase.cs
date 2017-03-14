@@ -112,7 +112,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                                 return method.Invoke(null, null);
                             }
 
-                            return Services.Get(request.ServiceType);
+                            var results = Services.GetAll(request.ServiceType);
+
+                            return results.FirstOrDefault();
                         }
                     )));
 
