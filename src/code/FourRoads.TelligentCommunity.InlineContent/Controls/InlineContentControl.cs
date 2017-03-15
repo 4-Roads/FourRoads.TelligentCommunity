@@ -48,6 +48,8 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
                 $(this).removeClass('highlight');
               } 
             );});", true);
+
+            EnsureChildControls();
         }
 
         protected override void CreateChildControls()
@@ -78,9 +80,9 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
             return (PublicApi.Users.AnonymousUserName == PublicApi.Users.AccessingUser.Username);
         }
 
-        protected override void EnsureChildControls()
+        protected /*override*/ void EnsureChildControls()
         {
-            base.EnsureChildControls();
+            //base.EnsureChildControls();
 
             if (!ReadOnly)
             {
@@ -121,12 +123,12 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
                 _editor.Attributes.Add("class", "fourroads-inline-content");
                 _editor.ID = "editor";
 
-                _editor.Controls.Add(new LiteralControl("<label>Default Content</Label>"));
 
                 _editorContent = new TinyMCE();
                 _editorContent.ClientIDMode = ClientIDMode.Static;
                 _editorContent.SupportFileUpload = true;
                 _editorContent.Submittable = false;
+                _editorContent.Visible = false;
                 //_editorContent.ConfigurationData = _configurationDataBase;
                 _editorContent.ContentTypeId = InlineContentPart.InlineContentContentTypeId;
 
@@ -136,16 +138,18 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
                 _editorContent.CssClass = "editor";
                 _editorContent.ID = "editorcontent";
 
-                _editor.Controls.Add(new LiteralControl("<label>Anonymous Content Override</Label>"));
-
                 _editorAnonymousContent= new TinyMCE();
                 _editorAnonymousContent.ClientIDMode = ClientIDMode.Static;
                 _editorAnonymousContent.SupportFileUpload = true;
                 _editorAnonymousContent.Submittable = false;
+                _editorAnonymousContent.Visible = false;
                 //_editorAnonymousContent.ConfigurationData = _configurationDataBase;
                 _editorAnonymousContent.ContentTypeId = InlineContentPart.InlineContentContentTypeId;
-
                 _editor.Controls.Add(_editorAnonymousContent);
+
+                _editor.Controls.Add(new LiteralControl("<label>Default Content</Label>"));
+                
+                _editor.Controls.Add(new LiteralControl("<label>Anonymous Content Override</Label>"));
 
                 _editorAnonymousContent.Text = customContent != null ? customContent.AnonymousContent ?? DefaultAnonymousContent : DefaultAnonymousContent;
                 _editorAnonymousContent.CssClass = "editor";
@@ -183,6 +187,10 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
                 {
                     c.Controls.Add(control);
                 }
+
+                _editor.Controls.AddAt(_editor.Controls.IndexOf(_editorContent), new LiteralControl(( (IScriptableTextEditor)_editorContent ).Render()));
+                _editor.Controls.AddAt(_editor.Controls.IndexOf(_editorAnonymousContent), new LiteralControl(( (IScriptableTextEditor)_editorAnonymousContent ).Render()));
+
             }
         }
 
@@ -246,17 +254,17 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
             base.OnPreRender(e);
         }
 
-        protected override void Render(HtmlTextWriter writer)
-        {
-            StringBuilder sb = new StringBuilder();
-            using (HtmlTextWriter tw = new HtmlTextWriter(new System.IO.StringWriter(sb)))
-            {
-                base.Render(tw);
-            }
+        //protected override void Render(HtmlTextWriter writer)
+        //{
+        //    StringBuilder sb = new StringBuilder();
+        //    using (HtmlTextWriter tw = new HtmlTextWriter(new System.IO.StringWriter(sb)))
+        //    {
+        //        base.Render(tw);
+        //    }
 
-            //writer.Write(PublicApi.UI.Render(sb.ToString() , new UiRenderOptions()));
-            writer.Write(sb.ToString());
-        }
+        //    //writer.Write(PublicApi.UI.Render(sb.ToString() , new UiRenderOptions()));
+        //    writer.Write(sb.ToString());
+        //}
 
         public string DefaultContent
         {

@@ -15,6 +15,7 @@ using System.Web.UI.WebControls;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.InlineContent.CentralizedFileStore;
 using FourRoads.TelligentCommunity.InlineContent.Controls;
 using FourRoads.TelligentCommunity.InlineContent.HeaderExtensions;
@@ -29,6 +30,8 @@ using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
+using DryIoc;
+using IContainer = Telligent.Evolution.Extensibility.Content.Version1.IContainer;
 
 namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 {
@@ -472,5 +475,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
         {
             return null;
         }
+
+
     }
 }

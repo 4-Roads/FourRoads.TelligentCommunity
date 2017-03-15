@@ -24,34 +24,37 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
     {
         public static T Get<T>()
         {
-            return DependencyInjectionPlugin._container.Resolve<T>();
+            return DependencyContainer.Container().Resolve<T>();
         }
 
         public object Get(Type type)
         {
-            return DependencyInjectionPlugin._container.Resolve(type);
+            return DependencyContainer.Container().Resolve(type);
         }
 
         T IObjectFactory.Get<T>()
         {
-            return DependencyInjectionPlugin._container.Resolve<T>();
+            return DependencyContainer.Container().Resolve<T>();
         }
     }
 
-    public class DependencyInjectionPlugin : ISingletonPlugin
+
+    public static class DependencyContainer
     {
         internal static Container _container;
+        internal static object _lock = new object();
 
-        private static object _initializedLock = new object();
-        private static bool _initialized = false;
-
-        public DependencyInjectionPlugin()
+        static DependencyContainer()
         {
-            lock (_initializedLock)
+            
+        }
+
+        public static Container Container()
+        {
+            lock (_lock)
             {
-                if (!_initialized)
+                if (_container == null)
                 {
-                    _initialized = true;
                     // Only include one instance of common bindings
                     Type type = typeof(IBindingsLoader);
 
@@ -101,7 +104,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     _container = new Container(rules => rules.WithAutoConcreteTypeResolution().With(FactoryMethod.ConstructorWithResolvableArguments).WithUnknownServiceResolvers(request =>
                         new DelegateFactory(_ =>
                         {
-                            if ( request.ServiceType.GetInterfaces().Contains(typeof(IApi)) )
+                            if (request.ServiceType.GetInterfaces().Contains(typeof(IApi)))
                             {
                                 // Get the generic type definition
                                 MethodInfo method = typeof(Apis).GetMethod("Get", BindingFlags.Public | BindingFlags.Static);
@@ -116,26 +119,35 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                             return results.FirstOrDefault();
                         }
-                    )));
+                            )));
 
-                    foreach ( IBindingsLoader bindingsLoader in bindingsLoaders)
+                    foreach (IBindingsLoader bindingsLoader in bindingsLoaders)
                     {
                         bindingsLoader.LoadBindings(_container);
                     }
 
-                    _container.Register<FourRoads.Common.Interfaces.ICache , TCCache>();
+                    _container.Register<FourRoads.Common.Interfaces.ICache, TCCache>();
                     _container.Register<FourRoads.Common.Interfaces.IObjectFactory, Injector>();
                     _container.Register<FourRoads.Common.Interfaces.IPagedCollectionFactory, PagedCollectionFactory>();
                     _container.Register<FourRoads.Common.Sql.IDataHelper, SqlDataHelper>();
                     _container.Register<FourRoads.Common.Sql.IDBFactory, SqlDataLayer>();
                 }
+
             }
+            return _container;
+        }
+    }
+
+    public class DependencyInjectionPlugin : ISingletonPlugin
+    {
+        public DependencyInjectionPlugin()
+        {
+            DependencyContainer.Container();
         }
 
         public void Initialize()
         {
             
-
         }
 
         public string Name => "4-Roads DI";
