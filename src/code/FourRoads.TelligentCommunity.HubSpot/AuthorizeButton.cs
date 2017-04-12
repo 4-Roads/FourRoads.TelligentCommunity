@@ -3,27 +3,28 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Version1;
+using TelligentProperty = Telligent.DynamicConfiguration.Components.Property;
 
 namespace FourRoads.TelligentCommunity.HubSpot
 {
-    public class AuthorizeButton : WebControl, IPropertyControl , INamingContainer
+    public class AuthorizeButton : WebControl, IPropertyControl, INamingContainer
     {
         protected Button LinkButton;
         protected TextBox AuthCode;
-        protected Literal Message; 
+        protected Literal Message;
 
         protected override void EnsureChildControls()
         {
             base.EnsureChildControls();
 
-            if ( AuthCode == null )
+            if (AuthCode == null)
             {
                 AuthCode = new TextBox();
                 AuthCode.ID = "AuthCode";
                 Controls.Add(AuthCode);
             }
 
-            if ( Message == null )
+            if (Message == null)
             {
                 Message = new Literal();
                 Message.ID = "Message";
@@ -32,8 +33,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 Controls.Add(Message);
             }
 
-            if ( LinkButton == null )
-            { 
+            if (LinkButton == null)
+            {
                 LinkButton = new Button();
                 LinkButton.ID = "LinkBtn";
                 LinkButton.Text = "Link oAuth";
@@ -47,22 +48,30 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             var plg = PluginManager.GetSingleton<HubspotCrm>();
 
-            if ( plg != null )
+            if (plg != null)
             {
-                if ( plg.InitialLinkoAuth(AuthCode.Text) )
+                try
                 {
-                    Message.Text = "<label style=\"color:red\">Failed to obtain oauth credentials</label>";
+                    if (plg.InitialLinkoAuth(AuthCode.Text))
+                    {
+                        Message.Text = "<label style=\"color:green\">oAuth Syncronized</label>";
+                    }
+                    else
+                    {
+                        Message.Text = "<label style=\"color:red\">Failed to setup oauth credentials</label>";
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    Message.Text = "<label style=\"color:green\">oAuth Syncronized</label>";
+                    Message.Text = $"<label style=\"color:red\">Error while trying to setup oauth credentials</label><br><small>{ex.Message}</small>";
                 }
+
             }
         }
 
         public ConfigurationDataBase ConfigurationData { get; set; }
 
-        public Property ConfigurationProperty
+        public TelligentProperty ConfigurationProperty
         { get; set; }
 
         public event ConfigurationPropertyChanged ConfigurationValueChanged;
