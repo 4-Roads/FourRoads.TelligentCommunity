@@ -17,6 +17,7 @@ using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.HubSpot.Models;
 using System.Threading.Tasks;
+using Telligent.Evolution.Extensibility;
 using Formatting = Newtonsoft.Json.Formatting;
 using TelligentProperty = Telligent.DynamicConfiguration.Components.Property;
 
@@ -405,7 +406,6 @@ namespace FourRoads.TelligentCommunity.HubSpot
         public List<ContactPropertyGroup> GetContactPropertyGroups()
         {
             List<ContactPropertyGroup> contactPropertyGroups = new List<ContactPropertyGroup>();
-
             PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
             {
                 dynamic response = CreateApiRequest("GET", "properties/v1/contacts/groups", string.Empty);
@@ -535,7 +535,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
             {
-                dynamic response = CreateApiRequest("POST", $"contacts/v1/contact/email/{PublicApi.Url.Encode(email)}/profile",
+                dynamic response = CreateApiRequest("POST", $"contacts/v1/contact/email/{Apis.Get<IUrl>().Encode(email)}/profile",
                     JsonConvert.SerializeObject(properties,
                     Formatting.None,
                     new JsonSerializerSettings
@@ -559,7 +559,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
             {
-                response = CreateApiRequest("POST", $"contacts/v1/contact/createOrUpdate/email/{PublicApi.Url.Encode(email)}",
+                response = CreateApiRequest("POST", $"contacts/v1/contact/createOrUpdate/email/{Apis.Get<IUrl>().Encode(email)}",
                     JsonConvert.SerializeObject(properties,
                     Formatting.None,
                     new JsonSerializerSettings

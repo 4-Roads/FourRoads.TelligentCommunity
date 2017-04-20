@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility;
@@ -10,19 +11,18 @@ using Telligent.Evolution.Extensibility.Version1;
 namespace FourRoads.TelligentCommunity.Rules.Actions
 {
 
-    public class UnjoinAllGroups : IConfigurableRuleAction, ITranslatablePlugin, ICategorizedPlugin
+    public class UpdateUserReputationPoints : IConfigurableRuleAction, ITranslatablePlugin, ICategorizedPlugin
     {
         private ITranslatablePluginController _translationController;
-        private Guid _componentId = new Guid("{8CF1F489-A812-46C0-BEC1-A63F421365ED}");
+        private Guid _componentId = new Guid("{29C18C56-678A-4DC1-BD76-885546D611AD}");
 
         public void Initialize()
         {
-            
         }
 
-        public string Name { get { return "4 Roads - Unjoin All Groups Rule Action"; } }
+        public string Name { get { return "4 Roads - Update user reputation points"; } }
 
-        public string Description { get{return "Unjoins a user from all groups in the system that they are a member of.";} }
+        public string Description { get{return "Update the extended property field for user reputation points";} }
 
         public Guid RuleComponentId { get { return _componentId; } }
 
@@ -36,13 +36,40 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
 
             if (!user.HasErrors())
             {
-                var groupUserMembers = Apis.Get<IGroupUserMembers>();
-
-                var groupMembership = groupUserMembers.List(new GroupUserMembersListOptions() {UserId = user.Id.Value, PageSize = int.MaxValue});
-
-                foreach (GroupUser groupUser in groupMembership)
+                var field = Apis.Get<UserProfileFields>().Get("UserReputation");
+                if (!field.HasErrors())
                 {
-                    groupUserMembers.Delete(groupUser.Group.Id.Value, new GroupUserMembersDeleteOptions() {UserId = user.Id.Value});
+                    var value = user.ProfileFields.Get("UserReputation");
+                    if (!value.HasErrors())
+                    {
+                        int reputation = 0;
+                        int update = runtime.GetInt("Points");
+                        int.TryParse(value.Value, out reputation);
+
+                        reputation += update;
+
+                        try
+                        {
+                            UsersUpdateOptions userUpdateOptions = new UsersUpdateOptions
+                            {
+                                ProfileFields = new List<ProfileField>
+                                {
+                                    new ProfileField
+                                    {
+                                        Label = "UserReputation",
+                                        Value = reputation.ToString()
+                                    }
+                                },
+                                Id = user.Id
+                            };
+
+                            var newUser = Apis.Get<IUsers>().Update(userUpdateOptions);
+                        }
+                        catch (Exception e)
+                        {
+                            var message = e.Message;
+                        }
+                    }
                 }
             }
         }
@@ -59,8 +86,8 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleComponentName", "remove this user from all groups they are a member of");
-                defaultTranslation[0].Set("RuleComponentCategory", "Group");
+                defaultTranslation[0].Set("RuleComponentName", "update the user reputation based on system actions");
+                defaultTranslation[0].Set("RuleComponentCategory", "Reputation");
 
                 return defaultTranslation;
             }
@@ -74,6 +101,8 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
                 Property userProp = new Property("User", "User", PropertyType.Custom, 2, "");
                 userProp.ControlType = typeof (UserTokenSelectionControl);
                 group.Properties.Add(userProp);
+
+                group.Properties.Add(new Property("Points", "Points", PropertyType.Int, 2, ""));
 
                 return new[] {group};
             }

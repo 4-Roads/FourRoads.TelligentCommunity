@@ -4,6 +4,7 @@ using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Controls;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -22,8 +23,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
  
         public void Initialize()
         {
-            PublicApi.Users.Events.BeforeUpdate += EventsOnBeforeUpdate;
-            PublicApi.Users.Events.AfterUpdate += EventsOnAfterUpdate;
+            Apis.Get<IUsers>().Events.BeforeUpdate += EventsOnBeforeUpdate;
+            Apis.Get<IUsers>().Events.AfterUpdate += EventsOnAfterUpdate;
         }
 
         private void EventsOnBeforeUpdate(UserBeforeUpdateEventArgs userBeforerUpdateEventArgs)
@@ -38,7 +39,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
                         if (!_beforeUpdateCache.ContainsKey(userId))
                         {
-                            User user = PublicApi.Users.Get(new UsersGetOptions() {Id = userId});
+                            User user = Apis.Get<IUsers>().Get(new UsersGetOptions() {Id = userId});
 
                             if (!user.HasErrors())
                                 _beforeUpdateCache.Add(userId, user);
@@ -165,11 +166,12 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
                 if (int.TryParse(data["UserId"], out userId))
                 {
-                    var user = PublicApi.Users.Get(new UsersGetOptions() {Id = userId});
+                    var users = Apis.Get<IUsers>();
+                    var user = users.Get(new UsersGetOptions() {Id = userId});
 
                     if (!user.HasErrors())
                     {
-                        context.Add(PublicApi.Users.ContentTypeId, user);
+                        context.Add(users.ContentTypeId, user);
                         context.Add(_triggerid , true); //Added this trigger so that it is not re-entrant
                     }
                 }
@@ -195,7 +197,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] {PublicApi.Users.ContentTypeId}; }
+            get { return new[] { Apis.Get<IUsers>().ContentTypeId}; }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -243,7 +245,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             results.Add(new KeyValuePair<string, string>("AllowSitePartnersToContact", "Allow Site Partners To Contact"));
             results.Add(new KeyValuePair<string, string>("AllowSiteToContact", "Allow Site To Contact"));
 
-            foreach (var field in PublicApi.UserProfileFields.List(new UserProfileFieldsListOptions() { PageIndex = 0, PageSize = int.MaxValue }))
+            foreach (var field in Apis.Get<IUserProfileFields>().List(new UserProfileFieldsListOptions() { PageIndex = 0, PageSize = int.MaxValue }))
             {
                 results.Add(new KeyValuePair<string, string>("-" + field.Name, field.Title));
             }
