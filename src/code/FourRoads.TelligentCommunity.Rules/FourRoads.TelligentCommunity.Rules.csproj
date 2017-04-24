@@ -77,10 +77,13 @@
     <Compile Include="Actions\UnjoinAllGroups.cs" />
     <Compile Include="Actions\UpdateConnectedCRMs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tokens\RegisterRuleTokens.cs" />
     <Compile Include="Tokens\CustomTriggerParametersToken.cs" />
     <Compile Include="Tokens\CustomTriggerParameters.cs" />
+    <Compile Include="Triggers\ForumReplyUpdated.cs" />
     <Compile Include="Triggers\ForumReplyVoteUpdated.cs" />
     <Compile Include="Triggers\UserUpdated.cs" />
+    <Compile Include="Triggers\AbusiveContentUpdated.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">

@@ -26,9 +26,9 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
 
         public Guid RuleComponentId { get { return _componentId; } }
 
-        public string RuleComponentName { get { return _translationController.GetLanguageResourceValue("RuleComponentName"); ;} }
+        public string RuleComponentName { get { return _translationController.GetLanguageResourceValue("RuleComponentName"); } }
 
-        public string RuleComponentCategory { get { return _translationController.GetLanguageResourceValue("RuleComponentCategory"); ;} }
+        public string RuleComponentCategory { get { return _translationController.GetLanguageResourceValue("RuleComponentCategory"); } }
 
         public void Execute(IRuleExecutionRuntime runtime)
         {

@@ -13,86 +13,45 @@ using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
-    public class ForumReplyVoteUpdated : IRuleTrigger, ITranslatablePlugin, IConfigurablePlugin, ISingletonPlugin, ICategorizedPlugin
+    public class ForumReplyUpdated : IRuleTrigger, ITranslatablePlugin, IConfigurablePlugin, ISingletonPlugin, ICategorizedPlugin
     {
         private static object _lockObj = new object();
         private List<string> _actions = new List<string>();
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
-        private readonly Guid _triggerid = new Guid("{8D90F6A7-D4DB-4C6F-8634-CDE6A9D165A2}");
+        private readonly Guid _triggerid = new Guid("{052DF652-6ADB-4B54-8965-1DFFF59D15D8}");
         private RegisterRuleTokens _ruleTokens = new RegisterRuleTokens();
 
-        private ConcurrentDictionary<string, ForumReplyVote>
-            _beforeUpdateCache = new ConcurrentDictionary<string, ForumReplyVote>();
+        private ConcurrentDictionary<int, ForumReply>
+            _beforeUpdateCache = new ConcurrentDictionary<int, ForumReply>();
 
         public void Initialize()
         {
-            Apis.Get<IForumReplyVotes>().Events.BeforeCreate += EventsOnBeforeCreate;
-            Apis.Get<IForumReplyVotes>().Events.AfterCreate += EventsOnAfterCreate;
-            Apis.Get<IForumReplyVotes>().Events.AfterDelete += EventsOnAfterDelete;
-            Apis.Get<IForumReplyVotes>().Events.BeforeUpdate += EventsOnBeforeUpdate;
-            Apis.Get<IForumReplyVotes>().Events.AfterUpdate += EventsOnAfterUpdate;
+            Apis.Get<IForumReplies>().Events.AfterCreate += EventsOnAfterCreate;
+            Apis.Get<IForumReplies>().Events.AfterDelete += EventsOnAfterDelete;
+            Apis.Get<IForumReplies>().Events.BeforeUpdate += EventsOnBeforeUpdate;
+            Apis.Get<IForumReplies>().Events.AfterUpdate += EventsOnAfterUpdate;
         }
 
         /// <summary>
-        /// Save a version of the vote so that we can determine what actually happened 
+        /// Check on the state of the reply after creation
         /// </summary>
-        /// <param name="forumReplyVoteBeforeCreateEventArgs"></param>
+        /// <param name="args"></param>
         /// <returns></returns>
-        private void EventsOnBeforeCreate(ForumReplyVoteBeforeCreateEventArgs forumReplyVoteBeforeCreateEventArgs)
-        {
-            try
-            {
-                CacheUserVote(forumReplyVoteBeforeCreateEventArgs.ReplyId, forumReplyVoteBeforeCreateEventArgs.UserId);
-            }
-            catch (Exception ex)
-            {
-                new TCException(
-                    string.Format("EventsOnBeforeCreate failed for userid:{0}",
-                        forumReplyVoteBeforeCreateEventArgs.UserId), ex).Log();
-            }
-        }
-
-        /// <summary>
-        /// Check on the action performed
-        /// For some reason this event is also called whren updating ?
-        /// </summary>
-        /// <param name="forumReplyVoteAfterCreateEventArgs"></param>
-        /// <returns></returns>
-        private void EventsOnAfterCreate(ForumReplyVoteAfterCreateEventArgs forumReplyVoteAfterCreateEventArgs)
+        private void EventsOnAfterCreate(ForumReplyAfterCreateEventArgs args)
         {
             try
             {
                 if (_ruleController != null)
                 {
-                    string key = forumReplyVoteAfterCreateEventArgs.UserId + "," +
-                                 forumReplyVoteAfterCreateEventArgs.ReplyId;
-
                     List<string> actions = new List<string>();
-                    if (forumReplyVoteAfterCreateEventArgs.Value)
+
+                    // add in any checks in here 
+                    if (args.IsAnswer.HasValue && (bool)args.IsAnswer)
                     {
-                        actions.Add("Add-UpVote");
-                    }
-                    else
-                    {
-                        actions.Add("Add-DownVote");
+                        actions.Add("Add-Answer");
                     }
 
-                    if (_beforeUpdateCache.ContainsKey(key))
-                    {
-                        var old = _beforeUpdateCache[key];
-                        if (old.Value)
-                        {
-                            actions.Add("Del-UpVote");
-                        }
-                        else
-                        {
-                            actions.Add("Del-DownVote");
-                        }
-
-                        ForumReplyVote removed;
-                        _beforeUpdateCache.TryRemove(key, out removed);
-                    }
                     foreach (var action in actions)
                     {
                         if (IsActionActive(action))
@@ -100,10 +59,10 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                             _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
                                 {
-                                    "UserId", forumReplyVoteAfterCreateEventArgs.UserId.ToString()
+                                    "UserId", args.Author.Id.ToString()
                                 },
                                 {
-                                    "ReplyId", forumReplyVoteAfterCreateEventArgs.ReplyId.ToString()
+                                    "Id", args.Id.ToString()
                                 },
                                 {
                                     "Action", action
@@ -116,112 +75,108 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             catch (Exception ex)
             {
                 new TCException(
-                    string.Format("EventsOnAfterCreate failed for userid:{0}", forumReplyVoteAfterCreateEventArgs.UserId),
+                    string.Format("EventsOnAfterCreate failed for forum reply id :{0}", args.Id),
                     ex).Log();
             }
         }
 
         /// <summary>
-        /// Determine what was removed
+        /// Determine what has been effected by the reply being deleted
         /// </summary>
-        /// <param name="forumReplyVoteAfterDeleteEventArgs"></param>
+        /// <param name="forumReplyAfterDeleteEventArgs"></param>
         /// <returns></returns>
-        private void EventsOnAfterDelete(ForumReplyVoteAfterDeleteEventArgs forumReplyVoteAfterDeleteEventArgs)
+        private void EventsOnAfterDelete(ForumReplyAfterDeleteEventArgs args)
         {
             try
             {
                 if (_ruleController != null)
                 {
-                    string action = "Del-DownVote";
-
-                    if (forumReplyVoteAfterDeleteEventArgs.Value)
+                    List<string> actions = new List<string>();
+                    
+                    // add in any checks in here 
+                    if (args.IsAnswer.HasValue && (bool)args.IsAnswer)
                     {
-                        action = "Del-UpVote";
+                        actions.Add("Del-Answer");
                     }
-                    if (IsActionActive(action))
+                    
+                    foreach (var action in actions)
                     {
-                        _ruleController.ScheduleTrigger(new Dictionary<string, string>()
+                        if (IsActionActive(action))
                         {
+                            _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
-                                "UserId", forumReplyVoteAfterDeleteEventArgs.UserId.ToString()
-                            },
+                                {
+                                    "UserId", args.Author.Id.ToString()
+                                },
+                                {
+                                    "Id", args.Id.ToString()
+                                },
+                                {
+                                    "Action", action
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                new TCException(
+                    string.Format("EventsOnAfterDelete failed for forum reply id :{0}", args.Id),
+                    ex).Log();
+            }
+        }
+
+        /// <summary>
+        /// Save a version of the forum reply so that we can determine what actually happened 
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private void EventsOnBeforeUpdate(ForumReplyBeforeUpdateEventArgs args)
+        {
+            try
+            {
+                CacheForumReply((int)args.Id);
+            }
+            catch (Exception ex)
+            {
+                new TCException(
+                    string.Format("EventsOnBeforeUpdatefailed for forum reply id :{0}", args.Id),
+                    ex).Log();
+            }
+        }
+
+        /// <summary>
+        /// Check on the action performed
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private void EventsOnAfterUpdate(ForumReplyAfterUpdateEventArgs args)
+        {
+            try
+            {
+                if (_ruleController != null)
+                {
+                    int key = (int)args.Id;
+
+                    List<string> actions = new List<string>();
+
+                    // add in any checks in here 
+                    if (_beforeUpdateCache.ContainsKey(key))
+                    {
+                        var old = _beforeUpdateCache[key];
+                        if ((old.IsAnswer ?? false) != (args.IsAnswer ?? false))
+                        {
+                            if (args.IsAnswer ?? false)
                             {
-                                "ReplyId", forumReplyVoteAfterDeleteEventArgs.ReplyId.ToString()
-                            },
-                            {
-                                "Action", action
+                                actions.Add("Add-Answer");
                             }
-
-                        });
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                new TCException(
-                    string.Format("EventsOnAfterDelete failed for userid:{0}", forumReplyVoteAfterDeleteEventArgs.UserId),
-                    ex).Log();
-            }
-        }
-
-        /// <summary>
-        /// Save a version of the vote so that we can determine what actually happened 
-        /// </summary>
-        /// <param name="forumReplyVoteBeforeUpdateEventArgs"></param>
-        /// <returns></returns>
-        private void EventsOnBeforeUpdate(ForumReplyVoteBeforeUpdateEventArgs forumReplyVoteBeforeUpdateEventArgs)
-        {
-            try
-            {
-                CacheUserVote(forumReplyVoteBeforeUpdateEventArgs.ReplyId, forumReplyVoteBeforeUpdateEventArgs.UserId);
-            }
-            catch (Exception ex)
-            {
-                new TCException(
-                    string.Format("EventsOnBeforeUpdate failed for userid:{0}",
-                        forumReplyVoteBeforeUpdateEventArgs.UserId), ex).Log();
-            }
-        }
-
-        /// <summary>
-        /// Check on the action performed
-        /// This does not seem to get fired, but is here incase it gets fixed ....
-        /// The updates are currently handled by the Update events 
-        /// </summary>
-        /// <param name="forumReplyVoteAfterUpdateEventArgs"></param>
-        /// <returns></returns>
-        private void EventsOnAfterUpdate(ForumReplyVoteAfterUpdateEventArgs forumReplyVoteAfterUpdateEventArgs)
-        {
-            try
-            {
-                if (_ruleController != null)
-                {
-                    string key = forumReplyVoteAfterUpdateEventArgs.UserId + "," +
-                                 forumReplyVoteAfterUpdateEventArgs.ReplyId;
-
-                    List<string> actions = new List<string>();
-                    if (forumReplyVoteAfterUpdateEventArgs.Value)
-                    {
-                        actions.Add("Add-UpVote");
-                    }
-                    else
-                    {
-                        actions.Add("Add-DownVote");
-                    }
-
-                    if (_beforeUpdateCache.ContainsKey(key))
-                    {
-                        var old = _beforeUpdateCache[key];
-                        if (old.Value)
-                        {
-                            actions.Add("Del-UpVote");
+                            else
+                            {
+                                actions.Add("Del-Answer");
+                            }
                         }
-                        else
-                        {
-                            actions.Add("Del-DownVote");
-                        }
-
-                        ForumReplyVote removed;
+                        ForumReply removed;
                         _beforeUpdateCache.TryRemove(key, out removed);
                     }
                     foreach (var action in actions)
@@ -231,10 +186,10 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                             _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
                                 {
-                                    "UserId", forumReplyVoteAfterUpdateEventArgs.UserId.ToString()
+                                    "UserId", args.Author.Id.ToString()
                                 },
                                 {
-                                    "ReplyId", forumReplyVoteAfterUpdateEventArgs.ReplyId.ToString()
+                                    "Id", args.Id.ToString()
                                 },
                                 {
                                     "Action", action
@@ -247,28 +202,25 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             catch (Exception ex)
             {
                 new TCException(
-                    string.Format("EventsOnAfterUpdate failed for userid:{0}", forumReplyVoteAfterUpdateEventArgs.UserId),
+                    string.Format("EventsOnAfterUpdate failed for forum reply id :{0}", args.Id),
                     ex).Log();
             }
         }
 
         /// <summary>
-        /// Cache a copy of the vote before it is updated so that we can later determine what happened
+        /// Cache a copy of the reply before it is updated so that we can later determine what happened
         /// </summary>
         /// <param name="replyId"></param>
-        /// <param name="userId"></param>
         /// <returns>bool</returns>
         /// 
-        private bool CacheUserVote(int replyId, int userId)
+        private bool CacheForumReply(int replyId)
         {
-            if (!_beforeUpdateCache.ContainsKey(userId + "," + replyId))
+            if (!_beforeUpdateCache.ContainsKey(replyId))
             {
-                var vote = Apis.Get<IForumReplyVotes>()
-                    .Get(replyId, new ForumReplyVoteGetOptions() {VoteType = "Quality"});
-
-                if (!vote.HasErrors())
+                var reply = Apis.Get<IForumReplies>().Get(replyId);
+                if (!reply.HasErrors())
                 {
-                    _beforeUpdateCache.AddOrUpdate(userId + "," + replyId, vote, (key, existingVal) => vote);
+                    _beforeUpdateCache.AddOrUpdate(replyId, reply, (key, existingVal) => reply);
                 }
             }
 
@@ -276,7 +228,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         }
 
         /// <summary>
-        /// Check if the action is configured for the current action
+        /// Check if the action is configured for the current rule
         /// </summary>
         /// <param name="action"></param>
         /// <returns>bool</returns>
@@ -295,12 +247,12 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - Forum Reply Vote Trigger"; }
+            get { return "4 Roads - Forum Reply Updated Trigger"; }
         }
 
         public string Description
         {
-            get { return "Fires when a vote is added, removed or toggled for a forum post."; }
+            get { return "Fires when a forum reply is added, updated or deleted"; }
         }
 
         public void SetController(IRuleController controller)
@@ -318,7 +270,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 if (int.TryParse(data["UserId"], out userId))
                 {
                     var users = Apis.Get<IUsers>();
-                    var user = users.Get(new UsersGetOptions() {Id = userId});
+                    var user = users.Get(new UsersGetOptions() { Id = userId });
 
                     if (!user.HasErrors())
                     {
@@ -328,11 +280,11 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 }
             }
 
-            if (data.ContainsKey("ReplyId"))
+            if (data.ContainsKey("Id"))
             {
                 int replyId;
 
-                if (int.TryParse(data["ReplyId"], out replyId))
+                if (int.TryParse(data["Id"], out replyId))
                 {
                     var forumReplies = Apis.Get<IForumReplies>();
                     var forumReply = forumReplies.Get(replyId);
@@ -346,7 +298,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
             if (data.ContainsKey("Action"))
             {
-                CustomTriggerParameters ruleParameters = new CustomTriggerParameters() {Action = data["Action"]};
+                CustomTriggerParameters ruleParameters = new CustomTriggerParameters() { Action = data["Action"] };
                 context.Add(_ruleTokens.CustomTriggerParametersTypeId, ruleParameters);
             }
             return context;
@@ -369,13 +321,13 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         /// <summary>
         /// Setup the contextual datatype ids for users, forum reply and custom trigger parameters
-        /// custom trigger parameters are to allow config in the UI for the action being performed (add-upvote, del-upvote etc)
+        /// custom trigger parameters are to allow config in the UI for the action being performed (suggested-answer etc)
         /// </summary>
         /// <returns>IEnumerable<Guid></returns>
         /// 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] {Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId, _ruleTokens.CustomTriggerParametersTypeId }; }
+            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId, _ruleTokens.CustomTriggerParametersTypeId }; }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -387,9 +339,9 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             get
             {
-                Translation[] defaultTranslation = new[] {new Translation("en-us")};
+                Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a forum reply was voted upon");
+                defaultTranslation[0].Set("RuleTriggerName", "a forum reply was created, updated or deleted");
                 defaultTranslation[0].Set("RuleTriggerCategory", "Forum Reply");
 
                 return defaultTranslation;
@@ -405,7 +357,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 string fieldList = configuration.GetCustom("Actions") ?? string.Empty;
 
                 //Convert the string to  a list
-                string[] fieldFilter = fieldList.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                string[] fieldFilter = fieldList.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                 _actions.AddRange(fieldFilter);
             }
@@ -419,14 +371,12 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 Property availableFields = new Property("Actions", "Actions", PropertyType.Custom, 0, "");
 
                 availableFields.ControlType = typeof(CheckboxListControl);
-                availableFields.SelectableValues.Add(new PropertyValue("Add-DownVote", "Added Down Vote", 0) {});
-                availableFields.SelectableValues.Add(new PropertyValue("Add-UpVote", "Added Up Vote", 0) {});
-                availableFields.SelectableValues.Add(new PropertyValue("Del-DownVote", "Removed Down Vote", 0) {});
-                availableFields.SelectableValues.Add(new PropertyValue("Del-UpVote", "Removed Up Vote", 0) {});
+                availableFields.SelectableValues.Add(new PropertyValue("Add-Answer", "Reply accepted as answer", 0) { });
+                availableFields.SelectableValues.Add(new PropertyValue("Del-Answer", "Reply rejected as answer", 0) { });
 
                 group.Properties.Add(availableFields);
 
-                return new[] {group};
+                return new[] { group };
             }
         }
 
