@@ -2,9 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using FourRoads.Common.TelligentCommunity.Components;
-using FourRoads.TelligentCommunity.Rules.Tokens;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
@@ -13,14 +10,11 @@ using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
-    public class ForumReplyUpdated : IRuleTrigger, ITranslatablePlugin, IConfigurablePlugin, ISingletonPlugin, ICategorizedPlugin
+    public class ForumAnswerAccepted : IRuleTrigger, ITranslatablePlugin, ISingletonPlugin, ICategorizedPlugin
     {
-        private static object _lockObj = new object();
-        private List<string> _actions = new List<string>();
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
-        private readonly Guid _triggerid = new Guid("{052DF652-6ADB-4B54-8965-1DFFF59D15D8}");
-        private RegisterRuleTokens _ruleTokens = new RegisterRuleTokens();
+        private readonly Guid _triggerid = new Guid("{8ED30D84-C20A-4BB7-B27F-9516BC75C3EB}");
 
         private ConcurrentDictionary<int, ForumReply>
             _beforeUpdateCache = new ConcurrentDictionary<int, ForumReply>();
@@ -28,7 +22,6 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         public void Initialize()
         {
             Apis.Get<IForumReplies>().Events.AfterCreate += EventsOnAfterCreate;
-            Apis.Get<IForumReplies>().Events.AfterDelete += EventsOnAfterDelete;
             Apis.Get<IForumReplies>().Events.BeforeUpdate += EventsOnBeforeUpdate;
             Apis.Get<IForumReplies>().Events.AfterUpdate += EventsOnAfterUpdate;
         }
@@ -44,31 +37,17 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 if (_ruleController != null)
                 {
-                    List<string> actions = new List<string>();
-
-                    // add in any checks in here 
-                    if (args.IsAnswer.HasValue && (bool)args.IsAnswer)
+                    if (args.IsAnswer.HasValue && (bool) args.IsAnswer)
                     {
-                        actions.Add("Add-Answer");
-                    }
-
-                    foreach (var action in actions)
-                    {
-                        if (IsActionActive(action))
+                        _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
-                            _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
-                                {
-                                    "UserId", args.Author.Id.ToString()
-                                },
-                                {
-                                    "Id", args.Id.ToString()
-                                },
-                                {
-                                    "Action", action
-                                }
-                            });
-                        }
+                                "UserId", args.Author.Id.ToString()
+                            },
+                            {
+                                "ReplyId", args.Id.ToString()
+                            }
+                        });
                     }
                 }
             }
@@ -76,53 +55,6 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 new TCException(
                     string.Format("EventsOnAfterCreate failed for forum reply id :{0}", args.Id),
-                    ex).Log();
-            }
-        }
-
-        /// <summary>
-        /// Determine what has been effected by the reply being deleted
-        /// </summary>
-        /// <param name="forumReplyAfterDeleteEventArgs"></param>
-        /// <returns></returns>
-        private void EventsOnAfterDelete(ForumReplyAfterDeleteEventArgs args)
-        {
-            try
-            {
-                if (_ruleController != null)
-                {
-                    List<string> actions = new List<string>();
-                    
-                    // add in any checks in here 
-                    if (args.IsAnswer.HasValue && (bool)args.IsAnswer)
-                    {
-                        actions.Add("Del-Answer");
-                    }
-                    
-                    foreach (var action in actions)
-                    {
-                        if (IsActionActive(action))
-                        {
-                            _ruleController.ScheduleTrigger(new Dictionary<string, string>()
-                            {
-                                {
-                                    "UserId", args.Author.Id.ToString()
-                                },
-                                {
-                                    "Id", args.Id.ToString()
-                                },
-                                {
-                                    "Action", action
-                                }
-                            });
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                new TCException(
-                    string.Format("EventsOnAfterDelete failed for forum reply id :{0}", args.Id),
                     ex).Log();
             }
         }
@@ -158,8 +90,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 if (_ruleController != null)
                 {
                     int key = (int)args.Id;
-
-                    List<string> actions = new List<string>();
+                    string action = string.Empty;
 
                     // add in any checks in here 
                     if (_beforeUpdateCache.ContainsKey(key))
@@ -169,33 +100,28 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                         {
                             if (args.IsAnswer ?? false)
                             {
-                                actions.Add("Add-Answer");
+                                action = "Add";
                             }
                             else
                             {
-                                actions.Add("Del-Answer");
+                                action = "Del";
                             }
                         }
                         ForumReply removed;
                         _beforeUpdateCache.TryRemove(key, out removed);
                     }
-                    foreach (var action in actions)
+
+                    if (action.Equals("Add"))
                     {
-                        if (IsActionActive(action))
+                        _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
-                            _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
-                                {
-                                    "UserId", args.Author.Id.ToString()
-                                },
-                                {
-                                    "Id", args.Id.ToString()
-                                },
-                                {
-                                    "Action", action
-                                }
-                            });
-                        }
+                                "UserId", args.Author.Id.ToString()
+                            },
+                            {
+                                "ReplyId", args.Id.ToString()
+                            }
+                        });
                     }
                 }
             }
@@ -227,32 +153,14 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             return true;
         }
 
-        /// <summary>
-        /// Check if the action is configured for the current rule
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns>bool</returns>
-        /// 
-        private bool IsActionActive(string action)
-        {
-            lock (_lockObj)
-            {
-                if (_actions.Contains(action))
-                {
-                    return true;
-                }
-                return false;
-            }
-        }
-
         public string Name
         {
-            get { return "4 Roads - Forum Reply Updated Trigger"; }
+            get { return "4 Roads - Forum Reply Accepted as Answer Trigger"; }
         }
 
         public string Description
         {
-            get { return "Fires when a forum reply is added, updated or deleted"; }
+            get { return "Fires when a forum reply is accepted as the answer"; }
         }
 
         public void SetController(IRuleController controller)
@@ -280,11 +188,10 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 }
             }
 
-            if (data.ContainsKey("Id"))
+            if (data.ContainsKey("ReplyId"))
             {
                 int replyId;
-
-                if (int.TryParse(data["Id"], out replyId))
+                if (int.TryParse(data["ReplyId"], out replyId))
                 {
                     var forumReplies = Apis.Get<IForumReplies>();
                     var forumReply = forumReplies.Get(replyId);
@@ -294,12 +201,6 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                         context.Add(forumReply.GlobalContentTypeId, forumReply);
                     }
                 }
-            }
-
-            if (data.ContainsKey("Action"))
-            {
-                CustomTriggerParameters ruleParameters = new CustomTriggerParameters() { Action = data["Action"] };
-                context.Add(_ruleTokens.CustomTriggerParametersTypeId, ruleParameters);
             }
             return context;
         }
@@ -327,7 +228,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         /// 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId, _ruleTokens.CustomTriggerParametersTypeId }; }
+            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId }; }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -341,42 +242,10 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a forum reply was created, updated or deleted");
+                defaultTranslation[0].Set("RuleTriggerName", "a forum reply was accepted as the answer");
                 defaultTranslation[0].Set("RuleTriggerCategory", "Forum Reply");
 
                 return defaultTranslation;
-            }
-        }
-
-        public void Update(IPluginConfiguration configuration)
-        {
-            lock (_lockObj)
-            {
-                _actions.Clear();
-
-                string fieldList = configuration.GetCustom("Actions") ?? string.Empty;
-
-                //Convert the string to  a list
-                string[] fieldFilter = fieldList.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                _actions.AddRange(fieldFilter);
-            }
-        }
-
-        public PropertyGroup[] ConfigurationOptions
-        {
-            get
-            {
-                PropertyGroup group = new PropertyGroup("Options", "Options", 0);
-                Property availableFields = new Property("Actions", "Actions", PropertyType.Custom, 0, "");
-
-                availableFields.ControlType = typeof(CheckboxListControl);
-                availableFields.SelectableValues.Add(new PropertyValue("Add-Answer", "Reply accepted as answer", 0) { });
-                availableFields.SelectableValues.Add(new PropertyValue("Del-Answer", "Reply rejected as answer", 0) { });
-
-                group.Properties.Add(availableFields);
-
-                return new[] { group };
             }
         }
 
