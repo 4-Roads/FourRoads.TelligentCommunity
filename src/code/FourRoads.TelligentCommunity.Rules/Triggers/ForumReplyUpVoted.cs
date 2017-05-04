@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.Rules.Tokens;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
@@ -8,11 +10,12 @@ using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
-    public class ForumReplyUpVoted : IRuleTrigger, ITranslatablePlugin, ISingletonPlugin, ICategorizedPlugin
+    public class ForumReplyUpVoted : IRuleTrigger, ITranslatablePlugin, ISingletonPlugin, ICategorizedPlugin, IPluginGroup
     {
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
         private readonly Guid _triggerid = new Guid("{05FFBDD4-7104-4BF6-B885-14F99AA41FAF}");
+        private RegisterUpVoteTokens _ruleTokens = new RegisterUpVoteTokens();
 
         public void Initialize()
         {
@@ -133,6 +136,17 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     if (!forumReply.HasErrors())
                     {
                         context.Add(forumReply.GlobalContentTypeId, forumReply);
+
+                        // get thread total votes 
+                        var threadReplies = Apis.Get<IForumReplies>().ListThreaded((int)forumReply.ThreadId, null).ToList();
+                        var threadUpVotes = threadReplies.Sum(fv => fv.QualityYesVotes ?? 0);
+                        
+                        UpVoteTriggerParameters upVoteTriggerParameters = new UpVoteTriggerParameters()
+                        {
+                            ReplyUpVotes = forumReply.QualityYesVotes ?? 0 , 
+                            ThreadUpVotes = threadUpVotes
+                        };
+                        context.Add(_ruleTokens.UpVoteTriggerParametersTypeId, upVoteTriggerParameters);
                     }
                 }
             }
@@ -162,7 +176,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         /// 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId }; }
+            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId, _ruleTokens.UpVoteTriggerParametersTypeId }; }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -193,6 +207,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 };
             }
         }
+
+        public IEnumerable<Type> Plugins => new Type[] { typeof(RegisterUpVoteTokens) };
 
     }
 }
