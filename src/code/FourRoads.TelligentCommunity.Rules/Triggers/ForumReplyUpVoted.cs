@@ -137,7 +137,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     {
                         context.Add(forumReply.GlobalContentTypeId, forumReply);
 
-                        // get thread total votes 
+                        // get thread total up votes 
                         var threadReplies = Apis.Get<IForumReplies>().ListThreaded((int)forumReply.ThreadId, null).ToList();
                         var threadUpVotes = threadReplies.Sum(fv => fv.QualityYesVotes ?? 0);
                         

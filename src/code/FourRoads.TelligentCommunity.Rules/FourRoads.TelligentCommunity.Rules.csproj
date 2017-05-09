@@ -81,9 +81,14 @@
     <Compile Include="Actions\UnjoinAllGroups.cs" />
     <Compile Include="Actions\UpdateConnectedCRMs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tokens\RegisterDownVoteTokens.cs" />
+    <Compile Include="Tokens\DownVoteTriggerParameters.cs" />
     <Compile Include="Tokens\UpVoteTriggerParameters.cs" />
+    <Compile Include="Tokens\DownVoteTriggerParametersToken.cs" />
     <Compile Include="Tokens\UpVoteTriggerParametersToken.cs" />
     <Compile Include="Tokens\RegisterUpVoteTokens.cs" />
+    <Compile Include="Triggers\ForumReplyDeleted.cs" />
+    <Compile Include="Triggers\UserPresence.cs" />
     <Compile Include="Triggers\AbusiveContent.cs" />
     <Compile Include="Triggers\AbusiveContentx3.cs" />
     <Compile Include="Triggers\ForumAnswerAccepted.cs" />

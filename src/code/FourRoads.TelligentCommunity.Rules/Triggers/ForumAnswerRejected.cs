@@ -21,18 +21,17 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public void Initialize()
         {
-            Apis.Get<IForumReplies>().Events.AfterDelete += EventsOnAfterDelete;
+            Apis.Get<IForumReplies>().Events.BeforeDelete += EventsOnBeforeDelete;
             Apis.Get<IForumReplies>().Events.BeforeUpdate += EventsOnBeforeUpdate;
             Apis.Get<IForumReplies>().Events.AfterUpdate += EventsOnAfterUpdate;
         }
 
-
         /// <summary>
         /// Determine what has been effected by the reply being deleted
         /// </summary>
-        /// <param name="forumReplyAfterDeleteEventArgs"></param>
+        /// <param name="ForumReplyBeforeDeleteEventArgs"></param>
         /// <returns></returns>
-        private void EventsOnAfterDelete(ForumReplyAfterDeleteEventArgs args)
+        private void EventsOnBeforeDelete(ForumReplyBeforeDeleteEventArgs args)
         {
             try
             {
@@ -41,6 +40,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     // add in any checks in here 
                     if (args.IsAnswer.HasValue && (bool)args.IsAnswer)
                     {
+                        CacheForumReply((int)args.Id);
+
                         _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
                             {
@@ -56,7 +57,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             catch (Exception ex)
             {
                 new TCException(
-                    string.Format("EventsOnAfterDelete failed for forum reply id :{0}", args.Id),
+                    string.Format("EventsOnBeforeDelete failed for forum reply id :{0}", args.Id),
                     ex).Log();
             }
         }
@@ -202,6 +203,20 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     if (!forumReply.HasErrors())
                     {
                         context.Add(forumReply.GlobalContentTypeId, forumReply);
+                    }
+                    else
+                    {
+                        // if deleting may have already gone so use the cache 
+                        if (_beforeUpdateCache.ContainsKey(replyId))
+                        {
+                            var cachedForumReply = _beforeUpdateCache[replyId];
+                            if (!cachedForumReply.HasErrors())
+                            {
+                                context.Add(cachedForumReply.GlobalContentTypeId, cachedForumReply);
+                            }
+                            ForumReply removed;
+                            _beforeUpdateCache.TryRemove(replyId, out removed);
+                        }
                     }
                 }
             }
