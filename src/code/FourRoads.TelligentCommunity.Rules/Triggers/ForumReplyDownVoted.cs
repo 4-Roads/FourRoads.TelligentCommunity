@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.Rules.Tokens;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
@@ -8,11 +10,12 @@ using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
-    public class ForumReplyDownVoted : IRuleTrigger, ITranslatablePlugin, ISingletonPlugin, ICategorizedPlugin
+    public class ForumReplyDownVoted : IRuleTrigger, ITranslatablePlugin, ISingletonPlugin, ICategorizedPlugin, IPluginGroup
     {
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
         private readonly Guid _triggerid = new Guid("{F20A930A-FD76-47DB-8999-102EF8DFF263}");
+        private RegisterDownVoteTokens _ruleTokens = new RegisterDownVoteTokens();
 
         public void Initialize()
         {
@@ -136,6 +139,33 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     }
                 }
             }
+
+            if (data.ContainsKey("ReplyId"))
+            {
+                int replyId;
+                if (int.TryParse(data["ReplyId"], out replyId))
+                {
+                    var forumReplies = Apis.Get<IForumReplies>();
+                    var forumReply = forumReplies.Get(replyId);
+
+                    if (!forumReply.HasErrors())
+                    {
+                        context.Add(forumReply.GlobalContentTypeId, forumReply);
+
+                        // get thread total down votes 
+                        var threadReplies =
+                            Apis.Get<IForumReplies>().ListThreaded((int)forumReply.ThreadId, null).ToList();
+                        var threadDownVotes = threadReplies.Sum(fv => fv.QualityNoVotes ?? 0);
+
+                        DownVoteTriggerParameters downVoteTriggerParameters = new DownVoteTriggerParameters()
+                        {
+                            ReplyDownVotes = forumReply.QualityNoVotes ?? 0,
+                            ThreadDownVotes = threadDownVotes
+                        };
+                        context.Add(_ruleTokens.DownVoteTriggerParametersTypeId, downVoteTriggerParameters);
+                    }
+                }
+            }
             return context;
         }
 
@@ -162,7 +192,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         /// 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId }; }
+            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId, _ruleTokens.DownVoteTriggerParametersTypeId }; }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -193,6 +223,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 };
             }
         }
+
+        public IEnumerable<Type> Plugins => new Type[] { typeof(RegisterDownVoteTokens) };
 
     }
 }

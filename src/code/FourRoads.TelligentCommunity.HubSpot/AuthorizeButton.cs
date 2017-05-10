@@ -63,7 +63,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 }
                 catch (Exception ex)
                 {
-                    Message.Text = $"<label style=\"color:red\">Error while trying to setup oauth credentials</label><br><small>{ex.Message}</small>";
+                    Message.Text = $"<label style=\"color:red\">Error while trying to setup oauth credentials</label><br><small>{ex.Message + ((ex.InnerException != null) ? ": " + ex.InnerException.Message + " : " : "")}</small>";
                 }
 
             }

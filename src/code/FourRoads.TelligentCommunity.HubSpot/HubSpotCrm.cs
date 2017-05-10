@@ -248,6 +248,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                 if (!task.Result.IsSuccessStatusCode)
                 {
+                    PublicApi.Eventlogs.Write($"Hubspot API Issue: http status code {task.Result.StatusCode} - {content}", new EventLogEntryWriteOptions());
+
                     if (task.Result.StatusCode == HttpStatusCode.NotFound)
                     {
                         return null;
@@ -276,13 +278,13 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             if (jsonResponse.access_token != null)
             {
-                PublicApi.Eventlogs.Write("Obtained access token for Hubspot", new EventLogEntryWriteOptions() { EventType = "Debug" });
+                PublicApi.Eventlogs.Write("Obtained access token for Hubspot", new EventLogEntryWriteOptions() {EventType = "Debug"});
 
                 _configuration.SetString("AccessToken", jsonResponse.access_token.ToString());
                 _configuration.SetString("RefreshToken", jsonResponse.refresh_token.ToString());
                 _configuration.SetString("Expires", DateTime.Now.AddHours(4).ToString());
-
             }
+
             _configuration.Commit();
 
         }
@@ -335,7 +337,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                 ProcessHubspotRequestRepsonse(repsonse);
 
-                return repsonse.error != null;
+                return repsonse.access_token != null;
             }
             else
             {
