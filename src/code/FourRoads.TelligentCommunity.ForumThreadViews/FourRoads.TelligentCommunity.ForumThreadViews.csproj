@@ -83,6 +83,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="DataProvider\ThreadViewDataProvider.cs" />
     <Compile Include="Interfaces\IThreadViewEvents.cs" />
     <Compile Include="Events\ThreadViewEvents.cs" />
