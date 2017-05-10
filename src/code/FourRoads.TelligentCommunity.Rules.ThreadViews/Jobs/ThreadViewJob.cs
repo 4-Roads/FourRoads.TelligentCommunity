@@ -1,9 +1,9 @@
 using System;
-using FourRoads.TelligentCommunity.ForumThreadViews.Triggers;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Triggers;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.Jobs
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Jobs
 {
     public class ThreadViewJob : IRecurringEvolutionJobPlugin
     {

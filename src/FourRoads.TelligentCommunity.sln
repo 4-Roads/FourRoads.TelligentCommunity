@@ -84,7 +84,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.Common.TelligentC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.HubSpot", "code\FourRoads.TelligentCommunity.HubSpot\FourRoads.TelligentCommunity.HubSpot.csproj", "{5BB7919E-9F1A-4DCD-8EC7-210F160F1FC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.ForumThreadViews", "code\FourRoads.TelligentCommunity.ForumThreadViews\FourRoads.TelligentCommunity.ForumThreadViews.csproj", "{1780110F-EF88-4134-8C8F-94E5C411B29D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Rules.ThreadViews", "code\FourRoads.TelligentCommunity.Rules.ThreadViews\FourRoads.TelligentCommunity.Rules.ThreadViews.csproj", "{1780110F-EF88-4134-8C8F-94E5C411B29D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -324,7 +324,7 @@ Global
 		{ADFC1B7B-81A5-4ED5-9115-12A2A608C546} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{8EAD72EC-98CB-49B0-9870-1DE3EEF883F3} = {DB514636-79B7-4717-B485-5B535A3111A5}
 		{5BB7919E-9F1A-4DCD-8EC7-210F160F1FC1} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
-		{1780110F-EF88-4134-8C8F-94E5C411B29D} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
+		{1780110F-EF88-4134-8C8F-94E5C411B29D} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		VisualSVNWorkingCopyRoot = ..

@@ -1,6 +1,6 @@
 ﻿using FourRoads.Common.TelligentCommunity.Components;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.Resources
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Resources
 {
     public class SqlScriptsInstaller : FourRoads.Common.TelligentCommunity.Plugins.Base.SqlScriptsInstaller
     {
@@ -11,7 +11,7 @@ namespace FourRoads.TelligentCommunity.ForumThreadViews.Resources
 
         protected override string BaseResourcePath
         {
-            get { return "FourRoads.TelligentCommunity.ForumThreadViews.Resources."; }
+            get { return "FourRoads.TelligentCommunity.Rules.ThreadViews.Resources."; }
         }
 
         protected override EmbeddedResourcesBase EmbeddedResources

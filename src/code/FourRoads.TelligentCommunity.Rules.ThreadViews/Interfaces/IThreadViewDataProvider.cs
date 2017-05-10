@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using FourRoads.TelligentCommunity.ForumThreadViews.Entities;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Entities;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.Interfaces
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces
 {
     public interface IThreadViewDataProvider
     {

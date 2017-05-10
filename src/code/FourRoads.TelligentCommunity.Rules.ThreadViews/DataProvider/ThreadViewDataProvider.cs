@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using FourRoads.TelligentCommunity.ForumThreadViews.Entities;
-using FourRoads.TelligentCommunity.ForumThreadViews.Interfaces;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Entities;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.DataProvider
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.DataProvider
 {
     public class ThreadViewDataProvider : IThreadViewDataProvider
     {

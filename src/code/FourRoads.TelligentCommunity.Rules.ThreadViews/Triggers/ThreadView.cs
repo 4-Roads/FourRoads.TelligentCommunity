@@ -4,11 +4,11 @@ using DryIoc;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
-using FourRoads.TelligentCommunity.ForumThreadViews.DataProvider;
-using FourRoads.TelligentCommunity.ForumThreadViews.Events;
-using FourRoads.TelligentCommunity.ForumThreadViews.Interfaces;
-using FourRoads.TelligentCommunity.ForumThreadViews.Jobs;
-using FourRoads.TelligentCommunity.ForumThreadViews.Services;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.DataProvider;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Events;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Jobs;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Services;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -16,7 +16,7 @@ using Telligent.Evolution.Extensibility.Rules.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Forums.Api.Implementation;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.Triggers
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Triggers
 {
     public class ThreadView : IRuleTrigger, ITranslatablePlugin, ISingletonPlugin, ICategorizedPlugin, IBindingsLoader, IConfigurablePlugin , IPluginGroup
     {
@@ -61,6 +61,10 @@ namespace FourRoads.TelligentCommunity.ForumThreadViews.Triggers
             }
         }
 
+        /// <summary>
+        ///  Fired from _forumThreadViewService for any threads which have been viewed 
+        /// </summary>
+        /// <param name="args"></param>
         private void EventsAfterView(ThreadViewEventsArgs args)
         {
             try
@@ -81,6 +85,9 @@ namespace FourRoads.TelligentCommunity.ForumThreadViews.Triggers
             }
         }
 
+        /// <summary>
+        /// Fired from ThreadViewJob to check every x duration if we have had thread views
+        /// </summary>
         public void CheckViewsforTrigger()
         {
             _forumThreadViewService.CheckforViewTriggers(_threshold);

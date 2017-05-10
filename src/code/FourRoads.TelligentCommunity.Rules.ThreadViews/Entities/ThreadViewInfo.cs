@@ -1,6 +1,6 @@
 using System;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.Entities
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Entities
 {
     [Serializable]
     public class ThreadViewInfo

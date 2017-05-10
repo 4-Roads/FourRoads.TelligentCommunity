@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using FourRoads.TelligentCommunity.ForumThreadViews.Events;
-using FourRoads.TelligentCommunity.ForumThreadViews.Interfaces;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Events;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Version1;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.Services
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Services
 {
     public class ThreadViewService : IThreadViewService
     {

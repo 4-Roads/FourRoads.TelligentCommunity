@@ -1,8 +1,8 @@
 ﻿using System;
-using FourRoads.TelligentCommunity.ForumThreadViews.Interfaces;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces;
 using Telligent.Evolution.Extensibility.Events.Version1;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.Events
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Events
 {
     public class ThreadViewEventsArgs
     {

@@ -1,7 +1,7 @@
 ﻿using System;
-using FourRoads.TelligentCommunity.ForumThreadViews.Events;
+using FourRoads.TelligentCommunity.Rules.ThreadViews.Events;
 
-namespace FourRoads.TelligentCommunity.ForumThreadViews.Interfaces
+namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces
 {
     public interface IThreadViewEvents
     {
