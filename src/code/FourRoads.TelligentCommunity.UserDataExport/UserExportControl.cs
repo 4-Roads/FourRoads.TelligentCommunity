@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Telligent.DynamicConfiguration.Components;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 
@@ -15,6 +17,9 @@ namespace FourRoads.TelligentCommunity.UserDataExport
         Button _createReport;
         HyperLink _downloadReport;
         Literal _processing;
+        Literal _helper;
+        Literal _spacer;
+        DropDownList _userGroupDropDownList;
 
         protected override void CreateChildControls()
         {
@@ -22,18 +27,61 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
             if (_deleteCurrentReport == null)
             {
-                _processing = new Literal() { Text = "<strong>Processing......please come back later</strong>", ID = "processing" };
+                _processing = new Literal()
+                {
+                    Text =
+                        "<strong>Processing......this may take a few minutes depending on system load and volumes</strong><br>",
+                    ID = "processing"
+                };
                 Controls.Add(_processing);
 
-                _deleteCurrentReport = new Button() { ID = "deleteCurrentReport" , Text="Delete/Cancel Report" };
+                _deleteCurrentReport = new Button() { ID = "deleteCurrentReport", Text = "Delete/Cancel Report" };
                 _deleteCurrentReport.Click += _deleteCurrentReport_Click;
                 Controls.Add(_deleteCurrentReport);
+
+                _helper = new Literal() { Text = "Choose a group to extract or 'All Users' for all users<br>" };
+                Controls.Add(_helper);
+
+                _userGroupDropDownList = new DropDownList() { ID = "userGroupDropDownList", Text = "User Groups" };
+                _userGroupDropDownList.Items.Add(new ListItem() { Text = "All Users", Value = "", Selected = true });
+
+                GroupsListOptions list = new GroupsListOptions()
+                {
+                    PageIndex = 0,
+                    PageSize = 100
+                };
+
+                bool moreRecords = true;
+                while (moreRecords)
+                {
+                    var groups = Apis.Get<Groups>().List(list);
+                    moreRecords = groups.TotalCount > (++list.PageIndex * list.PageSize);
+
+                    if (!groups.HasErrors())
+                    {
+                        foreach (var group in groups)
+                        {
+                            if ((group.TotalMembers ?? 0) > 0)
+                            {
+                                _userGroupDropDownList.Items.Add(new ListItem()
+                                {
+                                    Text = group.Name,
+                                    Value = group.Id.ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+                Controls.Add(_userGroupDropDownList);
+
+                _spacer = new Literal() { Text = "<br><br>" };
+                Controls.Add(_spacer);
 
                 _createReport = new Button() { ID = "createReport", Text = "Create Report" };
                 _createReport.Click += _createReport_Click;
                 Controls.Add(_createReport);
 
-                _downloadReport = new HyperLink() { ID = "downloadReport", Text = "Download" };
+                _downloadReport = new HyperLink() { ID = "downloadReport", Text = "Download Report" };
                 _downloadReport.Target = "_blank";
                 Controls.Add(_downloadReport);
 
@@ -86,7 +134,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
         private void CleanUpFiles()
         {
-            foreach(var file in Filestore().GetFiles(PathSearchOption.AllPaths))
+            foreach (var file in Filestore().GetFiles(PathSearchOption.AllPaths))
             {
                 Filestore().Delete(file.Path, file.FileName);
             }
@@ -97,7 +145,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
             if (Filestore().GetFile("", "processing.txt") == null)
             {
                 Filestore().AddUpdateFile("", "processing.txt", new MemoryStream() { });
-                PublicApi.JobService.Schedule(typeof(UserExportJob), DateTime.Now.ToUniversalTime());
+                PublicApi.JobService.Schedule(typeof(UserExportJob), DateTime.Now.ToUniversalTime(), new Dictionary<string, string>() { { "groupId", _userGroupDropDownList.SelectedValue } });
             }
 
             ShowRunning();
@@ -112,7 +160,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
         private bool ResultsExist()
         {
-            return (Filestore().GetFile("" , "results.csv") != null);
+            return (Filestore().GetFile("", "results.csv") != null);
         }
 
         private static Telligent.Evolution.Extensibility.Storage.Version1.ICentralizedFileStorageProvider Filestore()
@@ -122,12 +170,15 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
         private bool IsJobRunningOrScheduled()
         {
-           return  Filestore().GetFile("", "processing.txt") != null;
+            return Filestore().GetFile("", "processing.txt") != null;
         }
 
         private void ShowChoices()
         {
             _deleteCurrentReport.Visible = false;
+            _userGroupDropDownList.Visible = true;
+            _helper.Visible = true;
+            _spacer.Visible = true;
             _createReport.Visible = true;
             _downloadReport.Visible = false;
             _processing.Visible = false;
@@ -136,6 +187,9 @@ namespace FourRoads.TelligentCommunity.UserDataExport
         private void ShowResults()
         {
             _deleteCurrentReport.Visible = true;
+            _userGroupDropDownList.Visible = false;
+            _helper.Visible = false;
+            _spacer.Visible = false;
             _createReport.Visible = false;
             _downloadReport.Visible = true;
             _processing.Visible = false;
@@ -147,6 +201,9 @@ namespace FourRoads.TelligentCommunity.UserDataExport
         private void ShowRunning()
         {
             _deleteCurrentReport.Visible = true;
+            _userGroupDropDownList.Visible = false;
+            _helper.Visible = false;
+            _spacer.Visible = false;
             _createReport.Visible = false;
             _downloadReport.Visible = false;
             _processing.Visible = true;
@@ -172,7 +229,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
             }
             set
             {
-                
+
             }
         }
 
@@ -190,7 +247,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
         public void SetConfigurationPropertyValue(object value)
         {
-            
+
         }
     }
 }

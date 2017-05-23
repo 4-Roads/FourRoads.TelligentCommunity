@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
@@ -11,89 +13,74 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 {
     public class UserExportJob : IEvolutionJob
     {
+        private int _groupid;
+        private bool _grouped = false;
+
         public void Execute(JobData jobData)
         {
-            var fs = CentralizedFileStorage.GetFileStore(UserExportPlugin.FILESTORE_KEY);
+            if (jobData.Data.ContainsKey("groupId"))
+            {
+                if (int.TryParse(jobData.Data["groupId"], out _groupid))
+                {
+                    _grouped = true;
+                }
+            }
 
+            var fs = CentralizedFileStorage.GetFileStore(UserExportPlugin.FILESTORE_KEY);
             if (fs.GetFile("", "processing.txt") == null)
                 return;
 
             try
             {
-                UsersListOptions list = new UsersListOptions()
-                {
-                    PageIndex = 0,
-                    PageSize = 100,
-                    IncludeHidden = true,
-                    AccountStatus = "All"
-                };
-
                 StringBuilder resultCsv = new StringBuilder(100000);
+                resultCsv.AppendLine(BuildHeader());
 
                 bool moreRecords = true;
 
-                //Build the header
-                List<string> elements = new List<string>();
-                elements.Add("UserName");
-                elements.Add("DisplayName");
-                elements.Add("Account Email");
-                elements.Add("LastLoginDate");
-                elements.Add("Language");
-                elements.Add("AccountStatus");
-                elements.Add("Allow Partners To Contact");
-                elements.Add("Allow Site To Contact");
-                elements.Add("Avatar URL");
-                elements.Add("Birthday");
-                elements.Add("Bio");
-                elements.Add("Location");
-                elements.Add("TotalPosts");
-
-                foreach (var profileFeild in PublicApi.UserProfileFields.List())
+                if (_grouped)
                 {
-                    elements.Add(profileFeild.Title);
-                }
-
-                resultCsv.AppendLine(string.Join(",", elements.Select(Csv.Escape)));
-
-                while (moreRecords)
-                {
-                    var results = PublicApi.Users.List(list);
-
-                    moreRecords = results.TotalCount > (++list.PageIndex*list.PageSize);
-
-                    foreach (var user in results)
+                    GroupUserMembersListOptions list = new GroupUserMembersListOptions()
                     {
-                        elements.Clear();
+                        PageIndex = 0,
+                        PageSize = 100
+                    };
 
-                        elements.Add(user.Username);
-                        elements.Add(user.DisplayName);
-                        elements.Add(user.PrivateEmail);
-                        elements.Add(PublicApi.Language.FormatDateAndTime(user.LastLoginDate.GetValueOrDefault(DateTime.MinValue)));
-                        elements.Add(user.Language);
-                        elements.Add(user.AccountStatus);
-                        elements.Add(user.AllowSitePartnersToContact.ToString());
-                        elements.Add(user.AllowSiteToContact.ToString());
-                        elements.Add(user.AvatarUrl);
-                        elements.Add(PublicApi.Language.FormatDateAndTime(user.Birthday.GetValueOrDefault(DateTime.MinValue)));
-                        elements.Add(user.Bio(""));
-                        elements.Add(user.Location);
-                        elements.Add(user.TotalPosts.ToString());
+                    while (moreRecords)
+                    {
+                        if (fs.GetFile("", "processing.txt") == null)
+                            return;
 
-                        var profileFeilds = user.ProfileFields.ToLookup(l => l.Label);
+                        var results = Apis.Get<GroupUserMembers>().List(_groupid ,list);
+                        moreRecords = results.TotalCount > (++list.PageIndex * list.PageSize);
 
-                        foreach (var profileFeild in PublicApi.UserProfileFields.List())
+                        foreach (var groupUser in results)
                         {
-                            if (profileFeilds.Contains(profileFeild.Name))
-                            {
-                                elements.Add(profileFeilds[profileFeild.Name].First().Value);
-                            }
-                            else
-                            {
-                                elements.Add(string.Empty);
-                            }
+                            resultCsv.AppendLine(ExtractUser(groupUser.User));
                         }
+                    }
+                }
+                else
+                {
+                    UsersListOptions list = new UsersListOptions()
+                    {
+                        PageIndex = 0,
+                        PageSize = 100,
+                        IncludeHidden = true,
+                        AccountStatus = "All"
+                    };
 
-                        resultCsv.AppendLine(string.Join(",", elements.Select(Csv.Escape)));
+                    while (moreRecords)
+                    {
+                        if (fs.GetFile("", "processing.txt") == null)
+                            return;
+
+                        var results = Apis.Get<IUsers>().List(list);
+                        moreRecords = results.TotalCount > (++list.PageIndex*list.PageSize);
+
+                        foreach (var user in results)
+                        {
+                            resultCsv.AppendLine(ExtractUser(user));
+                        }
                     }
                 }
 
@@ -112,15 +99,82 @@ namespace FourRoads.TelligentCommunity.UserDataExport
             }
             catch (Exception ex)
             {
-                PublicApi.Eventlogs.Write("Error exporting users:" + ex, new EventLogEntryWriteOptions() { Category = "User Export" });
+                Apis.Get<IEventLog>().Write("Error exporting users:" + ex,
+                    new EventLogEntryWriteOptions() { Category = "User Export" });
             }
             finally
             {
-                PublicApi.Eventlogs.Write("Finished exporting users", new EventLogEntryWriteOptions() {Category = "User Export"});
+                Apis.Get<IEventLog>().Write("Finished exporting users",
+                    new EventLogEntryWriteOptions() { Category = "User Export" });
 
                 fs.Delete("", "processing.txt");
             }
         }
 
+        private string ExtractUser(User user)
+        {
+            List<string> elements = new List<string>
+            {
+                user.Username,
+                user.DisplayName,
+                user.PrivateEmail,
+                user.PublicEmail,
+                Apis.Get<ILanguage>().FormatDateAndTime(user.LastLoginDate.GetValueOrDefault(DateTime.MinValue)),
+                user.Language,
+                user.AccountStatus,
+                user.AllowSitePartnersToContact.ToString(),
+                user.AllowSiteToContact.ToString(),
+                user.AvatarUrl,
+                Apis.Get<ILanguage>().FormatDateAndTime(user.Birthday.GetValueOrDefault(DateTime.MinValue)),
+                user.Bio(""),
+                user.Location,
+                user.TotalPosts.ToString()
+            };
+            
+            var profileFields = user.ProfileFields.ToLookup(l => l.Label);
+            foreach (var profileFeild in Apis.Get<IUserProfileFields>().List())
+            {
+                if (profileFields.Contains(profileFeild.Name))
+                {
+                    elements.Add(profileFields[profileFeild.Name].First().Value);
+                }
+                else
+                {
+                    elements.Add(string.Empty);
+                }
+            }
+
+            return string.Join(",", elements.Select(Csv.Escape));
+        }
+
+        private string BuildHeader()
+        {
+            //Build the header
+            List<string> elements = new List<string>
+            {
+                "UserName",
+                "DisplayName",
+                "Private Email",
+                "Public Email",
+                "LastLoginDate",
+                "Language",
+                "AccountStatus",
+                "Allow Partners To Contact",
+                "Allow Site To Contact",
+                "Avatar URL",
+                "Birthday",
+                "Bio",
+                "Location",
+                "TotalPosts"
+            };
+
+            foreach (var profileField in Apis.Get<IUserProfileFields>().List())
+            {
+                elements.Add(profileField.Title);
+            }
+
+            return string.Join(",", elements.Select(Csv.Escape));
+        }
     }
+
 }

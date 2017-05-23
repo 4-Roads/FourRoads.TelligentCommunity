@@ -1,4 +1,5 @@
-﻿using Telligent.DynamicConfiguration.Components;
+﻿using System.Web.UI.WebControls;
+using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -51,12 +52,15 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
                 PropertyGroup exportGroup = new PropertyGroup("ExportForm", "Export Form", 1);
 
-                Property exportControl = new Property("exportButton", "Export Button", PropertyType.Custom, 1, "")
+                if (PluginManager.IsEnabled(this))
                 {
-                    ControlType = typeof(UserExportControl)
-                };
+                    Property exportControl = new Property("exportButton", "Export Settings", PropertyType.Custom, 1, "")
+                    {
+                        ControlType = typeof(UserExportControl)
+                    };
 
-                exportGroup.Properties.Add(exportControl);
+                    exportGroup.Properties.Add(exportControl);
+                }
 
                 return new[] { exportGroup };   
             
