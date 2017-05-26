@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.Rules.Helpers;
+using FourRoads.TelligentCommunity.Rules.Tokens;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
@@ -8,48 +11,56 @@ using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
-    public class AbusiveContent : IRuleTrigger, ITranslatablePlugin, ISingletonPlugin, ICategorizedPlugin
+    public class ForumThreadTagged : IRuleTrigger, ITranslatablePlugin, ISingletonPlugin, ICategorizedPlugin , IPluginGroup
     {
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
-        private readonly Guid _triggerid = new Guid("{E234C7D0-5649-47B4-BEB6-AD8D8CAC8786}");
+        private readonly Guid _triggerid = new Guid("{E0EDB61D-1D00-4B09-8C37-09F8EB3F899C}");
+        private UserTotalTokensRegister _userTotalTokens = new UserTotalTokensRegister();
+        private Guid _forumThreadType;
+
 
         public void Initialize()
         {
-            Apis.Get<IAbusiveContent>().Events.AfterFoundAbusive += EventsOnAfterFoundAbusive;
+            Apis.Get<ITags>().Events.AfterAdd += EventsOnAfterAdd;
+            _forumThreadType = Apis.Get<IForumThreads>().ContentTypeId;
         }
 
-        private void EventsOnAfterFoundAbusive(AbusiveContentAfterFoundAbusiveEventArgs args)
+        private void EventsOnAfterAdd(TagAfterAddEventArgs args)
         {
             try
             {
-                if (_ruleController != null && args.TotalReportCount.Equals(1))
+                if (_ruleController != null && args.ContentTypeId == _forumThreadType)
                 {
-                    _ruleController.ScheduleTrigger(new Dictionary<string, string>()
+                    if (args.Tags != null && args.Tags.Any())
                     {
+                        UserTotalValues.Tags(args.UserId, args.Tags.Length);
+                    }
+
+                    _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
-                            "UserId", args.AuthorUserId.ToString()
-                        },
-                        {
-                            "AbuseId", args.AbuseId.ToString()
-                        }
-                    });
+                            {
+                                "UserId", args.UserId.ToString()
+                            }
+                        });
                 }
             }
             catch (Exception ex)
             {
-                new TCException(string.Format("EventsOnAfterFoundAbusive failed for abuse report id:{0}", args.AbuseId), ex).Log();
+                new TCException(
+                    string.Format("EventsOnAfterAdd failed for id :{0}", args.ContentId),
+                    ex).Log();
             }
         }
 
         public string Name
         {
-            get { return "4 Roads - Content flagged as abusive trigger"; }
+            get { return "4 Roads - Forum thread is tagged trigger"; }
         }
 
         public string Description
         {
-            get { return "Fires when a post is marked as abusive"; }
+            get { return "Fires when a thread is tagged"; }
         }
 
         public void SetController(IRuleController controller)
@@ -73,22 +84,9 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     {
                         context.Add(users.ContentTypeId, user);
                         context.Add(_triggerid, true); //Added this trigger so that it is not re-entrant
-                    }
-                }
 
-                if (data.ContainsKey("AbuseId"))
-                {
-                    Guid abuseId;
-
-                    if (Guid.TryParse(data["AbuseId"], out abuseId))
-                    {
-                        var content = Apis.Get<IAbusiveContent>();
-                        var abusiveContent = content.Get(abuseId, content.DataTypeId);
-
-                        if (!abusiveContent.HasErrors())
-                        {
-                            context.Add(content.DataTypeId, abusiveContent);
-                        }
+                        //get the extended user attributes
+                        UserTotalValues.UpdateContext(context , user);
                     }
                 }
             }
@@ -112,7 +110,12 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] { Apis.Get<IUsers>().ContentTypeId }; }
+            get { return new[]
+            {
+                Apis.Get<IUsers>().ContentTypeId,
+                _userTotalTokens.UserTotalTriggerParametersTypeId
+            };
+            }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -126,7 +129,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a post is flagged as abusive");
+                defaultTranslation[0].Set("RuleTriggerName", "a thread is tagged");
                 defaultTranslation[0].Set("RuleTriggerCategory", "User");
 
                 return defaultTranslation;
@@ -143,5 +146,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 };
             }
         }
+        public IEnumerable<Type> Plugins => new Type[] { typeof(UserTotalTokensRegister) };
+
     }
 }

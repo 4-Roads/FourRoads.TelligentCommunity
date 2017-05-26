@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.Rules.Helpers;
 using FourRoads.TelligentCommunity.Rules.Tokens;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -15,7 +16,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
         private readonly Guid _triggerid = new Guid("{F20A930A-FD76-47DB-8999-102EF8DFF263}");
-        private RegisterDownVoteTokens _ruleTokens = new RegisterDownVoteTokens();
+        private DownVoteTokensRegister _downVoteTokens = new DownVoteTokensRegister();
+        private UserTotalTokensRegister _userTotalTokens = new UserTotalTokensRegister();
 
         public void Initialize()
         {
@@ -35,8 +37,11 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 if (_ruleController != null)
                 {
+                    // false = downvote
                     if (!args.Value)
                     {
+                        UserTotalValues.Votes(args.UserId, args.ReplyId ,1, UserTotalValues.VoteType.DownVoteCount);
+
                         _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
                             {
@@ -68,8 +73,11 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 if (_ruleController != null)
                 {
+                    // false = downvote
                     if (!args.Value)
                     {
+                        UserTotalValues.Votes(args.UserId, args.ReplyId, 1, UserTotalValues.VoteType.DownVoteCount);
+
                         _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
                             {
@@ -121,21 +129,9 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     {
                         context.Add(users.ContentTypeId, user);
                         context.Add(_triggerid, true); //Added this trigger so that it is not re-entrant
-                    }
-                }
-            }
 
-            if (data.ContainsKey("ReplyId"))
-            {
-                int replyId;
-                if (int.TryParse(data["ReplyId"], out replyId))
-                {
-                    var forumReplies = Apis.Get<IForumReplies>();
-                    var forumReply = forumReplies.Get(replyId);
-
-                    if (!forumReply.HasErrors())
-                    {
-                        context.Add(forumReply.GlobalContentTypeId, forumReply);
+                        //get the extended user attributes
+                        UserTotalValues.UpdateContext(context, user);
                     }
                 }
             }
@@ -162,7 +158,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                             ReplyDownVotes = forumReply.QualityNoVotes ?? 0,
                             ThreadDownVotes = threadDownVotes
                         };
-                        context.Add(_ruleTokens.DownVoteTriggerParametersTypeId, downVoteTriggerParameters);
+                        context.Add(_downVoteTokens.DownVoteTriggerParametersTypeId, downVoteTriggerParameters);
                     }
                 }
             }
@@ -192,7 +188,14 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         /// 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId, _ruleTokens.DownVoteTriggerParametersTypeId }; }
+            get { return new[]
+            {
+                Apis.Get<IUsers>().ContentTypeId,
+                Apis.Get<IForumReplies>().ContentTypeId,
+                _downVoteTokens.DownVoteTriggerParametersTypeId,
+                _userTotalTokens.UserTotalTriggerParametersTypeId
+            };
+            }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -224,7 +227,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             }
         }
 
-        public IEnumerable<Type> Plugins => new Type[] { typeof(RegisterDownVoteTokens) };
+        public IEnumerable<Type> Plugins => new Type[] { typeof(DownVoteTokensRegister), typeof(UserTotalTokensRegister) };
 
     }
 }

@@ -18,7 +18,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
         private List<string> _fields = new List<string>();
-        private Guid _triggerid = new Guid("{0FB34C60-65DB-48C9-BDFA-5ADFFADAE2F9}");
+        private readonly Guid _triggerid = new Guid("{0FB34C60-65DB-48C9-BDFA-5ADFFADAE2F9}");
         private Dictionary<int, User> _beforeUpdateCache = new Dictionary<int, User>();
  
         public void Initialize()

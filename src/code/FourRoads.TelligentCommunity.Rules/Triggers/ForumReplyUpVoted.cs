@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.Rules.Helpers;
 using FourRoads.TelligentCommunity.Rules.Tokens;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -15,7 +16,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
         private readonly Guid _triggerid = new Guid("{05FFBDD4-7104-4BF6-B885-14F99AA41FAF}");
-        private RegisterUpVoteTokens _ruleTokens = new RegisterUpVoteTokens();
+        private UpVoteTokensRegister _upVoteTokens = new UpVoteTokensRegister();
+        private UserTotalTokensRegister _userTotalTokens = new UserTotalTokensRegister();
 
         public void Initialize()
         {
@@ -35,8 +37,11 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 if (_ruleController != null)
                 {
+                    // true = upvote
                     if (args.Value)
                     {
+                        UserTotalValues.Votes(args.UserId, args.ReplyId , 1, UserTotalValues.VoteType.UpVoteCount);
+
                         _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
                             {
@@ -68,8 +73,11 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 if (_ruleController != null)
                 {
+                    // true = upvote
                     if (args.Value)
                     {
+                        UserTotalValues.Votes(args.UserId, args.ReplyId, 1, UserTotalValues.VoteType.UpVoteCount);
+
                         _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
                             {
@@ -121,6 +129,9 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     {
                         context.Add(users.ContentTypeId, user);
                         context.Add(_triggerid, true); //Added this trigger so that it is not re-entrant
+
+                        //get the extended user attributes
+                        UserTotalValues.UpdateContext(context, user);
                     }
                 }
             }
@@ -146,7 +157,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                             ReplyUpVotes = forumReply.QualityYesVotes ?? 0 , 
                             ThreadUpVotes = threadUpVotes
                         };
-                        context.Add(_ruleTokens.UpVoteTriggerParametersTypeId, upVoteTriggerParameters);
+                        context.Add(_upVoteTokens.UpVoteTriggerParametersTypeId, upVoteTriggerParameters);
                     }
                 }
             }
@@ -176,7 +187,14 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         /// 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] { Apis.Get<IUsers>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId, _ruleTokens.UpVoteTriggerParametersTypeId }; }
+            get { return new[]
+            {
+                Apis.Get<IUsers>().ContentTypeId,
+                Apis.Get<IForumReplies>().ContentTypeId,
+                _upVoteTokens.UpVoteTriggerParametersTypeId,
+                _userTotalTokens.UserTotalTriggerParametersTypeId
+            };
+            }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -208,7 +226,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             }
         }
 
-        public IEnumerable<Type> Plugins => new Type[] { typeof(RegisterUpVoteTokens) };
+        public IEnumerable<Type> Plugins => new Type[] { typeof(UpVoteTokensRegister) , typeof(UserTotalTokensRegister) };
 
     }
 }

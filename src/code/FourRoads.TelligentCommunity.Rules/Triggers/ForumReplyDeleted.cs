@@ -17,8 +17,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
         private readonly Guid _triggerid = new Guid("{A0D49DDB-7336-47D3-9884-23120806D75B}");
-        private RegisterUpVoteTokens _ruleUpTokens = new RegisterUpVoteTokens();
-        private RegisterDownVoteTokens _ruleDownTokens = new RegisterDownVoteTokens();
+        private UpVoteTokensRegister _ruleUpTokens = new UpVoteTokensRegister();
+        private DownVoteTokensRegister _ruleDownTokens = new DownVoteTokensRegister();
 
         private ConcurrentDictionary<int, ForumReply> _beforeDeleteCache = new ConcurrentDictionary<int, ForumReply>();
 
@@ -251,7 +251,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             }
         }
 
-        public IEnumerable<Type> Plugins => new Type[] { typeof(RegisterUpVoteTokens), typeof(RegisterDownVoteTokens) };
+        public IEnumerable<Type> Plugins => new Type[] { typeof(UpVoteTokensRegister), typeof(DownVoteTokensRegister) };
 
     }
 }

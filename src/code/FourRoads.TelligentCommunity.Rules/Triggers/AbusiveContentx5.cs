@@ -12,7 +12,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
     {
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
-        private Guid _triggerid = new Guid("{036F282B-105A-43B7-9C8B-DD19D5F8EE1D}");
+        private readonly Guid _triggerid = new Guid("{036F282B-105A-43B7-9C8B-DD19D5F8EE1D}");
 
         public void Initialize()
         {

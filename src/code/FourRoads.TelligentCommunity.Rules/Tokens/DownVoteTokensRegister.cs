@@ -3,7 +3,7 @@ using Telligent.Evolution.Extensibility.Templating.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Tokens
 {
-    public class RegisterDownVoteTokens : ITokenRegistrar
+    public class DownVoteTokensRegister : ITokenRegistrar
     {
         public readonly Guid DownVoteTriggerParametersTypeId = new Guid("EC0164C4-3EAA-4A1D-9C4D-69D13F184505");
 
