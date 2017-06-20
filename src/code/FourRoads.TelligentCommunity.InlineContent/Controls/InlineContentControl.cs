@@ -48,8 +48,6 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
                 $(this).removeClass('highlight');
               } 
             );});", true);
-
-            EnsureChildControls();
         }
 
         protected override void CreateChildControls()
@@ -80,13 +78,14 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
             return (PublicApi.Users.AnonymousUserName == PublicApi.Users.AccessingUser.Username);
         }
 
-        protected /*override*/ void EnsureChildControls()
+        protected override void EnsureChildControls()
         {
-            //base.EnsureChildControls();
+            base.EnsureChildControls();
 
             if (!ReadOnly)
             {
                 var customContent = _inlineContentLogic.GetInlineContent(InlineContentName);
+                var instanceId = _inlineContentLogic.MakeSafeFileName(InlineContentName);
 
                 //Is the any content that is waiting to be published with a newer date, if so add an extra class
                 Control[] tempCollection = new Control[Controls.Count];
@@ -123,6 +122,7 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
                 _editor.Attributes.Add("class", "fourroads-inline-content");
                 _editor.ID = "editor";
 
+                _editor.Controls.Add(new LiteralControl("<label>Default Content</Label>"));
 
                 _editorContent = new TinyMCE();
                 _editorContent.ClientIDMode = ClientIDMode.Static;
@@ -136,9 +136,11 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
 
                 _editorContent.Text = customContent != null ? customContent.Content ?? DefaultContent : DefaultContent;
                 _editorContent.CssClass = "editor";
-                _editorContent.ID = "editorcontent";
+                _editorContent.ID = "editorcontent" + instanceId;
 
-                _editorAnonymousContent= new TinyMCE();
+                _editor.Controls.Add(new LiteralControl("<label>Anonymous Content Override</Label>"));
+
+                _editorAnonymousContent = new TinyMCE();
                 _editorAnonymousContent.ClientIDMode = ClientIDMode.Static;
                 _editorAnonymousContent.SupportFileUpload = true;
                 _editorAnonymousContent.Submittable = false;
@@ -146,14 +148,10 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
                 //_editorAnonymousContent.ConfigurationData = _configurationDataBase;
                 _editorAnonymousContent.ContentTypeId = InlineContentPart.InlineContentContentTypeId;
                 _editor.Controls.Add(_editorAnonymousContent);
-
-                _editor.Controls.Add(new LiteralControl("<label>Default Content</Label>"));
-                
-                _editor.Controls.Add(new LiteralControl("<label>Anonymous Content Override</Label>"));
-
+               
                 _editorAnonymousContent.Text = customContent != null ? customContent.AnonymousContent ?? DefaultAnonymousContent : DefaultAnonymousContent;
                 _editorAnonymousContent.CssClass = "editor";
-                _editorAnonymousContent.ID = "editoranonymouscontent";
+                _editorAnonymousContent.ID = "editoranonymouscontent" + instanceId;
 
                 HtmlGenericControl actions = new HtmlGenericControl("div");
                 actions.Attributes.Add("style", "float:right");

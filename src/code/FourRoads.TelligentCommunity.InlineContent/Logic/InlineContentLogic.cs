@@ -120,7 +120,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
             return "4-roads-inline-content:" + contentName;
         }
 
-        private static string MakeSafeFileName(string name)
+        public string MakeSafeFileName(string name)
         {
             string result = string.Empty;
 
