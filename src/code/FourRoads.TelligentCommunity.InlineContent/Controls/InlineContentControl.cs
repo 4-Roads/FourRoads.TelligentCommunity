@@ -85,7 +85,7 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
             if (!ReadOnly)
             {
                 var customContent = _inlineContentLogic.GetInlineContent(InlineContentName);
-                var instanceId = _inlineContentLogic.MakeSafeFileName(InlineContentName);
+                var instanceId = Guid.NewGuid().ToString();
 
                 //Is the any content that is waiting to be published with a newer date, if so add an extra class
                 Control[] tempCollection = new Control[Controls.Count];
@@ -217,8 +217,8 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
                                 left = Math.max($(window).width() - modal.outerWidth(), 0) / 2;
 
                                 modal.css({{
-                                    top:top + $(window).scrollTop(), 
-                                    left:left + $(window).scrollLeft(),
+                                    top:top , 
+                                    left:left,
                                     height: Math.min($(window).height(), modal.outerHeight()),
                                     overflow: 'scroll'
                                 }});
