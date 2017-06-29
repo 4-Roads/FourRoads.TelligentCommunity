@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Text;
 using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
 using FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments;
-using Telligent.Common;
 using Telligent.Common.Diagnostics.Tracing.Web;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.ScriptedContentFragments.Implementations;
-using Telligent.Evolution.ScriptedContentFragments.Model;
-using Telligent.Evolution.ScriptedContentFragments.Services;
 
 namespace FourRoads.TelligentCommunity.InlineContent.Controls
 {
@@ -70,7 +65,12 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
             }
 
             //Add the dynamic content in here
-            Controls.Add(new Literal() { Text = contentToDisplay ?? (IsAnonymous() ? DefaultAnonymousContent : DefaultContent) });
+            // Call the render process to convert any embedded content such as emoji, images etc 
+            var preRenderedContent =
+                PublicApi.UI.Render(contentToDisplay ?? (IsAnonymous() ? DefaultAnonymousContent : DefaultContent),
+                    new UiRenderOptions());
+
+            Controls.Add(new Literal() { Text = preRenderedContent });
         }
 
         protected bool IsAnonymous()
