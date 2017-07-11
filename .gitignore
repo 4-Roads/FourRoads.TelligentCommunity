@@ -240,3 +240,4 @@ $RECYCLE.BIN/
 **/lib/Telligent*/*.dll
 **/lib/Telligent*/*.xml
 /src/code/TelligentCommunity
+/src/lib/Telligent
