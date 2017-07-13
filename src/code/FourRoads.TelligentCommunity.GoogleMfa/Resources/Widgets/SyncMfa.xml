@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:Mfa_Name}" version="10.0.0.4689" description="${resource:Mfa_Description}" instanceIdentifier="6d9264a6f6c4434c9d9954b87a865e57" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="splash" provider="3bd55b782e624b77b6e730f6bce17de2">
+    <contentScript><![CDATA[#set($validateInput = $core_v2_widget.UniqueId('validateInput'))
+#set($submit = $core_v2_widget.UniqueId('submit'))
+#set($disable = $core_v2_widget.UniqueId('disable'))
+
+#set($twoFactorEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled())
+
+#if (!$twoFactorEnabled)
+#set($twoFactor = $frcommon_v1_googleMfa.GenerateSetupInfo())
+
+<p>$core_v2_language.GetResource('Introduction')</p>
+<div><img src="$core_v2_encoding.HtmlAttributeEncode($twoFactor.QrCodeImageUrl)" /></div>
+<div><label>Manual Code:</label>$twoFactor.ManualEntrySetupCode</div>
+
+ <div class="form">
+  <p>$core_v2_language.GetResource('Complete_Setup')</p>
+ <fieldset>
+    <ul class="field-list">
+      <li class="field-item display-name">
+        <label for="$core_v2_encoding.HtmlAttributeEncode($displayNameId)">$core_v2_language.GetResource('VerifyCode')</label>
+        <span class="field-item-input"><input type="text" size="30" maxlength="254"  id="$core_v2_encoding.HtmlAttributeEncode($validateInput)" name="$core_v2_encoding.HtmlAttributeEncode($validateInput)" /></span>
+        <span class="field-item-validation" style="display: none;">Invalid code entered, please try again</span>
+      </li>
+      <li class="field-item">
+          <a class="button" id="$submit" href="javascript:void(0)">$core_v2_language.GetResource('VerfifyAndEnable')</a>
+      </li>
+    </ul> 
+    
+ </fieldset>   
+</div>
+#else
+ <div class="form">
+     <fieldset>
+<ul class="field-list">
+  <li class="field-item">  
+    <h3 class="warning">$core_v2_language.GetResource('TwoFactorEnabled')</h3>
+    <a class="button" id="$disable" href="javascript:void(0)">Disable Two Factor</a>
+</li>
+</ul>
+</fieldset>  
+</div>
+#end
+
+#registerEndOfPageHtml('fourroads.widgets.mfa')
+  <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('mfa.js'))"></script>
+#end
+
+#registerEndOfPageHtml()
+  <script type="text/javascript">
+      jQuery(function(){
+          jQuery.fourroads.widgets.mfa.register({
+      selectors : {
+          validateInput: '#$core_v2_encoding.JavascriptEncode($validateInput)',
+          submit: '#$core_v2_encoding.JavascriptEncode($submit)',
+          disable: '#$core_v2_encoding.JavascriptEncode($disable)'
+      },
+      urls : {
+	              validate: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('validate.vm'))'
+      },
+      resources : {
+         requiredField: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Required'))',
+         invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('invalidCode'))'
+      }
+          });
+      });
+  </script>
+#end
+
+			]]></contentScript>
+    <headerScript><![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Mfa_Header}'))
+			]]></headerScript>
+    <configuration><![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="Mfa_Name" dataType="string" defaultValue="${resource:Mfa_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Platform" />
+</propertyGroup>
+]]></configuration>
+    <languageResources><language key="en-us">
+  <resource name="Mfa_Name">4 Roads - MFA Sync</resource>
+  <resource name="Mfa_Header">MFA Setup</resource>
+  <resource name="Mfa_Description">Adds support for Google MFA.</resource>
+  <resource name="Options">Options</resource>
+  <resource name="SaveButton">Submit</resource>
+  <resource name="Introduction">Using the &lt;a href="https://support.google.com/accounts/answer/1066447?hl=en"&gt;Google Authentication App&lt;/a&gt; on your device please scan the QR Code below or enter the manual code.</resource>
+  <resource name="Complete_Setup">To complete your setup for multi factor authentication, please enter the current code in the application</resource>
+  <resource name="TwoFactorEnabled">Two factor authentication is enabled</resource>
+  <resource name="VerifyCode">Verify Code</resource>
+  <resource name="VerfifyAndEnable">Verify and Enable</resource>
+</language></languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

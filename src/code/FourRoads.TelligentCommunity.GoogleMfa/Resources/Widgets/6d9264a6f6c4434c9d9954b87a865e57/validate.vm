@@ -1,0 +1,22 @@
+$core_v2_page.SetContentType('application/json')
+#if ($core_v2_page.IsPost)
+
+	#set($validationCode = $core_v2_page.GetFormValue('validationCode'))
+
+	#if ($validationCode == "")
+		$frcommon_v1_googleMfa.EnableTwoFactor(false)
+
+		{"result":"true"}
+	#else
+
+		#if($frcommon_v1_googleMfa.Validate($validationCode))
+			$frcommon_v1_googleMfa.EnableTwoFactor(true)
+			{"result":"true"}
+		#else
+			$frcommon_v1_googleMfa.EnableTwoFactor(false)
+			{"result":"false"}
+		#end
+
+	#end
+	
+#end

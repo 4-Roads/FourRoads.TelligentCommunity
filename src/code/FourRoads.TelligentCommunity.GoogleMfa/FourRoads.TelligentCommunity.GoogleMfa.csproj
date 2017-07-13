@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{104B1F22-5CF1-4364-8C89-62CA11B032FE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FourRoads.TelligentCommunity.GoogleMfa</RootNamespace>
+    <AssemblyName>FourRoads.TelligentCommunity.GoogleMfa</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FourRoads.Common, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FourRoads.Common.Sql, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.Sql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FourRoads.Common.Web, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.Web.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Google.Authenticator, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\GoogleAuthenticator.1.2.1\lib\net45\Google.Authenticator.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Telligent.Common">
+      <HintPath>..\..\lib\Telligent\Telligent.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Api">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Components">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Components.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Controls">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Core">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Platform">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.RegexLibrary">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.RegexLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Rest">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Rest.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Glow">
+      <HintPath>..\..\lib\Telligent\Telligent.Glow.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Extensions\GoogleAuthenticatorExtension.cs" />
+    <Compile Include="Interfaces\IMfaLogic.cs" />
+    <Compile Include="Logic\MfaLogic.cs" />
+    <Compile Include="Plugins\FactoryDefaultWidgetProviderInstaller.cs" />
+    <Compile Include="Resources\EmbeddedResources.cs" />
+    <Compile Include="ScriptedFragments\SetupInfo.cs" />
+    <Compile Include="ScriptedFragments\GoogleAuthenticatorScriptedFragment.cs" />
+    <Compile Include="Plugins\GoogleMfaPluginCore.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\Widgets\6d9264a6f6c4434c9d9954b87a865e57\validate.vm" />
+    <EmbeddedResource Include="Resources\Widgets\295391e2b78d4b7e8056868ae4fe8fb3\validate.vm" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\6d9264a6f6c4434c9d9954b87a865e57\mfa.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
+      <Project>{8EAD72EC-98CB-49B0-9870-1DE3EEF883F3}</Project>
+      <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\SyncMfa.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\ValidateMfa.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\295391e2b78d4b7e8056868ae4fe8fb3\mfa.js" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
