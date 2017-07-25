@@ -21,18 +21,20 @@
                 validationCode: code
             };
 
-            context.selectors.submit.closest('.field-item').find('.field-item-validation').hide();
+            context.selectors.validateInput.closest('.field-item').find('.field-item-validation').hide();
 
             return $.telligent.evolution.post({
                 url: context.urls.validate,
                 data: data,
                 dataType: 'json',
                 success: function(response) {
-                    if (response.success === "true") {
-                        window.location = context.returnUrl;
+                    console.log(response);
+                    console.log(response.result);
+                    if (response.result === "true") {
+                        window.location = context.urls.returnUrl;
                     } else {
                         //Show error message
-                        context.selectors.submit.closest('.field-item').find('.field-item-validation').show();
+                        context.selectors.validateInput.closest('.field-item').find('.field-item-validation').show();
                     }
 
                 }

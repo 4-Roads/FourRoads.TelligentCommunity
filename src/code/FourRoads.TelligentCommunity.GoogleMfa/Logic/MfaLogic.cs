@@ -137,7 +137,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                         {
                             if (_usersService.AnonymousUserName == _usersService.AccessingUser.Username)
                             {
-                                accessController.AccessDenied("This page is not availalble to you" , false);
+                                accessController.AccessDenied("This page is not available to you" , false);
                             }
                         }
                     }

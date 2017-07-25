@@ -9,7 +9,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
     {
         public override Guid ScriptedContentFragmentFactoryDefaultIdentifier { get; } = new Guid("{3BD55B78-2E62-4B77-B6E7-30F6BCE17DE2}");
 
-        protected override string ProjectName => "Google MFA";
+        protected override string ProjectName => "4 Roads - Google MFA";
 
         protected override string BaseResourcePath => "FourRoads.TelligentCommunity.GoogleMfa.Resources.";
 

@@ -85,6 +85,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>  
     <Compile Include="Extensions\GoogleAuthenticatorExtension.cs" />
     <Compile Include="Interfaces\IMfaLogic.cs" />
     <Compile Include="Logic\MfaLogic.cs" />
