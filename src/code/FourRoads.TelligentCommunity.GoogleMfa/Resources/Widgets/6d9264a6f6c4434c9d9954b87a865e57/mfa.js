@@ -10,6 +10,14 @@
             context.selectors.submit.click(function(){save(context, context.selectors.validateInput.val());});
             context.selectors.disable.click(function(){save(context,'~~disable~~');});
             context.selectors.toggle.click(function(){context.selectors.activate.hide(); context.selectors.configure.show();});
+            // enter key on code entry
+			context.selectors.validateInput.bind('keypress', function(e){
+				// if enter was pressed, trigger a click on the submit button
+				if (e.keyCode === 13) {
+					e.preventDefault();
+					context.selectors.submit.click();
+				}
+			});            
         },
         scrapeElements = function (context) {
             $.each([context.selectors], function(i, set) {

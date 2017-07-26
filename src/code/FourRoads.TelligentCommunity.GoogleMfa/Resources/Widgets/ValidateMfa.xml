@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <scriptedContentFragments>
   <scriptedContentFragment name="${resource:Mfa_Name}" version="10.0.0.4689" description="${resource:Mfa_Description}" instanceIdentifier="295391e2b78d4b7e8056868ae4fe8fb3" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="splash" provider="3bd55b782e624b77b6e730f6bce17de2">
-    <contentScript><![CDATA[    #set($validateInput = $core_v2_widget.UniqueId('validateInput'))
+    <contentScript><![CDATA[#set($validateInput = $core_v2_widget.UniqueId('validateInput'))
 #set($submit = $core_v2_widget.UniqueId('submit'))
 
 #set($twoFactorEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled())

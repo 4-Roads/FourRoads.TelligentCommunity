@@ -8,6 +8,15 @@
 
     var attachHandlers = function (context) {
             context.selectors.submit.click(function(){save(context, context.selectors.validateInput.val());});
+            
+            // enter key on code entry
+			context.selectors.validateInput.bind('keypress', function(e){
+				// if enter was pressed, trigger a click on the submit button
+				if (e.keyCode === 13) {
+					e.preventDefault();
+					context.selectors.submit.click();
+				}
+			});
         },
         scrapeElements = function (context) {
             $.each([context.selectors], function(i, set) {
@@ -44,7 +53,6 @@
     $.fourroads.widgets.mfa = {
         register: function(context) {
             scrapeElements(context);
-
             attachHandlers(context);
         }
     };
