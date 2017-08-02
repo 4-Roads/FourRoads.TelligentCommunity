@@ -25,7 +25,10 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             _usersService.Events.AfterIdentify += EventsAfterIdentify;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
         }
-
+        /// <summary>
+        /// intercept the user has logged in and decide if we need to enforce mfa for this session
+        /// </summary>
+        /// <param name="userAfterAuthenticateEventArgs"></param>
         private void EventsOnAfterAuthenticate(UserAfterAuthenticateEventArgs userAfterAuthenticateEventArgs)
         {
             //user has authenticated
@@ -33,8 +36,17 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             var user = _usersService.Get(new UsersGetOptions() {Username = userAfterAuthenticateEventArgs.Username});
             if (TwoFactorEnabled(user))
             {
-                //Yes set flag to false
-                SetTwoFactorState(user, false);
+                var request = HttpContext.Current.Request;
+                if (request.Url.Host.ToLower() == "localhost" && request.Url.LocalPath.ToLower() == "/controlpanel/localaccess.aspx")
+                {
+                    //bypass mfa for emergency local access
+                    SetTwoFactorState(user, true);
+                }
+                else
+                {
+                    //Yes set flag to false
+                    SetTwoFactorState(user, false);
+                }
             }
             else
             {
@@ -42,6 +54,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                 SetTwoFactorState(user, true);
             }
         }
+
         /// <summary>
         /// Intercept requests and trap when a user has logged in 
         /// but still needs to perform the second auth stage. 
