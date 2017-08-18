@@ -116,7 +116,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a user has a presence in the platform");
+                defaultTranslation[0].Set("RuleTriggerName", "a user has a presence in the platform - 4 roads");
                 defaultTranslation[0].Set("RuleTriggerCategory", "Achievements");
 
                 return defaultTranslation;

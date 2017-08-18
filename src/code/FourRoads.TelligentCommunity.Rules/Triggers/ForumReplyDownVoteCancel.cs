@@ -295,7 +295,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a forum reply down vote was cancelled");
+                defaultTranslation[0].Set("RuleTriggerName", "a forum reply down vote was cancelled - 4 roads");
                 defaultTranslation[0].Set("RuleTriggerCategory", "Forum Reply");
 
                 return defaultTranslation;

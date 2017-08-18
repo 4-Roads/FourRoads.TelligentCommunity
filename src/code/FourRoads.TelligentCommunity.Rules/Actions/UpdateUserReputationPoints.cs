@@ -24,7 +24,7 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
 
         public string Name { get { return "4 Roads - Update user reputation points"; } }
 
-        public string Description { get { return "Update the extended property containing user reputation points"; } }
+        public string Description { get { return "Update the user reputation points/score with daily limit"; } }
 
         public Guid RuleComponentId { get { return _componentId; } }
 
@@ -39,7 +39,7 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
             {
                 int points = runtime.GetInt("Points");
                 int reputationGain = 0;
-                int reputation = 0;
+                //int reputation = 0;
 
                 ExtendedAttribute userReputationDate = user.ExtendedAttributes.Get("UserReputationDate");
                 ExtendedAttribute userReputationGain = user.ExtendedAttributes.Get("UserReputationGain");
@@ -63,14 +63,22 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
                         }
                     }
                 }
-               
-                ExtendedAttribute userReputation = user.ExtendedAttributes.Get("UserReputation");
-                if (userReputation != null)
+
+                var desc = runtime.GetString("Description");
+                if (string.IsNullOrWhiteSpace(desc))
                 {
-                    int.TryParse(userReputation.Value, out reputation);
+                    desc = "Reputation";
                 }
 
-                reputation += points;
+                Apis.Get<IPointTransactions>().Create(desc, user.Id.Value, points, user.ContentId, Apis.Get<IUsers>().ContentTypeId, new PointTransactionCreateOptions() { });
+
+                //ExtendedAttribute userReputation = user.ExtendedAttributes.Get("UserReputation");
+                //if (userReputation != null)
+                //{
+                //    int.TryParse(userReputation.Value, out reputation);
+                //}
+
+                //reputation += points;
                 reputationGain += points;
 
                 if (userReputationDate == null)
@@ -91,15 +99,16 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
                     userReputationGain.Value = Math.Max(0,reputationGain).ToString();
                 }
 
-                if (userReputation == null)
-                {
-                    user.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "UserReputation", Value = Math.Max(0, reputation).ToString() });
-                }
-                else
-                {
-                    userReputation.Value = Math.Max(0, reputation).ToString();
-                }
+                //if (userReputation == null)
+                //{
+                //    user.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "UserReputation", Value = Math.Max(0, reputation).ToString() });
+                //}
+                //else
+                //{
+                //    userReputation.Value = Math.Max(0, reputation).ToString();
+                //}
                 Apis.Get<IUsers>().Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes });
+               
             }
         }
 
@@ -114,7 +123,7 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleComponentName", "update the user reputation based on system actions");
+                defaultTranslation[0].Set("RuleComponentName", "award points with daily limit - 4 roads");
                 defaultTranslation[0].Set("RuleComponentCategory", "Reputation");
 
                 return defaultTranslation;
@@ -131,6 +140,8 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
                 group.Properties.Add(userProp);
 
                 group.Properties.Add(new Property("Points", "Points", PropertyType.Int, 2, ""));
+
+                group.Properties.Add(new Property("Description", "Description", PropertyType.String, 3, ""));
 
                 return new PropertyGroup[] { group };
             }
