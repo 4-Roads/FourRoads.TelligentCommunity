@@ -5,7 +5,7 @@ using Google.Authenticator;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
-using Telligent.Evolution.Urls.Routing;
+using FourRoads.Common.TelligentCommunity.Routing;
 
 namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 {
