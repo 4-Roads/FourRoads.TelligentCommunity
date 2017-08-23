@@ -129,7 +129,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a thread is tagged");
+                defaultTranslation[0].Set("RuleTriggerName", "a thread is tagged - 4 roads");
                 defaultTranslation[0].Set("RuleTriggerCategory", "User");
 
                 return defaultTranslation;

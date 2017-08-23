@@ -242,7 +242,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a forum reply was accepted as the answer");
+                defaultTranslation[0].Set("RuleTriggerName", "a forum reply was accepted as the answer - 4 roads");
                 defaultTranslation[0].Set("RuleTriggerCategory", "Forum Reply");
 
                 return defaultTranslation;
