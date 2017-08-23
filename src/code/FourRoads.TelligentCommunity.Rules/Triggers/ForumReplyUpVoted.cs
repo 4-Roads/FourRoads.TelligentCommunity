@@ -208,7 +208,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a forum reply was up voted");
+                defaultTranslation[0].Set("RuleTriggerName", "a forum reply was up voted - 4 roads");
                 defaultTranslation[0].Set("RuleTriggerCategory", "Forum Reply");
 
                 return defaultTranslation;

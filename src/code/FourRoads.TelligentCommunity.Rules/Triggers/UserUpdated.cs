@@ -211,7 +211,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a user profile is updated");
+                defaultTranslation[0].Set("RuleTriggerName", "a user profile is updated - 4 roads");
                 defaultTranslation[0].Set("RuleTriggerCategory", "User");
 
                 return defaultTranslation;

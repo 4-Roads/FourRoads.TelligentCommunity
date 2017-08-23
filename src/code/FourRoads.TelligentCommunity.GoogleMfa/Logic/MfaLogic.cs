@@ -25,7 +25,10 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             _usersService.Events.AfterIdentify += EventsAfterIdentify;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
         }
-
+        /// <summary>
+        /// intercept the user has logged in and decide if we need to enforce mfa for this session
+        /// </summary>
+        /// <param name="userAfterAuthenticateEventArgs"></param>
         private void EventsOnAfterAuthenticate(UserAfterAuthenticateEventArgs userAfterAuthenticateEventArgs)
         {
             //user has authenticated
@@ -33,8 +36,17 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             var user = _usersService.Get(new UsersGetOptions() {Username = userAfterAuthenticateEventArgs.Username});
             if (TwoFactorEnabled(user))
             {
-                //Yes set flag to false
-                SetTwoFactorState(user, false);
+                var request = HttpContext.Current.Request;
+                if (request.Url.Host.ToLower() == "localhost" && request.Url.LocalPath.ToLower() == "/controlpanel/localaccess.aspx")
+                {
+                    //bypass mfa for emergency local access
+                    SetTwoFactorState(user, true);
+                }
+                else
+                {
+                    //Yes set flag to false
+                    SetTwoFactorState(user, false);
+                }
             }
             else
             {
@@ -43,24 +55,57 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             }
         }
 
+        /// <summary>
+        /// Intercept requests and trap when a user has logged in 
+        /// but still needs to perform the second auth stage. 
+        /// At this point the user is technically authenticated with telligent 
+        /// so we also need to supress any callbacks etc whilst the second stage 
+        /// auth is being performed.
+        /// </summary>
+        /// <param name="e"></param>
         protected void EventsAfterIdentify(UserAfterIdentifyEventArgs e)
         {
             var user = _usersService.AccessingUser;
             if (user.Username != _usersService.AnonymousUserName)
             {
-                var reqeust = HttpContext.Current.Request;
-                var response = HttpContext.Current.Response;
-
-                if (response.ContentType == "text/html" &&
-                    !reqeust.Path.StartsWith("/tinymce") &&
-                    string.Compare(HttpContext.Current.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) == 0 && //Don't do post backs to avoid issues with callbacks etc
-                    (reqeust.CurrentExecutionFilePathExtension == ".aspx" || reqeust.CurrentExecutionFilePathExtension == ".htm" || reqeust.CurrentExecutionFilePathExtension == string.Empty))
+                if (TwoFactorEnabled(user) && TwoFactorState(user) == false)
                 {
-                    //Requires 2nd factor
-                    if (TwoFactorEnabled(user) && TwoFactorState(user) == false && reqeust.Url.LocalPath != "/mfa")
+                    // user is logged in but has not completed the second auth stage
+                    var request = HttpContext.Current.Request;
+
+                    if (request.Path.StartsWith("/socket.ashx"))
                     {
-                        //redirect to 2 factor page
-                        response.Redirect("/mfa" + "?ReturnUrl=" + _urlService.Encode(reqeust.RawUrl), true);
+                        return;
+                    }
+
+                    var response = HttpContext.Current.Response;
+
+                    // suppress any callbacks re search, notifications, header links etc
+                    if (request.Path.StartsWith("/api.ashx") ||
+                        (request.Url.LocalPath == "/utility/scripted-file.ashx" && 
+                        request.QueryString["_cf"] != null &&
+                        request.QueryString["_cf"] != "logout.vm" && 
+                        request.QueryString["_cf"] != "validate.vm"))
+                    {
+                        // this should only happen when in the second auth stage 
+                        // for blocked callbacks so a bit brutal
+                        response.Clear();
+                        response.End();
+                    }
+
+                    // is it a suitable time to redirect the user to the second auth page
+                    if (response.ContentType == "text/html" &&
+                        !request.Path.StartsWith("/tinymce") && 
+                        request.Url.LocalPath != "/logout" &&
+                        request.Url.LocalPath != "/mfa" && 
+                        string.Compare(HttpContext.Current.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) == 0 && 
+                        //Is this a main page and not a callback etc 
+                        (request.CurrentExecutionFilePathExtension == ".aspx" ||
+                         request.CurrentExecutionFilePathExtension == ".htm" ||
+                         request.CurrentExecutionFilePathExtension == string.Empty))
+                    {
+                         //redirect to 2 factor page
+                         response.Redirect("/mfa" + "?ReturnUrl=" + _urlService.Encode(request.RawUrl), true);
                     }
                 }
             }
@@ -137,7 +182,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                         {
                             if (_usersService.AnonymousUserName == _usersService.AccessingUser.Username)
                             {
-                                accessController.AccessDenied("This page is not availalble to you" , false);
+                                accessController.AccessDenied("This page is not available to you" , false);
                             }
                         }
                     }

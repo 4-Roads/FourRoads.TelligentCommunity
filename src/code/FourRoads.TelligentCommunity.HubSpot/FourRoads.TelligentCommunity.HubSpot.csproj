@@ -77,10 +77,6 @@
       <Project>{8EAD72EC-98CB-49B0-9870-1DE3EEF883F3}</Project>
       <Name>FourRoads.Common.TelligentCommunity</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FourRoads.TelligentCommunity.Rules\FourRoads.TelligentCommunity.Rules.csproj">
-      <Project>{2090D715-FFD1-4548-96A4-A978D4A48A92}</Project>
-      <Name>FourRoads.TelligentCommunity.Rules</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

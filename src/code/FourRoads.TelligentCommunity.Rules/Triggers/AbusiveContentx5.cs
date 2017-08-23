@@ -127,7 +127,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a post is flagged as abusive 5 times");
+                defaultTranslation[0].Set("RuleTriggerName", "a post is flagged as abusive 5 times - 4 roads");
                 defaultTranslation[0].Set("RuleTriggerCategory", "User");
 
                 return defaultTranslation;

@@ -20,7 +20,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
 
         }
 
-        public string Name => "Google MFA Plugin";
+        public string Name => "4 Roads - Google MFA Plugin";
 
         public string Description => "Plugin for adding MFA using the google authenticator";
 

@@ -16,7 +16,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Extensions
             
         }
 
-        public string Name => "Google Authenticator Extension";
+        public string Name => "4 Roads - Google Authenticator Extension";
         public string Description => "Used for MFA authentication";
         public string ExtensionName => "frcommon_v1_googleMfa";
         public object Extension => new GoogleAuthenticatorScriptedFragment();

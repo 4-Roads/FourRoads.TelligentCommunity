@@ -206,9 +206,6 @@ namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Triggers
         {
             module.Register<IThreadViewService, ThreadViewService>(Reuse.Singleton);
             module.Register<IThreadViewDataProvider, ThreadViewDataProvider>(Reuse.Singleton);
-            module.Register<IUsers, Users>(Reuse.Singleton);
-            module.Register<IForumThreads, ForumThreads>(Reuse.Singleton);
-            module.Register<IContentPresence, ContentPresence>(Reuse.Singleton);
             module.Register<IThreadViewEvents , ThreadViewEvents>(Reuse.Singleton);
         }
     }
