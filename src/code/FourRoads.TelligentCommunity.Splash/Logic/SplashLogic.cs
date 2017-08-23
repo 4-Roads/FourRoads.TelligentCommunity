@@ -6,13 +6,12 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
-
 using FourRoads.TelligentCommunity.Splash.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
-using Telligent.Evolution.Urls.Routing;
+using FourRoads.Common.TelligentCommunity.Routing;
 using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.Splash.Logic
