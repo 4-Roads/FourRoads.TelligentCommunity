@@ -1,6 +1,7 @@
 ﻿using System;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Platform.Logging;
 
 namespace FourRoads.Common.TelligentCommunity.Components
 {
@@ -40,18 +41,23 @@ namespace FourRoads.Common.TelligentCommunity.Components
 
         protected class NotSafeCsException : CSException
         {
-            public NotSafeCsException(CSExceptionType t, string internalMessage, Func<CSException, string> getTranslatedMessage) : base(t, internalMessage, getTranslatedMessage)
+            public NotSafeCsException(CSExceptionType t, string internalMessage) : base(t, internalMessage)
             {
             }
 
-            public NotSafeCsException(CSExceptionType t, string internalMessage, Func<CSException, string> getTranslatedMessage, Exception inner) : base(t, internalMessage, getTranslatedMessage, inner)
+            public NotSafeCsException(CSExceptionType t, string internalMessage, Exception inner) : base(t, internalMessage, inner)
             {
+            }
+
+            public void Log()
+            {
+                ExceptionHelper.Handle(this);
             }
         }
 
         public void Log()
         {
-            new NotSafeCsException(CSExceptionType.UnknownError, "Logged Error", null, this).Log();
+            new NotSafeCsException(CSExceptionType.UnknownError, "Logged Error", this).Log();
         }
     }
 }

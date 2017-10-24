@@ -84,7 +84,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         return new Type[0];
                     }
                         ).
-                        Where(t => type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                        Where(t => type.IsAssignableFrom(t) && !t.IsInterface() && !t.IsAbstract());
                     List<IBindingsLoader> bindingsLoaders = new List<IBindingsLoader>();
 
                     foreach (var bindingsType in types)

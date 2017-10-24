@@ -254,7 +254,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Controls
         {
             foreach (RepeaterItem item in _repeater.Items)
             {
-                CheckBox rowSel = item.SearchForControl("rowSelector") as CheckBox;
+                CheckBox rowSel = item.FindControl("rowSelector") as CheckBox;
                 var row = item.FindControl("row") as HtmlGenericControl;
                 if (row != null && rowSel != null && rowSel.Checked)
                 {

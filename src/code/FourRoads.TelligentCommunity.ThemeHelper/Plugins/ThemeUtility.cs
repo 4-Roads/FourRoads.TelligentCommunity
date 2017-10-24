@@ -52,33 +52,40 @@ namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
                 if (_themeFileInfos == null)
                 {
                     _themeFileInfos = new List<ThemeFileInfo>();
+                    ThemeConfigurationData configuration =
+                ThemeConfigurationDatas.GetFactoryDefaultThemeConfigurationData(_siteThemeTypeId, _siteThemeName);
 
-                    foreach (string folder in _themeFileFolders)
+                    var allThemeFiles = ThemeFiles.GetAllFilesForContext(_siteThemeTypeId, _siteThemeName, _themeContextId, false);
+                    
+                    foreach (var fileGroup in allThemeFiles.FilesByProperty)
                     {
-                        _themeFileInfos.AddRange(
-                            ThemeFiles.GetFiles(_siteThemeTypeId, _themeContextId, _siteThemeName, folder, false)
-                                .Select(f =>
-                                {
-                                    List<ThemeFile> themeFiles = (_themeConfigurationData != null)
-                                        ? ThemeFiles.DeserializeThemeFiles(_siteThemeTypeId,
-                                            _themeContextId, _siteThemeName,
-                                            folder,
-                                            _themeConfigurationData.GetStringValue(folder, "") , false , true)
-                                            .ToList()
-                                        : null;
-                                    return new ThemeFileInfo
-                                    {
-                                        ThemeFile = f,
-                                        HasConfiguredVersion =
-                                            ThemeFiles.GetConfiguredFile(_siteThemeTypeId, _themeContextId,
-                                                _siteThemeName,
-                                                folder, f.FileName , false) != null,
-                                        HasDeletedConfiguredVersion =
-                                            (themeFiles != null && !themeFiles.Exists(
-                                                t => t.FileName == f.FileName && t.PropertyName == f.PropertyName))
-                                    };
-                                }));
+                        var property = fileGroup.Key;
+
+                        List<ThemeFile> themeFiles = (_themeConfigurationData != null)
+                            ? ThemeFiles.DeserializeThemeFiles(configuration, property,
+                                _themeConfigurationData.GetStringValue(property, "")).ToList()
+                            : null;
+
+                        foreach (var installedFile in fileGroup)
+                        {
+                            var themeFile = ThemeFiles.GetFile(configuration, property, installedFile.FileName);
+
+                            var hasConfigured = ThemeFiles.GetConfiguredFile(_siteThemeTypeId, _themeContextId,
+                                                _siteThemeName, property, installedFile.FileName, false) != null;
+
+                            var hasDeletedConfiguredVersion = (themeFiles != null && !themeFiles.Exists(
+                                                t => t.FileName == themeFile.FileName && t.PropertyName == themeFile.PropertyName));
+
+                            _themeFileInfos.Add(new ThemeFileInfo
+                            {
+                                ThemeFile = themeFile,
+                                HasConfiguredVersion = hasConfigured,
+                                HasDeletedConfiguredVersion = hasDeletedConfiguredVersion
+                            }
+                            );
+                        }
                     }
+                    
                 }
 
                 return _themeFileInfos;
@@ -249,8 +256,7 @@ namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
             {
                 if (info.HasConfiguredVersion)
                 {
-                    ThemeFiles.DeleteFile(info.ThemeFile.ThemeTypeID,
-                        info.ThemeFile.ThemeContextID, info.ThemeFile.ThemeName,
+                    ThemeFiles.DeleteFile(configuration,
                         info.ThemeFile.PropertyName, info.ThemeFile.FileName , false);
 
                     return;
@@ -260,7 +266,7 @@ namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
                 {
                     IEnumerable<ThemeFile> themeFiles = ThemeFiles.DeserializeThemeFiles(configuration,
                         info.ThemeFile.PropertyName,
-                        configuration.GetCustomValue(info.ThemeFile.PropertyName, String.Empty), false, true);
+                        configuration.GetCustomValue(info.ThemeFile.PropertyName, String.Empty));
                     ThemeFile themeFile =
                         themeFiles.FirstOrDefault(
                             t =>
@@ -269,10 +275,10 @@ namespace FourRoads.TelligentCommunity.ThemeHelper.Plugins
 
                     if (themeFile != null)
                     {
-                        IList<ThemeFile> list = ThemeFiles.DeserializeThemeFiles(_siteThemeTypeId,
-                            _themeContextId, _siteThemeName, info.ThemeFile.PropertyName,
+                        IList<ThemeFile> list = ThemeFiles.DeserializeThemeFiles(configuration,
+                            info.ThemeFile.PropertyName,
                             _themeConfigurationData.GetCustomValue(
-                                info.ThemeFile.PropertyName, String.Empty), false, true);
+                                info.ThemeFile.PropertyName, String.Empty));
 
                         list.Add(themeFile);
 

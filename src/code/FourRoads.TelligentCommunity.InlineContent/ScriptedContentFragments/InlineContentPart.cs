@@ -30,6 +30,7 @@ using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
+using Telligent.Evolution.Platform.Logging;
 using DryIoc;
 using IContainer = Telligent.Evolution.Extensibility.Content.Version1.IContainer;
 
@@ -290,7 +291,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             }
             catch (CSException csEx)
             {
-                csEx.Log();
+                ExceptionHelper.Handle(csEx);
                 control.Controls.Add(new LiteralControl(csEx.Message));
             }
             catch (Exception ex)
