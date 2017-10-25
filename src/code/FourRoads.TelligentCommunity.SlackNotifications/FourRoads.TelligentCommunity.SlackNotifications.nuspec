@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>FourRoads.TelligentCommunity100.SlackNotifications</id>
+    <id>FourRoads.TelligentCommunity101.SlackNotifications</id>
     <version>$version$</version>
     <title>$title$</title>
     <authors>$author$</authors>
