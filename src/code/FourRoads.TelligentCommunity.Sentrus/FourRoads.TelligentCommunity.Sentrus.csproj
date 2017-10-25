@@ -36,16 +36,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FourRoads.Common, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.121\lib\net462\FourRoads.Common.dll</HintPath>
     </Reference>
     <Reference Include="FourRoads.Common.Sql, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.Sql.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.121\lib\net462\FourRoads.Common.Sql.dll</HintPath>
     </Reference>
     <Reference Include="FourRoads.Common.Web, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.0.0.108-beta\lib\net462\FourRoads.Common.Web.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\FourRoads.Common.5.0.0.121\lib\net462\FourRoads.Common.Web.dll</HintPath>
     </Reference>
     <Reference Include="NVelocity, Version=1.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
