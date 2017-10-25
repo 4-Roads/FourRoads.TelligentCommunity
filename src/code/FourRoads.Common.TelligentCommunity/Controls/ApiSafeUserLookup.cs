@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.WebControls;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 
@@ -113,7 +114,7 @@ namespace FourRoads.Common.TelligentCommunity.Controls
             {
                 string[] userIds = Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                return userIds.Select(u => PublicApi.Users.Get(new UsersGetOptions{Id=Convert.ToInt32(u)}));
+                return userIds.Select(u => Apis.Get<IUsers>().Get(new UsersGetOptions{Id=Convert.ToInt32(u)}));
             }
         }
     }

@@ -1,6 +1,6 @@
+using FourRoads.Common.TelligentCommunity.Components;
 using System;
 using System.Collections.Generic;
-using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;

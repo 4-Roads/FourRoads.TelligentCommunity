@@ -9,6 +9,7 @@ using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls.PropertyRules;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Authentication.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -265,7 +266,7 @@ namespace FourRoads.TelligentCommunity.Nexus2.Strava
 
         private bool UserNameExists(string userName)
         {
-            var user = PublicApi.Users.Get(new UsersGetOptions() { Username = userName });
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Username = userName });
 
             if (user != null && !user.HasWarningsOrErrors())
                 return true;

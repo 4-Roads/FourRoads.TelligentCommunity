@@ -1,3 +1,4 @@
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensions.Calendar.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensions.Calendar.Extensibility.Api.Version1;
@@ -22,7 +23,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
                 //This works around the issue of not being able to filter by goup id, not ideal and not very fast
                 while (true)
                 {
-                    var result = Telligent.Evolution.Extensions.Calendar.Api.PublicApi.Calendars.List(new CalendarsListOptions() {PageIndex = pageIndex, PageSize = 1});
+                    var result = Apis.Get<ICalendars>().List(new CalendarsListOptions() {PageIndex = pageIndex, PageSize = 1});
 
                     if (result.Count == 0)
                         break;
@@ -34,7 +35,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
                 }
             }
 
-            return new PagedList<Calendar>(new[] { Telligent.Evolution.Extensions.Calendar.Api.PublicApi.Calendars.Show(new CalendarsShowOptions() { Id = _calendarId.Value }) }, 1, 0, 1);
+            return new PagedList<Calendar>(new[] { Apis.Get<ICalendars>().Show(new CalendarsShowOptions() { Id = _calendarId.Value }) }, 1, 0, 1);
         }
     }
 }

@@ -9,6 +9,7 @@ using Telligent.Common.Diagnostics.Tracing.Web;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.InlineContent.Controls
 {
@@ -67,7 +68,7 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
             //Add the dynamic content in here
             // Call the render process to convert any embedded content such as emoji, images etc 
             var preRenderedContent =
-                PublicApi.UI.Render(contentToDisplay ?? (IsAnonymous() ? DefaultAnonymousContent : DefaultContent),
+                Apis.Get<IUI>().Render(contentToDisplay ?? (IsAnonymous() ? DefaultAnonymousContent : DefaultContent),
                     new UiRenderOptions());
 
             Controls.Add(new Literal() { Text = preRenderedContent });
@@ -75,7 +76,7 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
 
         protected bool IsAnonymous()
         {
-            return (PublicApi.Users.AnonymousUserName == PublicApi.Users.AccessingUser.Username);
+            return (Apis.Get<IUsers>().AnonymousUserName == Apis.Get<IUsers>().AccessingUser.Username);
         }
 
         protected override void EnsureChildControls()
@@ -260,7 +261,7 @@ public class InlineContentControl : TraceableControl ,  IPostBackEventHandler
         //        base.Render(tw);
         //    }
 
-        //    //writer.Write(PublicApi.UI.Render(sb.ToString() , new UiRenderOptions()));
+        //    //writer.Write(Apis.Get<IUI>().Render(sb.ToString() , new UiRenderOptions()));
         //    writer.Write(sb.ToString());
         //}
 

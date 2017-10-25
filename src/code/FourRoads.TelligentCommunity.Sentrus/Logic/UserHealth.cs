@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using FourRoads.TelligentCommunity.Sentrus.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using System.Data;
 using FourRoads.TelligentCommunity.Sentrus.Entities;
 
@@ -22,7 +23,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Logic
             {
                 if (_administratorRole == null)
                 {
-                    _administratorRole = PublicApi.Roles.Find("Administrators").FirstOrDefault();
+                    _administratorRole = Apis.Get<IRoles>().Find("Administrators").FirstOrDefault();
                 }
                 return _administratorRole;
             }
@@ -37,7 +38,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Logic
                 //avoid returning everyone who logged in before NOW or some future date 
                 yield break;
             }
-            User anon = PublicApi.Users.Get(new UsersGetOptions { Username = "anonymous" });
+            User anon = Apis.Get<IUsers>().Get(new UsersGetOptions { Username = "anonymous" });
 
             if (anon != null && AdministratorRole != null)
             {
@@ -56,12 +57,12 @@ namespace FourRoads.TelligentCommunity.Sentrus.Logic
                             {
                                 Guid userId = new Guid(Convert.ToString(reader["MembershipId"]));
 
-                                User usr = PublicApi.Users.Get(new UsersGetOptions { ContentId = userId });
+                                User usr = Apis.Get<IUsers>().Get(new UsersGetOptions { ContentId = userId });
 
                                 if (usr != null)
                                 {
                                     if (usr.Id != anon.Id &&
-                                        !PublicApi.RoleUsers.IsUserInRoles(usr.Username, new[] {AdministratorRole.Name}))
+                                        !Apis.Get<IRoleUsers>().IsUserInRoles(usr.Username, new[] {AdministratorRole.Name}))
                                     {
                                         yield return usr;
                                     }

@@ -9,6 +9,7 @@ using System.Linq;
 using FourRoads.TelligentCommunity.CustomEditor.Interfaces;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -74,7 +75,7 @@ namespace FourRoads.TelligentCommunity.CustomEditor
 
                     foreach (ICentralizedFile file in plugin.Files)
                     {
-                        stringBuilder.Append("<script type=\"text/javascript\" src='").Append(PublicApi.Html.EncodeAttribute(file.GetDownloadUrl())).Append("'></script>").AppendLine();
+                        stringBuilder.Append("<script type=\"text/javascript\" src='").Append(Apis.Get<IHtml>().EncodeAttribute(file.GetDownloadUrl())).Append("'></script>").AppendLine();
                     }
                 }
 
@@ -84,10 +85,10 @@ namespace FourRoads.TelligentCommunity.CustomEditor
 
                     String uploaderId = Guid.NewGuid().ToString();
 
-                    PageContext pageContext = PublicApi.Url.CurrentContext;
+                    PageContext pageContext = Apis.Get<IUrl>().CurrentContext;
                     if (pageContext == null)
                     {
-                        pageContext = PublicApi.Url.ParsePageContext(System.Web.HttpContext.Current.Request.Url.ToString());
+                        pageContext = Apis.Get<IUrl>().ParsePageContext(System.Web.HttpContext.Current.Request.Url.ToString());
                     }
 
                     var authCookie = context.Request.Cookies["AuthorizationCookie"];
@@ -103,7 +104,7 @@ namespace FourRoads.TelligentCommunity.CustomEditor
                     bool sourceButton = true;
                     if (group != null)
                     {
-                        sourceButton = PublicApi.Permissions.Get(PermissionRegistrar.CustomEditorSourceButton, PublicApi.Users.AccessingUser.Id.Value, group.ContentId.GetValueOrDefault(), pageContext.ContainerTypeId.Value).IsAllowed;
+                        sourceButton = Apis.Get<IPermissions>().Get(PermissionRegistrar.CustomEditorSourceButton, Apis.Get<IUsers>().AccessingUser.Id.Value, group.ContentId.GetValueOrDefault(), pageContext.ContainerTypeId.Value).IsAllowed;
                     }
                     
                     stringBuilder.Append("<script type=\"text/javascript\">jQuery.fourroads.customEditor.Attach('").Append(ClientID).Append("','");
@@ -214,7 +215,7 @@ namespace FourRoads.TelligentCommunity.CustomEditor
         }
 
         private int rows;
-        public int Rows 
+        public new int Rows 
         {
             get
             {

@@ -1,5 +1,6 @@
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
 {
@@ -18,10 +19,10 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
         {
             if (_forumId == null)
             {
-                return PublicApi.Forums.List(new ForumsListOptions() { PageIndex = pageIndex, GroupId = _groupId });
+                return Apis.Get<IForums>().List(new ForumsListOptions() { PageIndex = pageIndex, GroupId = _groupId });
             }
 
-            return new PagedList<Forum>(new[] { PublicApi.Forums.Get(_forumId.Value) }, 1, 0 , 1);
+            return new PagedList<Forum>(new[] { Apis.Get<IForums>().Get(_forumId.Value) }, 1, 0 , 1);
         }
     }
 }

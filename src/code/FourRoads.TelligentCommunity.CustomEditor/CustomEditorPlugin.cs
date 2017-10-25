@@ -15,6 +15,7 @@ using FourRoads.TelligentCommunity.CustomEditor.Interfaces;
 using FourRoads.TelligentCommunity.CustomEditor.CentralizedFileStore;
 using FourRoads.TelligentCommunity.CustomEditor.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using ThemeFiles = Telligent.Evolution.Extensibility.UI.Version1.ThemeFiles;
@@ -351,9 +352,9 @@ namespace FourRoads.TelligentCommunity.CustomEditor
 
             if (uploadedCfsFile != null)
             {
-                string resizedHtml = PublicApi.UI.GetResizedImageHtml(CentralizedFileStorage.GetGenericDownloadUrl(uploadedCfsFile), defaultWidth, defaultHeight, new UiGetResizedImageHtmlOptions());
+                string resizedHtml = Apis.Get<IUI>().GetResizedImageHtml(CentralizedFileStorage.GetGenericDownloadUrl(uploadedCfsFile), defaultWidth, defaultHeight, new UiGetResizedImageHtmlOptions());
 
-                returnString.Append(string.Concat("{\"" + jsonId + "\":\"", PublicApi.Javascript.Encode(uploadedCfsFile.GetDownloadUrl()), "\",\"resizedMarkup\":\"", PublicApi.Javascript.Encode(resizedHtml), "\",\"filename\":\"" + fname + "\"}"));
+                returnString.Append(string.Concat("{\"" + jsonId + "\":\"", Apis.Get<IJavascript>().Encode(uploadedCfsFile.GetDownloadUrl()), "\",\"resizedMarkup\":\"", Apis.Get<IJavascript>().Encode(resizedHtml), "\",\"filename\":\"" + fname + "\"}"));
             }
         }
 

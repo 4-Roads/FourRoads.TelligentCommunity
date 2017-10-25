@@ -14,6 +14,7 @@ using FourRoads.TelligentCommunity.MetaData.Security;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Caching.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
@@ -35,17 +36,17 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         {
             get
             {
-                if (PublicApi.Url.CurrentContext != null && PublicApi.Url.CurrentContext.ContextItems != null && PublicApi.Users.AccessingUser != null)
+                if (Apis.Get<IUrl>().CurrentContext != null && Apis.Get<IUrl>().CurrentContext.ContextItems != null && Apis.Get<IUsers>().AccessingUser != null)
                 {
-                    var items  = PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems();
+                    var items  = Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems();
 
                     if (items.Any())
                     {
                         foreach (var context in items)
                         {
-                            if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && PublicApi.Users.AccessingUser.Id.HasValue)
+                            if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && Apis.Get<IUsers>().AccessingUser.Id.HasValue)
                             {
-                                if (PublicApi.Permissions.Get(PermissionRegistrar.EditMetaDataPermission, PublicApi.Users.AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
+                                if (Apis.Get<IPermissions>().Get(PermissionRegistrar.EditMetaDataPermission, Apis.Get<IUsers>().AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
                                 {
                                     return true;
                                 }
@@ -54,7 +55,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                     }
                     else
                     {
-                        return PublicApi.Permissions.Get(PermissionRegistrar.EditMetaDataPermission, PublicApi.Users.AccessingUser.Id.GetValueOrDefault(0)).IsAllowed;
+                        return Apis.Get<IPermissions>().Get(PermissionRegistrar.EditMetaDataPermission, Apis.Get<IUsers>().AccessingUser.Id.GetValueOrDefault(0)).IsAllowed;
                     }
                 }
 
@@ -105,7 +106,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             if (details.ContentId.HasValue && details.ContentTypeId.HasValue)
             {
                 //Look for first image in content
-                Content content = PublicApi.Content.Get(details.ContentId.Value, details.ContentTypeId.Value);
+                Content content = Apis.Get<IContents>().Get(details.ContentId.Value, details.ContentTypeId.Value);
 
                 if (!content.HasErrors())
                 {
@@ -116,7 +117,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             if (details.ApplicationId.HasValue && string.IsNullOrWhiteSpace(imageUrl))
             {
                 //Look for first image in application description
-                var app = PublicApi.Applications.Get(details.ApplicationId.Value, details.ApplicationTypeId.Value);
+                var app = Apis.Get<IApplications>().Get(details.ApplicationId.Value, details.ApplicationTypeId.Value);
 
                 if (!app.HasErrors())
                 {
@@ -128,7 +129,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             {
                 //Get image from group avatar
                 //Look for first image in application description
-                var container = PublicApi.Containers.Get(details.ContainerId.Value, details.ContainerTypeId.Value);
+                var container = Apis.Get<IContainers>().Get(details.ContainerId.Value, details.ContainerTypeId.Value);
 
                 if (!container.HasErrors())
                 {
@@ -152,7 +153,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 foreach (Match match in matches)
                 {
                     Uri result;
-                    if (Uri.TryCreate(PublicApi.Url.Absolute(match.Groups["url"].Value), UriKind.Absolute, out result))
+                    if (Uri.TryCreate(Apis.Get<IUrl>().Absolute(match.Groups["url"].Value), UriKind.Absolute, out result))
                     {
                         results.Add(result.AbsoluteUri);
                     }
@@ -200,9 +201,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         {
             ContentDetails details = (ContentDetails)CacheService.Get("ContentDetails", CacheScope.Context) ?? new ContentDetails() {PageName = "default"};
 
-            if (PublicApi.Url.CurrentContext != null && details.PageName == "default")
+            if (Apis.Get<IUrl>().CurrentContext != null && details.PageName == "default")
             {
-                details.PageName = PublicApi.Url.CurrentContext.PageName;
+                details.PageName = Apis.Get<IUrl>().CurrentContext.PageName;
 
                 ContextualItem(coa =>
                 {
@@ -233,7 +234,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             {
                 details = new ContentDetails() { PageName = "default" };
 
-                var content = PublicApi.Content.Get(contentId, contentTypeId);
+                var content = Apis.Get<IContents>().Get(contentId, contentTypeId);
 
                 if (content != null)
                 {
@@ -273,11 +274,11 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             IContainer currentContainer = null;
             IContent currentContent = null;
 
-            foreach (var contextItem in PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems())
+            foreach (var contextItem in Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems())
             {
                 var container = PluginManager.Get<IWebContextualContainerType>().FirstOrDefault(a => a.ContainerTypeId == contextItem.ContainerTypeId);
 
-                if (container != null && contextItem.ContainerId.HasValue && contextItem.ContainerTypeId == PublicApi.Groups.ContainerTypeId)
+                if (container != null && contextItem.ContainerId.HasValue && contextItem.ContainerTypeId == Apis.Get<IGroups>().ContainerTypeId)
                 {
                     currentContainer = container.Get(contextItem.ContainerId.Value);
                 }
@@ -364,15 +365,15 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             while (data.InheritData && data.ContainerId != Guid.Empty)
             {
-                var container = PublicApi.Containers.Get(data.ContainerId, data.ContainerTypeId);
+                var container = Apis.Get<IContainers>().Get(data.ContainerId, data.ContainerTypeId);
 
                 //Once we start inheriting we go to the group home page
                 if (!container.HasErrors())
                 {
-                    if (container.ContainerId == PublicApi.Groups.Root.ContainerId)
+                    if (container.ContainerId == Apis.Get<IGroups>().Root.ContainerId)
                         break;
 
-                    var context = PublicApi.Url.ParsePageContext(container.Url);
+                    var context = Apis.Get<IUrl>().ParsePageContext(container.Url);
 
                     if (context != null && container.ParentContainer != null)
                     {

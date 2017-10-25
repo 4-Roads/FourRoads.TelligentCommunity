@@ -5,6 +5,7 @@ using Telligent.Evolution.Components;
 using Telligent.Evolution.CoreServices.WebContext.Services;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using CacheScope = Telligent.Caching.CacheScope;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
@@ -29,14 +30,14 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
             if (content == null)
                 return;
 
-            if (PublicApi.ContentTypes.Get(content.ContentTypeId).Name.ToLower() != "forum thread")
+            if (Apis.Get<IContentTypes>().Get(content.ContentTypeId).Name.ToLower() != "forum thread")
                 return;
 
-            ForumReply post = PublicApi.ForumReplies.Get(replyId, new ForumRepliesGetOptions() { ForumId = forumId, ThreadId = threadId });
+            ForumReply post = Apis.Get<IForumReplies>().Get(replyId, new ForumRepliesGetOptions() { ForumId = forumId, ThreadId = threadId });
 
             if (post != null && post.ThreadId == threadId)
             {
-                ForumThread thread = PublicApi.ForumThreads.Get(threadId, new ForumThreadsGetOptions() {ForumId = forumId});
+                ForumThread thread = Apis.Get<IForumThreads>().Get(threadId, new ForumThreadsGetOptions() {ForumId = forumId});
 
                 LastReadPostInfo lastReadPost = GetLastReadPost(appicationId, thread.ContentId, userId);
 
@@ -46,10 +47,10 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
                     if (postDateTime > lastReadPost.PostDate)
                     {
                         //Work out the reply count all posts previous to this date
-                        int pageIndex = PublicApi.ForumReplies.GetPageIndex(threadId, replyId, new ForumRepliesGetPageIndexOptions() {IncludeThreadStarter = true, PageSize = 10});
+                        int pageIndex = Apis.Get<IForumReplies>().GetPageIndex(threadId, replyId, new ForumRepliesGetPageIndexOptions() {IncludeThreadStarter = true, PageSize = 10});
                         int replyCount = pageIndex*10;
 
-                        var replies = PublicApi.ForumReplies.List(threadId, new ForumRepliesListOptions() {PageIndex = pageIndex, PageSize = 10, IncludeThreadStarter = true});
+                        var replies = Apis.Get<IForumReplies>().List(threadId, new ForumRepliesListOptions() {PageIndex = pageIndex, PageSize = 10, IncludeThreadStarter = true});
 
                         foreach (ForumReply forumReply in replies)
                         {

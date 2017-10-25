@@ -1,5 +1,6 @@
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
 {
@@ -21,10 +22,10 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
         {
             if (_groupId == null)
             {
-                return PublicApi.Groups.List(new GroupsListOptions() {PageIndex = pageIndex , GroupTypes = "Joinless"});
+                return Apis.Get<IGroups>().List(new GroupsListOptions() {PageIndex = pageIndex , GroupTypes = "Joinless"});
             }
 
-            return new PagedList<Group>(new []{PublicApi.Groups.Get(new GroupsGetOptions(){Id = _groupId})}, 1 ,0 , 1);
+            return new PagedList<Group>(new []{Apis.Get<IGroups>().Get(new GroupsGetOptions(){Id = _groupId})}, 1 ,0 , 1);
         }
     }
 }

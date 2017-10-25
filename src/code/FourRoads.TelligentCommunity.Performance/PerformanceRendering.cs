@@ -9,6 +9,7 @@ using System.Collections.Generic;
 
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Semaphore = System.Threading.Semaphore;
 using FourRoads.TelligentCommunity.Performance.Storage;
@@ -36,7 +37,7 @@ namespace FourRoads.TelligentCommunity.Performance
 
             if (contentFragmentPage != null )
             {
-                PageContext currentContext = PublicApi.Url.CurrentContext;
+                PageContext currentContext = Apis.Get<IUrl>().CurrentContext;
 
                 if (currentContext != null && !string.IsNullOrWhiteSpace(currentContext.UrlName))
                 {

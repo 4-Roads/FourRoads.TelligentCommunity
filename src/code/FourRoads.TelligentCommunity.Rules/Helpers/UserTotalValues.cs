@@ -1,5 +1,5 @@
-﻿using System;
-using FourRoads.TelligentCommunity.Rules.Tokens;
+﻿using FourRoads.TelligentCommunity.Rules.Tokens;
+using System;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;

@@ -3,6 +3,7 @@ using FourRoads.Common.TelligentCommunity.Components.Extensions;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 
@@ -27,7 +28,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProce
 
                 string setting = lookups.GetString("DefaultSubscriptionSetting", "unset");
 
-                SetSubscriptionStatus(forum.ApplicationId, PublicApi.Forums.ApplicationTypeId, setting, user.Id.Value);
+                SetSubscriptionStatus(forum.ApplicationId, Apis.Get<IForums>().ApplicationTypeId, setting, user.Id.Value);
             }
         }
 

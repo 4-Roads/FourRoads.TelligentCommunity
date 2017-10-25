@@ -11,6 +11,7 @@ using FourRoads.TelligentCommunity.ForumLastPost.ScriptedFragmentss;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
@@ -21,14 +22,14 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
     {
         void IPlugin.Initialize()
         {
-            PublicApi.ForumReplies.Events.Render += ForumReplyRender;
+            Apis.Get<IForumReplies>().Events.Render += ForumReplyRender;
 
             Initialize();
         }
 
         private void ForumReplyRender(ForumReplyRenderEventArgs e)
         {
-            User user = PublicApi.Users.AccessingUser;
+            User user = Apis.Get<IUsers>().AccessingUser;
 
             if (Services.Get<IPluginManager>().IsEnabled(this))
             {

@@ -1,5 +1,6 @@
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
 {
@@ -18,10 +19,10 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
         {
             if (_blogId == null)
             {
-                return PublicApi.Blogs.List(new BlogsListOptions() { PageIndex = pageIndex, GroupId = _groupId });
+                return Apis.Get<IBlogs>().List(new BlogsListOptions() { PageIndex = pageIndex, GroupId = _groupId });
             }
 
-            return new PagedList<Blog>(new[] { PublicApi.Blogs.Get(new BlogsGetOptions() { Id = _blogId.Value }) }, 1, 0, 1);
+            return new PagedList<Blog>(new[] { Apis.Get<IBlogs>().Get(new BlogsGetOptions() { Id = _blogId.Value }) }, 1, 0, 1);
         }
     }
 }

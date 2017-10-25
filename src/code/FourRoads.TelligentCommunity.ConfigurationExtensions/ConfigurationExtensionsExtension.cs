@@ -5,6 +5,7 @@ using FourRoads.TelligentCommunity.ConfigurationExtensions.Api.Public.Entities;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Api.Internal.Data;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions
@@ -13,7 +14,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
     {
         public void Initialize()
         {
-            PublicApi.Users.Events.AfterCreate += Events_UserAfterCreate;
+            Apis.Get<IUsers>().Events.AfterCreate += Events_UserAfterCreate;
         }
 
         private void Events_UserAfterCreate(UserAfterCreateEventArgs args)
@@ -21,8 +22,8 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
             List<SystemNotificationPreference> defaults = DefaultSystemNotifications.GetSystemNotificationPreferences();
             if (defaults != null && defaults.Count > 0)
             {
-                ApiList<NotificationDistributionTypeInfo> distributionTypes = PublicApi.Notifications.ListDistributionTypes();
-                ApiList<NotificationTypeInfo> notificationTypes = PublicApi.Notifications.ListNotificationTypes();
+                ApiList<NotificationDistributionTypeInfo> distributionTypes = Apis.Get<INotifications>().ListDistributionTypes();
+                ApiList<NotificationTypeInfo> notificationTypes = Apis.Get<INotifications>().ListNotificationTypes();
                 foreach (NotificationTypeInfo notificationType in notificationTypes)
                 {
                     foreach (NotificationDistributionTypeInfo distributionType in distributionTypes)
@@ -33,11 +34,11 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
                             select p).FirstOrDefault();
                         if (preference != null)
                         {
-                            PublicApi.Users.RunAsUser(args.Id.Value, () => PublicApi.Notifications.UpdatePreference(preference.NotificationTypeId, preference.DistributionTypeId, preference.IsEnabled));
+                            Apis.Get<IUsers>().RunAsUser(args.Id.Value, () => Apis.Get<INotifications>().UpdatePreference(preference.NotificationTypeId, preference.DistributionTypeId, preference.IsEnabled));
                         }
                         else
                         {
-                            PublicApi.Users.RunAsUser(args.Id.Value, () => PublicApi.Notifications.UpdatePreference(notificationType.NotificationTypeId, distributionType.DistributionTypeId, false));
+                            Apis.Get<IUsers>().RunAsUser(args.Id.Value, () => Apis.Get<INotifications>().UpdatePreference(notificationType.NotificationTypeId, distributionType.DistributionTypeId, false));
                         }
                     }
                 }

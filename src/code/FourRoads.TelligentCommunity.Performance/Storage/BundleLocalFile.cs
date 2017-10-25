@@ -4,6 +4,7 @@ using System.Web;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.Performance.Storage
 {
@@ -17,7 +18,7 @@ namespace FourRoads.TelligentCommunity.Performance.Storage
 
                 if (uri.StartsWith("http://") || uri.StartsWith("https://"))
                 {
-                    uri = uri.Replace(PublicApi.Url.Absolute("~"), "~");
+                    uri = uri.Replace(Apis.Get<IUrl>().Absolute("~"), "~");
                 }
 
                 string realFilePath = uri;

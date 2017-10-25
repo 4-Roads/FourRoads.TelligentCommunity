@@ -6,6 +6,7 @@ using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Entities = Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.TelligentCommunity.ContentDiscuss
@@ -43,8 +44,8 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
 
         public void Initialize()
         {
-            PublicApi.ForumThreads.Events.BeforeCreate += ForumThread_BeforeCreate;
-            PublicApi.SearchIndexing.Events.BeforeBulkIndex += Search_BeforeBulkIndex;
+            Apis.Get<IForumThreads>().Events.BeforeCreate += ForumThread_BeforeCreate;
+            Apis.Get<ISearchIndexing>().Events.BeforeBulkIndex += Search_BeforeBulkIndex;
         }
 
 
@@ -56,9 +57,9 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
             Guid originalContentTypeGuid;
             if (!String.IsNullOrEmpty(originalContentId) && !String.IsNullOrEmpty(originalContentTypeId) && Guid.TryParse(originalContentId, out originalContentGuid) && Guid.TryParse(originalContentTypeId, out originalContentTypeGuid))
             {
-                if(originalContentTypeGuid == PublicApi.BlogPosts.ContentTypeId)
+                if(originalContentTypeGuid == Apis.Get<IBlogPosts>().ContentTypeId)
                 {
-                    Entities.BlogPost blogPost = PublicApi.BlogPosts.Get(originalContentGuid);
+                    Entities.BlogPost blogPost = Apis.Get<IBlogPosts>().Get(originalContentGuid);
                     // Add the new forum post to the list of discussions started from this blog post
                     Entities.ExtendedAttribute forumPosts = blogPost.ExtendedAttributes.Get("forumDiscussions");
                     if(forumPosts == null)
@@ -69,13 +70,13 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
                     {
                         forumPosts.Value = new StringBuilder(forumPosts.Value).Append(",").Append(args.ContentId.ToString()).ToString();
                     }
-                    PublicApi.BlogPosts.Update(blogPost.Id.Value, new BlogPostsUpdateOptions() { ExtendedAttributes = blogPost.ExtendedAttributes });
+                    Apis.Get<IBlogPosts>().Update(blogPost.Id.Value, new BlogPostsUpdateOptions() { ExtendedAttributes = blogPost.ExtendedAttributes });
                     // Add the blog post as the originator of the forum post
                     args.ExtendedAttributes.Add(new Entities.ExtendedAttribute() { Key = "createdFrom", Value = blogPost.ContentId.ToString() });
                 }
-                else if(originalContentTypeGuid == PublicApi.WikiPages.ContentTypeId)
+                else if(originalContentTypeGuid == Apis.Get<IWikiPages>().ContentTypeId)
                 {
-                    Entities.WikiPage wikiPage = PublicApi.WikiPages.Get(originalContentGuid);
+                    Entities.WikiPage wikiPage = Apis.Get<IWikiPages>().Get(originalContentGuid);
                     args.ExtendedAttributes.Add(new Entities.ExtendedAttribute() { Key = "createdFrom", Value = wikiPage.ContentId.ToString() });
                 }
             }
@@ -87,7 +88,7 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
             {
                 foreach (Entities.SearchIndexDocument document in args.Documents)
                 {
-                    Entities.ForumThread thread = PublicApi.ForumThreads.Get(document.ContentId);
+                    Entities.ForumThread thread = Apis.Get<IForumThreads>().Get(document.ContentId);
                     if(thread.ExtendedAttributes["createdFrom"] != null && !String.IsNullOrEmpty(thread.ExtendedAttributes["createdFrom"].Value))
                     {
                         document.AddField("createdfrom_t", thread.ExtendedAttributes["createdFrom"].Value);

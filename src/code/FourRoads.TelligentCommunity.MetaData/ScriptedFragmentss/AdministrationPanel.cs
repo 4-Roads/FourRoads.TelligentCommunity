@@ -9,6 +9,7 @@ using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using Telligent.Evolution.Extensibility.Administration.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -107,12 +108,12 @@ namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
 
         public Guid[] ContainerTypes
         {
-            get { return new [] { PublicApi.Groups.ContainerTypeId }; }
+            get { return new [] { Apis.Get<IGroups>().ContainerTypeId }; }
         }
 
         public Guid[] ApplicationTypes
         {
-            get { return PublicApi.ApplicationTypes.List().Where(c => Telligent.Evolution.Extensibility.Version1.PluginManager.Get<IWebContextualApplicationType>().Any(a => a.ApplicationTypeId == c.Id.GetValueOrDefault(Guid.Empty))).Select(c => c.Id.Value).ToArray(); }
+            get { return Apis.Get<IApplicationTypes>().List().Where(c => Telligent.Evolution.Extensibility.Version1.PluginManager.Get<IWebContextualApplicationType>().Any(a => a.ApplicationTypeId == c.Id.GetValueOrDefault(Guid.Empty))).Select(c => c.Id.Value).ToArray(); }
         }
 
         protected  string BaseResourcePath {

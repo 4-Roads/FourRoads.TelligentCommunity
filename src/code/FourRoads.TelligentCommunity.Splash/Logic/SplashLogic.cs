@@ -9,6 +9,7 @@ using System.Web;
 using FourRoads.TelligentCommunity.Splash.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using FourRoads.Common.TelligentCommunity.Routing;
@@ -34,12 +35,12 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
         {
             if (_configuration.HasValue)
             {
-                if (PublicApi.Users.AccessingUser.Id == PublicApi.Users.Get(new UsersGetOptions() {Username = "anonymous"}).Id)
+                if (Apis.Get<IUsers>().AccessingUser.Id == Apis.Get<IUsers>().Get(new UsersGetOptions() {Username = "anonymous"}).Id)
                 {
                     //if (HttpContext.Current.Request.Url.LocalPath != "/splash")
                     string urlRequest = HttpContext.Current.Request.Url.LocalPath;
 
-                    var pageContext = PublicApi.Url.ParsePageContext(HttpContext.Current.Request.Url.OriginalString);
+                    var pageContext = Apis.Get<IUrl>().ParsePageContext(HttpContext.Current.Request.Url.OriginalString);
 
                     if (pageContext != null && pageContext.PageName != _pageName && !CentralizedFileStorage.IsCentralizedFileUrl(urlRequest) && !(urlRequest.EndsWith(".js") || urlRequest.EndsWith(".axd") || urlRequest.EndsWith(".ashx") || urlRequest.IndexOf("socket.ashx") >= 0 || urlRequest.StartsWith("/resized-image/__size/")))
                     {
@@ -47,7 +48,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
 
                         if (cookie == null || cookie["hash"] != GetPasswordHash())
                         {
-                            HttpContext.Current.Response.Redirect("/splash" + "?ReturnUrl=" + PublicApi.CoreUrls.Home(false), true);
+                            HttpContext.Current.Response.Redirect("/splash" + "?ReturnUrl=" + Apis.Get<ICoreUrls>().Home(false), true);
                         }
                     }
                 }
@@ -61,7 +62,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
             {
                 if (!_initialized)
                 {
-                    PublicApi.Users.Events.AfterIdentify += EventsAfterIdentify;
+                    Apis.Get<IUsers>().Events.AfterIdentify += EventsAfterIdentify;
                     _initialized = true;
                 }
             }
@@ -115,14 +116,14 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
                 },
                 Validate = (context, accessController) =>
                 {
-                    if (PublicApi.Users.AccessingUser != null)
+                    if (Apis.Get<IUsers>().AccessingUser != null)
                     {
-                        User anon = PublicApi.Users.Get(new UsersGetOptions { Username = PublicApi.Users.AnonymousUserName });
-                        if (anon.Id != PublicApi.Users.AccessingUser.Id)
+                        User anon = Apis.Get<IUsers>().Get(new UsersGetOptions { Username = Apis.Get<IUsers>().AnonymousUserName });
+                        if (anon.Id != Apis.Get<IUsers>().AccessingUser.Id)
                         {
                             //If the user is a system administrator then grant access to the splash page so they can download the splash csv file, else redirect
-                            if (!PublicApi.RoleUsers.IsUserInRoles(PublicApi.Users.AccessingUser.Username , new []{"Administrators"}))
-                                accessController.Redirect(PublicApi.CoreUrls.Home(false));
+                            if (!Apis.Get<IRoleUsers>().IsUserInRoles(Apis.Get<IUsers>().AccessingUser.Username , new []{"Administrators"}))
+                                accessController.Redirect(Apis.Get<ICoreUrls>().Home(false));
                         }
                     }
                 }
@@ -234,7 +235,7 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
         {
             if (_configuration.HasValue)
             {
-                var pageContext = PublicApi.Url.ParsePageContext(HttpContext.Current.Request.Url.PathAndQuery);
+                var pageContext = Apis.Get<IUrl>().ParsePageContext(HttpContext.Current.Request.Url.PathAndQuery);
 
                 if (pageContext != null && pageContext.PageName == _pageName)
                 {

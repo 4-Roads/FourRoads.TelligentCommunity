@@ -1,5 +1,6 @@
 ﻿using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.Links
@@ -20,7 +21,7 @@ namespace FourRoads.TelligentCommunity.Links
 
         public void Initialize()
         {
-            PublicApi.Html.Events.Render += EventsOnRender;
+            Apis.Get<IHtml>().Events.Render += EventsOnRender;
         }
 
         private void EventsOnRender(HtmlRenderEventArgs htmlRenderEventArgs)

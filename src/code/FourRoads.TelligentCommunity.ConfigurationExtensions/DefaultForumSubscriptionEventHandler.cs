@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Interfaces;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Extensibility.Jobs.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions
 {
@@ -11,14 +13,14 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
     {
         public void Initialize()
         {
-            PublicApi.GroupUserMembers.Events.AfterUpdate += Events_AfterUpdate;
-            PublicApi.Users.Events.AfterCreate += EventsOnAfterCreate;
+            Apis.Get<IGroupUserMembers>().Events.AfterUpdate += Events_AfterUpdate;
+            Apis.Get<IUsers>().Events.AfterCreate += EventsOnAfterCreate;
         }
 
         private void EventsOnAfterCreate(UserAfterCreateEventArgs userAfterCreateEventArgs)
         {
             //Find all of the joinless groups with forums and set the default subscription for this user
-            PublicApi.JobService.Schedule(typeof(SubscriptionUpdateJob) ,DateTime.UtcNow, new Dictionary<string,string>()
+            Apis.Get<IJobService>().Schedule(typeof(SubscriptionUpdateJob) ,DateTime.UtcNow, new Dictionary<string,string>()
             {
                 {"UserName" , userAfterCreateEventArgs.Username},
                 {"processForums" , bool.TrueString},
@@ -31,7 +33,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions
         private void Events_AfterUpdate(GroupUserAfterUpdateEventArgs e)
         {
             //Get all of the forums of this group and get the default subscription and assign the user
-            PublicApi.JobService.Schedule(typeof(SubscriptionUpdateJob), DateTime.UtcNow, new Dictionary<string, string>()
+            Apis.Get<IJobService>().Schedule(typeof(SubscriptionUpdateJob), DateTime.UtcNow, new Dictionary<string, string>()
             {
                 {"UserName" , e.User.Username},
                 {"GroupId" , e.Group.Id.ToString()},

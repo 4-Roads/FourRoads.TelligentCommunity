@@ -2,6 +2,7 @@
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Entities = Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs
@@ -18,7 +19,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Jobs
 
             foreach (Entities.User user in enumerateUsers)
             {
-                PublicApi.Users.RunAsUser(user.Id.Value, () => PublicApi.Notifications.UpdatePreference(notificationTypeId, distributionTypeId, enable));
+                Apis.Get<IUsers>().RunAsUser(user.Id.Value, () => Apis.Get<INotifications>().UpdatePreference(notificationTypeId, distributionTypeId, enable));
             }
         }
     }

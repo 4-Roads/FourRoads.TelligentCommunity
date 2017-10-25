@@ -5,6 +5,7 @@ using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.Performance.Interfaces;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 
 namespace FourRoads.TelligentCommunity.Performance.Storage
@@ -33,7 +34,7 @@ namespace FourRoads.TelligentCommunity.Performance.Storage
 
                     if (localPath.StartsWith("http://") || localPath.StartsWith("https://"))
                     {
-                        localPath = localPath.Replace(PublicApi.Url.Absolute("~"), "~");
+                        localPath = localPath.Replace(Apis.Get<IUrl>().Absolute("~"), "~");
                     }
 
                     localPath = HttpContext.Current.Server.MapPath(localPath);

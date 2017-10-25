@@ -114,7 +114,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public event ConfigurationPropertyChanged ConfigurationValueChanged;
 
-        public new Control Control => this;
+        public Control Control => this;
 
         public object GetConfigurationPropertyValue()
         {

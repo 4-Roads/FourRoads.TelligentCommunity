@@ -1,6 +1,7 @@
 ﻿using System;
 using FourRoads.TelligentCommunity.ForumLastPost.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.ScriptedFragmentss
@@ -37,11 +38,11 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.ScriptedFragmentss
 
             if (lrp.ContentId.HasValue && lrp.ContentId.Value != Guid.Empty)
             {
-                var replies = PublicApi.ForumReplies.Get(lrp.ContentId.Value);
+                var replies = Apis.Get<IForumReplies>().Get(lrp.ContentId.Value);
 
                 if (replies != null)
                 {
-                    string url = PublicApi.ForumUrls.ForumReply(replies.Id.GetValueOrDefault(0));
+                    string url = Apis.Get<IForumUrls>().ForumReply(replies.Id.GetValueOrDefault(0));
 
                     if (lrp.ContentId.Value != Guid.Empty && lrp.ReplyCount > 0)
                         return url;

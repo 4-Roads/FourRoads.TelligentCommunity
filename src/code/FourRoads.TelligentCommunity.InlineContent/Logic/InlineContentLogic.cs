@@ -6,6 +6,7 @@ using System.Xml.Serialization;
 using FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments;
 using FourRoads.TelligentCommunity.InlineContent.Security;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Caching.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -23,17 +24,17 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
         {
             get
             {
-                if (PublicApi.Url.CurrentContext != null && PublicApi.Url.CurrentContext.ContextItems != null && PublicApi.Users.AccessingUser != null)
+                if (Apis.Get<IUrl>().CurrentContext != null && Apis.Get<IUrl>().CurrentContext.ContextItems != null && Apis.Get<IUsers>().AccessingUser != null)
                 {
-                    var items  = PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems();
+                    var items  = Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems();
 
                     if (items.Any())
                     {
                         foreach (var context in items)
                         {
-                            if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && PublicApi.Users.AccessingUser.Id.HasValue)
+                            if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && Apis.Get<IUsers>().AccessingUser.Id.HasValue)
                             {
-                                if (PublicApi.Permissions.Get(PermissionRegistrar.EditInlineContentPermission, PublicApi.Users.AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
+                                if (Apis.Get<IPermissions>().Get(PermissionRegistrar.EditInlineContentPermission, Apis.Get<IUsers>().AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
                                 {
                                     return true;
                                 }
@@ -42,7 +43,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
                     }
                     else
                     {
-                        return PublicApi.Permissions.Get(PermissionRegistrar.EditInlineContentPermission, PublicApi.Users.AccessingUser.Id.GetValueOrDefault(0)).IsAllowed;
+                        return Apis.Get<IPermissions>().Get(PermissionRegistrar.EditInlineContentPermission, Apis.Get<IUsers>().AccessingUser.Id.GetValueOrDefault(0)).IsAllowed;
                     }
 
                 }

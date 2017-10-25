@@ -8,6 +8,7 @@ using  FourRoads.TelligentCommunity.Sentrus.Controls;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
     using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
     using Telligent.Evolution.Extensibility.Version1;
     using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
     using Telligent.Evolution.Extensibility.Email.Version1;
@@ -54,8 +55,8 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
         public override void Initialize()
         {
-            PublicApi.Users.Events.AfterAuthenticate += Events_AfterAuthenticate;
-            PublicApi.Users.Events.AfterIdentify += Events_AfterIdentify;
+            Apis.Get<IUsers>().Events.AfterAuthenticate += Events_AfterAuthenticate;
+            Apis.Get<IUsers>().Events.AfterIdentify += Events_AfterIdentify;
         }
 
         public override string Description
@@ -97,7 +98,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             }
 
             //Send a sample email
-            UserAccountEncouragement(PublicApi.Users.Get(new UsersGetOptions() { Id = PublicApi.Url.ParsePageContext(System.Web.HttpContext.Current.Request.Url.ToString()).UserId }), emailAccountList.ToString());
+            UserAccountEncouragement(Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = Apis.Get<IUrl>().ParsePageContext(System.Web.HttpContext.Current.Request.Url.ToString()).UserId }), emailAccountList.ToString());
         }
 
 
@@ -181,23 +182,23 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
             EmailHealthEncouragementContainer emailDigestContainer = new EmailHealthEncouragementContainer();
 
-            PublicApi.Users.RunAsUser(user.Username, () =>
+            Apis.Get<IUsers>().RunAsUser(user.Username, () =>
             {
-                emailDigestContainer.ContentRecommendations = PublicApi.ContentRecommendations.List(new ContentRecommendationsListOptions()
+                emailDigestContainer.ContentRecommendations = Apis.Get<IContentRecommendations>().List(new ContentRecommendationsListOptions()
                 {
                     PageSize = 25,
                     PageIndex = 0,
-                    ContentTypeIds = new Guid[] { PublicApi.BlogPosts.ContentTypeId, PublicApi.ForumThreads.ContentTypeId, PublicApi.Media.ContentTypeId, PublicApi.WikiPages.ContentTypeId, PublicApi.ForumReplies.ContentTypeId }
+                    ContentTypeIds = new Guid[] { Apis.Get<IBlogPosts>().ContentTypeId, Apis.Get<IForumThreads>().ContentTypeId, Apis.Get<IMedia>().ContentTypeId, Apis.Get<IWikiPages>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId }
                 }).ToList();
             });
 
             TemplateContext templateContext = new TemplateContext(new Dictionary<Guid, object>()
                     {
-                        { PublicApi.Users.ContentTypeId, user },
+                        { Apis.Get<IUsers>().ContentTypeId, user },
                         { EmailHealthEncouragementContainer.DateTypeId, emailDigestContainer }
                     });
 
-            PublicApi.Users.RunAsUser(user.Username, () =>
+            Apis.Get<IUsers>().RunAsUser(user.Username, () =>
             {
                 var mailTempalte = Telligent.Evolution.Extensibility.Version1.PluginManager.GetSingleton<UserEncouragementEmailTemplate>();
 
@@ -224,7 +225,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
                         mailOptions.Attachments = attachments;
                     }
 
-                    PublicApi.SendEmail.Send(mailOptions);
+                    Apis.Get<ISendEmail>().Send(mailOptions);
                 }
             });
         }
@@ -343,10 +344,10 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
                 {
                     _tokenizedTemplates = new TokenizedTemplate[]{
 
-                        CreateTokenizedTemplate(EmailTarget.Header  , _defaultHeaderContent ,  PublicApi.Users.ContentTypeId,  EmailHealthEncouragementContainer.DateTypeId),
-                        CreateTokenizedTemplate(EmailTarget.Footer  ,  _defualtFooterContent ,  PublicApi.Users.ContentTypeId,  EmailHealthEncouragementContainer.DateTypeId),
-                        CreateTokenizedTemplate(EmailTarget.Subject  , _defualtSubjectContent ,  PublicApi.Users.ContentTypeId,  EmailHealthEncouragementContainer.DateTypeId),
-                        CreateTokenizedTemplate(EmailTarget.Body  ,  _defualtBodyContent ,  PublicApi.Users.ContentTypeId,  EmailHealthEncouragementContainer.DateTypeId)
+                        CreateTokenizedTemplate(EmailTarget.Header  , _defaultHeaderContent ,  Apis.Get<IUsers>().ContentTypeId,  EmailHealthEncouragementContainer.DateTypeId),
+                        CreateTokenizedTemplate(EmailTarget.Footer  ,  _defualtFooterContent ,  Apis.Get<IUsers>().ContentTypeId,  EmailHealthEncouragementContainer.DateTypeId),
+                        CreateTokenizedTemplate(EmailTarget.Subject  , _defualtSubjectContent ,  Apis.Get<IUsers>().ContentTypeId,  EmailHealthEncouragementContainer.DateTypeId),
+                        CreateTokenizedTemplate(EmailTarget.Body  ,  _defualtBodyContent ,  Apis.Get<IUsers>().ContentTypeId,  EmailHealthEncouragementContainer.DateTypeId)
                     };
                 }
 

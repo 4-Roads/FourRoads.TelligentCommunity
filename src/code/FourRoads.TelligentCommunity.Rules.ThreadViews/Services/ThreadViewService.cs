@@ -3,6 +3,7 @@ using System.Linq;
 using FourRoads.TelligentCommunity.Rules.ThreadViews.Events;
 using FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Services
 {

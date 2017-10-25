@@ -3,6 +3,7 @@ using FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProcessors
@@ -51,15 +52,15 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProce
 
         protected virtual void SetSubscriptionStatus(Guid contentId, Guid contentTypeId, string setting, int userId)
         {
-            PublicApi.Users.RunAsUser(userId, () =>
+            Apis.Get<IUsers>().RunAsUser(userId, () =>
             {
                 if (setting.ToLower() == "subscribed")
                 {
-                    PublicApi.ApplicationSubscriptions.Create(contentId, contentTypeId);
+                    Apis.Get<IApplicationSubscriptions>().Create(contentId, contentTypeId);
                 }
                 else if (setting.ToLower() == "unsubscribed")
                 {
-                    PublicApi.ApplicationSubscriptions.Delete(contentId, contentTypeId);
+                    Apis.Get<IApplicationSubscriptions>().Delete(contentId, contentTypeId);
                 }
             });
         }

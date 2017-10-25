@@ -1,6 +1,7 @@
 ﻿using System.Web.UI.WebControls;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -30,11 +31,11 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
         public bool UserHasAccess(int userId, string path, string fileName)
         {
-            var user = PublicApi.Users.Get(new UsersGetOptions() { Id= userId});
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id= userId});
 
             if (user != null)
             {
-                return PublicApi.Permissions.Get(Telligent.Evolution.Components.SitePermission.ManageMembership, userId).IsAllowed;
+                return Apis.Get<IPermissions>().Get(Telligent.Evolution.Components.SitePermission.ManageMembership, userId).IsAllowed;
             }
 
             return false;

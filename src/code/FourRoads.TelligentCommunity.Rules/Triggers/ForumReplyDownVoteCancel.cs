@@ -1,12 +1,12 @@
+using FourRoads.Common.TelligentCommunity.Components;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {

@@ -4,10 +4,12 @@ using FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations;
 using Telligent.Evolution.Calendar.Plugins;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensions.Calendar.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Extensions.Calendar.Extensibility.Api.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProcessors
 {
@@ -48,15 +50,15 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProce
          
         protected void SetSubscriptionStatus(int calendarId, string setting, int userId)
         {
-            PublicApi.Users.RunAsUser(userId, () =>
+            Apis.Get<IUsers>().RunAsUser(userId, () =>
             {
                 if (setting.ToLower() == "subscribed")
                 {
-                    Telligent.Evolution.Extensions.Calendar.Api.PublicApi.CalendarSubscriptions.Subscribe(userId, calendarId);
+                    Apis.Get<ICalendarSubscriptions>().Subscribe(userId, calendarId);
                 }
                 else if (setting.ToLower() == "unsubscribed")
                 {
-                    Telligent.Evolution.Extensions.Calendar.Api.PublicApi.CalendarSubscriptions.Unsubscribe(userId, calendarId);
+                    Apis.Get<ICalendarSubscriptions>().Unsubscribe(userId, calendarId);
                 }
             });
         }

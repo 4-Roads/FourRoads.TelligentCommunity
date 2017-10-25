@@ -12,12 +12,12 @@ namespace FourRoads.TelligentCommunity.CustomEditor
         {
         }
 
-        internal static string GetString(string path)
+        internal new static string GetString(string path)
         {
             return GetResourceString(Assembly, path);
         }
 
-        internal static Stream GetStream(string path)
+        internal new static Stream GetStream(string path)
         {
             return GetResourceStream(Assembly, path);
         }

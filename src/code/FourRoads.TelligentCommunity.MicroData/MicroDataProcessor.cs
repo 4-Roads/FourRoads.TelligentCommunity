@@ -6,6 +6,7 @@ using System.Web;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.RenderingHelper;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using IContent = Telligent.Evolution.Extensibility.Content.Version1.IContent;
@@ -138,9 +139,9 @@ namespace FourRoads.TelligentCommunity.MicroData
             {
                 get
                 {
-                    if (PublicApi.Users.AccessingUser != null)
+                    if (Apis.Get<IUsers>().AccessingUser != null)
                     {
-                        return PublicApi.Users.AccessingUser.Id.GetValueOrDefault(0);
+                        return Apis.Get<IUsers>().AccessingUser.Id.GetValueOrDefault(0);
                     }
 
                     return 0;

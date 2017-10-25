@@ -1,4 +1,5 @@
 ﻿using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 
 namespace FourRoads.TelligentCommunity.Splash.Plugins
@@ -25,11 +26,11 @@ namespace FourRoads.TelligentCommunity.Splash.Plugins
 
         public bool UserHasAccess(int userId, string path, string fileName)
         {
-            var user = PublicApi.Users.Get(new UsersGetOptions() {Id = userId});
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions() {Id = userId});
 
             if (!user.HasErrors())
             {
-                return PublicApi.RoleUsers.IsUserInRoles(user.Username, new[] {"Administrators"});
+                return Apis.Get<IRoleUsers>().IsUserInRoles(user.Username, new[] {"Administrators"});
             }
 
             return false;

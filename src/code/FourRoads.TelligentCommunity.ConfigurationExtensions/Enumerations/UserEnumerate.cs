@@ -1,6 +1,7 @@
 using System.Linq;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
 {
@@ -20,15 +21,15 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations
             if (_groupId.HasValue)
             {
                 //if the group is joinless then all site members should be updated otherwise just the members
-                if (PublicApi.Groups.Get(new GroupsGetOptions() {Id = _groupId}).GroupType.ToLower() != "joinless")
+                if (Apis.Get<IGroups>().Get(new GroupsGetOptions() {Id = _groupId}).GroupType.ToLower() != "joinless")
                 {
-                    var pageResult = PublicApi.GroupUserMembers.List(_groupId.Value, new GroupUserMembersListOptions() {IncludeRoleMembers = true, PageIndex = pageIndex});
+                    var pageResult = Apis.Get<IGroupUserMembers>().List(_groupId.Value, new GroupUserMembersListOptions() {IncludeRoleMembers = true, PageIndex = pageIndex});
 
                     return new PagedList<User>(pageResult.Select(gu => gu.User), pageResult.PageSize, pageResult.TotalCount);
                 }
             }
 
-            return PublicApi.Users.List(new UsersListOptions() { Usernames = _userName, PageIndex = pageIndex , IncludeHidden = false});
+            return Apis.Get<IUsers>().List(new UsersListOptions() { Usernames = _userName, PageIndex = pageIndex , IncludeHidden = false});
         }
     }
 }

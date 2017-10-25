@@ -13,7 +13,6 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
 {
     public class GoogleMfaPluginCore : IPluginGroup , IBindingsLoader, INavigable
     {
-        private IMfaLogic _mfaLogic;
 
         public void Initialize()
         {

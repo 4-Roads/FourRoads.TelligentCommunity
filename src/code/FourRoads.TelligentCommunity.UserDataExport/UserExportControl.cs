@@ -7,6 +7,7 @@ using System.Web.UI.WebControls;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 
 namespace FourRoads.TelligentCommunity.UserDataExport
@@ -145,7 +146,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
             if (Filestore().GetFile("", "processing.txt") == null)
             {
                 Filestore().AddUpdateFile("", "processing.txt", new MemoryStream() { });
-                PublicApi.JobService.Schedule(typeof(UserExportJob), DateTime.Now.ToUniversalTime(), new Dictionary<string, string>() { { "groupId", _userGroupDropDownList.SelectedValue } });
+                Apis.Get<IJobService>().Schedule(typeof(UserExportJob), DateTime.Now.ToUniversalTime(), new Dictionary<string, string>() { { "groupId", _userGroupDropDownList.SelectedValue } });
             }
 
             ShowRunning();
@@ -235,7 +236,7 @@ namespace FourRoads.TelligentCommunity.UserDataExport
 
         public event ConfigurationPropertyChanged ConfigurationValueChanged;
 
-        public new Control Control
+        public Control Control
         {
             get { return this; }
         }

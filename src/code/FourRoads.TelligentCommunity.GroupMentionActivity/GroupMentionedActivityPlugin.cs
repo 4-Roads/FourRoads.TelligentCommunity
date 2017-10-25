@@ -4,6 +4,7 @@ using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components.Extensions;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -18,7 +19,7 @@ namespace FourRoads.TelligentCommunity.GroupMentionActivity
 
         public void Initialize()
         {
-            PublicApi.Mentions.Events.AfterCreate += EventsOnAfterCreate;
+            Apis.Get<IMentions>().Events.AfterCreate += EventsOnAfterCreate;
         }
 
         private void EventsOnAfterCreate(MentionAfterCreateEventArgs maca)
@@ -31,7 +32,7 @@ namespace FourRoads.TelligentCommunity.GroupMentionActivity
 
                 if (mentioningTypeId == Telligent.Evolution.Components.ContentTypes.StatusMessage)
                 {
-                    var story = PublicApi.ActivityStories.Get(mentioningId);
+                    var story = Apis.Get<IActivityStories>().Get(mentioningId);
 
                     if (story != null && story.Errors.Count == 0)
                     {
@@ -104,15 +105,15 @@ namespace FourRoads.TelligentCommunity.GroupMentionActivity
 
         public bool CanDeleteStory(Guid storyId, int userId)
         {
-            var story = PublicApi.ActivityStories.Get(storyId);
+            var story = Apis.Get<IActivityStories>().Get(storyId);
 
             if (story != null)
             {
-                var group = PublicApi.Groups.Get(story.ContentId.Value);
+                var group = Apis.Get<IGroups>().Get(story.ContentId.Value);
 
                 if (group != null && group.Errors.Count() == 0)
                 {
-                    if (PublicApi.GroupUserMembers.List(group.Id.Value, new GroupUserMembersListOptions() {MembershipType = "Owner,Manager", IncludeRoleMembers = true, PageSize = 1, UserId = userId}).TotalCount > 0)
+                    if (Apis.Get<IGroupUserMembers>().List(group.Id.Value, new GroupUserMembersListOptions() {MembershipType = "Owner,Manager", IncludeRoleMembers = true, PageSize = 1, UserId = userId}).TotalCount > 0)
                     {
                         return true;
                     }
@@ -142,11 +143,11 @@ namespace FourRoads.TelligentCommunity.GroupMentionActivity
 
         private string RenderActivity(IActivityStory story)
         {
-            var group = PublicApi.Groups.Get(story.ContentId.Value);
+            var group = Apis.Get<IGroups>().Get(story.ContentId.Value);
 
             if (group != null && group.Errors.Count() == 0)
             {
-                User user = PublicApi.Users.Get(new UsersGetOptions() { Id = GetPrimaryUser(story) });
+                User user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = GetPrimaryUser(story) });
 
                 if (user != null)
                 {
@@ -155,13 +156,13 @@ namespace FourRoads.TelligentCommunity.GroupMentionActivity
                     Guid contentId = attributes.GetGuid("MentioningContentId" , Guid.Empty);
                     Guid contentTypeId = attributes.GetGuid("MentioningContentTypeId", Guid.Empty);
 
-                    var content  = PublicApi.Content.Get(contentId, contentTypeId);
+                    var content  = Apis.Get<IContents>().Get(contentId, contentTypeId);
 
                     if (content != null && content.Errors.Count == 0)
                     {
 
-                        return string.Format(_translatablePluginController.GetLanguageResourceValue("GroupMentioned"),  PublicApi.Html.EncodeAttribute(user.Url) , user.DisplayName,
-                            PublicApi.Html.EncodeAttribute(content.Url), content.HtmlName("web"));
+                        return string.Format(_translatablePluginController.GetLanguageResourceValue("GroupMentioned"),  Apis.Get<IHtml>().EncodeAttribute(user.Url) , user.DisplayName,
+                            Apis.Get<IHtml>().EncodeAttribute(content.Url), content.HtmlName("web"));
                     }
                 }
 

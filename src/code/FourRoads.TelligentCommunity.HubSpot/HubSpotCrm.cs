@@ -1,4 +1,6 @@
 ﻿using FourRoads.Common.TelligentCommunity.Controls;
+using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using FourRoads.TelligentCommunity.HubSpot.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,16 +10,14 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.DynamicConfiguration.Controls;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Extensibility.Api.Entities.Version1;
-using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
-using FourRoads.TelligentCommunity.HubSpot.Models;
-using System.Threading.Tasks;
-using Telligent.Evolution.Extensibility;
 using Formatting = Newtonsoft.Json.Formatting;
 using TelligentProperty = Telligent.DynamicConfiguration.Components.Property;
 
@@ -248,7 +248,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                 if (!task.Result.IsSuccessStatusCode)
                 {
-                    PublicApi.Eventlogs.Write($"Hubspot API Issue: http status code {task.Result.StatusCode} - {content}", new EventLogEntryWriteOptions());
+                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: http status code {task.Result.StatusCode} - {content}", new EventLogEntryWriteOptions());
 
                     if (task.Result.StatusCode == HttpStatusCode.NotFound)
                     {
@@ -268,7 +268,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
             if (jsonResponse.error != null)
             {
                 // throw new Exception("Hubspot API Issue:" + jsonResponse.error + jsonResponse.error_description);
-                PublicApi.Eventlogs.Write("Hubspot API Issue:" + jsonResponse.error_description, new EventLogEntryWriteOptions());
+                Apis.Get<IEventLog>().Write("Hubspot API Issue:" + jsonResponse.error_description, new EventLogEntryWriteOptions());
 
                 _expires = DateTime.Now;
                 _configuration.SetString("AccessToken", string.Empty);
@@ -278,7 +278,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             if (jsonResponse.access_token != null)
             {
-                PublicApi.Eventlogs.Write("Obtained access token for Hubspot", new EventLogEntryWriteOptions() {EventType = "Debug"});
+                Apis.Get<IEventLog>().Write("Obtained access token for Hubspot", new EventLogEntryWriteOptions() {EventType = "Debug"});
 
                 _configuration.SetString("AccessToken", jsonResponse.access_token.ToString());
                 _configuration.SetString("RefreshToken", jsonResponse.refresh_token.ToString());
@@ -293,7 +293,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             if (PluginManager.IsEnabled(this))
             {
-                string url = PublicApi.Url.Absolute(PublicApi.Url.ApplicationEscape("~"));
+                string url = Apis.Get<IUrl>().Absolute(Apis.Get<IUrl>().ApplicationEscape("~"));
 
                 if (!string.IsNullOrWhiteSpace(_refreshToken))
                 {
@@ -313,7 +313,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 }
                 else
                 {
-                    PublicApi.Eventlogs.Write("Hubspot API Issue: Refresh token blank, youn need to re-link your account", new EventLogEntryWriteOptions());
+                    Apis.Get<IEventLog>().Write("Hubspot API Issue: Refresh token blank, youn need to re-link your account", new EventLogEntryWriteOptions());
                 }
             }
 
@@ -324,7 +324,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             if (!string.IsNullOrWhiteSpace(authCOde))
             {
-                string url = PublicApi.Url.Absolute(PublicApi.Url.ApplicationEscape("~"));
+                string url = Apis.Get<IUrl>().Absolute(Apis.Get<IUrl>().ApplicationEscape("~"));
 
                 FormUrlEncodedContent content = new FormUrlEncodedContent(new Dictionary<string, string> {
                     {"grant_type","authorization_code"},
@@ -341,7 +341,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
             }
             else
             {
-                PublicApi.Eventlogs.Write("Hubspot API Issue: auth code blank, you need to link your account", new EventLogEntryWriteOptions());
+                Apis.Get<IEventLog>().Write("Hubspot API Issue: auth code blank, you need to link your account", new EventLogEntryWriteOptions());
             }
 
             return false;
@@ -349,9 +349,9 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public void SynchronizeUser(User u)
         {
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                PublicApi.Eventlogs.Write($"Syncronizing {u.Username} to Hubspot", new EventLogEntryWriteOptions() { EventType = "Information" });
+                Apis.Get<IEventLog>().Write($"Syncronizing {u.Username} to Hubspot", new EventLogEntryWriteOptions() { EventType = "Information" });
 
                 string parameters = string.Empty;
                 StringBuilder sb = new StringBuilder();
@@ -373,7 +373,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                             {
                                 string data = fields[src].First();
 
-                                if (PublicApi.UserProfileFields.Get(src).HasMultipleValues ?? false)
+                                if (Apis.Get<IUserProfileFields>().Get(src).HasMultipleValues ?? false)
                                 {
                                     data = data.Replace(",", ";");
                                 }
@@ -386,11 +386,11 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     }
                 }
 
-                dynamic response = CreateApiRequest("POST", $"contacts/v1/contact/createOrUpdate/email/{PublicApi.Url.Encode(u.PrivateEmail)}/", "{" + sb + "}");
+                dynamic response = CreateApiRequest("POST", $"contacts/v1/contact/createOrUpdate/email/{Apis.Get<IUrl>().Encode(u.PrivateEmail)}/", "{" + sb + "}");
 
                 if (response.status != null && response.status == "error")
                 {
-                    PublicApi.Eventlogs.Write("Hubspot API Issue:" + response, new EventLogEntryWriteOptions());
+                    Apis.Get<IEventLog>().Write("Hubspot API Issue:" + response, new EventLogEntryWriteOptions());
                 }
             });
         }
@@ -398,9 +398,9 @@ namespace FourRoads.TelligentCommunity.HubSpot
         public dynamic GetUserProperties(string email)
         {
             dynamic response = null;
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                response = CreateApiRequest("GET", $"contacts/v1/contact/email/{PublicApi.Url.Encode(email)}/profile", string.Empty);
+                response = CreateApiRequest("GET", $"contacts/v1/contact/email/{Apis.Get<IUrl>().Encode(email)}/profile", string.Empty);
             });
             return response;
         }
@@ -408,7 +408,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
         public List<ContactPropertyGroup> GetContactPropertyGroups()
         {
             List<ContactPropertyGroup> contactPropertyGroups = new List<ContactPropertyGroup>();
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
                 dynamic response = CreateApiRequest("GET", "properties/v1/contacts/groups", string.Empty);
 
@@ -418,13 +418,13 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                     if (!contactPropertyGroups.Any())
                     {
-                        PublicApi.Eventlogs.Write("Hubspot API Issue: No contact property groups found ",
+                        Apis.Get<IEventLog>().Write("Hubspot API Issue: No contact property groups found ",
                             new EventLogEntryWriteOptions());
                     }
                 }
                 catch (Exception e)
                 {
-                    PublicApi.Eventlogs.Write($"Hubspot API Issue: Failed to map contact property groups : {response} {e.Message}",
+                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: Failed to map contact property groups : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
                 }
             });
@@ -438,7 +438,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             contactPropertyGroup.name = contactPropertyGroup.name.ToLower();
 
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
                 dynamic response = CreateApiRequest("POST", "properties/v1/contacts/groups", JsonConvert.SerializeObject(contactPropertyGroup));
 
@@ -448,13 +448,13 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                     if (newContactPropertyGroup == null || string.IsNullOrWhiteSpace(newContactPropertyGroup.displayName))
                     {
-                        PublicApi.Eventlogs.Write("Hubspot API Issue: Failed to create contact property group ",
+                        Apis.Get<IEventLog>().Write("Hubspot API Issue: Failed to create contact property group ",
                             new EventLogEntryWriteOptions());
                     }
                 }
                 catch (Exception e)
                 {
-                    PublicApi.Eventlogs.Write($"Hubspot API Issue: Failed to create contact property group : {response} {e.Message}",
+                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: Failed to create contact property group : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
                 }
             });
@@ -468,7 +468,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
             contactProperty.name = contactProperty.name.ToLower();
             contactProperty.groupName = contactProperty.groupName.ToLower();
 
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
                 dynamic response = CreateApiRequest("POST", "properties/v1/contacts/properties",
                     JsonConvert.SerializeObject(contactProperty,
@@ -486,13 +486,13 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                     if (newContactProperty == null || string.IsNullOrWhiteSpace(newContactProperty.name))
                     {
-                        PublicApi.Eventlogs.Write("Hubspot API Issue: Failed to create contact property ",
+                        Apis.Get<IEventLog>().Write("Hubspot API Issue: Failed to create contact property ",
                             new EventLogEntryWriteOptions());
                     }
                 }
                 catch (Exception e)
                 {
-                    PublicApi.Eventlogs.Write($"Hubspot API Issue: Failed to create contact property : {response} {e.Message}",
+                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: Failed to create contact property : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
                 }
             });
@@ -509,7 +509,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 return null;
             }
 
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
                 dynamic response = CreateApiRequest("GET", $"properties/v1/contacts/properties/named/{name.ToLower()}", string.Empty);
 
@@ -519,13 +519,13 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                     if (contactProperty == null || string.IsNullOrWhiteSpace(contactProperty.name))
                     {
-                        PublicApi.Eventlogs.Write("Hubspot API Issue: Failed to locate contact property ",
+                        Apis.Get<IEventLog>().Write("Hubspot API Issue: Failed to locate contact property ",
                             new EventLogEntryWriteOptions());
                     }
                 }
                 catch (Exception e)
                 {
-                    PublicApi.Eventlogs.Write($"Hubspot API Issue: Failed to locate contact property : {response} {e.Message}",
+                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: Failed to locate contact property : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
                 }
             });
@@ -535,7 +535,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public bool UpdateContactProperties(string email, Properties properties)
         {
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
                 dynamic response = CreateApiRequest("POST", $"contacts/v1/contact/email/{Apis.Get<IUrl>().Encode(email)}/profile",
                     JsonConvert.SerializeObject(properties,
@@ -559,7 +559,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 properties.properties.Add(new Models.Property() { property = "email", value = email });
             }
 
-            PublicApi.Users.RunAsUser(PublicApi.Users.ServiceUserName, () =>
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
                 response = CreateApiRequest("POST", $"contacts/v1/contact/createOrUpdate/email/{Apis.Get<IUrl>().Encode(email)}",
                     JsonConvert.SerializeObject(properties,

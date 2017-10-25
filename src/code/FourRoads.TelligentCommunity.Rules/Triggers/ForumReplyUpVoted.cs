@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.Rules.Helpers;
 using FourRoads.TelligentCommunity.Rules.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;

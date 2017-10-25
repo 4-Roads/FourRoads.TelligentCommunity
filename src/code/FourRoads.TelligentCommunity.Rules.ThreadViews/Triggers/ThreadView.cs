@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using DryIoc;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
@@ -9,12 +7,13 @@ using FourRoads.TelligentCommunity.Rules.ThreadViews.Events;
 using FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces;
 using FourRoads.TelligentCommunity.Rules.ThreadViews.Jobs;
 using FourRoads.TelligentCommunity.Rules.ThreadViews.Services;
+using System;
+using System.Collections.Generic;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Forums.Api.Implementation;
 
 namespace FourRoads.TelligentCommunity.Rules.ThreadViews.Triggers
 {

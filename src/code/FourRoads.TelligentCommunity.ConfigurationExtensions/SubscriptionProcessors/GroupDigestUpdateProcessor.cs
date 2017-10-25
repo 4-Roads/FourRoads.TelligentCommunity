@@ -3,6 +3,7 @@ using FourRoads.Common.TelligentCommunity.Components.Extensions;
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Enumerations;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 
@@ -29,42 +30,42 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.SubscriptionProce
 
                 if ("daily".Equals(setting))
                 {
-                    PublicApi.Users.RunAsUser(user.Id.Value, () =>
+                    Apis.Get<IUsers>().RunAsUser(user.Id.Value, () =>
                     {
-                        EmailDigestSubscription subscription = PublicApi.EmailDigestSubscriptions.GetByGroup(@group.Id.Value);
+                        EmailDigestSubscription subscription = Apis.Get<IEmailDigestSubscriptions>().GetByGroup(@group.Id.Value);
                         if (subscription != null)
                         {
-                            PublicApi.EmailDigestSubscriptions.Update(subscription.Id.Value, 1);
+                            Apis.Get<IEmailDigestSubscriptions>().Update(subscription.Id.Value, 1);
                         }
                         else
                         {
-                            PublicApi.EmailDigestSubscriptions.Create("group", @group.Id.Value, 1);
+                            Apis.Get<IEmailDigestSubscriptions>().Create("group", @group.Id.Value, 1);
                         }
                     });
                 }
                 else if ("weekly".Equals(setting))
                 {
-                    PublicApi.Users.RunAsUser(user.Id.Value, () =>
+                    Apis.Get<IUsers>().RunAsUser(user.Id.Value, () =>
                     {
-                        EmailDigestSubscription subscription = PublicApi.EmailDigestSubscriptions.GetByGroup(@group.Id.Value);
+                        EmailDigestSubscription subscription = Apis.Get<IEmailDigestSubscriptions>().GetByGroup(@group.Id.Value);
                         if (subscription != null)
                         {
-                            PublicApi.EmailDigestSubscriptions.Update(subscription.Id.Value, 7);
+                            Apis.Get<IEmailDigestSubscriptions>().Update(subscription.Id.Value, 7);
                         }
                         else
                         {
-                            PublicApi.EmailDigestSubscriptions.Create("group", @group.Id.Value, 7);
+                            Apis.Get<IEmailDigestSubscriptions>().Create("group", @group.Id.Value, 7);
                         }
                     });
                 }
                 else if("off".Equals(setting))
                 {
-                    PublicApi.Users.RunAsUser(user.Id.Value, () =>
+                    Apis.Get<IUsers>().RunAsUser(user.Id.Value, () =>
                     {
-                        EmailDigestSubscription subscription = PublicApi.EmailDigestSubscriptions.GetByGroup(@group.Id.Value);
+                        EmailDigestSubscription subscription = Apis.Get<IEmailDigestSubscriptions>().GetByGroup(@group.Id.Value);
                         if (subscription != null)
                         {
-                            PublicApi.EmailDigestSubscriptions.Delete(subscription.Id.Value);
+                            Apis.Get<IEmailDigestSubscriptions>().Delete(subscription.Id.Value);
                         }
                     });
                 }

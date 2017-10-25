@@ -2,6 +2,7 @@
 using System.Linq;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Security.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -30,7 +31,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.Security
 
         public void RegisterPermissions(IPermissionRegistrarController permissionController)
         {
-            ApplicationType groupType = PublicApi.ApplicationTypes.List().FirstOrDefault(a => a.Name.Equals("group", StringComparison.OrdinalIgnoreCase));
+            ApplicationType groupType = Apis.Get<IApplicationTypes>().List().FirstOrDefault(a => a.Name.Equals("group", StringComparison.OrdinalIgnoreCase));
 
             if (groupType != null)
             {

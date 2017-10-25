@@ -5,6 +5,7 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Version1;
 using System.Web;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
 {
@@ -27,12 +28,12 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
         {
             return new CustomNavigationItem(id,
                         () => _translatablePluginController.GetLanguageResourceValue("Logon"),
-                        () => PublicApi.CoreUrls.LogIn(new CoreUrlLoginOptions { ReturnToCurrentUrl = true}), i => PublicApi.Users.AccessingUser.Username == PublicApi.Users.AnonymousUserName,
+                        () => Apis.Get<ICoreUrls>().LogIn(new CoreUrlLoginOptions { ReturnToCurrentUrl = true}), i => Apis.Get<IUsers>().AccessingUser.Username == Apis.Get<IUsers>().AnonymousUserName,
                         () =>
                         {
-                            if (PublicApi.Url.CurrentContext != null &&
-                                !string.IsNullOrWhiteSpace(PublicApi.Url.CurrentContext.PageName))
-                                return PublicApi.Url.CurrentContext.PageName == "common-login";
+                            if (Apis.Get<IUrl>().CurrentContext != null &&
+                                !string.IsNullOrWhiteSpace(Apis.Get<IUrl>().CurrentContext.PageName))
+                                return Apis.Get<IUrl>().CurrentContext.PageName == "common-login";
                             return false;
                         })
             {
@@ -88,8 +89,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
         {
             return new CustomNavigationItem(id,
                         () => _translatablePluginController.GetLanguageResourceValue("Register"),
-                        () => PublicApi.CoreUrls.Register(HttpContext.Current.Request.Url.LocalPath), i => PublicApi.Users.AccessingUser.Username == PublicApi.Users.AnonymousUserName,
-                        () => PublicApi.Url.CurrentContext.PageName == "user-createuser")
+                        () => Apis.Get<ICoreUrls>().Register(HttpContext.Current.Request.Url.LocalPath), i => Apis.Get<IUsers>().AccessingUser.Username == Apis.Get<IUsers>().AnonymousUserName,
+                        () => Apis.Get<IUrl>().CurrentContext.PageName == "user-createuser")
             {
                 Plugin = this,
                 Children = new ICustomNavigationItem[ 0 ],

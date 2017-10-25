@@ -6,6 +6,7 @@ using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using AngleSharp.Parser.Html;
 using AngleSharp.Dom.Html;
@@ -49,7 +50,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
                     //we can now put it into the document dom 
                     Seek(0, SeekOrigin.Begin);
 
-                    PageContext currentContext = PublicApi.Url.CurrentContext;
+                    PageContext currentContext = Apis.Get<IUrl>().CurrentContext;
 
                     if (currentContext != null && !string.IsNullOrWhiteSpace(currentContext.UrlName))
                     {

@@ -19,6 +19,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Controls
     using Telligent.Evolution.Controls.Extensions;
     using Telligent.Evolution.Extensibility.Api.Entities.Version1;
     using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
     using Telligent.Evolution.Extensibility.Version1;
     using Common.TelligentCommunity.Controls;
     using FourRoads.TelligentCommunity.Sentrus.Entities;
@@ -260,7 +261,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Controls
                 {
                     int userId = Convert.ToInt32(row.Attributes["data-userid"]);
 
-                    User user = PublicApi.Users.Get(new UsersGetOptions() { Id = userId });
+                    User user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = userId });
 
                     if (user != null)
                     {
@@ -280,15 +281,15 @@ namespace FourRoads.TelligentCommunity.Sentrus.Controls
                 User assgnedUser = null;
                 if (selectedUsers.Count() > 0)
                 {
-                    assgnedUser = PublicApi.Users.Get(new UsersGetOptions() { Id = _userToAssignTo.SelectedUsers.First().Id });
+                    assgnedUser = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = _userToAssignTo.SelectedUsers.First().Id });
                 }
 
                 if (assgnedUser == null)
                 {
-                    assgnedUser = PublicApi.Users.Get(new UsersGetOptions() { Username = "anonymous" });
+                    assgnedUser = Apis.Get<IUsers>().Get(new UsersGetOptions() { Username = "anonymous" });
                 }
 
-                PublicApi.Users.Delete(new UsersDeleteOptions() { Id = user.Id, Username = assgnedUser.Username });
+                Apis.Get<IUsers>().Delete(new UsersDeleteOptions() { Id = user.Id, Username = assgnedUser.Username });
             });
 
             //Set up the grid 
@@ -471,7 +472,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Controls
 
         public event ConfigurationPropertyChanged ConfigurationValueChanged;
 
-        public new Control Control
+        public Control Control
         {
             get { return this; }
         }

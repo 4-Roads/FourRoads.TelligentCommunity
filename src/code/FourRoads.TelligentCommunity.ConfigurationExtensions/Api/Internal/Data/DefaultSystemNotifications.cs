@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 
 using FourRoads.TelligentCommunity.ConfigurationExtensions.Api.Public.Entities;
 
@@ -28,7 +29,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Api.Internal.Data
                     return Encoding.UTF8.GetString(ms.ToArray());
                 }
             }
-            catch (Exception e)
+            catch
             {
                 return null;
             }
@@ -47,7 +48,7 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Api.Internal.Data
 
         public static List<SystemNotificationPreference> GetSystemNotificationPreferences()
         {
-            Group rootGroup = PublicApi.Groups.Root;
+            Group rootGroup = Apis.Get<IGroups>().Root;
             List<SystemNotificationPreference> defaults = new List<SystemNotificationPreference>();
             if (rootGroup.ExtendedAttributes["DefaultSystemNotifications"] != null && !String.IsNullOrEmpty(rootGroup.ExtendedAttributes["DefaultSystemNotifications"].Value))
             {
@@ -57,19 +58,19 @@ namespace FourRoads.TelligentCommunity.ConfigurationExtensions.Api.Internal.Data
             rootGroup.ExtendedAttributes.Remove(rootGroup.ExtendedAttributes.Where(x => x.Key == "DefaultSystemNotifications").FirstOrDefault<ExtendedAttribute>());
             List<ExtendedAttribute> attributes = new List<ExtendedAttribute>(rootGroup.ExtendedAttributes);
             attributes.Add(new ExtendedAttribute() { Key = "DefaultSystemNotifications", Value = "" });
-            PublicApi.Groups.Update(rootGroup.Id.Value, new GroupsUpdateOptions() { ExtendedAttributes = attributes });
-            rootGroup = PublicApi.Groups.Get(new GroupsGetOptions() { Id = PublicApi.Groups.Root.Id });
+            Apis.Get<IGroups>().Update(rootGroup.Id.Value, new GroupsUpdateOptions() { ExtendedAttributes = attributes });
+            rootGroup = Apis.Get<IGroups>().Get(new GroupsGetOptions() { Id = Apis.Get<IGroups>().Root.Id });
             */
             return defaults;
         }
 
         public static void UpdateSystemNotificationPreferences(List<SystemNotificationPreference> preferences)
         {
-            Group rootGroup = PublicApi.Groups.Root;
+            Group rootGroup = Apis.Get<IGroups>().Root;
             rootGroup.ExtendedAttributes.Remove(rootGroup.ExtendedAttributes.Where(x => x.Key == "DefaultSystemNotifications").FirstOrDefault<ExtendedAttribute>());
             List<ExtendedAttribute> attributes = new List<ExtendedAttribute>(rootGroup.ExtendedAttributes);
             attributes.Add(new ExtendedAttribute() { Key = "DefaultSystemNotifications", Value = Serialize(preferences) });
-            PublicApi.Groups.Update(rootGroup.Id.Value, new GroupsUpdateOptions() { ExtendedAttributes = attributes });
+            Apis.Get<IGroups>().Update(rootGroup.Id.Value, new GroupsUpdateOptions() { ExtendedAttributes = attributes });
         }
 
     }

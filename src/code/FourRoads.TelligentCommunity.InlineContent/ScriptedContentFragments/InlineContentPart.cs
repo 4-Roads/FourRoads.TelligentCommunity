@@ -25,6 +25,7 @@ using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
@@ -179,7 +180,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             IContainer currentContainer = null;
             string[] tags = null;
 
-            foreach (var contextItem in PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems())
+            foreach (var contextItem in Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems())
             {
                 var app = PluginManager.Get<IApplicationType>().FirstOrDefault(a => a.ApplicationTypeId == contextItem.ApplicationTypeId);
 
@@ -196,7 +197,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
                 
                 var container = PluginManager.Get<IContainerType>().FirstOrDefault(a => a.ContainerTypeId == contextItem.ContainerTypeId);
 
-                if (container != null && contextItem.ContainerId.HasValue && contextItem.ContainerTypeId == PublicApi.Groups.ContainerTypeId)
+                if (container != null && contextItem.ContainerId.HasValue && contextItem.ContainerTypeId == Apis.Get<IGroups>().ContainerTypeId)
                 {
                     currentContainer = container.Get(contextItem.ContainerId.Value);
                 }
@@ -254,7 +255,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
                 if (DynamicName)
                 {
-                    contentControl.InlineContentName  = PublicApi.Url.CurrentContext.PageName + "_";
+                    contentControl.InlineContentName  = Apis.Get<IUrl>().CurrentContext.PageName + "_";
                 }
 
                 if (ContextualMode == ContextMode.GroupContext || ContextualMode == ContextMode.Context)
@@ -269,7 +270,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
                     }, c =>
                     {
-                        if (c != null && c.ContainerId != PublicApi.Groups.Root.ContainerId)
+                        if (c != null && c.ContainerId != Apis.Get<IGroups>().Root.ContainerId)
                         {
                             contentControl.InlineContentName += c.ContainerId.ToString();
                         }

@@ -4,6 +4,7 @@ using FourRoads.TelligentCommunity.Performance.Storage;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using System.Collections.Generic;
 using AngleSharp.Dom.Html;
 using AngleSharp.Dom;
@@ -93,7 +94,7 @@ namespace FourRoads.TelligentCommunity.Performance
 
         private string BuildAxdSelector
         {
-            get { return string.Format("script[type='text/javascript'][src*='WebResource.axd'],script[type='text/javascript'][src*='/utility/jquery/'],script[type='text/javascript'][src*='{0}/utility/jquery/'],script[type='text/javascript'][src*=' /__key/defaultwidgets/'],script[type='text/javascript'][src*=' /__key/widgetfiles/']", PublicApi.Url.Absolute("~")); }
+            get { return string.Format("script[type='text/javascript'][src*='WebResource.axd'],script[type='text/javascript'][src*='/utility/jquery/'],script[type='text/javascript'][src*='{0}/utility/jquery/'],script[type='text/javascript'][src*=' /__key/defaultwidgets/'],script[type='text/javascript'][src*=' /__key/widgetfiles/']", Apis.Get<IUrl>().Absolute("~")); }
         }
 
         //private Selector ReplaceSelector  //this will improve performance but requires csquery 1.3.5-beta and above
