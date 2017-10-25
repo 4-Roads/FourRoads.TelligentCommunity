@@ -78,8 +78,8 @@
     <Reference Include="Telligent.Evolution.Core">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Evolution.OAuth">
-      <HintPath>..\..\lib\Telligent\Telligent.Evolution.OAuth.dll</HintPath>
+    <Reference Include="Telligent.Evolution.OAuthClients">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.OAuthClients.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Platform">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>

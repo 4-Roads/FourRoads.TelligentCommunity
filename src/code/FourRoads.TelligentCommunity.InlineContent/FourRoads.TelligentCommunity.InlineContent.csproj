@@ -44,7 +44,10 @@
     <Reference Include="FourRoads.Common.Web, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FourRoads.Common.5.0.0.121\lib\net462\FourRoads.Common.Web.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+        <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="NVelocity">
       <HintPath>..\..\packages\Castle.NVelocity.1.1.1\lib\net40\NVelocity.dll</HintPath>
       <Private>True</Private>

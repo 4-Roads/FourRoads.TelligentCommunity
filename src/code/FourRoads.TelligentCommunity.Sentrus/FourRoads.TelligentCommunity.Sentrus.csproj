@@ -81,9 +81,6 @@
     <Reference Include="Telligent.Evolution.Forums">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Forums.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Evolution.MailGateway.MailRoom">
-      <HintPath>..\..\lib\Telligent\Telligent.Evolution.MailGateway.MailRoom.dll</HintPath>
-    </Reference>
     <Reference Include="Telligent.Evolution.MediaGalleries">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
     </Reference>
