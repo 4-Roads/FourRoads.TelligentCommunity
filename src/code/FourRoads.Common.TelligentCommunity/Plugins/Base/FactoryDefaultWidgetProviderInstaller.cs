@@ -17,15 +17,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         #region IPlugin Members
 
-        public string Name
-        {
-            get { return ProjectName + " - Factory Default Widget Provider"; }
-        }
+        public string Name => ProjectName + " - Factory Default Widget Provider";
 
-        public string Description
-        {
-            get { return "Defines the default widget set for " + ProjectName+ "."; }
-        }
+        public string Description => "Defines the default widget set for " + ProjectName+ ".";
 
         public void Initialize()
         {
@@ -93,7 +87,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
                     catch (Exception exception)
                     {
-                        new TCException(string.Format("Couldn't load widget from '{0}' embedded resource.", resourceName), exception).Log();
+                        new TCException($"Couldn't load widget from '{resourceName}' embedded resource.", exception).Log();
                     }
                 });
             }
@@ -110,15 +104,12 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
                 catch (Exception exception)
                 {
-                    new TCException( string.Format("Couldn't delete factory default widgets from provider ID: '{0}'.", ScriptedContentFragmentFactoryDefaultIdentifier), exception).Log();
+                    new TCException($"Couldn't delete factory default widgets from provider ID: '{ScriptedContentFragmentFactoryDefaultIdentifier}'.", exception).Log();
                 }
             }
         }
 
-        public Version Version
-        {
-            get { return GetType().Assembly.GetName().Version; }
-        }
+        public Version Version => GetType().Assembly.GetName().Version;
 
         #endregion
     }

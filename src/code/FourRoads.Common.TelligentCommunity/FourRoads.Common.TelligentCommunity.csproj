@@ -118,6 +118,7 @@
     <Compile Include="Plugins\Base\FactoryDefaultWidgetProviderInstaller.cs" />
     <Compile Include="Plugins\Base\PluginBase.cs" />
     <Compile Include="Plugins\Base\PluginGroupLoader.cs" />
+    <Compile Include="Plugins\Base\ScriptableInstaller.cs" />
     <Compile Include="Plugins\Base\SqlScriptsInstaller.cs" />
     <Compile Include="Plugins\Base\VideoFileViewerBase.cs" />
     <Compile Include="Plugins\Extensions\ContentExtension.cs" />

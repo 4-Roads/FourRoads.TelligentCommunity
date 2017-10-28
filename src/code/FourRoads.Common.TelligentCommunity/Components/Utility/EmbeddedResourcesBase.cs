@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Telligent.Evolution.Extensibility.UI.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Components
 {
-	public abstract class EmbeddedResourcesBase
+    public abstract class EmbeddedResourcesBase
 	{
 		protected static string GetResourceString(Assembly assembly, string path)
 		{

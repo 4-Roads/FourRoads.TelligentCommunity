@@ -1,6 +1,7 @@
 ﻿using System;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
+using Telligent.Evolution.Extensibility.UI.Version1;
 
 namespace FourRoads.TelligentCommunity.MetaData
 {
@@ -8,24 +9,12 @@ namespace FourRoads.TelligentCommunity.MetaData
     {
         public static Guid _scriptedContentFragmentFactoryDefaultIdentifier = new Guid("{2584523C-F405-4159-A205-5322F5957F27}");
 
-        public override Guid ScriptedContentFragmentFactoryDefaultIdentifier
-        {
-            get { return _scriptedContentFragmentFactoryDefaultIdentifier; }
-        }
+        public override Guid ScriptedContentFragmentFactoryDefaultIdentifier => _scriptedContentFragmentFactoryDefaultIdentifier;
 
-        protected override string ProjectName
-        {
-            get { return "Meta Data"; }
-        }
+        protected override string ProjectName => "Meta Data";
 
-        protected override string BaseResourcePath
-        {
-            get { return "FourRoads.TelligentCommunity.MetaData.Resources."; }
-        }
+        protected override string BaseResourcePath { get; } = "FourRoads.TelligentCommunity.MetaData.Resources.";
 
-        protected override EmbeddedResourcesBase EmbeddedResources
-        {
-            get { return new EmbeddedResources(); }
-        }
+        protected override EmbeddedResourcesBase EmbeddedResources => new EmbeddedResources();
     }
 }
