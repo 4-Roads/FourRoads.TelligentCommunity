@@ -41,7 +41,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                         {
                             User user = Apis.Get<IUsers>().Get(new UsersGetOptions() {Id = userId});
 
-                            if (!user.HasErrors())
+                            if (user != null && !user.HasErrors())
                                 _beforeUpdateCache.Add(userId, user);
                         }
                     }

@@ -66,6 +66,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                         ForumReplyVote removed;
                         _beforeUpdateCache.TryRemove(key, out removed);
 
+                        //amended - was up vote and is now down vote
                         if (old.Value && !args.Value)
                         {
                             _ruleController.ScheduleTrigger(new Dictionary<string, string>()
@@ -100,6 +101,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 if (_ruleController != null)
                 {
+                    // removing up vote
                     if (args.Value)
                     {
                         _ruleController.ScheduleTrigger(new Dictionary<string, string>()
@@ -159,6 +161,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                         ForumReplyVote removed;
                         _beforeUpdateCache.TryRemove(key, out removed);
 
+                        //amended - was up vote and is now down vote
                         if (old.Value && !args.Value)
                         {
                             _ruleController.ScheduleTrigger(new Dictionary<string, string>()
@@ -197,7 +200,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 var vote = Apis.Get<IForumReplyVotes>()
                     .Get(replyId, new ForumReplyVoteGetOptions() { VoteType = "Quality" });
 
-                if (!vote.HasErrors())
+                if (vote != null && !vote.HasErrors())
                 {
                     _beforeUpdateCache.AddOrUpdate(userId + "," + replyId, vote, (key, existingVal) => vote);
                 }

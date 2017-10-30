@@ -144,7 +144,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             if (!_beforeUpdateCache.ContainsKey(replyId))
             {
                 var reply = Apis.Get<IForumReplies>().Get(replyId);
-                if (!reply.HasErrors())
+                if (reply != null && !reply.HasErrors())
                 {
                     _beforeUpdateCache.AddOrUpdate(replyId, reply, (key, existingVal) => reply);
                 }

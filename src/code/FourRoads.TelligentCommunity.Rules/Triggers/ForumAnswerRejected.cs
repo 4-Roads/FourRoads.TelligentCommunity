@@ -115,7 +115,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                         _beforeUpdateCache.TryRemove(key, out removed);
                     }
 
-                    if (action.Equals("Add"))
+                    if (action.Equals("Del"))
                     {
                         _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
@@ -148,7 +148,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             if (!_beforeUpdateCache.ContainsKey(replyId))
             {
                 var reply = Apis.Get<IForumReplies>().Get(replyId);
-                if (!reply.HasErrors())
+                if (reply != null && !reply.HasErrors())
                 {
                     _beforeUpdateCache.AddOrUpdate(replyId, reply, (key, existingVal) => reply);
                 }
