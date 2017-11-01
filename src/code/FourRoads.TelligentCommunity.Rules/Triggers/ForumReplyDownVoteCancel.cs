@@ -1,12 +1,13 @@
+using FourRoads.Common.TelligentCommunity.Components;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Extensibility.Api.Entities.Version1;
+using Telligent.Evolution.Forums.Internal.ReplyVote;
+using ForumReplyVote = Telligent.Evolution.Extensibility.Api.Entities.Version1.ForumReplyVote;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
@@ -37,7 +38,10 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             try
             {
-                CacheUserVote(args.ReplyId, args.UserId);
+                if (args.VoteType == ForumReplyVoteType.Quality)
+                {
+                    CacheUserVote(args.ReplyId, args.UserId);
+                }
             }
             catch (Exception ex)
             {
@@ -57,7 +61,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             try
             {
-                if (_ruleController != null)
+                if (args.VoteType == ForumReplyVoteType.Quality &&  _ruleController != null)
                 {
                     string key = args.UserId + "," + args.ReplyId;
                     if (_beforeUpdateCache.ContainsKey(key))
@@ -99,7 +103,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             try
             {
-                if (_ruleController != null)
+                if (args.VoteType == ForumReplyVoteType.Quality &&  _ruleController != null)
                 {
                     // removing down vote
                     if (!args.Value)
@@ -133,7 +137,10 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             try
             {
-                CacheUserVote(args.ReplyId, args.UserId);
+                if (args.VoteType == ForumReplyVoteType.Quality)
+                {
+                    CacheUserVote(args.ReplyId, args.UserId);
+                }
             }
             catch (Exception ex)
             {
@@ -152,7 +159,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             try
             {
-                if (_ruleController != null)
+                if (args.VoteType == ForumReplyVoteType.Quality && _ruleController != null)
                 {
                     string key = args.UserId + "," + args.ReplyId;
                     if (_beforeUpdateCache.ContainsKey(key))
