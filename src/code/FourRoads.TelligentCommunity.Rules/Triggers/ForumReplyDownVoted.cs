@@ -8,6 +8,7 @@ using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rules.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Forums.Internal.ReplyVote;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
@@ -35,7 +36,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             try
             {
-                if (_ruleController != null)
+                if (args.VoteType == ForumReplyVoteType.Quality && _ruleController != null)
                 {
                     // false = downvote
                     if (!args.Value)
@@ -71,7 +72,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             try
             {
-                if (_ruleController != null)
+                if (args.VoteType == ForumReplyVoteType.Quality && _ruleController != null)
                 {
                     // false = downvote
                     if (!args.Value)
