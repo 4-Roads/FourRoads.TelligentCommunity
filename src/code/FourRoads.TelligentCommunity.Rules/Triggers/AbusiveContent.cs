@@ -44,7 +44,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - Content flagged as abusive trigger"; }
+            get { return "4 Roads - Achievements - Content flagged as abusive trigger"; }
         }
 
         public string Description

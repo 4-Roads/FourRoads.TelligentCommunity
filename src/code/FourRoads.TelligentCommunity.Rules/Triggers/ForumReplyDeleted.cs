@@ -109,7 +109,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - Forum Reply Deleted Trigger"; }
+            get { return "4 Roads - Achievements - Forum Reply Deleted Trigger"; }
         }
 
         public string Description

@@ -22,7 +22,7 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
         {
         }
 
-        public string Name { get { return "4 Roads - Update user reputation points"; } }
+        public string Name { get { return "4 Roads - Achievements - Update user reputation points"; } }
 
         public string Description { get { return "Update the user reputation points/score with daily limit"; } }
 

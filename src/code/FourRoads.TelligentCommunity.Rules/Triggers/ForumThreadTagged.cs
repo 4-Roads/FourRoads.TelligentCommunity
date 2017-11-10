@@ -55,7 +55,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - Forum thread is tagged trigger"; }
+            get { return "4 Roads - Achievements - Forum thread is tagged trigger"; }
         }
 
         public string Description

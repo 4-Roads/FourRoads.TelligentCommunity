@@ -101,7 +101,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - Forum Reply Up Voted Trigger"; }
+            get { return "4 Roads - Achievements - Forum Reply Up Voted Trigger"; }
         }
 
         public string Description

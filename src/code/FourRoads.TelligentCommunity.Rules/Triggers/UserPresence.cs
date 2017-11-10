@@ -50,7 +50,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - User Presence"; }
+            get { return "4 Roads - Achievements - User Presence"; }
         }
 
         public string Description

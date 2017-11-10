@@ -218,7 +218,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - Forum Reply Down Vote Cancelled Trigger"; }
+            get { return "4 Roads - Achievements - Forum Reply Down Vote Cancelled Trigger"; }
         }
 
         public string Description

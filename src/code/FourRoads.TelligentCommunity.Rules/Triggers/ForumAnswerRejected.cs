@@ -159,7 +159,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - Forum Reply Rejected as Answer Trigger"; }
+            get { return "4 Roads - Achievements - Forum Reply Rejected as Answer Trigger"; }
         }
 
         public string Description
