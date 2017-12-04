@@ -12,12 +12,13 @@ using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 namespace FourRoads.TelligentCommunity.Rules.Actions
 {
 
-    public class UpdateUserReputationPoints : IConfigurableRuleAction, ITranslatablePlugin, ICategorizedPlugin , IConfigurablePlugin
+    public class UpdateUserReputationPoints : IConfigurableRuleAction, ITranslatablePlugin, ICategorizedPlugin, IConfigurablePlugin
     {
+        private static object _lockObj = new object();
         private ITranslatablePluginController _translationController;
         private Guid _componentId = new Guid("{29C18C56-678A-4DC1-BD76-885546D611AD}");
         private int _dailyGainLimit = 200;
-        
+
         public void Initialize()
         {
         }
@@ -34,81 +35,65 @@ namespace FourRoads.TelligentCommunity.Rules.Actions
 
         public void Execute(IRuleExecutionRuntime runtime)
         {
-            User user = runtime.GetCustomUser("User");
-            if (!user.HasErrors())
+            lock (_lockObj)
             {
-                int points = runtime.GetInt("Points");
-                int reputationGain = 0;
-                //int reputation = 0;
-
-                ExtendedAttribute userReputationDate = user.ExtendedAttributes.Get("UserReputationDate");
-                ExtendedAttribute userReputationGain = user.ExtendedAttributes.Get("UserReputationGain");
-
-                // check if the user has reached their daily limit for reputation gain
-                if (userReputationDate != null && userReputationGain != null)
+                User user = runtime.GetCustomUser("User");
+                if (!user.HasErrors())
                 {
-                    DateTime reputationDate;
-                    if (DateTime.TryParseExact(userReputationDate.Value, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out reputationDate))
+                    int points = runtime.GetInt("Points");
+                    int reputationGain = 0;
+
+                    ExtendedAttribute userReputationDate = user.ExtendedAttributes.Get("UserReputationDate");
+                    ExtendedAttribute userReputationGain = user.ExtendedAttributes.Get("UserReputationGain");
+
+                    // check if the user has reached their daily limit for reputation gain
+                    if (userReputationDate != null && userReputationGain != null)
                     {
-                        if (reputationDate.Date.Equals(DateTime.Now.Date))
+                        DateTime reputationDate;
+                        if (DateTime.TryParseExact(userReputationDate.Value, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out reputationDate))
                         {
-                            if (int.TryParse(userReputationGain.Value, out reputationGain))
+                            if (reputationDate.Date.Equals(DateTime.Now.Date))
                             {
-                                // stop if we are adding points and have reached the daily limit
-                                if (points > 0 && reputationGain >= _dailyGainLimit)
+                                if (int.TryParse(userReputationGain.Value, out reputationGain))
                                 {
-                                    return;
+                                    // stop if we are adding points and have reached the daily limit
+                                    if (points > 0 && reputationGain >= _dailyGainLimit)
+                                    {
+                                        return;
+                                    }
                                 }
                             }
                         }
                     }
+
+                    var desc = runtime.GetString("Description");
+                    if (string.IsNullOrWhiteSpace(desc))
+                    {
+                        desc = "Reputation";
+                    }
+
+                    Apis.Get<IPointTransactions>().Create(desc, user.Id.Value, points, user.ContentId, Apis.Get<IUsers>().ContentTypeId, new PointTransactionCreateOptions() { });
+                    reputationGain += points;
+
+                    if (userReputationDate == null)
+                    {
+                        user.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "UserReputationDate", Value = DateTime.Now.ToString("yyyyMMdd") });
+                    }
+                    else
+                    {
+                        userReputationDate.Value = DateTime.Now.ToString("yyyyMMdd");
+                    }
+
+                    if (userReputationGain == null)
+                    {
+                        user.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "UserReputationGain", Value = Math.Max(0, reputationGain).ToString() });
+                    }
+                    else
+                    {
+                        userReputationGain.Value = Math.Max(0, reputationGain).ToString();
+                    }
+                    Apis.Get<IUsers>().Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes });
                 }
-
-                var desc = runtime.GetString("Description");
-                if (string.IsNullOrWhiteSpace(desc))
-                {
-                    desc = "Reputation";
-                }
-
-                Apis.Get<IPointTransactions>().Create(desc, user.Id.Value, points, user.ContentId, Apis.Get<IUsers>().ContentTypeId, new PointTransactionCreateOptions() { });
-
-                //ExtendedAttribute userReputation = user.ExtendedAttributes.Get("UserReputation");
-                //if (userReputation != null)
-                //{
-                //    int.TryParse(userReputation.Value, out reputation);
-                //}
-
-                //reputation += points;
-                reputationGain += points;
-
-                if (userReputationDate == null)
-                {
-                    user.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "UserReputationDate", Value = DateTime.Now.ToString("yyyyMMdd") });
-                }
-                else
-                {
-                    userReputationDate.Value = DateTime.Now.ToString("yyyyMMdd");
-                }
-
-                if (userReputationGain == null)
-                {
-                    user.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "UserReputationGain", Value = Math.Max(0, reputationGain).ToString() });
-                }
-                else
-                {
-                    userReputationGain.Value = Math.Max(0,reputationGain).ToString();
-                }
-
-                //if (userReputation == null)
-                //{
-                //    user.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "UserReputation", Value = Math.Max(0, reputation).ToString() });
-                //}
-                //else
-                //{
-                //    userReputation.Value = Math.Max(0, reputation).ToString();
-                //}
-                Apis.Get<IUsers>().Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes });
-               
             }
         }
 
