@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net.Http;
 using System.Web;
+using System.Web.Security;
 using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
 using Google.Authenticator;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
@@ -112,11 +114,21 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             }
         }
 
+        private string GetSessionID(HttpContext context)
+        { 
+            var cookie = context.Request.Cookies[FormsAuthentication.FormsCookieName];
+
+            if (cookie != null)
+                return cookie.Value.Substring(0,10); //Chances of collission with 10 chars is small
+
+            return null;
+        }
+
         private void SetTwoFactorState(User user, bool passed)
         {
             UsersUpdateOptions updateOptions = new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = user.ExtendedAttributes};
 
-            updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() {Key = "__mfaState", Value = passed.ToString()});
+            updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() {Key = "__mfaState_" + GetSessionID(HttpContext.Current), Value = passed.ToString()});
 
             _usersService.Update(updateOptions);
         }
@@ -162,7 +174,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
         {
             bool state = false;
 
-            var mfaState = user.ExtendedAttributes.Get("__mfaState");
+            var mfaState = user.ExtendedAttributes.Get("__mfaState_" +GetSessionID(HttpContext.Current));
 
             if (mfaState != null)
             {
