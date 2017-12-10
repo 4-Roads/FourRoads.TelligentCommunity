@@ -107,6 +107,7 @@
     <Compile Include="Triggers\ForumReplyDownVoteCancel.cs" />
     <Compile Include="Triggers\ForumReplyUpVoteCancel.cs" />
     <Compile Include="Triggers\ForumReplyUpVoted.cs" />
+    <Compile Include="Triggers\UserProfileCompleted.cs" />
     <Compile Include="Triggers\UserUpdated.cs" />
     <Compile Include="Triggers\AbusiveContentx5.cs" />
   </ItemGroup>

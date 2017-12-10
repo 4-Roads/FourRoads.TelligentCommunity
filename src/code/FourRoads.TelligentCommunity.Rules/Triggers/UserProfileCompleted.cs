@@ -12,15 +12,15 @@ using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 
 namespace FourRoads.TelligentCommunity.Rules.Triggers
 {
-    public class UserUpdated : IRuleTrigger, ITranslatablePlugin , IConfigurablePlugin , ISingletonPlugin , ICategorizedPlugin
+    public class UserProfileCompleted : IRuleTrigger, ITranslatablePlugin, IConfigurablePlugin, ISingletonPlugin, ICategorizedPlugin
     {
         private static object _lockObj = new object();
         private IRuleController _ruleController;
         private ITranslatablePluginController _translationController;
         private List<string> _fields = new List<string>();
-        private readonly Guid _triggerid = new Guid("{0FB34C60-65DB-48C9-BDFA-5ADFFADAE2F9}");
+        private readonly Guid _triggerid = new Guid("{A696AC6A-1CC1-4169-B1E4-4458E94B090C}");
         private Dictionary<int, User> _beforeUpdateCache = new Dictionary<int, User>();
- 
+
         public void Initialize()
         {
             Apis.Get<IUsers>().Events.BeforeUpdate += EventsOnBeforeUpdate;
@@ -39,7 +39,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
                         if (!_beforeUpdateCache.ContainsKey(userId))
                         {
-                            User user = Apis.Get<IUsers>().Get(new UsersGetOptions() {Id = userId});
+                            User user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = userId });
 
                             if (user != null && !user.HasErrors())
                                 _beforeUpdateCache.Add(userId, user);
@@ -49,7 +49,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             }
             catch (Exception ex)
             {
-                new TCException( string.Format("EventsOnBeforeUpdate failed for userid:{0}", userBeforerUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
+                new TCException(string.Format("EventsOnBeforeUpdate failed for userid:{0}", userBeforerUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
             }
         }
 
@@ -63,7 +63,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
                     if (_beforeUpdateCache.ContainsKey(userId))
                     {
-                        if (_ruleController != null && ProfileChanged(userAfterUpdateEventArgs))
+                        if (_ruleController != null && ProfileCompleted(userAfterUpdateEventArgs))
                         {
                             _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
@@ -76,20 +76,24 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 new TCException(string.Format("EventsOnAfterUpdate failed for userid:{0}", userAfterUpdateEventArgs.Id.GetValueOrDefault(-1)), ex).Log();
             }
         }
 
         /// <summary>
-        /// Only want to check that the profile has changed, the user object has a lot of stuff that we would prefer to ignore when it comes to firing event updates
+        /// Only want to check that the profile has been completed
+        /// the user object has a lot of stuff so we need to check just the configured fields
+        /// and that something has changed
         /// </summary>
         /// <param name="userAfterUpdateEventArgs"></param>
         /// <returns></returns>
-        private bool ProfileChanged(UserAfterUpdateEventArgs newDetails)
+        private bool ProfileCompleted(UserAfterUpdateEventArgs newDetails)
         {
             User oldDetails = _beforeUpdateCache[newDetails.Id.Value];
+            bool hasChanged = false;
+            int completeFields = 0;
 
             lock (_lockObj)
             {
@@ -99,44 +103,56 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     {
                         string trimedField = field.TrimStart(new[] { '-' });
 
-                        if ( oldDetails.ProfileFields != null )
+                        if (oldDetails.ProfileFields != null)
                         {
-                            if ( oldDetails.ProfileFields[ trimedField ] != null )
+                            if (oldDetails.ProfileFields[trimedField] != null)
                             {
-                                if ( oldDetails.ProfileFields[ trimedField ].Value != newDetails.ProfileFields[ trimedField ].Value )
-                                    return true;
+                                if (oldDetails.ProfileFields[trimedField].Value != newDetails.ProfileFields[trimedField].Value)
+                                    hasChanged = true;
                             }
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(newDetails.ProfileFields[trimedField].Value))
+                        {
+                            completeFields++;
                         }
                     }
                     else
                     {
                         bool evaluate = false;
+                        bool populated = false;
                         //Could use reflection if we wanted to increase the number of comparison fields
                         switch (field)
                         {
                             case "UserName":
                                 evaluate = oldDetails.Username != newDetails.Username;
+                                populated = !string.IsNullOrWhiteSpace(newDetails.Username);
                                 break;
                             case "DisplayName":
                                 evaluate = oldDetails.DisplayName != newDetails.DisplayName;
+                                populated = !string.IsNullOrWhiteSpace(newDetails.DisplayName);
                                 break;
                             case "PrivateEmail":
                                 evaluate = oldDetails.PrivateEmail != newDetails.PrivateEmail;
-                                break;
-                            case "AccountStatus":
-                                evaluate = oldDetails.AccountStatus != newDetails.AccountStatus;
-                                break;
-                            case "AllowSitePartnersToContact":
-                                evaluate = oldDetails.AllowSitePartnersToContact != newDetails.AllowSitePartnersToContact;
-                                break;
-                            case "AllowSiteToContact":
-                                evaluate = oldDetails.AllowSiteToContact != newDetails.AllowSiteToContact;
+                                populated = !string.IsNullOrWhiteSpace(newDetails.PrivateEmail);
                                 break;
                         }
 
                         if (evaluate)
-                            return true;
+                        {
+                            hasChanged = true;
+                        }
+
+                        if (populated)
+                        {
+                            completeFields++;
+                        }
                     }
+                }
+
+                if (hasChanged && completeFields == _fields.Count)
+                {
+                    return true;
                 }
             }
             return false;
@@ -144,12 +160,12 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public string Name
         {
-            get { return "4 Roads - User Updated Trigger"; }
+            get { return "4 Roads - Achievements - User Profile Completed Trigger"; }
         }
 
         public string Description
         {
-            get { return "Fires when a user account is updated."; }
+            get { return "Fires when a user profile is updated to check if its complete."; }
         }
 
         public void SetController(IRuleController controller)
@@ -167,12 +183,12 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 if (int.TryParse(data["UserId"], out userId))
                 {
                     var users = Apis.Get<IUsers>();
-                    var user = users.Get(new UsersGetOptions() {Id = userId});
+                    var user = users.Get(new UsersGetOptions() { Id = userId });
 
                     if (!user.HasErrors())
                     {
                         context.Add(users.ContentTypeId, user);
-                        context.Add(_triggerid , true); //Added this trigger so that it is not re-entrant
+                        context.Add(_triggerid, true); //Added this trigger so that it is not re-entrant
                     }
                 }
             }
@@ -197,7 +213,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
 
         public IEnumerable<Guid> ContextualDataTypeIds
         {
-            get { return new[] { Apis.Get<IUsers>().ContentTypeId}; }
+            get { return new[] { Apis.Get<IUsers>().ContentTypeId }; }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -211,14 +227,13 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-                defaultTranslation[0].Set("RuleTriggerName", "a user profile is updated - 4 roads");
+                defaultTranslation[0].Set("RuleTriggerName", "a user profile has been completed - 4 roads");
                 defaultTranslation[0].Set("RuleTriggerCategory", "User");
 
                 return defaultTranslation;
             }
         }
-
-
+        
         public void Update(IPluginConfiguration configuration)
         {
             lock (_lockObj)
@@ -230,7 +245,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                 //Convert the string to  a list
                 string[] fieldFilter = fieldList.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                _fields.AddRange(GetAllFields().Where(k => fieldFilter.Contains(k.Key) || fieldFilter.Length==0).Select(f => f.Key));
+                _fields.AddRange(GetAllFields().Where(k => fieldFilter.Contains(k.Key) || fieldFilter.Length == 0).Select(f => f.Key));
             }
         }
 
@@ -238,12 +253,9 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         {
             List<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
 
-            results.Add(new KeyValuePair<string,string>("UserName", "User Name"));
+            results.Add(new KeyValuePair<string, string>("UserName", "User Name"));
             results.Add(new KeyValuePair<string, string>("DisplayName", "Display Name"));
             results.Add(new KeyValuePair<string, string>("PrivateEmail", "Email"));
-            results.Add(new KeyValuePair<string, string>("AccountStatus", "Account Status"));
-            results.Add(new KeyValuePair<string, string>("AllowSitePartnersToContact", "Allow Site Partners To Contact"));
-            results.Add(new KeyValuePair<string, string>("AllowSiteToContact", "Allow Site To Contact"));
 
             // this does not work in 10.1 as when called from ConfigurationOptions 
             // 
@@ -258,30 +270,31 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
             {
                 results.Add(new KeyValuePair<string, string>("-" + field.Name, field.Title));
             }
-            
+
             foreach (KeyValuePair<string, string> keyValuePair in results)
             {
                 yield return keyValuePair;
             }
-        } 
+        }
 
         public PropertyGroup[] ConfigurationOptions
         {
             get
             {
-                PropertyGroup group = new PropertyGroup("Options" , "Options" , 0);
-                Property availableFields = new Property("fields" , "Fields" , PropertyType.Custom, 0,"");
 
-                availableFields.ControlType = typeof (CheckboxListControl);
+                PropertyGroup group = new PropertyGroup("Options", "Options", 0);
+                Property availableFields = new Property("fields", "Fields", PropertyType.Custom, 0, "");
+
+                availableFields.ControlType = typeof(CheckboxListControl);
                 foreach (var field in GetAllFields())
                 {
-                    availableFields.SelectableValues.Add(new PropertyValue(field.Key, field.Value , 0) { });
+                    availableFields.SelectableValues.Add(new PropertyValue(field.Key, field.Value, 0) { });
                 }
 
                 group.Properties.Add(availableFields);
 
-                return new [] {group};
-            } 
+                return new[] { group };
+            }
         }
 
         public string[] Categories
