@@ -7,8 +7,8 @@ using FourRoads.TelligentCommunity.ApplicationInsights;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity101.Sentrus")]
-[assembly: AssemblyDescription("Provides several features to enhance community performance")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity101.ApplicationInsights")]
+[assembly: AssemblyDescription("Integration into Azure's application insights engine")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
