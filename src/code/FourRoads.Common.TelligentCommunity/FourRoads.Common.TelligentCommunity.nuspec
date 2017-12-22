@@ -2,14 +2,15 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>FourRoads.TelligentCommunity100.Common</id>
+        <version>$version$</version>
 		<title>FourRoads.TelligentCommunity100.Common</title>
-        <authors>FourRoads Ltd</authors>
-        <owners>FourRoads Ltd</owners>
+        <authors>$author$</authors>
+        <owners>$author$</owners>
         <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
 		<projectUrl>https://github.com/4-Roads/FourRoads.TelligentCommunity</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
 		<copyright>Copyright © Four Roads Ltd 2012-2016</copyright>
-        <description>Common Code for Telligent Community</description>
+        <description>$description$</description>
         <tags>Telligent utility</tags>
     </metadata>
 </package>
