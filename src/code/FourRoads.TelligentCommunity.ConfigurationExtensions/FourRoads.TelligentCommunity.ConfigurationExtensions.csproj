@@ -107,6 +107,7 @@
     </Compile>
     <Compile Include="Api\Internal\Data\DefaultSystemNotifications.cs" />
     <Compile Include="Api\Public\Entities\SystemNotificationPreference.cs" />
+    <Compile Include="Enumerations\GalleryEnumerate.cs" />
     <Compile Include="Enumerations\BlogEnumerate.cs" />
     <Compile Include="ConfigurationExtensions.cs" />
     <Compile Include="ConfigurationExtensionsPlugin.cs" />
