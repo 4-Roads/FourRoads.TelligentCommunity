@@ -112,6 +112,7 @@
     <Compile Include="ConfigurationExtensionsPlugin.cs" />
     <Compile Include="DefaultForumSubscriptionEventHandler.cs" />
     <Compile Include="Enumerations\CalendarEnumerate.cs" />
+    <Compile Include="Enumerations\GalleryEnumerate.cs" />
     <Compile Include="Interfaces\ISubscriptionUpdateProcessor.cs" />
     <Compile Include="Jobs\DefaultSubscriptionUpdateJob.cs" />
     <Compile Include="EmbeddedResources.cs" />
