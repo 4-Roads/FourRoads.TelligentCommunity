@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.RenderingHelper", "code\FourRoads.TelligentCommunity.RenderingHelper\FourRoads.TelligentCommunity.RenderingHelper.csproj", "{20BC9498-6E57-4F6E-BB23-38BFEF110161}"
 EndProject
@@ -37,8 +37,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Community plugins", "Community plugins", "{3735ED34-C87C-4D88-A055-8F8A2F5E000A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Administration plugins", "Administration plugins", "{5286FE7A-78EF-4AB5-B3EB-474C88218A37}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.ThemeHelper", "code\FourRoads.TelligentCommunity.ThemeHelper\FourRoads.TelligentCommunity.ThemeHelper.csproj", "{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Links", "code\FourRoads.TelligentCommunity.Links\FourRoads.TelligentCommunity.Links.csproj", "{30C53022-D89D-4EEE-AE85-B5C8E366FCD9}"
 EndProject
@@ -210,15 +208,6 @@ Global
 		{5CA9A695-520F-488B-837E-E9E3580C5C34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CA9A695-520F-488B-837E-E9E3580C5C34}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5CA9A695-520F-488B-837E-E9E3580C5C34}.Release|x86.ActiveCfg = Release|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Release Output|Any CPU.ActiveCfg = Release Output|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Release Output|Any CPU.Build.0 = Release Output|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Release Output|x86.ActiveCfg = Release Output|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE}.Release|x86.ActiveCfg = Release|Any CPU
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -359,7 +348,6 @@ Global
 		{C55C887C-8C15-4097-B203-9AAB25718F62} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{571BC785-5F45-40B9-949C-E33A882CEAE1} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{5CA9A695-520F-488B-837E-E9E3580C5C34} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
-		{4A328B83-B0C6-4BEA-B0FC-4E87F51761AE} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{2090D715-FFD1-4548-96A4-A978D4A48A92} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{B2927439-EF5E-4895-A46A-8B5167A326BA} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
@@ -373,7 +361,7 @@ Global
 		{47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		VisualSVNWorkingCopyRoot = ..
 		SolutionGuid = {3A9DD161-2AAF-4401-A077-06C1133BA207}
+		VisualSVNWorkingCopyRoot = ..
 	EndGlobalSection
 EndGlobal

@@ -45,7 +45,7 @@
       },
       resources : {
          requiredField: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Required'))',
-         invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('invalidCode'))'
+         invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('InvalidCode'))'
       }
           });
       });
@@ -71,6 +71,8 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
   <resource name="Submit">Submit Code</resource>
   <resource name="EnterCode">Enter Code</resource>
   <resource name="Heading">Two Factor Authentication</resource>
-</language></languageResources>
+  <resource name="Required">This value is mandatory</resource>
+  <resource name="InvalidCode">Invalid code entered, please try again</resource>
+    </language></languageResources>
   </scriptedContentFragment>
 </scriptedContentFragments>

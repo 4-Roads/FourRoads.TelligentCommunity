@@ -17,107 +17,123 @@ namespace FourRoads.TelligentCommunity.Rules.Helpers
 
         private static UserTotalTokensRegister _userTotalTokens = new UserTotalTokensRegister();
 
-        public static bool Votes(int userid, int replyId, int value , VoteType voteType)
+        public static bool Votes(int userid, int replyId, int value, VoteType voteType)
         {
-            var user = Apis.Get<IUsers>().Get(new UsersGetOptions() {Id = userid});
+            bool result = false;
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = userid });
 
             if (!user.HasErrors())
             {
-                // update the number of up/down votes a user has made globally
-                int votes = 0;
-                ExtendedAttribute userVotes = user.ExtendedAttributes.Get(voteType.ToString());
-                if (userVotes != null)
+                //ensure we have access to user.ExtendedAttributes
+                Apis.Get<IUsers>().RunAsUser("admin", () =>
                 {
-                    int.TryParse(userVotes.Value, out votes);
-                }
-
-                votes += value;
-
-                if (userVotes == null)
-                {
-                    user.ExtendedAttributes.Add(new ExtendedAttribute()
+                    // update the number of up/down votes a user has made globally
+                    int votes = 0;
+                    ExtendedAttribute userVotes = user.ExtendedAttributes.Get(voteType.ToString());
+                    if (userVotes != null)
                     {
-                        Key = voteType.ToString(),
-                        Value = Math.Max(0, votes).ToString()
-                    });
-                }
-                else
-                {
-                    userVotes.Value = Math.Max(0, votes).ToString();
-                }
+                        int.TryParse(userVotes.Value, out votes);
+                    }
 
-                // update the number of upvotes the user has made against answers
-                if (voteType == VoteType.UpVoteCount)
-                {
-                    var reply = Apis.Get<IForumReplies>().Get(replyId);
+                    votes += value;
 
-                    if (!reply.HasErrors() && (reply.IsAnswer ?? false))
+                    if (userVotes == null)
                     {
-                        votes = 0;
-                        ExtendedAttribute userAnswerVotes = user.ExtendedAttributes.Get("AnswerUpVoteCount");
-                        if (userAnswerVotes != null)
+                        user.ExtendedAttributes.Add(new ExtendedAttribute()
                         {
-                            int.TryParse(userAnswerVotes.Value, out votes);
-                        }
+                            Key = voteType.ToString(),
+                            Value = Math.Max(0, votes).ToString()
+                        });
+                    }
+                    else
+                    {
+                        userVotes.Value = Math.Max(0, votes).ToString();
+                    }
 
-                        votes += value;
+                    // update the number of upvotes the user has made against answers
+                    if (voteType == VoteType.UpVoteCount)
+                    {
+                        var reply = Apis.Get<IForumReplies>().Get(replyId);
 
-                        if (userAnswerVotes == null)
+                        if (!reply.HasErrors() && (reply.IsAnswer ?? false))
                         {
-                            user.ExtendedAttributes.Add(new ExtendedAttribute()
+                            votes = 0;
+                            ExtendedAttribute userAnswerVotes = user.ExtendedAttributes.Get("AnswerUpVoteCount");
+                            if (userAnswerVotes != null)
                             {
-                                Key = "AnswerUpVoteCount",
-                                Value = Math.Max(0, votes).ToString()
-                            });
-                        }
-                        else
-                        {
-                            userAnswerVotes.Value = Math.Max(0, votes).ToString();
+                                int.TryParse(userAnswerVotes.Value, out votes);
+                            }
+
+                            votes += value;
+
+                            if (userAnswerVotes == null)
+                            {
+                                user.ExtendedAttributes.Add(new ExtendedAttribute()
+                                {
+                                    Key = "AnswerUpVoteCount",
+                                    Value = Math.Max(0, votes).ToString()
+                                });
+                            }
+                            else
+                            {
+                                userAnswerVotes.Value = Math.Max(0, votes).ToString();
+                            }
                         }
                     }
-                }
 
-                Apis.Get<IUsers>()
-                    .Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = user.ExtendedAttributes});
-
-                return true;
+                    var resultUser = Apis.Get<IUsers>()
+                        .Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes });
+                    if (!resultUser.HasErrors())
+                    {
+                        result = true;
+                    }
+                });
             }
-            return false;
+
+            return result;
         }
 
         public static bool Tags(int userid, int value)
         {
+            bool result = false;
+
             User user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = userid });
             if (!user.HasErrors())
             {
-                int tags = 0;
-                ExtendedAttribute userTagCount = user.ExtendedAttributes.Get("TagCount");
-                if (userTagCount != null)
+                //ensure we have access to user.ExtendedAttributes
+                Apis.Get<IUsers>().RunAsUser("admin", () =>
                 {
-                    int.TryParse(userTagCount.Value, out tags);
-                }
-
-                tags += value;
-
-                if (userTagCount == null)
-                {
-                    user.ExtendedAttributes.Add(new ExtendedAttribute()
+                    int tags = 0;
+                    ExtendedAttribute userTagCount = user.ExtendedAttributes.Get("TagCount");
+                    if (userTagCount != null)
                     {
-                        Key = "TagCount",
-                        Value = Math.Max(0, tags).ToString()
-                    });
-                }
-                else
-                {
-                    userTagCount.Value = Math.Max(0, tags).ToString();
-                }
+                        int.TryParse(userTagCount.Value, out tags);
+                    }
 
-                Apis.Get<IUsers>()
-                    .Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes });
+                    tags += value;
 
-                return true;
+                    if (userTagCount == null)
+                    {
+                        user.ExtendedAttributes.Add(new ExtendedAttribute()
+                        {
+                            Key = "TagCount",
+                            Value = Math.Max(0, tags).ToString()
+                        });
+                    }
+                    else
+                    {
+                        userTagCount.Value = Math.Max(0, tags).ToString();
+                    }
+
+                    var resultUser = Apis.Get<IUsers>()
+                        .Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes });
+                    if (!resultUser.HasErrors())
+                    {
+                        result = true;
+                    }
+                });
             }
-            return false;
+            return result;
         }
 
         public static void UpdateContext(RuleTriggerExecutionContext context, User user)
@@ -125,9 +141,9 @@ namespace FourRoads.TelligentCommunity.Rules.Helpers
             //get the extended user attributes
             UserTotalTriggerParameters userTotalTriggerParameters = new UserTotalTriggerParameters()
             {
-                UpVoteCount = GetUserExtendedValue(user , "UpVoteCount"),
-                DownVoteCount = GetUserExtendedValue(user , "DownVoteCount"),
-                TagCount = GetUserExtendedValue(user , "TagCount")
+                UpVoteCount = GetUserExtendedValue(user, "UpVoteCount"),
+                DownVoteCount = GetUserExtendedValue(user, "DownVoteCount"),
+                TagCount = GetUserExtendedValue(user, "TagCount")
             };
             userTotalTriggerParameters.VoteCount = (userTotalTriggerParameters.UpVoteCount +
                                                     userTotalTriggerParameters.DownVoteCount);
@@ -137,11 +153,16 @@ namespace FourRoads.TelligentCommunity.Rules.Helpers
         private static int GetUserExtendedValue(User user, string key)
         {
             int value = 0;
-            ExtendedAttribute extendedAttribute = user.ExtendedAttributes.Get(key);
-            if (extendedAttribute != null)
+            //ensure we have access to user.ExtendedAttributes
+            Apis.Get<IUsers>().RunAsUser("admin", () =>
             {
-                int.TryParse(extendedAttribute.Value, out value);
-            }
+                ExtendedAttribute extendedAttribute = user.ExtendedAttributes.Get(key);
+                if (extendedAttribute != null)
+                {
+                    int.TryParse(extendedAttribute.Value, out value);
+                }
+            });
+
             return value;
         }
 

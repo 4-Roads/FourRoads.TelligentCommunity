@@ -16,7 +16,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
 
         public void Initialize()
         {
-
+            Injector.Get<IMfaLogic>().Initialize();
         }
 
         public string Name => "4 Roads - Google MFA Plugin";

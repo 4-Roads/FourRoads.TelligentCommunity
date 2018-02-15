@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <scriptedContentFragments>
   <scriptedContentFragment name="${resource:Mfa_Name}" version="10.0.0.4689" description="${resource:Mfa_Description}" instanceIdentifier="6d9264a6f6c4434c9d9954b87a865e57" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="splash" provider="3bd55b782e624b77b6e730f6bce17de2">
-    <contentScript><![CDATA[#set($validateInput = $core_v2_widget.UniqueId('validateInput'))
+    <contentScript>
+           <![CDATA[#set($validateInput = $core_v2_widget.UniqueId('validateInput'))
 #set($submit = $core_v2_widget.UniqueId('submit'))
 #set($disable = $core_v2_widget.UniqueId('disable'))
 #set($activate = $core_v2_widget.UniqueId('activate'))
@@ -84,7 +85,7 @@
       },
       resources : {
          requiredField: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Required'))',
-         invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('invalidCode'))'
+         invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('InvalidCode'))'
       }
       });
       });
@@ -114,8 +115,10 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
   <resource name="Heading">Two Factor Authentication</resource>
   <resource name="ActivateButton">Activate</resource>
   <resource name="DisableButton">Disable</resource>
+  <resource name="Required">This value is mandatory</resource>
   <resource name="InvalidCode">Invalid code entered, please try again</resource>
   <resource name="Activate_Desc">Activate two factor authentication using Google Authenticator to provide an extra level of protection to your account </resource>
+  <resource name="Disable_Desc">Disable two factor authentication for your account</resource>
   <resource name="Disable_Desc">Disable two factor authentication for your account</resource>
 </language></languageResources>
   </scriptedContentFragment>
