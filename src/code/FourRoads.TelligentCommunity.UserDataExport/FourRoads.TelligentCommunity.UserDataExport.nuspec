@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package >
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>FourRoads.TelligentCommunity101.UserDataExport</id>
     <version>$version$</version>
@@ -13,4 +13,7 @@
 	<description>$description$</description>
     <tags>Telligent utility</tags>
   </metadata>
+	<files>
+      <file src="code\**\bin\**\FourRoads.*.dll" target="lib\net462" exclude="*Tests*" />
+    </files>
 </package>
