@@ -37,17 +37,19 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
 
                 _tc = new TelemetryClient();
 
-                var user = Apis.Get<IUsers>();
+                if (_configuration.GetBool("Enabled"))
+                {
+                    var user = Apis.Get<IUsers>();
 
-                user.Events.AfterLockout += EventsOnAfterLockout;
-                user.Events.AfterCreate += EventsOnAfterCreate;
-                user.Events.BeforeDelete += EventsOnBeforeDelete;
-                user.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
-
+                    user.Events.AfterLockout += EventsOnAfterLockout;
+                    user.Events.AfterCreate += EventsOnAfterCreate;
+                    user.Events.BeforeDelete += EventsOnBeforeDelete;
+                    user.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
+                }
             }
         }
 
-        public string Name => "4 Roads - Application Inisights";
+        public string Name => "4 Roads - Application Insights";
 
         public string Description => "This plugin provides a configuration wrapper to Application Insights and also adds logging for key events.";
 

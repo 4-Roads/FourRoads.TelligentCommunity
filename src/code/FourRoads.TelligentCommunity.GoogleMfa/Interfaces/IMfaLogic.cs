@@ -5,6 +5,8 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Interfaces
 {
     public interface IMfaLogic
     {
+
+        void Initialize();
         void RegisterUrls(IUrlController controller);
 
         bool TwoFactorEnabled(User user);

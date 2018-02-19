@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>FourRoads.TelligentCommunity101.ThemeHelper</id>
+    <id>FourRoads.TelligentCommunity101.GroupDataExport</id>
     <version>$version$</version>
     <title>$title$</title>
     <authors>$author$</authors>

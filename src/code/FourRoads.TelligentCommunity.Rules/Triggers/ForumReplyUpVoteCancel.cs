@@ -1,4 +1,5 @@
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.Rules.Helpers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -73,6 +74,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                         //amended - was up vote and is now down vote
                         if (old.Value && !args.Value)
                         {
+                            UserTotalValues.Votes(args.UserId, args.ReplyId, -1, UserTotalValues.VoteType.UpVoteCount);
+
                             _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
                                 {
@@ -108,6 +111,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                     // removing up vote
                     if (args.Value)
                     {
+                        UserTotalValues.Votes(args.UserId, args.ReplyId, -1, UserTotalValues.VoteType.UpVoteCount);
+
                         _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                         {
                             {
@@ -171,6 +176,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                         //amended - was up vote and is now down vote
                         if (old.Value && !args.Value)
                         {
+                            UserTotalValues.Votes(args.UserId, args.ReplyId, -1, UserTotalValues.VoteType.UpVoteCount);
+
                             _ruleController.ScheduleTrigger(new Dictionary<string, string>()
                             {
                                 {
