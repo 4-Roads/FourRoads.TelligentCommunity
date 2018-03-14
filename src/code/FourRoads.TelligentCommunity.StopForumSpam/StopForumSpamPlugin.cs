@@ -89,7 +89,16 @@ namespace FourRoads.TelligentCommunity.StopForumSpam
                     Apis.Get<IEventLog>().Write($"Stop Forum Spam User Tested {moderatedUser.PrivateEmail} confidence:{confidence}", new EventLogEntryWriteOptions() { EventType = "Information" });
 
                     if (confidence > _configuration.GetInt("threashold"))
-                        _abuseController.Moderate(e.ContentId, e.ContentTypeId);
+                    {
+                        _abuseController.IdentifyAsAbusive(e.ContentId, e.ContentTypeId);
+
+                        userService.RunAsUser(userService.ServiceUserName ,
+                            () =>
+                            {
+                                userService.Update(new UsersUpdateOptions() { Id = moderatedUser.Id, AccountStatus = "Disapproved" });
+                        });
+                        
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -126,7 +135,7 @@ namespace FourRoads.TelligentCommunity.StopForumSpam
                 optionsGroup.Properties.Add(new Property("useIP", "Send IP for Testing", PropertyType.Bool, 1, bool.TrueString));
                 optionsGroup.Properties.Add(new Property("useEmail", "Send Email for Testing", PropertyType.Bool, 1, bool.TrueString));
                 optionsGroup.Properties.Add(new Property("useUserName", "Send UserName for Testing", PropertyType.Bool, 1, bool.TrueString));
-                optionsGroup.Properties.Add(new Property("threashold", "Score Threashold", PropertyType.Int, 1,"50"));
+                optionsGroup.Properties.Add(new Property("threashold", "Score Threashold, above this threshold users are automatically banned", PropertyType.Int, 1,"50"));
                 optionsGroup.Properties.Add(new Property("apiUrl", "API Url", PropertyType.String, 1, "http://api.stopforumspam.org/api"));
 
                 return groupArray;
