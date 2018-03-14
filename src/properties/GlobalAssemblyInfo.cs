@@ -11,7 +11,7 @@ using System.Reflection;
 #endregion
 
 [assembly: AssemblyCompany("4 Roads Ltd")]
-[assembly: AssemblyCopyright("Copyright © 4 Roads Ltd 2012-2017")]
+[assembly: AssemblyCopyright("Copyright © 4 Roads Ltd 2012-2018")]
 [assembly: AssemblyTrademark("All rights reserved.")]
 [assembly: AssemblyCulture("")]
 #if DEBUG
