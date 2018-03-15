@@ -38,67 +38,69 @@ namespace FourRoads.TelligentCommunity.StopForumSpam
             {
                 try
                 {
-                    var moderatedUser = userService.Get(new UsersGetOptions() {ContentId = e.ContentId});
+                    userService.RunAsUser(
+                        userService.ServiceUserName,
+                        () =>
+                        {
+                            var moderatedUser = userService.Get(new UsersGetOptions() {ContentId = e.ContentId});
 
-                    List<KeyValuePair<string, string>> postData = new List<KeyValuePair<string, string>>();
+                            List<KeyValuePair<string, string>> postData = new List<KeyValuePair<string, string>>();
 
-                    postData.Add(new KeyValuePair<string, string>("json" , "{''}"));
+                            postData.Add(new KeyValuePair<string, string>("json", "{''}"));
 
-                    if (_configuration.GetBool("useIP"))
-                        postData.Add(new KeyValuePair<string, string>("ip", CSContext.Current.UserHostAddress));
+                            if (_configuration.GetBool("useIP"))
+                                postData.Add(new KeyValuePair<string, string>("ip", CSContext.Current.UserHostAddress));
 
-                    if (_configuration.GetBool("useEmail"))
-                        postData.Add(new KeyValuePair<string, string>("email", moderatedUser.PrivateEmail));
+                            if (_configuration.GetBool("useEmail"))
+                                postData.Add(new KeyValuePair<string, string>("email", moderatedUser.PrivateEmail));
 
-                    if (_configuration.GetBool("useUserName"))
-                        postData.Add(new KeyValuePair<string, string>("username", moderatedUser.Username));
+                            if (_configuration.GetBool("useUserName"))
+                                postData.Add(new KeyValuePair<string, string>("username", moderatedUser.Username));
 
-                    HttpClient client = new HttpClient();
+                            HttpClient client = new HttpClient();
 
-                    var content = new FormUrlEncodedContent(postData.ToArray());
+                            var content = new FormUrlEncodedContent(postData.ToArray());
 
-                    var result = client.PostAsync(_configuration.GetString("apiUrl") +"?confidence", content).Result;
+                            var result = client.PostAsync(_configuration.GetString("apiUrl") + "?confidence", content).Result;
 
-                    var resultString =  result.Content.ReadAsStringAsync().Result;
+                            var resultString = result.Content.ReadAsStringAsync().Result;
 
-                    dynamic resultJson = JsonConvert.DeserializeObject<dynamic>(resultString);
+                            dynamic resultJson = JsonConvert.DeserializeObject<dynamic>(resultString);
 
-                    double confidence = 0;
+                            double confidence = 0;
 
-                    if (resultJson.ip != null)
-                    {
-                        double confInt;
-                        double.TryParse(resultJson.ip.confidence?.ToString(), out confInt);
-                        confidence += confInt;
-                    }
-
-                    if (resultJson.username != null)
-                    {
-                        double confInt;
-                        double.TryParse(resultJson.username.confidence?.ToString(), out confInt);
-                        confidence += confInt;
-                    }
-
-                    if (resultJson.email != null)
-                    {
-                        double confInt;
-                        double.TryParse(resultJson.email.confidence?.ToString(), out confInt);
-                        confidence += confInt;
-                    }
-
-                    Apis.Get<IEventLog>().Write($"Stop Forum Spam User Tested {moderatedUser.PrivateEmail} confidence:{confidence}", new EventLogEntryWriteOptions() { EventType = "Information" });
-
-                    if (confidence > _configuration.GetInt("threashold"))
-                    {
-                        _abuseController.IdentifyAsAbusive(e.ContentId, e.ContentTypeId);
-
-                        userService.RunAsUser(userService.ServiceUserName ,
-                            () =>
+                            if (resultJson.ip != null)
                             {
-                                userService.Update(new UsersUpdateOptions() { Id = moderatedUser.Id, AccountStatus = "Disapproved" });
+                                double confInt;
+                                double.TryParse(resultJson.ip.confidence?.ToString(), out confInt);
+                                confidence += confInt;
+                            }
+
+                            if (resultJson.username != null)
+                            {
+                                double confInt;
+                                double.TryParse(resultJson.username.confidence?.ToString(), out confInt);
+                                confidence += confInt;
+                            }
+
+                            if (resultJson.email != null)
+                            {
+                                double confInt;
+                                double.TryParse(resultJson.email.confidence?.ToString(), out confInt);
+                                confidence += confInt;
+                            }
+
+                            Apis.Get<IEventLog>().Write($"Stop Forum Spam User Tested {moderatedUser.PrivateEmail} confidence:{confidence}", new EventLogEntryWriteOptions() {EventType = "Information"});
+
+
+                            if (confidence > _configuration.GetInt("threashold"))
+                            {
+                                _abuseController.IdentifyAsAbusive(e.ContentId, e.ContentTypeId);
+
+
+                                userService.Update(new UsersUpdateOptions() {Id = moderatedUser.Id, AccountStatus = "Disapproved"});
+                            }
                         });
-                        
-                    }
                 }
                 catch (Exception ex)
                 {
