@@ -98,7 +98,7 @@ namespace FourRoads.TelligentCommunity.StopForumSpam
                                 _abuseController.IdentifyAsAbusive(e.ContentId, e.ContentTypeId);
 
 
-                                userService.Update(new UsersUpdateOptions() {Id = moderatedUser.Id, AccountStatus = "Disapproved"});
+                                userService.Update(new UsersUpdateOptions() {Id = moderatedUser.Id, AccountStatus = "ApprovalPending", ForceLogin = true});
                             }
                         });
                 }
