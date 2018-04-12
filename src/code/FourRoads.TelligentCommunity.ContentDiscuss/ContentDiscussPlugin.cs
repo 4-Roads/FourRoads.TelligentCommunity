@@ -84,14 +84,21 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
 
         private void Search_BeforeBulkIndex(BeforeBulkIndexingEventArgs args)
         {
-            if(args.HandlerName == "Forum Thread Content Type")
+            // --todo look at this re string below .....
+            var threadService = Apis.Get<IForumThreads>();
+
+            foreach (var doc in args.Documents)
             {
-                foreach (Entities.SearchIndexDocument document in args.Documents)
+                // Select documents that are forum threads
+                if (doc.ContentTypeId == threadService.ContentTypeId)
                 {
-                    Entities.ForumThread thread = Apis.Get<IForumThreads>().Get(document.ContentId);
-                    if(thread.ExtendedAttributes["createdFrom"] != null && !String.IsNullOrEmpty(thread.ExtendedAttributes["createdFrom"].Value))
+                    var thread = threadService.Get(doc.ContentId);
+                    if (thread == null)
+                        continue;
+
+                    if (thread.ExtendedAttributes["createdFrom"] != null && !String.IsNullOrEmpty(thread.ExtendedAttributes["createdFrom"].Value))
                     {
-                        document.AddField("createdfrom_t", thread.ExtendedAttributes["createdFrom"].Value);
+                        doc.AddField("createdfrom_t", thread.ExtendedAttributes["createdFrom"].Value);
                     }
                 }
             }
