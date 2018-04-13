@@ -33,6 +33,7 @@ namespace FourRoads.TelligentCommunity.PowerBI
         private static string TableName;
 
         private AzureLanguage azureLanguage = null;
+        private WatsonLanguage watsonLanguage = null;
 
         public Client(IPluginConfiguration configuration)
         {
@@ -42,7 +43,7 @@ namespace FourRoads.TelligentCommunity.PowerBI
             ResourceUrl = configuration.GetString("resourceUrl");
             ClientId = configuration.GetString("clientId");
             ApiUrl = configuration.GetString("apiUrl");
-            GroupName = "";// configuration.GetString("groupName");
+            GroupName = configuration.GetString("groupName");
             DataSetName = configuration.GetString("datasetName");
             TableName = configuration.GetString("tableName");
 
@@ -53,6 +54,16 @@ namespace FourRoads.TelligentCommunity.PowerBI
             {
                 azureLanguage = new AzureLanguage(azureRegion, azuretextAnalyticsAPI);
             }
+
+            string watsonUserName = configuration.GetString("watsonUserName");
+            string watsonPassword = configuration.GetString("watsonPassword");
+            string watsonLanguageUrl = configuration.GetString("watsonLanguageUrl");
+
+            if (!string.IsNullOrWhiteSpace(watsonUserName) && !string.IsNullOrWhiteSpace(watsonPassword) && !string.IsNullOrWhiteSpace(watsonLanguageUrl))
+            {
+                watsonLanguage = new WatsonLanguage(watsonUserName, watsonPassword, watsonLanguageUrl);
+            }
+
         }
 
         public bool Init()
@@ -335,7 +346,11 @@ namespace FourRoads.TelligentCommunity.PowerBI
                             new Column() { name = "Content", dataType = "string" },
                             new Column() { name = "RawContent", dataType = "string" },
                             new Column() { name = "Tags", dataType = "string" },
-                            new Column() { name = "KeyPhrases", dataType = "string" },
+                            new Column() { name = "KeyPhrases1", dataType = "string" },
+                            new Column() { name = "KeyPhrases2", dataType = "string" },
+                            new Column() { name = "KeyPhrases3", dataType = "string" },
+                            new Column() { name = "KeyPhrases4", dataType = "string" },
+                            new Column() { name = "KeyPhrases5", dataType = "string" },
                             new Column() { name = "CreatedOn", dataType = "DateTime" },
                             new Column() { name = "UpdatedOn", dataType = "DateTime" }
                         }
@@ -585,17 +600,26 @@ namespace FourRoads.TelligentCommunity.PowerBI
 
             foreach (var doc in docs)
             {
-                string keyPhrases = string.Empty;
+                string keyPhrases1 = string.Empty;
+                string keyPhrases2 = string.Empty;
                 IList<string> tags = new List<String>();
                 foreach (var tag in doc.IndexFields.Where(a => a.FieldName == "tag"))
                 {
                     tags.Add(tag.FieldValue);
                 }
 
-                if (azureLanguage != null)
+                if (azureLanguage != null || watsonLanguage != null)
                 {
                     string allContent = doc.Title + " " + doc.Content + " " + String.Join(" ", tags.Select(x => x.ToString()).ToArray());
-                    keyPhrases = azureLanguage.KeyPhrasesCSV(allContent);
+
+                    if (azureLanguage != null)
+                    {
+                        keyPhrases1 = azureLanguage.KeyPhrasesCSV(allContent);
+                    }
+                    if (watsonLanguage != null)
+                    {
+                        keyPhrases2 = watsonLanguage.KeyPhrasesCSV(allContent);
+                    }
                 }
 
                 rows.rows.Add(new Row()
@@ -607,7 +631,11 @@ namespace FourRoads.TelligentCommunity.PowerBI
                     RawContent = GetIndexField(doc, "rawcontent"),
                     Author = GetIndexField(doc, "username"),
                     Tags = String.Join(",", tags.Select(x => x.ToString()).ToArray()),
-                    KeyPhrases = keyPhrases,
+                    KeyPhrases1 = keyPhrases1,
+                    KeyPhrases2 = keyPhrases2,
+                    KeyPhrases3 = string.Empty,
+                    KeyPhrases4 = string.Empty,
+                    KeyPhrases5 = string.Empty,
                     CreatedOn = Helpers.UserProfile.FormatDate(GetIndexField(doc, "date")),
                     UpdatedOn = Helpers.UserProfile.FormatDate()
                 });

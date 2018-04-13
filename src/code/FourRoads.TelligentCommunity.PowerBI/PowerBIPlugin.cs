@@ -163,6 +163,12 @@ namespace FourRoads.TelligentCommunity.PowerBI
                 azureGroup.Properties.Add(new Property("azureRegion", "Azure Analytics Region", PropertyType.String, 0, "Westeurope"));
                 azureGroup.Properties.Add(new Property("azureTextAnalyticsAPI", "Text Analytics API Key", PropertyType.String, 0, ""));
 
+                PropertyGroup watsonGroup = new PropertyGroup("WatsonAnalytics", "Watson Analytics", 0);
+
+                watsonGroup.Properties.Add(new Property("watsonLanguageUrl", "NLP Url", PropertyType.Url, 0, "https://gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2018-03-16"));
+                watsonGroup.Properties.Add(new Property("watsonUserName", "User Name", PropertyType.String, 0, ""));
+                AddPrivateProp("watsonPassword", "Password", watsonGroup);
+
                 PropertyGroup userprofileGroup = new PropertyGroup("UserProfileFields", "User Profile Fields", 0);
 
                 Property availableFields = new Property("fields", "Fields", PropertyType.Custom, 0, "");
@@ -175,7 +181,7 @@ namespace FourRoads.TelligentCommunity.PowerBI
 
                 userprofileGroup.Properties.Add(availableFields);
 
-                return new PropertyGroup[] { optionsGroup, urlsGroup, azureGroup, userprofileGroup };
+                return new PropertyGroup[] { optionsGroup, urlsGroup, azureGroup, watsonGroup, userprofileGroup };
             }
         }
 
