@@ -1,5 +1,6 @@
 using FourRoads.Common.TelligentCommunity.Components;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Telligent.DynamicConfiguration.Components;
@@ -19,7 +20,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
         private ITranslatablePluginController _translationController;
         private List<string> _fields = new List<string>();
         private readonly Guid _triggerid = new Guid("{A696AC6A-1CC1-4169-B1E4-4458E94B090C}");
-        private Dictionary<int, User> _beforeUpdateCache = new Dictionary<int, User>();
+        private ConcurrentDictionary<int, User> _beforeUpdateCache = new ConcurrentDictionary<int, User>();
 
         public void Initialize()
         {
@@ -42,7 +43,7 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                             User user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = userId });
 
                             if (user != null && !user.HasErrors())
-                                _beforeUpdateCache.Add(userId, user);
+                                _beforeUpdateCache.AddOrUpdate(userId, user, (key, existingVal) => user);
                         }
                     }
                 }
@@ -72,7 +73,8 @@ namespace FourRoads.TelligentCommunity.Rules.Triggers
                                 }
                             });
                         }
-                        _beforeUpdateCache.Remove(userId);
+                        User removed;
+                        _beforeUpdateCache.TryRemove(userId , out removed);
                     }
                 }
             }
