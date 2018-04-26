@@ -2152,22 +2152,25 @@ namespace DryIoc
                             case IfAlreadyRegistered.Replace:
                                 if (oldFactoriesEntry != null)
                                 {
-                                    var newFactories = oldFactoriesEntry.Factories;
+                                    // remove defaults but keep keyed (issue #569)
+                                    var oldFactories = oldFactoriesEntry.Factories;
+                                    var keyedFactories = ImTreeMap<object, Factory>.Empty;
                                     if (oldFactoriesEntry.LastDefaultKey != null)
                                     {
-                                        newFactories = ImTreeMap<object, Factory>.Empty;
                                         var removedFactories = ImTreeMap<object, Factory>.Empty;
-                                        foreach (var f in newFactories.Enumerate())
+                                        foreach (var f in oldFactories.Enumerate())
                                             if (f.Key is DefaultKey)
                                                 removedFactories = removedFactories.AddOrUpdate(f.Key, f.Value);
-                                            else
-                                                newFactories = newFactories.AddOrUpdate(f.Key, f.Value);
+                                            else // copy keyed to new
+                                                keyedFactories = keyedFactories.AddOrUpdate(f.Key, f.Value);
 
                                         replacedFactories = removedFactories;
+                                        if (keyedFactories.IsEmpty)
+                                            return newEntry; // the entry with all default was completely replace
                                     }
 
                                     return new FactoriesEntry(DefaultKey.Value,
-                                        newFactories.AddOrUpdate(DefaultKey.Value, newFactory));
+                                        keyedFactories.AddOrUpdate(DefaultKey.Value, newFactory));
                                 }
 
                                 replacedFactory = oldFactory;
@@ -4412,6 +4415,14 @@ namespace DryIoc
         /// <returns>New factory method wrapper.</returns>
         public static FactoryMethod Of(MemberInfo ctorOrMethodOrMember, ServiceInfo factoryInfo = null)
         {
+            ctorOrMethodOrMember.ThrowIfNull(Error.PassedCtorOrMemberIsNull);
+            if (!(ctorOrMethodOrMember is ConstructorInfo) && !ctorOrMethodOrMember.IsStatic())
+            {
+                if (factoryInfo == null)
+                    Throw.It(Error.PassedMemberIsNotStaticButInstanceFactoryIsNull, ctorOrMethodOrMember);
+            }
+            else if (factoryInfo != null)
+                Throw.It(Error.PassedMemberIsStaticButInstanceFactoryIsNotNull, ctorOrMethodOrMember, factoryInfo);
             return new FactoryMethod(ctorOrMethodOrMember, factoryInfo);
         }
 
@@ -4709,8 +4720,8 @@ namespace DryIoc
         public static Made Of(Func<Type, ConstructorInfo> getConstructor, ParameterSelector parameters = null,
             PropertiesAndFieldsSelector propertiesAndFields = null)
         {
-            return Of(r => DryIoc.FactoryMethod.Of(getConstructor(r.ImplementationType)
-                .ThrowIfNull(Error.GotNullConstructorFromFactoryMethod, r)),
+            return Of(r => DryIoc.FactoryMethod.Of(
+                getConstructor(r.ImplementationType).ThrowIfNull(Error.GotNullConstructorFromFactoryMethod, r)),
                 parameters, propertiesAndFields);
         }
 
@@ -7121,7 +7132,9 @@ namespace DryIoc
             if (reuse == null)
                 reuse = GetDefaultReuse(factory);
 
-            var flags = _flags;
+            // remove non-inherited factory flag,
+            // e.g. when factory is resolved second time with decorator we need to nullify previous service factory flags
+            var flags = _flags & ~RequestFlags.TracksTransientDisposable;
 
             if (!skipCaptiveDependencyCheck && reuse.Lifespan != 0 &&
                 Rules.ThrowIfDependencyHasShorterReuseLifespan)
@@ -8574,6 +8587,7 @@ namespace DryIoc
         public static bool IsInjectable(this PropertyInfo property, bool withNonPublic = false, bool withPrimitive = false)
         {
             return property.CanWrite
+                && !property.IsExplicitlyImplemented()
                 && !property.IsStatic()
                 && !property.IsIndexer() // first checks that property is assignable in general and not an indexer
                 && (withNonPublic || property.GetSetMethodOrNull() != null)
@@ -8793,8 +8807,10 @@ namespace DryIoc
                     Throw.It(Error.RegisteringNotAGenericTypedefImplType,
                         implType, implType.GetGenericDefinitionOrNull());
 
-                else if (implType != serviceType && serviceType != typeof(object) &&
-                    implType.GetImplementedTypes().IndexOf(t => t == serviceType) == -1)
+                else if (implType != serviceType && serviceType != typeof(object)
+                      && implType.GetImplementedTypes().IndexOf(t =>
+                      t == serviceType || t.GetGenericDefinitionOrNull() == serviceType) == -1)
+
                     Throw.It(Error.RegisteringImplementationNotAssignableToServiceType, implType, serviceType);
             }
             else if (implType != serviceType)
@@ -9094,18 +9110,6 @@ namespace DryIoc
             }
 
             var factoryMethod = factoryMethodSelector(request);
-            if (factoryMethod != null && !(factoryMethod.ConstructorOrMethodOrMember is ConstructorInfo))
-            {
-                var member = factoryMethod.ConstructorOrMethodOrMember;
-                var isStaticMember = member.IsStatic();
-
-                Throw.If(isStaticMember && factoryMethod.FactoryServiceInfo != null,
-                    Error.FactoryObjProvidedButMethodIsStatic, factoryMethod.FactoryServiceInfo, factoryMethod, request);
-
-                Throw.If(!isStaticMember && factoryMethod.FactoryServiceInfo == null,
-                    Error.FactoryObjIsNullInFactoryMethod, factoryMethod, request);
-            }
-
             return factoryMethod.ThrowIfNull(Error.UnableToGetConstructorFromSelector, implType, request);
         }
 
@@ -11256,9 +11260,9 @@ namespace DryIoc
             object arg0, object arg1 = null, object arg2 = null, object arg3 = null,
             Exception innerException = null)
         {
-            var messageFormat = GetMessage(errorCheck, errorCode);
-            var message = string.Format(messageFormat, Print(arg0), Print(arg1), Print(arg2), Print(arg3));
-            return new ContainerException(errorCode, message, innerException);
+            return new ContainerException(errorCode,
+                string.Format(GetMessage(errorCheck, errorCode), Print(arg0), Print(arg1), Print(arg2), Print(arg3)),
+                innerException);
         }
 
         /// <summary>Gets error message based on provided args.</summary> <param name="errorCheck"></param> <param name="errorCode"></param>
@@ -11293,11 +11297,10 @@ namespace DryIoc
     /// <summary>Defines error codes and error messages for all DryIoc exceptions (DryIoc extensions may define their own.)</summary>
     public static class Error
     {
-        /// <summary>First error code to identify error range for other possible error code definitions.</summary>
-        public static readonly int FirstErrorCode = 0;
-
         /// <summary>List of error messages indexed with code.</summary>
         public static readonly List<string> Messages = new List<string>(100);
+
+        private static int _errorIndex = -1;
 
 #pragma warning disable 1591 // "Missing XML-comment"
         public static readonly int
@@ -11393,10 +11396,6 @@ namespace DryIoc
                 "Reused service wrapped in WeakReference is Garbage Collected and no longer available."),
             ServiceIsNotAssignableFromFactoryMethod = Of(
                 "Service of {0} is not assignable from factory method {1} when resolving: {2}."),
-            FactoryObjIsNullInFactoryMethod = Of(
-                "Unable to use null factory object with *instance* factory method {0} when resolving: {1}."),
-            FactoryObjProvidedButMethodIsStatic = Of(
-                "Factory instance provided {0} But factory method is static {1} when resolving: {2}."),
             GotNullConstructorFromFactoryMethod = Of(
                 "Got null constructor when resolving {0}"),
             UnableToRegisterDuplicateDefault = Of(
@@ -11483,26 +11482,33 @@ namespace DryIoc
                 "Please Register the implementation with the ifAlreadyRegistered.Replace parameter to fill the placeholder."),
             UnableToFindSingletonInstance = Of(
                 "Expecting the instance to be stored in singleton scope, but unable to find anything here." + Environment.NewLine + 
-                "Likely, you've called UseInstance from the scoped container, but resolving from another container or injecting into a singleton.");
+                "Likely, you've called UseInstance from the scoped container, but resolving from another container or injecting into a singleton."),
+            PassedCtorOrMemberIsNull = Of(
+                "The costructor of member info passed to `Made.Of` or `FactoryMethod.Of` is null"),
+            PassedMemberIsNotStaticButInstanceFactoryIsNull = Of(
+                "The member info {0} passed to `Made.Of` or `FactoryMethod.Of` is NOT static, but instance factory is not provided or null"),
+            PassedMemberIsStaticButInstanceFactoryIsNotNull = Of(
+                "You are passing constructor or STATIC member info {0} to `Made.Of` or `FactoryMethod.Of`, but then why are you passing an INSTANCE factory: {1}");
 
 #pragma warning restore 1591 // "Missing XML-comment"
 
         /// <summary>Stores new error message and returns error code for it.</summary>
-        /// <param name="message">Error message to store.</param> <returns>Error code for message.</returns>
         public static int Of(string message)
         {
-            Messages.Add(message);
-            return FirstErrorCode + Messages.Count - 1;
+            // thread-safe code to return exactly the code of set message
+            var errorIndex = Interlocked.Increment(ref _errorIndex);
+            while (errorIndex >= Messages.Count)
+                Messages.Add("^_^");
+            Messages[errorIndex] = message;
+            return errorIndex;
         }
 
         /// <summary>Returns the name for the provided error code.</summary>
-        /// <param name="error">error code.</param> <returns>name of error, unique in scope of this <see cref="Error"/> class.</returns>
-        public static string NameOf(int error)
+        public static string NameOf(int errorIndex)
         {
-            var index = error - FirstErrorCode + 1;
             var field = typeof(Error).GetTypeInfo().DeclaredFields
                 .Where(f => f.FieldType == typeof(int))
-                .Where((_, i) => i == index)
+                .Where((_, i) => i == errorIndex + 1)
                 .FirstOrDefault();
             return field != null ? field.Name : null;
         }
@@ -12101,17 +12107,36 @@ namespace DryIoc
         /// <summary>Returns type assembly.</summary> <param name="type">Input type</param> <returns>Type assembly.</returns>
         public static Assembly GetAssembly(this Type type) { return type.GetTypeInfo().Assembly; }
 
+        /// <summary>Is <c>true</c> for interface declared property explicitly implemented, e.g. <c>IInterface.Prop</c></summary>
+        public static bool IsExplicitlyImplemented(this PropertyInfo property)
+        {
+            return property.Name.Contains(".");
+        }
+
         /// <summary>Returns true if member is static, otherwise returns false.</summary>
         /// <param name="member">Member to check.</param> <returns>True if static.</returns>
         public static bool IsStatic(this MemberInfo member)
         {
-            var isStatic =
-                member is MethodInfo ? ((MethodInfo)member).IsStatic :
-                member is PropertyInfo
-                    ? (((PropertyInfo)member).GetGetMethodOrNull(includeNonPublic: true)
-                    ?? ((PropertyInfo)member).GetSetMethodOrNull(includeNonPublic: true)).IsStatic :
-                ((FieldInfo)member).IsStatic;
-            return isStatic;
+            var method = member as MethodInfo;
+            if (method != null)
+                return method.IsStatic;
+
+            var field = member as FieldInfo;
+            if (field != null)
+                return field.IsStatic;
+
+            var prop = member as PropertyInfo;
+            if (prop == null || prop.IsExplicitlyImplemented())
+                return false;
+
+            var propAccessor = 
+                prop.GetGetMethodOrNull(includeNonPublic: true) ??
+                prop.GetSetMethodOrNull(includeNonPublic: true);
+
+            if (propAccessor == null)
+                return false; // how come?
+
+            return propAccessor.IsStatic;
         }
 
         /// <summary>Return either <see cref="PropertyInfo.PropertyType"/>, or <see cref="FieldInfo.FieldType"/>, <see cref="MethodInfo.ReturnType"/>.

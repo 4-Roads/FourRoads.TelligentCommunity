@@ -9,8 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
-using Telligent.Evolution.Api.Content;
-using Telligent.Evolution.Components;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using IContent = Telligent.Evolution.Extensibility.Content.Version1.IContent;
 
@@ -25,132 +25,60 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
         private static string _videoRegEx = @"<iframe[^>]*source=(?:(""|')(?<url>[^\1]*?)\1|(?<url>[^\s|""|'|>]+))";
         private static Regex _videoRegex = new Regex(_videoRegEx, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public ContentLogic(IContentService contentService, IAttachmentService attachmentService, ILegacyContentService legacyContentService, IFileViewerService fileViewerService)
+        public ContentLogic(IContents contentsService , IUrl urlService)
         {
-            if (contentService == null)
-            {
-                throw new ArgumentNullException("contentService");
-            }
-
-            if (attachmentService == null)
-            {
-                throw new ArgumentNullException("attachmentService");
-            }
-
-            if (fileViewerService == null)
-            {
-                throw new ArgumentNullException("fileViewerService");
-            }
-
-            if (legacyContentService == null)
-            {
-                throw new ArgumentNullException("legacyContentService");
-            }
-
-            ContentService = contentService;
-            AttachmentService = attachmentService;
-            LegacyContentService = legacyContentService;
-            FileViewerService = fileViewerService;
+            _contentsService = contentsService;
+            _urlService = urlService;
         }
 
-        protected IContentService ContentService { get; private set; }
-        protected IAttachmentService AttachmentService { get; private set; }
-        protected ILegacyContentService LegacyContentService { get; private set; }
-        protected IFileViewerService FileViewerService { get; private set; }
+
+        private IContents _contentsService;
+        private IUrl _urlService;
 
         #region IContentLogic Members
 
-        public string GetBestImageUrl(Guid contentId)
+        public string GetBestImageUrl(Guid contentId, Guid contentTypeId)
         {
-            return GetAllImageUrls(contentId).FirstOrDefault();
+            return GetAllImageUrls(contentId, contentTypeId).FirstOrDefault();
         }
 
-        public IEnumerable<string> GetAllImageUrls(Guid contentId)
+        public IEnumerable<string> GetAllImageUrls(Guid contentId , Guid contentTypeId)
         {
             List<string> images = new List<string>();
-            IContent content = ContentService.Get(contentId);
+
+            IContent content = _contentsService.Get(contentId, contentTypeId);
+
             if (content != null)
             {
-                LegacyContentIdentifier lContentId = LegacyContentService.GetLegacyIdentification(content);
-
-                IViewableContent vContent = LegacyContentService.GetViewableContent(contentId);
-
-                if (vContent != null && lContentId != null)
-                {
-                    int applicationId;
-
-                    string[] ids = vContent.Container.UniqueID.Split(new[] {':'});
-
-                    if (ids.Length == 2)
-                    {
-                        if (int.TryParse(ids[1], out applicationId))
-                        {
-                            IAttachment attachment = AttachmentService.Get(applicationId, (int) vContent.Container.ApplicationType, 0, lContentId.LegacyId);
-
-                            if (attachment != null)
-                            {
-                                if (FileViewerService.GetMediaType(attachment.File, FileViewerViewType.Preview, false) == FileViewerMediaType.Image)
-                                {
-                                    images.Add(Globals.FullPath(attachment.Url));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //Now does the content contain any images
+                ////Now does the content contain any images
                 images.AddRange(ParseImagesFromContent(content.HtmlDescription("")));
 
-                //Container Image
-                images.Add(Globals.FullPath(content.Application.Container.AvatarUrl));
+                ////Container Image
+                images.Add(_urlService.Absolute(content.Application.Container.AvatarUrl));
             }
 
             return images.Distinct(StringComparer.OrdinalIgnoreCase);
         }
 
-        public IEnumerable<string> GetAllVideoUrls(Guid contentId)
+        public IEnumerable<string> GetAllVideoUrls(Guid contentId, Guid contentTypeId)
         {
             List<string> images = new List<string>();
-            IContent content = ContentService.Get(contentId);
+
+            IContent content = _contentsService.Get(contentId, contentTypeId);
+
             if (content != null)
             {
-                LegacyContentIdentifier lContentId = LegacyContentService.GetLegacyIdentification(content);
-
-                IViewableContent vContent = LegacyContentService.GetViewableContent(contentId);
-
-                if (vContent != null && lContentId != null)
-                {
-                    int applicationId;
-
-                    string[] ids = vContent.Container.UniqueID.Split(new[] { ':' });
-
-                    if (ids.Length == 2)
-                    {
-                        if (int.TryParse(ids[1], out applicationId))
-                        {
-                            IAttachment attachment = AttachmentService.Get(applicationId, (int)vContent.Container.ApplicationType, 0, lContentId.LegacyId);
-
-                            if (attachment != null)
-                            {
-                                if (FileViewerService.GetMediaType(attachment.File, FileViewerViewType.Preview, false) == FileViewerMediaType.Video)
-                                {
-                                    images.Add(Globals.FullPath(attachment.Url));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //Now does the content contain any images
+                ////Now does the content contain any images
                 images.AddRange(ParseVideosFromContent(content.HtmlDescription("")));
+
             }
 
             return images.Distinct(StringComparer.OrdinalIgnoreCase);
         }
 
-        public string GetFirstVideoUrl(Guid contentId)
+        public string GetFirstVideoUrl(Guid contentId, Guid contentTypeId)
         {
-            return GetAllVideoUrls(contentId).FirstOrDefault();
+            return GetAllVideoUrls(contentId, contentTypeId).FirstOrDefault();
         }
 
         #endregion
@@ -167,7 +95,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
                 foreach (Match match in matches)
                 {
                     Uri result;
-                    if (Uri.TryCreate(Globals.FullPath(match.Groups["url"].Value), UriKind.Absolute, out result))
+                    if (Uri.TryCreate(_urlService.Absolute(match.Groups["url"].Value), UriKind.Absolute, out result))
                     {
                         results.Add(result.AbsoluteUri);
                     }
@@ -192,7 +120,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
                         ? match.Groups["url"].Value
                         : string.Format("http:{0}", match.Groups["url"].Value);
                     Uri result;
-                    if (Uri.TryCreate(Globals.FullPath(videoUrl), UriKind.Absolute, out result))
+                    if (Uri.TryCreate(_urlService.Absolute(videoUrl), UriKind.Absolute, out result))
                     {
                         results.Add(result.AbsoluteUri);
                     }
