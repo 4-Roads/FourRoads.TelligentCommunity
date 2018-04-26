@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using IContent = Telligent.Evolution.Extensibility.Content.Version1.IContent;
 
@@ -94,10 +95,17 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
 
                 foreach (Match match in matches)
                 {
-                    Uri result;
-                    if (Uri.TryCreate(_urlService.Absolute(match.Groups["url"].Value), UriKind.Absolute, out result))
+                    string url = match.Groups["url"].Value;
+ 
+                    var file = CentralizedFileStorage.GetCentralizedFileByUrl(url);
+
+                    if (file != null)
                     {
-                        results.Add(result.AbsoluteUri);
+                        results.Add(file.GetDownloadUrl());
+                    }
+                    else
+                    {
+                        results.Add(url);
                     }
                 }
             }
