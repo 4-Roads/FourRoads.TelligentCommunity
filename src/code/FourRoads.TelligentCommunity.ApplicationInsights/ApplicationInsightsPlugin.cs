@@ -1,19 +1,16 @@
 using System;
 using System.Collections.Generic;
-using DryIoc;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.Sentrus.Interfaces;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Extensibility;
-using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.ApplicationInsights
 {
-    public class ApplicationInsightsPlugin : IApplicationInsightsPlugin, IInstallablePlugin, IBindingsLoader, IConfigurablePlugin, ISingletonPlugin
+    public class ApplicationInsightsPlugin : IApplicationInsightsPlugin, IConfigurablePlugin
     {
         private PluginGroupLoader _pluginGroupLoader;
         private IPluginConfiguration _configuration;
@@ -21,30 +18,22 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
 
         public TelemetryClient TelemetryClient => _tc;
 
-        public void LoadBindings(IContainer module)
-        {
-            //module.Register<IUserHealth, UserHealth>();
-        }
-
-        public int LoadOrder => 100;
-
         public void Initialize()
         {
             if (_configuration != null)
             {
-                TelemetryConfiguration.Active.InstrumentationKey = _configuration.GetString("InstrumentationKey");
-                TelemetryConfiguration.Active.DisableTelemetry = !_configuration.GetBool("Enabled");
+                _tc = null;
 
-                _tc = new TelemetryClient();
+                bool enabled = _configuration.GetBool("Enabled");
 
-                if (_configuration.GetBool("Enabled"))
+                TelemetryConfiguration.Active.DisableTelemetry = !enabled;
+
+                if (enabled)
                 {
-                    var user = Apis.Get<IUsers>();
+                    //var config = TelemetryConfiguration.CreateFromConfiguration(_configuration.GetString("Configuration"));
+                    TelemetryConfiguration.Active.InstrumentationKey = _configuration.GetString("InstrumentationKey");
 
-                    user.Events.AfterLockout += EventsOnAfterLockout;
-                    user.Events.AfterCreate += EventsOnAfterCreate;
-                    user.Events.BeforeDelete += EventsOnBeforeDelete;
-                    user.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
+                    _tc = new TelemetryClient();
                 }
             }
         }
@@ -52,7 +41,6 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
         public string Name => "4 Roads - Application Insights";
 
         public string Description => "This plugin provides a configuration wrapper to Application Insights and also adds logging for key events.";
-
 
         private class PluginGroupLoaderTypeVisitor : FourRoads.Common.TelligentCommunity.Plugins.Base.PluginGroupLoaderTypeVisitor
         {
@@ -70,7 +58,7 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
                 {
                     Type[] priorityPlugins =
                     {
-                        typeof(DependencyInjectionPlugin)
+                       
                     };
 
                     _pluginGroupLoader = new PluginGroupLoader();
@@ -81,89 +69,7 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
                 return _pluginGroupLoader.GetPlugins();
             }
         }
-
-
-        public void Install(Version lastInstalledVersion)
-        {
-       
-        }
-
-        private void EventsOnAfterAuthenticate(UserAfterAuthenticateEventArgs userAfterAuthenticateEventArgs)
-        {
-            try
-            {
-                _tc.TrackEvent("TelligentUsersOnAfterAuthenticate", new Dictionary<string, string>
-                {
-                    {"UserId" , userAfterAuthenticateEventArgs.Id.ToString()},
-                    {"UserName" , userAfterAuthenticateEventArgs.Username},
-                    {"UserEmail" , userAfterAuthenticateEventArgs.PrivateEmail},
-                });
-            }
-            catch (Exception e)
-            {
-                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
-            }
-        }
-
-        private void EventsOnBeforeDelete(UserBeforeDeleteEventArgs userBeforeDeleteEventArgs)
-        {
-            try
-            {
-                _tc.TrackEvent("TelligentUserOnBeforeDelete" , new Dictionary<string, string>
-                {
-                    {"UserId" , userBeforeDeleteEventArgs.Id.ToString()},
-                    {"UserName" , userBeforeDeleteEventArgs.Username},
-                    {"UserEmail" , userBeforeDeleteEventArgs.PrivateEmail},
-                    {"Reassing UserId" , userBeforeDeleteEventArgs.ReassignedUserId.ToString()}
-                });
-            }
-            catch (Exception e)
-            {
-                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() {Category = "Logging", EventType = "Error"});
-            }
-        }
-
-        private void EventsOnAfterCreate(UserAfterCreateEventArgs userAfterCreateEventArgs)
-        {
-            try
-            {
-                _tc.TrackEvent("TelligentUserOnAfterCreate", new Dictionary<string, string>
-                {
-                    {"UserId" , userAfterCreateEventArgs.Id.ToString()},
-                    {"UserName" , userAfterCreateEventArgs.Username},
-                    {"UserEmail" , userAfterCreateEventArgs.PrivateEmail},
-                });
-            }
-            catch (Exception e)
-            {
-                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
-            }
-        }
-
-        private void EventsOnAfterLockout(UserAfterLockoutEventArgs userAfterLockoutEventArgs)
-        {
-            try
-            {
-                _tc.TrackEvent("TelligentUserOnAfterLockout", new Dictionary<string, string>
-                {
-                    {"UserId" , userAfterLockoutEventArgs.Id.ToString()},
-                    {"UserName" , userAfterLockoutEventArgs.Username},
-                    {"UserEmail" , userAfterLockoutEventArgs.PrivateEmail},
-                });
-            }
-            catch (Exception e)
-            {
-                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
-            }
-        }
-
-        public void Uninstall()
-        {
-
-        }
-
-
-        public Version Version => GetType().Assembly.GetName().Version;
+        
         public void Update(IPluginConfiguration configuration)
         {
             _configuration = configuration;
@@ -178,10 +84,20 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
                 groupArray[0] = optionsGroup;
 
                 optionsGroup.Properties.Add(new Property("InstrumentationKey", "Instrumentation Key", PropertyType.String, 1, ""));
+
+                //var configuration = new Property("Configuration", "ApplicationInsights.Config", PropertyType.String, 1, new EmbededResources().GetString("FourRoads.TelligentCommunity.ApplicationInsights.ApplicationInsights.config"));
+
+                //configuration.ControlType = typeof(MultilineStringControl);
+                //configuration.Attributes["rows"] = "150";
+                //configuration.Attributes["cols"] = "100";
+
+                //optionsGroup.Properties.Add(configuration);
+
                 optionsGroup.Properties.Add(new Property("Enabled", "Enabled", PropertyType.Bool, 0, "True"));
 
                 return groupArray;
             }
         }
     }
+
 }
