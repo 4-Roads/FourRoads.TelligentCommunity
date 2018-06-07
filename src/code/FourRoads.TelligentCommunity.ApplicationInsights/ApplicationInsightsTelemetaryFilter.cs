@@ -25,7 +25,10 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
             if (request != null)
             {
                 // Determine tenant
-                if (request.Url.PathAndQuery.ToLower().Contains("socket.ashx"))
+                string url = request.Url.PathAndQuery.ToLower();
+
+                if (url.Contains("socket.ashx") ||
+                    url.Contains("/utility/error-notfound.aspx"))
                     return;
             }
 
