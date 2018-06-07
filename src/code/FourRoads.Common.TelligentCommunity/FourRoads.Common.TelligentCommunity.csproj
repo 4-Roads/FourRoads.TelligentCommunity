@@ -66,6 +66,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Blogs, Version=10.1.6.9599, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.Components, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Components.dll</HintPath>
@@ -101,6 +105,7 @@
     <Compile Include="Components\TCPagedQuery.cs" />
     <Compile Include="Components\Tokenizers\TokenizedTemplateEnumerableToken.cs" />
     <Compile Include="Components\Utility\EmbeddedResourcesBase.cs" />
+    <Compile Include="Controls\ApiSafeBlogLookup.cs" />
     <Compile Include="Controls\ApiSafeUserLookup.cs" />
     <Compile Include="Controls\MultiSelectRepeater.cs" />
     <Compile Include="Controls\PasswordPropertyControl.cs" />
@@ -111,7 +116,9 @@
     <Compile Include="DryIoc\ImTools.cs" />
     <Compile Include="Plugins\Base\CFSFilestoreInstaller.cs" />
     <Compile Include="Plugins\Base\FactoryDefaultThemeInstaller.cs" />
+    <Compile Include="Plugins\Base\FactoryDefaultThemeInstallerV2.cs" />
     <Compile Include="Plugins\Base\FactoryDefaultWidgetProviderInstaller.cs" />
+    <Compile Include="Plugins\Base\FactoryDefaultWidgetProviderInstallerv2.cs" />
     <Compile Include="Plugins\Base\PluginBase.cs" />
     <Compile Include="Plugins\Base\PluginGroupLoader.cs" />
     <Compile Include="Plugins\Base\ScriptableInstaller.cs" />
@@ -131,7 +138,7 @@
     <Compile Include="Routing\SiteRootRouteConstraint.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Controls\MultiSelectRepeater.js" />
+    <EmbeddedResource Include="Controls\MultiSelectRepeater.js" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
