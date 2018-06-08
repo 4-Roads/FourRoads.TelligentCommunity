@@ -74,9 +74,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         // string widgetName = widgetPath.Substring(basePath.Length);
 
                         Guid instanceId;
+                        string cssClass;
                         var widgetXml = EmbeddedResources.GetString(resourceName);
 
-                        if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId))
+                        if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass))
                             return;
 
                         FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(
@@ -86,7 +87,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         );
 
                         IEnumerable<string> supplementaryResources = GetType().Assembly.GetManifestResourceNames()
-                            .Where(r => r.StartsWith(widgetPath) && !r.EndsWith(".widget.xml")).ToArray();
+                                                    .Where(r => r.StartsWith(widgetPath) && !r.EndsWith(".widget.xml")).ToArray();
 
                         if (!supplementaryResources.Any())
                             return;
@@ -94,11 +95,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         foreach (string supplementPath in supplementaryResources)
                         {
                             string supplementName = supplementPath.Substring(widgetPath.Length);
-
-                            using (var stream = EmbeddedResources.GetStream(supplementPath))
-                            {
-                                FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(this, instanceId, supplementName, stream);
-                            }
+                            var stream = EmbeddedResources.GetStream(supplementPath);
+                            FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(
+                                this,
+                                instanceId,
+                                supplementName,
+                                PreprocessWidgetFile(ReadStream(stream), supplementName, cssClass)
+                            );
                         }
                     }
                     catch (Exception exception)
@@ -109,9 +112,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
 
-        private bool GetInstanceIdFromWidgetXml(string widhgetXml, out Guid instanceId)
+        private bool GetInstanceIdFromWidgetXml(string widhgetXml, out Guid instanceId, out string cssClass)
         {
             instanceId = Guid.Empty;
+            cssClass = "";
             // GetInstanceIdFromWidgetXml widget identifier
             XDocument xdoc = XDocument.Parse(widhgetXml);
             XElement root = xdoc.Root;
@@ -130,6 +134,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 return false;
 
             instanceId = new Guid(attribute.Value);
+
+            var cssClassAttr = element.Attribute("cssClass");
+            cssClass = (cssClassAttr != null) ? cssClassAttr.Value : instanceId.ToString();
+
             return true;
         }
 
@@ -204,14 +212,72 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             return stream;
         }
 
-        public Stream FileAsStream(string path)
+        private byte[] ReadFileBytes(string path)
         {
-            // Avoiding locking
-            var bytes = File.ReadAllBytes(path);
-            var stream = new MemoryStream();
-            stream.Write(bytes, 0, bytes.Length);
-            stream.Position = 0;
-            return stream;
+            byte[] result = null;
+
+            while (result == null)
+            {
+                try
+                {
+                    result = File.ReadAllBytes(path);
+                }
+                catch (IOException e)
+                {
+                    System.Threading.Thread.Sleep(100);
+                }
+            }
+
+            return result;
+        }
+
+        public static byte[] ReadStream(Stream input)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                input.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+        
+        private string BytesToText(byte[] data)
+        {
+            // UTF8 file without BOM
+            return System.Text.Encoding.UTF8.GetString(data).Trim(new char[] { '\uFEFF', '\u200B' }); ;
+        }
+        
+        /// <summary>
+        /// Processes the file content for a particular widget file, enabling automated formatting from pretty -> Telligent.
+        /// </summary>
+        /// <param name="fileContent"></param>
+        /// <param name="name"></param>
+        /// <param name="cssClass"></param>
+        /// <returns></returns>
+        private Stream PreprocessWidgetFile(byte[] fileContent, string name, string cssClass)
+        {
+            if (name == "script.js")
+            {
+                fileContent = BuildJavascript(fileContent, cssClass);
+            }
+            return new MemoryStream(fileContent);
+        }
+        
+        /// <summary>
+        /// Wraps widget.js with automated scope management to keep everything consistent and tidy.
+        /// </summary>
+        /// <param name="jsFile">The content of widget.js</param>
+        /// <param name="cssClass">The CSS class name from the widget</param>
+        private byte[] BuildJavascript(byte[] jsFile, string cssClass)
+        {
+            var str = @"(function($){
+                if (!$.customWidgets) { $.customWidgets = { }; }
+                $.customWidgets['" + cssClass.Replace("-", "").Replace("_", "") + @"'] = {register : function(context){
+                    var widget = {root: $('." + cssClass + @"')};
+                    " + BytesToText(jsFile) + @"
+                }};
+            })(jQuery);";
+
+            return System.Text.Encoding.UTF8.GetBytes(str);
         }
 
         /// <summary>
@@ -221,12 +287,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         {
 
             // WaitForFile(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var widgetXml = File.ReadAllText(pathToWidget + "/widget.xml");
+            var widgetXml = BytesToText(ReadFileBytes(pathToWidget + "/widget.xml"));
 
             // Get the widget ID:
             Guid instanceId;
+            string cssClass;
 
-            if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId))
+            if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass))
             {
                 return;
             }
@@ -252,7 +319,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     this,
                     instanceId,
                     fileName,
-                    FileAsStream(supFile)
+                    PreprocessWidgetFile(ReadFileBytes(supFile), fileName, cssClass)
                 );
             }
 
