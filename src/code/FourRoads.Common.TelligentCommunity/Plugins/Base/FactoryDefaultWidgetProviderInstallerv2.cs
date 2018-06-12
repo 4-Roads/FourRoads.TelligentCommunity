@@ -75,10 +75,17 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                         Guid instanceId;
                         string cssClass;
+                        Guid providerId;
                         var widgetXml = EmbeddedResources.GetString(resourceName);
-
-                        if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass))
+                        
+                        if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
                             return;
+
+                        // If this widget's provider ID is not the one we're installing, then ignore it:
+                        if (providerId != ScriptedContentFragmentFactoryDefaultIdentifier)
+                        {
+                            return;
+                        }
 
                         FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(
                             this,
@@ -112,9 +119,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
 
-        private bool GetInstanceIdFromWidgetXml(string widhgetXml, out Guid instanceId, out string cssClass)
+        private bool GetInstanceIdFromWidgetXml(string widhgetXml, out Guid instanceId, out string cssClass, out Guid providerId)
         {
             instanceId = Guid.Empty;
+            providerId = Guid.Empty;
             cssClass = "";
             // GetInstanceIdFromWidgetXml widget identifier
             XDocument xdoc = XDocument.Parse(widhgetXml);
@@ -134,6 +142,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 return false;
 
             instanceId = new Guid(attribute.Value);
+
+            XAttribute providerAttr = element.Attribute("provider");
+
+            if (providerAttr == null)
+                return false;
+
+            providerId = new Guid(providerAttr.Value);
 
             var cssClassAttr = element.Attribute("cssClass");
             cssClass = (cssClassAttr != null) ? cssClassAttr.Value : instanceId.ToString();
@@ -292,8 +307,15 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             // Get the widget ID:
             Guid instanceId;
             string cssClass;
+            Guid providerId;
 
-            if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass))
+            if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
+            {
+                return;
+            }
+
+            // If this widget's provider ID is not the one we're installing, then ignore it:
+            if (providerId != ScriptedContentFragmentFactoryDefaultIdentifier)
             {
                 return;
             }
