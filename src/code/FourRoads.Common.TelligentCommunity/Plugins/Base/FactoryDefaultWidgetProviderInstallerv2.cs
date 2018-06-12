@@ -26,6 +26,17 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
 
+        /// <summary>
+        /// The du
+        /// </summary>
+        /// <param name=""></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        protected virtual string GetDirectory()
+        {
+            return null;
+        }
+
         #region IPlugin Members
 
         public string Name => ProjectName + " - Widgets";
@@ -77,7 +88,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         string cssClass;
                         Guid providerId;
                         var widgetXml = EmbeddedResources.GetString(resourceName);
-                        
+
                         if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
                             return;
 
@@ -254,13 +265,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 return ms.ToArray();
             }
         }
-        
+
         private string BytesToText(byte[] data)
         {
             // UTF8 file without BOM
             return System.Text.Encoding.UTF8.GetString(data).Trim(new char[] { '\uFEFF', '\u200B' }); ;
         }
-        
+
         /// <summary>
         /// Processes the file content for a particular widget file, enabling automated formatting from pretty -> Telligent.
         /// </summary>
@@ -276,7 +287,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
             return new MemoryStream(fileContent);
         }
-        
+
         /// <summary>
         /// Wraps widget.js with automated scope management to keep everything consistent and tidy.
         /// </summary>
@@ -376,31 +387,41 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 BuildWidget(dir);
             }
         }
-
-        private void InitializeFilewatcher([CallerFilePath] string path = "")
+        
+        private void InitializeFilewatcher()
         {
             _fileSystemWatcher?.Dispose();
+            var path = GetDirectory();
+
 
             if (!string.IsNullOrWhiteSpace(path))
             {
-                path = Path.GetDirectoryName(path);
+                path = Path.GetDirectoryName(path).Replace("\\", "/");
+                var directoryParts = path.Split('/').ToList();
+                var pathToFind = "/Resources/Widgets";
 
-                //TODO: Assumption is that this class is in the root of the project for now
-                path = Path.Combine(path, "Resources");
-                path = Path.Combine(path, "Widgets");
-
-                if (Directory.Exists(path))
+                // Go up the directory tree and check for a nearby Resources/Widgets dir.
+                for (var i = 0; i < directoryParts.Count; i++)
                 {
-                    _fileSystemWatcher = new FileSystemWatcher();
-                    _fileSystemWatcher.Path = path;
-                    _fileSystemWatcher.NotifyFilter = NotifyFilters.LastWrite;
-                    _fileSystemWatcher.Filter = "*.*";
-                    _fileSystemWatcher.IncludeSubdirectories = true;
-                    _fileSystemWatcher.EnableRaisingEvents = true;
+                    var widgetsPath = string.Join("/", directoryParts) + pathToFind;
 
-                    _fileSystemWatcher.Changed += new FileSystemEventHandler(OnChanged);
-                    _fileSystemWatcher.Created += new FileSystemEventHandler(OnChanged);
-                    _fileSystemWatcher.Deleted += new FileSystemEventHandler(OnChanged);
+                    if (Directory.Exists(widgetsPath))
+                    {
+                        _fileSystemWatcher = new FileSystemWatcher();
+                        _fileSystemWatcher.Path = widgetsPath;
+                        _fileSystemWatcher.NotifyFilter = NotifyFilters.LastWrite;
+                        _fileSystemWatcher.Filter = "*.*";
+                        _fileSystemWatcher.IncludeSubdirectories = true;
+                        _fileSystemWatcher.EnableRaisingEvents = true;
+
+                        _fileSystemWatcher.Changed += new FileSystemEventHandler(OnChanged);
+                        _fileSystemWatcher.Created += new FileSystemEventHandler(OnChanged);
+                        _fileSystemWatcher.Deleted += new FileSystemEventHandler(OnChanged);
+                        return;
+                    }
+
+                    // Pop the last one and go around again:
+                    directoryParts.RemoveAt(directoryParts.Count - 1);
                 }
             }
 
