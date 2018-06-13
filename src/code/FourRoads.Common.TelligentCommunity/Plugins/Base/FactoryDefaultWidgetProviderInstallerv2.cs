@@ -36,7 +36,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// <param name=""></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        protected abstract string GetSourceFilesDirectory([CallerFilePath] string suggestedPath=null);
+        protected abstract string GetSourceFilesDirectory(string suggestedPath=null);
 
         #region IPlugin Members
 
