@@ -9,6 +9,11 @@ using System.Collections.Generic;
 
 namespace FourRoads.Common.TelligentCommunity.Components.Interfaces
 {
+    public interface ICallerPathVistor
+    {
+        string GetPath();
+    }
+
     public interface IContentLogic
     {
         string GetBestImageUrl(Guid contentId, Guid contentTypeId);

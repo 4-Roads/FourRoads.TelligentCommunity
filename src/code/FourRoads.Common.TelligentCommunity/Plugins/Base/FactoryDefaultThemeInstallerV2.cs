@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -6,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
@@ -247,12 +249,12 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
 
-        protected abstract string GetSourceFilesDirectory(string suggestedPath = null);
+        protected abstract ICallerPathVistor CallerPath();
 
         private void InitializeFilewatcher()
         {
             _fileSystemWatcher?.Dispose();
-            string path = GetSourceFilesDirectory();
+            string path = CallerPath().GetPath();
 
             if (!string.IsNullOrWhiteSpace(path))
             {

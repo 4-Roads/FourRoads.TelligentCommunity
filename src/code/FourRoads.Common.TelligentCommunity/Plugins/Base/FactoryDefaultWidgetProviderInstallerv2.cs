@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
@@ -29,14 +31,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
-
-        /// <summary>
-        /// The du
-        /// </summary>
-        /// <param name=""></param>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        protected abstract string GetSourceFilesDirectory(string suggestedPath=null);
 
         #region IPlugin Members
 
@@ -388,12 +382,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 BuildWidget(dir);
             }
         }
-        
+
+        protected abstract ICallerPathVistor CallerPath();
+
         private void InitializeFilewatcher()
         {
             _fileSystemWatcher?.Dispose();
-            var path = GetSourceFilesDirectory();
-
+            string path = CallerPath().GetPath();
 
             if (!string.IsNullOrWhiteSpace(path))
             {
