@@ -247,9 +247,12 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
 
-        private void InitializeFilewatcher([CallerFilePath] string path = "")
+        protected abstract string GetSourceFilesDirectory([CallerFilePath] string suggestedPath = null);
+
+        private void InitializeFilewatcher()
         {
             _fileSystemWatcher?.Dispose();
+            string path = GetSourceFilesDirectory();
 
             if (!string.IsNullOrWhiteSpace(path))
             {

@@ -3,20 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
 using System.Xml.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.ScriptedContentFragments.Services;
+using ThemeFiles = Telligent.Evolution.Components.ThemeFiles;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
-    public abstract class FactoryDefaultWidgetProviderInstallerv2 : IScriptedContentFragmentFactoryDefaultProvider, IInstallablePlugin, IConfigurablePlugin
+    public abstract class FactoryDefaultWidgetProviderInstallerV2 : IScriptedContentFragmentFactoryDefaultProvider, IInstallablePlugin, IConfigurablePlugin
     {
-        private bool _enableFilewatcher = false;
-        private bool _installOnNextLoad = false;
+        private bool _enableFilewatcher;
+        private bool _installOnNextLoad;
         private IPluginConfiguration _configuration;
         private FileSystemWatcher _fileSystemWatcher;
         private static object _resourceLock = new object();
@@ -32,10 +36,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// <param name=""></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        protected virtual string GetDirectory()
-        {
-            return null;
-        }
+        protected abstract string GetSourceFilesDirectory([CallerFilePath] string suggestedPath=null);
 
         #region IPlugin Members
 
@@ -220,11 +221,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         private static void ClearCacheNotApiSafe()
         {
-            Telligent.Common.Services.Get<IFactoryDefaultScriptedContentFragmentService>().ExpireCache();
-            Telligent.Common.Services.Get<IScriptedContentFragmentService>().ExpireCache();
-            Telligent.Common.Services.Get<IContentFragmentPageService>().RemoveAllFromCache();
-            Telligent.Common.Services.Get<IContentFragmentService>().RefreshContentFragments();
-            Telligent.Evolution.Components.ThemeFiles.RequestHostVersionedThemeFileRegeneration();
+            Services.Get<IFactoryDefaultScriptedContentFragmentService>().ExpireCache();
+            Services.Get<IScriptedContentFragmentService>().ExpireCache();
+            Services.Get<IContentFragmentPageService>().RemoveAllFromCache();
+            Services.Get<IContentFragmentService>().RefreshContentFragments();
+            ThemeFiles.RequestHostVersionedThemeFileRegeneration();
             SystemFileStore.RequestHostVersionedThemeFileRegeneration();
         }
 
@@ -250,7 +251,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
                 catch (IOException e)
                 {
-                    System.Threading.Thread.Sleep(100);
+                    Thread.Sleep(100);
                 }
             }
 
@@ -269,7 +270,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         private string BytesToText(byte[] data)
         {
             // UTF8 file without BOM
-            return System.Text.Encoding.UTF8.GetString(data).Trim(new char[] { '\uFEFF', '\u200B' }); ;
+            return Encoding.UTF8.GetString(data).Trim('\uFEFF', '\u200B'); ;
         }
 
         /// <summary>
@@ -303,7 +304,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }};
             })(jQuery);";
 
-            return System.Text.Encoding.UTF8.GetBytes(str);
+            return Encoding.UTF8.GetBytes(str);
         }
 
         /// <summary>
@@ -391,7 +392,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         private void InitializeFilewatcher()
         {
             _fileSystemWatcher?.Dispose();
-            var path = GetDirectory();
+            var path = GetSourceFilesDirectory();
 
 
             if (!string.IsNullOrWhiteSpace(path))
@@ -414,9 +415,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         _fileSystemWatcher.IncludeSubdirectories = true;
                         _fileSystemWatcher.EnableRaisingEvents = true;
 
-                        _fileSystemWatcher.Changed += new FileSystemEventHandler(OnChanged);
-                        _fileSystemWatcher.Created += new FileSystemEventHandler(OnChanged);
-                        _fileSystemWatcher.Deleted += new FileSystemEventHandler(OnChanged);
+                        _fileSystemWatcher.Changed += OnChanged;
+                        _fileSystemWatcher.Created += OnChanged;
+                        _fileSystemWatcher.Deleted += OnChanged;
                         return;
                     }
 
