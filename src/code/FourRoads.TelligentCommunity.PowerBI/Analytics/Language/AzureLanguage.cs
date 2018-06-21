@@ -1,8 +1,12 @@
 ﻿using Microsoft.Azure.CognitiveServices.Language.TextAnalytics;
 using Microsoft.Azure.CognitiveServices.Language.TextAnalytics.Models;
+using Microsoft.Rest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FourRoads.TelligentCommunity.PowerBI.Analytics.Language
 {
@@ -11,12 +15,29 @@ namespace FourRoads.TelligentCommunity.PowerBI.Analytics.Language
 
         private ITextAnalyticsAPI client;
 
+        /// <summary>
+        /// Container for subscription credentials. Make sure to enter your valid key.
+        /// </summary>
+        private class ApiKeyServiceClientCredentials : ServiceClientCredentials
+        {
+            public ApiKeyServiceClientCredentials(string apikey)
+            {
+                this.apikey = apikey;
+            }
+
+            private string apikey;
+            public override Task ProcessHttpRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                request.Headers.Add("Ocp-Apim-Subscription-Key", apikey);
+                return base.ProcessHttpRequestAsync(request, cancellationToken);
+            }
+        }
+
         public AzureLanguage(string azureRegion , string apiKey)
         {
-            client = new TextAnalyticsAPI();
+            client = new TextAnalyticsAPI(new ApiKeyServiceClientCredentials(apiKey));
 
             client.AzureRegion = Enum.GetValues(typeof(AzureRegions)).OfType<AzureRegions>().FirstOrDefault(x => x.ToString() == azureRegion);
-            client.SubscriptionKey = apiKey;
         }
 
         public string KeyPhrasesCSV(string text)
@@ -28,12 +49,12 @@ namespace FourRoads.TelligentCommunity.PowerBI.Analytics.Language
         {
             List<string> keyPhrases = new List<string>();
 
-            KeyPhraseBatchResult result = client.KeyPhrases(
+            KeyPhraseBatchResult result = client.KeyPhrasesAsync(
                 new MultiLanguageBatchInput(
                     new List<MultiLanguageInput>()
                     {
                         new MultiLanguageInput("en", "1", text.Substring(0, Math.Min(5000, text.Length)).Replace('"', ' '))
-                    }));
+                    })).Result;
 
             if (result != null && result.Documents.Any()) {
                 foreach (var document in result.Documents)
