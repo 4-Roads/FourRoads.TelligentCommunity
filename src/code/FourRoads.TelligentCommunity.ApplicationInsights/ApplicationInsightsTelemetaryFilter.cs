@@ -1,11 +1,13 @@
-﻿using Microsoft.ApplicationInsights.Channel;
+﻿using System.Text.RegularExpressions;
+using FourRoads.TelligentCommunity.Sentrus.Interfaces;
+using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
 
 namespace FourRoads.TelligentCommunity.ApplicationInsights
 {
 
-    public class ApplicationInsightsTelemetaryFilter : ITelemetryProcessor
+    public class ApplicationInsightsTelemetaryFilter : ITelemetryProcessor , IApplicationInsightsFilter
     {
         private ITelemetryProcessor Next { get; set; }
 
@@ -16,23 +18,32 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
 
         public void Process(ITelemetry item)
         {
-            if (!string.IsNullOrEmpty(item.Context.Operation.SyntheticSource))
+            if (ExludeSynthetic)
             {
-                return;
+                if (!string.IsNullOrEmpty(item.Context.Operation.SyntheticSource))
+                {
+                    return;
+                }
             }
 
-            var request = item as RequestTelemetry;
-            if (request != null)
+            if (IgnorePathsRegex != null)
             {
-                // Determine tenant
-                string url = request.Url.PathAndQuery.ToLower();
+                var request = item as RequestTelemetry;
+                if (request != null)
+                {
+                    // Determine tenant
+                    string url = request.Url.PathAndQuery.ToLower();
 
-                if (url.Contains("socket.ashx") ||
-                    url.Contains("/utility/error-notfound.aspx"))
-                    return;
+                    if (IgnorePathsRegex.IsMatch(url))
+                        return;
+                }
             }
 
             Next.Process(item);
         }
+
+        public bool ExludeSynthetic { get; set; }
+
+        public Regex IgnorePathsRegex { get; set; }
     }
 }

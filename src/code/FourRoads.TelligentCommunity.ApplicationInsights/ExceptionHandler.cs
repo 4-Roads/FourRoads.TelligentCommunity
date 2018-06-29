@@ -16,16 +16,26 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
 
         private void ContextOnError(object sender, EventArgs eventArgs)
         {
-            Exception ex = HttpContext.Current.Server.GetLastError();
-
-            var  plugin = PluginManager.GetSingleton<ApplicationInsightsPlugin>();
-
-            if (plugin != null && ex != null)
+            if (HttpContext.Current != null)
             {
-                plugin.TelemetryClient?.TrackException(ex , new Dictionary<string, string>
+                Exception ex = HttpContext.Current.Server.GetLastError();
+
+                var plugin = PluginManager.GetSingleton<ApplicationInsightsPlugin>();
+
+                if (plugin != null && ex != null)
                 {
-                    {"UserId" ,Apis.Get<IUrl>().CurrentContext.UserId.ToString()}
-                });
+                    var context = Apis.Get<IUrl>().CurrentContext;
+
+                    if (context != null)
+                    {
+                        plugin.TelemetryClient?.TrackException(
+                            ex,
+                            new Dictionary<string, string>
+                            {
+                                {"UserId", Apis.Get<IUrl>().CurrentContext.UserId.ToString()}
+                            });
+                    }
+                }
             }
         }
 
