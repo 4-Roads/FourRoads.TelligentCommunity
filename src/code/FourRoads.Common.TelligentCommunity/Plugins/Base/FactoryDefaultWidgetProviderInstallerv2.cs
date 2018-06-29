@@ -274,7 +274,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// <param name="name"></param>
         /// <param name="cssClass"></param>
         /// <returns></returns>
-        private Stream PreprocessWidgetFile(byte[] fileContent, string name, string cssClass)
+        protected virtual Stream PreprocessWidgetFile(byte[] fileContent, string name, string cssClass)
         {
             if (name == "script.js")
             {
@@ -288,12 +288,12 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// </summary>
         /// <param name="jsFile">The content of widget.js</param>
         /// <param name="cssClass">The CSS class name from the widget</param>
-        private byte[] BuildJavascript(byte[] jsFile, string cssClass)
+        protected virtual byte[] BuildJavascript(byte[] jsFile, string cssClass)
         {
             var str = @"(function($){
                 if (!$.customWidgets) { $.customWidgets = { }; }
-                $.customWidgets['" + cssClass.Replace("-", "").Replace("_", "") + @"'] = {register : function(context){
-                    var widget = {root: $('." + cssClass + @"')};
+                $.customWidgets['" + cssClass.Replace("-", "").Replace("_", "") + @"'] = {register : function(context, __fragId){
+                    var widget = {root: $(__fragId ? '#' + __fragId : '." + cssClass + @"'), id: __fragId};
                     " + BytesToText(jsFile) + @"
                 }};
             })(jQuery);";

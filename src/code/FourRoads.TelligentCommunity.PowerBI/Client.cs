@@ -367,6 +367,17 @@ namespace FourRoads.TelligentCommunity.PowerBI
                             new Column() { name = "UpdatedOn", dataType = "DateTime" },
                             new Column() { name = "TotalPosts", dataType = "Int64" }
                         }
+                    },
+                    new Table()
+                    {
+                        name = "Keywords",
+                        columns = new List<Column>()
+                        {
+                            new Column() { name = "Id", dataType = "string" },
+                            new Column() { name = "Keyword", dataType = "string" },
+                            new Column() { name = "CreatedOn", dataType = "DateTime" },
+                            new Column() { name = "Source", dataType = "string" }
+                        }
                     }
                 },
                 relationships = new List<Relationship>()
@@ -379,7 +390,17 @@ namespace FourRoads.TelligentCommunity.PowerBI
                         fromColumn = "Author",
                         toColumn = "UserName",
                         crossFilteringBehavior = "bothDirections"
+                    },
+                    new Relationship()
+                    {
+                        name = Guid.NewGuid().ToString(),
+                        fromTable = tableName,
+                        toTable = "Keywords",
+                        fromColumn = "Id",
+                        toColumn = "Id",
+                        crossFilteringBehavior = "bothDirections"
                     }
+
                 }
             };
 
@@ -593,6 +614,13 @@ namespace FourRoads.TelligentCommunity.PowerBI
                 powerBIApiRowsUrl = $"{ApiUrl}v1.0/myorg/groups/{groupId}/datasets/{datasetId}/tables/{tableName}/rows";
             }
 
+            string delimiter = ",";
+            string rowdelimiter = "";
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("{\"rows\":[");
+            int keywords = 0;
+
             Rows rows = new Rows()
             {
                 rows = new List<Row>()
@@ -615,10 +643,40 @@ namespace FourRoads.TelligentCommunity.PowerBI
                     if (azureLanguage != null)
                     {
                         keyPhrases1 = azureLanguage.KeyPhrasesCSV(allContent);
+                        if (!string.IsNullOrWhiteSpace(keyPhrases1))
+                        {
+                            foreach (var keyword in keyPhrases1.Split(','))
+                            {
+                                keywords++;
+                                sb.Append(rowdelimiter);
+                                sb.Append("{");
+                                sb.Append($"\"Id\":\"{doc.Id}\"");
+                                sb.Append($"{delimiter}\"Keyword\":\"{keyword}\"");
+                                sb.Append($"{delimiter}\"Source\":\"Azure\"");
+                                sb.Append($"{delimiter}\"CreatedOn\":\"{Helpers.UserProfile.FormatDate(GetIndexField(doc, "date"))}\"");
+                                sb.Append("}");
+                                rowdelimiter = ",";
+                            }
+                        }
                     }
                     if (watsonLanguage != null)
                     {
                         keyPhrases2 = watsonLanguage.KeyPhrasesCSV(allContent);
+                        if (!string.IsNullOrWhiteSpace(keyPhrases2))
+                        {
+                            foreach (var keyword in keyPhrases2.Split(','))
+                            {
+                                keywords++;
+                                sb.Append(rowdelimiter);
+                                sb.Append("{");
+                                sb.Append($"\"Id\":\"{doc.Id}\"");
+                                sb.Append($"{delimiter}\"Keyword\":\"{keyword}\"");
+                                sb.Append($"{delimiter}\"Source\":\"Watson\"");
+                                sb.Append($"{delimiter}\"CreatedOn\":\"{Helpers.UserProfile.FormatDate(GetIndexField(doc, "date"))}\"");
+                                sb.Append("}");
+                                rowdelimiter = ",";
+                            }
+                        }
                     }
                 }
 
@@ -641,6 +699,8 @@ namespace FourRoads.TelligentCommunity.PowerBI
                 });
             }
 
+            sb.Append("]}");
+
             //POST web request
             byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(rows, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
@@ -653,6 +713,33 @@ namespace FourRoads.TelligentCommunity.PowerBI
             {
                 attempt++;
                 success = SendRequest(powerBIApiRowsUrl, "POST", byteArray, ref response);
+            }
+
+            if (success && keywords > 0)
+            {
+
+                //To add rows to keywords dataset in 'my' group
+                powerBIApiRowsUrl = $"{ApiUrl}v1.0/myorg/datasets/{datasetId}/tables/Keywords/rows";
+                if (!string.IsNullOrWhiteSpace(groupId))
+                {
+                    //To add rows to keywords dataset in a group, use the Groups uri
+                    powerBIApiRowsUrl = $"{ApiUrl}v1.0/myorg/groups/{groupId}/datasets/{datasetId}/tables/Keywords/rows";
+                }
+
+                //POST web request
+                byteArray = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+
+                //POST web request
+                attempt = 1;
+                success = false;
+                response = string.Empty;
+
+                while (!success && attempt <= 3)
+                {
+                    attempt++;
+                    success = SendRequest(powerBIApiRowsUrl, "POST", byteArray, ref response);
+                }
+
             }
 
             return success;
