@@ -16,26 +16,33 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
 
         private void ContextOnError(object sender, EventArgs eventArgs)
         {
-            if (HttpContext.Current != null)
+            try
             {
-                Exception ex = HttpContext.Current.Server.GetLastError();
-
-                var plugin = PluginManager.GetSingleton<ApplicationInsightsPlugin>();
-
-                if (plugin != null && ex != null)
+                if (HttpContext.Current != null)
                 {
-                    var context = Apis.Get<IUrl>().CurrentContext;
+                    Exception ex = HttpContext.Current.Server.GetLastError();
 
-                    if (context != null)
+                    var plugin = PluginManager.GetSingleton<ApplicationInsightsPlugin>();
+
+                    if (plugin != null && ex != null)
                     {
-                        plugin.TelemetryClient?.TrackException(
-                            ex,
-                            new Dictionary<string, string>
-                            {
-                                {"UserId", Apis.Get<IUrl>().CurrentContext.UserId.ToString()}
-                            });
+                        var context = Apis.Get<IUrl>().CurrentContext;
+
+                        if (context != null)
+                        {
+                            plugin.TelemetryClient?.TrackException(
+                                ex,
+                                new Dictionary<string, string>
+                                {
+                                    {"UserId", Apis.Get<IUrl>().CurrentContext.UserId.ToString()}
+                                });
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + ex, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
             }
         }
 
