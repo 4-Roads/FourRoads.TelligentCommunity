@@ -14,6 +14,6 @@
     <tags>Telligent utility</tags>
   </metadata>
 	<files>
-      <file src="bin\**\FourRoads.*.dll" target="lib\net462" exclude="*Tests*" />
+      <file src="bin\**\FourRoads.TelligentCommunity.GoogleMfa.dll" target="lib\net462" exclude="*Tests*" />
     </files>
 </package>
