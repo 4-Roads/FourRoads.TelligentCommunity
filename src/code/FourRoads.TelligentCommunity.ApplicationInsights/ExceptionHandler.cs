@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -12,6 +13,7 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
         public void Init(HttpApplication context)
         {
             context.Error += ContextOnError;
+            TaskScheduler.UnobservedTaskException += EventsUnobservedTaskExceptionAboutToTrigger;
         }
 
         private void ContextOnError(object sender, EventArgs eventArgs)
@@ -30,11 +32,10 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
 
                         if (context != null)
                         {
-                            plugin.TelemetryClient?.TrackException(
-                                ex,
+                            plugin.TelemetryClient?.TrackException(ex,
                                 new Dictionary<string, string>
                                 {
-                                    {"UserId", Apis.Get<IUrl>().CurrentContext.UserId.ToString()}
+                                    {"UserId", context.UserId.ToString()},
                                 });
                         }
                     }
@@ -46,6 +47,29 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
             }
         }
 
+        private void EventsUnobservedTaskExceptionAboutToTrigger(object sender, UnobservedTaskExceptionEventArgs args)
+        {
+            try
+            {
+
+                var plugin = PluginManager.GetSingleton<ApplicationInsightsPlugin>();
+
+                var context = Apis.Get<IUrl>().CurrentContext;
+
+                if (plugin != null && context != null)
+                {
+                    plugin.TelemetryClient?.TrackException(args.Exception,
+                        new Dictionary<string, string>
+                        {
+                            {"UserId", context.UserId.ToString()},
+                        });
+                }
+            }
+            catch (Exception e)
+            {
+                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
+            }
+        }
         public void Dispose()
         {
 
