@@ -47,7 +47,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
             if (_installOnNextLoad)
             {
-                Install(Version);
+                InstallNow();
 
                 if (_configuration != null)
                 {
@@ -65,66 +65,70 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         {
             if (lastInstalledVersion < Version || IsDebugBuild)
             {
-                Uninstall();
-
-                string basePath = BaseResourcePath + "Widgets.";
-
-                EmbeddedResources.EnumerateReosurces(basePath, "widget.xml", resourceName =>
-                {
-                    try
-                    {
-                        // Resource path to all files relating to this widget:
-                        string widgetPath = resourceName.Replace(".widget.xml", ".");
-
-                        // The widget's nice name:
-                        // string widgetName = widgetPath.Substring(basePath.Length);
-
-                        Guid instanceId;
-                        string cssClass;
-                        Guid providerId;
-                        var widgetXml = EmbeddedResources.GetString(resourceName);
-
-                        if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
-                            return;
-
-                        // If this widget's provider ID is not the one we're installing, then ignore it:
-                        if (providerId != ScriptedContentFragmentFactoryDefaultIdentifier)
-                        {
-                            return;
-                        }
-
-                        FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(
-                            this,
-                            instanceId.ToString("N").ToLower() + ".xml",
-                            TextAsStream(widgetXml)
-                        );
-
-                        IEnumerable<string> supplementaryResources = GetType().Assembly.GetManifestResourceNames()
-                                                    .Where(r => r.StartsWith(widgetPath) && !r.EndsWith(".widget.xml")).ToArray();
-
-                        if (!supplementaryResources.Any())
-                            return;
-
-                        foreach (string supplementPath in supplementaryResources)
-                        {
-                            string supplementName = supplementPath.Substring(widgetPath.Length);
-                            var stream = EmbeddedResources.GetStream(supplementPath);
-                            FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(
-                                this,
-                                instanceId,
-                                supplementName,
-                                PreprocessWidgetFile(ReadStream(stream), supplementName, cssClass)
-                            );
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        new TCException($"Couldn't load widget from '{resourceName}' embedded resource.", exception).Log();
-                    }
-                });
+                InstallNow();
             }
         }
+        
+        public void InstallNow(){
+            Uninstall();
+            
+            string basePath = BaseResourcePath + "Widgets.";
 
+            EmbeddedResources.EnumerateReosurces(basePath, "widget.xml", resourceName =>
+            {
+                try
+                {
+                    // Resource path to all files relating to this widget:
+                    string widgetPath = resourceName.Replace(".widget.xml", ".");
+
+                    // The widget's nice name:
+                    // string widgetName = widgetPath.Substring(basePath.Length);
+
+                    Guid instanceId;
+                    string cssClass;
+                    Guid providerId;
+                    var widgetXml = EmbeddedResources.GetString(resourceName);
+
+                    if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
+                        return;
+
+                    // If this widget's provider ID is not the one we're installing, then ignore it:
+                    if (providerId != ScriptedContentFragmentFactoryDefaultIdentifier)
+                    {
+                        return;
+                    }
+
+                    FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(
+                        this,
+                        instanceId.ToString("N").ToLower() + ".xml",
+                        TextAsStream(widgetXml)
+                    );
+
+                    IEnumerable<string> supplementaryResources = GetType().Assembly.GetManifestResourceNames()
+                                                .Where(r => r.StartsWith(widgetPath) && !r.EndsWith(".widget.xml")).ToArray();
+
+                    if (!supplementaryResources.Any())
+                        return;
+
+                    foreach (string supplementPath in supplementaryResources)
+                    {
+                        string supplementName = supplementPath.Substring(widgetPath.Length);
+                        var stream = EmbeddedResources.GetStream(supplementPath);
+                        FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(
+                            this,
+                            instanceId,
+                            supplementName,
+                            PreprocessWidgetFile(ReadStream(stream), supplementName, cssClass)
+                        );
+                    }
+                }
+                catch (Exception exception)
+                {
+                    new TCException($"Couldn't load widget from '{resourceName}' embedded resource.", exception).Log();
+                }
+            });
+        }
+        
         private bool GetInstanceIdFromWidgetXml(string widhgetXml, out Guid instanceId, out string cssClass, out Guid providerId)
         {
             instanceId = Guid.Empty;
@@ -190,26 +194,23 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             if (IsDebugBuild)
             {
                 _enableFilewatcher = configuration.GetBool("filewatcher");
-                _installOnNextLoad = configuration.GetBool("installNextLoad");
             }
+            _installOnNextLoad = configuration.GetBool("installNextLoad");
         }
 
         public PropertyGroup[] ConfigurationOptions
         {
             get
             {
+                PropertyGroup propertyGroup = new PropertyGroup("options", "Options", 0);
+
+                propertyGroup.Properties.Add(new Property("installNextLoad", "Install on next load", PropertyType.Bool, 0, bool.TrueString));
+
                 if (IsDebugBuild)
                 {
-                    PropertyGroup propertyGroup = new PropertyGroup("options", "Options", 0);
-
-                    propertyGroup.Properties.Add(new Property("installNextLoad", "Install on next load", PropertyType.Bool, 0, bool.TrueString));
-
                     propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
-
-                    return new[] { propertyGroup };
                 }
-
-                return new PropertyGroup[0];
+                return new[] { propertyGroup };
             }
         }
 
