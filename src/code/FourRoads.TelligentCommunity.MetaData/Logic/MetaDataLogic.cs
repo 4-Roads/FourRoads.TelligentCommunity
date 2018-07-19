@@ -38,6 +38,11 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             {
                 if (Apis.Get<IUrl>().CurrentContext != null && Apis.Get<IUrl>().CurrentContext.ContextItems != null && Apis.Get<IUsers>().AccessingUser != null)
                 {
+                    if (Apis.Get<IPermissions>().Get(PermissionRegistrar.SiteEditMetaDataPermission, Apis.Get<IUsers>().AccessingUser.Id.GetValueOrDefault(0)).IsAllowed)
+                    {
+                        return true;
+                    }
+
                     var items  = Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems();
 
                     if (items.Any())
@@ -52,10 +57,6 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        return Apis.Get<IPermissions>().Get(PermissionRegistrar.EditMetaDataPermission, Apis.Get<IUsers>().AccessingUser.Id.GetValueOrDefault(0)).IsAllowed;
                     }
                 }
 

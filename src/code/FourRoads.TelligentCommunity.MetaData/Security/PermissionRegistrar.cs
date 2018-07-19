@@ -13,6 +13,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Security
     {
         private ITranslatablePluginController _controller;
 
+        public static Guid SiteEditMetaDataPermission = new Guid("{DD353225-54CF-4F65-8E07-B7E38D19316E}");
         public static Guid EditMetaDataPermission = new Guid("{A54AB949-9113-4E1D-A3BC-F4A639BA510D}");
 
         public void Initialize()
@@ -20,32 +21,38 @@ namespace FourRoads.TelligentCommunity.MetaData.Security
              
         }
 
-        public string Name
-        {
-            get { return "Permissions"; }
-        }
+        public string Name => "Permissions";
 
-        public string Description
-        {
-            get { return "Handles the registration of permissions for meta data"; }
-        }
+        public string Description => "Handles the registration of permissions for meta data";
 
         public void RegisterPermissions(IPermissionRegistrarController permissionController)
         {
-            ApplicationType groupType = Apis.Get<IApplicationTypes>().List().FirstOrDefault(a => a.Name.Equals("group", StringComparison.OrdinalIgnoreCase));
+            permissionController.Register(new Permission(EditMetaDataPermission, "metadata_updatepage", "metadata_updatepagedescription", _controller, 
+                Apis.Get<IGroups>().ApplicationTypeId,
+                new PermissionConfiguration()
+                {
+                    Joinless = new JoinlessGroupPermissionConfiguration { Administrators = true },
+                    PublicOpen = new MembershipGroupPermissionConfiguration { Owners = true },
+                    PublicClosed = new MembershipGroupPermissionConfiguration { Owners = true },
+                    PrivateListed = new MembershipGroupPermissionConfiguration { Owners = true },
+                    PrivateUnlisted = new MembershipGroupPermissionConfiguration { Owners = true }
+                }));
 
-            if (groupType != null)
-            {
-                permissionController.Register(new Permission(EditMetaDataPermission, "metadata_updatepage", "metadata_updatepagedescription", _controller, groupType.Id.Value,
+            permissionController.Register(
+                new Permission(
+                    SiteEditMetaDataPermission,
+                    "metadata_updatesite",
+                    "metadata_updatesitedescription",
+                    _controller,
+                    Guid.Empty,
                     new PermissionConfiguration()
                     {
-                        Joinless = new JoinlessGroupPermissionConfiguration { Administrators = true },
-                        PublicOpen = new MembershipGroupPermissionConfiguration { Owners = true },
-                        PublicClosed = new MembershipGroupPermissionConfiguration { Owners = true },
-                        PrivateListed = new MembershipGroupPermissionConfiguration { Owners = true },
-                        PrivateUnlisted = new MembershipGroupPermissionConfiguration { Owners = true }
+                        Joinless = new JoinlessGroupPermissionConfiguration {Administrators = true},
+                        PublicOpen = new MembershipGroupPermissionConfiguration {Owners = true},
+                        PublicClosed = new MembershipGroupPermissionConfiguration {Owners = true},
+                        PrivateListed = new MembershipGroupPermissionConfiguration {Owners = true},
+                        PrivateUnlisted = new MembershipGroupPermissionConfiguration {Owners = true}
                     }));
-            }
         }
 
         public void SetController(ITranslatablePluginController controller)
@@ -61,6 +68,10 @@ namespace FourRoads.TelligentCommunity.MetaData.Security
 
                 trn.Set("metadata_updatepage", "Meta Data - Edit");
                 trn.Set("metadata_updatepagedescription", "Grants a user permission to edit meta data for a page");
+
+
+                trn.Set("metadata_updatesite", "Meta Data - Sitewide Edit");
+                trn.Set("metadata_updatesitedescription", "Grants a user permission to edit meta data for the site");
 
                 return new[] { trn };
             }
