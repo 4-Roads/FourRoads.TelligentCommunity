@@ -34,7 +34,7 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
                     //var config = TelemetryConfiguration.CreateFromConfiguration(_configuration.GetString("Configuration"));
                     TelemetryConfiguration.Active.InstrumentationKey = _configuration.GetString("InstrumentationKey");
 
-                    TelemetryClient = new TelemetryClient();
+                    TelemetryClient = new TelemetryClient(new TelemetryConfiguration(TelemetryConfiguration.Active.InstrumentationKey));
 
                     IApplicationInsightsFilter filter = (IApplicationInsightsFilter)TelemetryConfiguration.Active.TelemetryProcessors.FirstOrDefault(
                         p =>

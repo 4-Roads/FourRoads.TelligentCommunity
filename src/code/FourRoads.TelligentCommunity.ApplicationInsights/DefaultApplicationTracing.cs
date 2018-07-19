@@ -24,7 +24,106 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
                 user.Events.BeforeDelete += EventsOnBeforeDelete;
                 user.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
 
+                var groupRoleMembers = Apis.Get<IGroupRoleMembers>();
+
+                groupRoleMembers.Events.AfterCreate += EventsOnAfterCreate;
+
+                var groupMembers = Apis.Get<IGroupUserMembers>();
+
+                groupMembers.Events.AfterCreate += EventsOnAfterCreate;
+                groupMembers.Events.AfterUpdate += EventsOnAfterUpdate;
+                groupMembers.Events.AfterDelete += EventsOnAfterDelete;
             }
+        }
+
+        private void EventsOnAfterDelete(GroupUserAfterDeleteEventArgs groupUserAfterDeleteEventArgs)
+        {
+            try
+            {
+                _mainPlugin.TelemetryClient.TrackEvent(
+                    "TelligentGroupUserAfterDeleteEvent",
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", Apis.Get<IUsers>().AccessingUser.Id.ToString()},
+                        {"MemberUserId", groupUserAfterDeleteEventArgs.User.Id.ToString()},
+                        {"DirectMemeber", groupUserAfterDeleteEventArgs.IsDirectMember.ToString()},
+                        {"RoleMemeber", groupUserAfterDeleteEventArgs.IsRoleMember.ToString()},
+                        {"MembershipType", groupUserAfterDeleteEventArgs.MembershipType},
+                        {"Message", groupUserAfterDeleteEventArgs.Message},
+                    });
+            }
+            catch (Exception e)
+            {
+                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
+            }
+        }
+
+        private void EventsOnAfterUpdate(GroupUserAfterUpdateEventArgs groupUserAfterUpdateEventArgs)
+        {
+            try
+            {
+                _mainPlugin.TelemetryClient.TrackEvent(
+                    "TelligentGroupUserAfterUpdateEvent",
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", Apis.Get<IUsers>().AccessingUser.Id.ToString()},
+                        {"MemberUserId", groupUserAfterUpdateEventArgs.User.Id.ToString()},
+                        {"DirectMemeber", groupUserAfterUpdateEventArgs.IsDirectMember.ToString()},
+                        {"RoleMemeber", groupUserAfterUpdateEventArgs.IsRoleMember.ToString()},
+                        {"MembershipType", groupUserAfterUpdateEventArgs.MembershipType},
+                        {"Message", groupUserAfterUpdateEventArgs.Message},
+                    });
+            }
+            catch (Exception e)
+            {
+                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
+            }
+        }
+
+        private void EventsOnAfterCreate(GroupUserAfterCreateEventArgs groupUserAfterCreateEventArgs)
+        {
+            try
+            {
+                _mainPlugin.TelemetryClient.TrackEvent(
+                    "TelligentGroupUserAfterCreateEvent",
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", Apis.Get<IUsers>().AccessingUser.Id.ToString()},
+                        {"MemberUserId", groupUserAfterCreateEventArgs.User.Id.ToString()},
+                        {"DirectMemeber", groupUserAfterCreateEventArgs.IsDirectMember.ToString()},
+                        {"RoleMemeber", groupUserAfterCreateEventArgs.IsRoleMember.ToString()},
+                        {"MembershipType", groupUserAfterCreateEventArgs.MembershipType},
+                        {"Message", groupUserAfterCreateEventArgs.Message},
+                    });
+            }
+            catch (Exception e)
+            {
+                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
+            }
+
+        }
+
+        private void EventsOnAfterCreate(GroupRoleAfterCreateEventArgs groupRoleAfterCreateEventArgs)
+        {
+            try
+            {
+                _mainPlugin.TelemetryClient.TrackEvent(
+                    "TelligentGroupRoleAfterCreateEvent",
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", Apis.Get<IUsers>().AccessingUser.Id.ToString()},
+                        {"GroupId", groupRoleAfterCreateEventArgs.Group.Id.ToString()},
+                        {"RoleId", groupRoleAfterCreateEventArgs.Role.Id.ToString()},
+                        {"GroupName", groupRoleAfterCreateEventArgs.Group.Name},
+                        {"RoleName", groupRoleAfterCreateEventArgs.Role.Name},
+                        {"MembershipType", groupRoleAfterCreateEventArgs.MembershipType},
+                    });
+            }
+            catch (Exception e)
+            {
+                Apis.Get<IEventLog>().Write("Application Inisights Failed: " + e, new EventLogEntryWriteOptions() { Category = "Logging", EventType = "Error" });
+            }
+
         }
 
         private void EventsOnAfterAuthenticate(UserAfterAuthenticateEventArgs userAfterAuthenticateEventArgs)
