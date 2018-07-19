@@ -256,6 +256,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             _fileSystemWatcher?.Dispose();
             string path = CallerPath().GetPath();
 
+            //Rebase the path
+            string assemblyName = GetType().Assembly.GetName().Name;
+
+            path = path.Substring(0, path.IndexOf(assemblyName, StringComparison.Ordinal) + assemblyName.Length + 1);
+
             if (!string.IsNullOrWhiteSpace(path))
             {
                 path = Path.GetDirectoryName(path);
