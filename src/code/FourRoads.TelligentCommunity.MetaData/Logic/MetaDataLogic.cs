@@ -181,15 +181,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             public Guid? ContainerId;
             public Guid? ApplicationId;
 
-            public string FileName
-            {
-                get
-                {
-                    return MakeSafeFileName(PageName + (ContainerId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContainerId : string.Empty) +
-                           (ApplicationId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ApplicationId : string.Empty));
-
-                }
-            }
+            public string FileName => MakeSafeFileName(PageName + (ContainerId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContainerId : string.Empty) +
+                                                       (ApplicationId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ApplicationId : string.Empty) +
+                                                       (ContentId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContentId : string.Empty));
 
             public string PageName;
             public Guid? ContainerTypeId { get; set; }
@@ -468,9 +462,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             MetaData metaData = GetCurrentMetaData(details);
 
-            PropertyGroup group = new PropertyGroup("Meta", "Meta Options", 0);
+            PropertyGroup group = new PropertyGroup("Meta", "Meta Configuration", 0);
 
-            PropertySubGroup subGroup = new PropertySubGroup("Options", "Main Options", 0)
+            PropertySubGroup subGroup = new PropertySubGroup("Options", "Options", 0)
             {
             };
 
@@ -497,7 +491,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             using (XmlTextWriter tw = new XmlTextWriter(sw))
                 group.Serialize(tw);
 
-            return sb.ToString();
+            //Hack to make it render slightly nicer
+            return sb.ToString().Replace("legend>" , "h2>");
         }
     }
 }

@@ -9,6 +9,22 @@
 	        #set($metaForm = $frcommon_v1_metaData.GetDynamicFormXml())
 	        #set($formId =  $core_v2_widget.UniqueId('formId'))
 
+          <h2>Available Parameters</h2>
+          <ul>
+            <li>{SiteName}</li>
+            <li>{SiteLogoUrl}</li>
+            <li>{ContainerName}</li>
+            <li>{ContainerDescription}</li>
+            <li>{ParentContainerName}</li>
+            <li>{PageImage}</li>
+            <li>{ApplicationName}</li>
+            <li>{ApplicationDescription}</li>
+            <li>{ApplicationrImage}</li>
+            <li>{ContentName}</li>
+            <li>{ContentDescription}</li>
+          </ul>
+
+          <hr/>
           $core_v2_dynamicForm.RenderForm($formId, $metaForm)
 
 	        #registerEndOfPageHtml('fourroads.widgets.metadata')
