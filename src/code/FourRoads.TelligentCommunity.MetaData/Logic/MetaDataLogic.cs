@@ -14,6 +14,7 @@ using FourRoads.TelligentCommunity.MetaData.Security;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Caching.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
@@ -37,6 +38,10 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             {
                 if (PublicApi.Url.CurrentContext != null && PublicApi.Url.CurrentContext.ContextItems != null && PublicApi.Users.AccessingUser != null)
                 {
+                    if (Apis.Get<IPermissions>().Get(PermissionRegistrar.SiteEditMetaDataPermission, Apis.Get<IUsers>().AccessingUser.Id.GetValueOrDefault(0)).IsAllowed)
+                    {
+                        return true;
+                    }
                     var items  = PublicApi.Url.CurrentContext.ContextItems.GetAllContextItems();
 
                     if (items.Any())
@@ -51,10 +56,6 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        return PublicApi.Permissions.Get(PermissionRegistrar.EditMetaDataPermission, PublicApi.Users.AccessingUser.Id.GetValueOrDefault(0)).IsAllowed;
                     }
                 }
 
@@ -183,9 +184,10 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             {
                 get
                 {
-                    return MakeSafeFileName(PageName + (ContainerId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContainerId : string.Empty) +
-                           (ApplicationId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ApplicationId : string.Empty));
-
+                    return MakeSafeFileName(PageName + 
+                        (ContainerId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContainerId : string.Empty) +
+                        (ApplicationId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ApplicationId : string.Empty) +
+                        (ContentId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContentId : string.Empty));
                 }
             }
 
@@ -466,9 +468,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             MetaData metaData = GetCurrentMetaData(details);
 
-            PropertyGroup group = new PropertyGroup("Meta", "Meta Options", 0);
+            PropertyGroup group = new PropertyGroup("Meta", "Meta Configuration", 0);
 
-            PropertySubGroup subGroup = new PropertySubGroup("Options", "Main Options", 0)
+            PropertySubGroup subGroup = new PropertySubGroup("Options", "Options", 0)
             {
             };
 
@@ -495,7 +497,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             using (XmlTextWriter tw = new XmlTextWriter(sw))
                 group.Serialize(tw);
 
-            return sb.ToString();
+            //Hack to make it render slightly nicer
+            return sb.ToString().Replace("legend>" , "h2>");
         }
     }
 }

@@ -12,6 +12,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Security
     {
         private ITranslatablePluginController _controller;
 
+        public static Guid SiteEditMetaDataPermission = new Guid("{DD353225-54CF-4F65-8E07-B7E38D19316E}");
         public static Guid EditMetaDataPermission = new Guid("{A54AB949-9113-4E1D-A3BC-F4A639BA510D}");
 
         public void Initialize()
@@ -45,6 +46,21 @@ namespace FourRoads.TelligentCommunity.MetaData.Security
                         PrivateUnlisted = new MembershipGroupPermissionConfiguration { Owners = true }
                     }));
             }
+            permissionController.Register(
+                new Permission(
+                    SiteEditMetaDataPermission,
+                    "metadata_updatesite",
+                    "metadata_updatesitedescription",
+                    _controller,
+                    Guid.Empty,
+                    new PermissionConfiguration()
+                    {
+                        Joinless = new JoinlessGroupPermissionConfiguration {Administrators = true},
+                        PublicOpen = new MembershipGroupPermissionConfiguration {Owners = true},
+                        PublicClosed = new MembershipGroupPermissionConfiguration {Owners = true},
+                        PrivateListed = new MembershipGroupPermissionConfiguration {Owners = true},
+                        PrivateUnlisted = new MembershipGroupPermissionConfiguration {Owners = true}
+                    }));
         }
 
         public void SetController(ITranslatablePluginController controller)

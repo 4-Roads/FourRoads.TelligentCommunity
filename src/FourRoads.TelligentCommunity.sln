@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.RenderingHelper", "code\FourRoads.TelligentCommunity.RenderingHelper\FourRoads.TelligentCommunity.RenderingHelper.csproj", "{20BC9498-6E57-4F6E-BB23-38BFEF110161}"
 EndProject
@@ -89,6 +89,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.GoogleMfa", "code\FourRoads.TelligentCommunity.GoogleMfa\FourRoads.TelligentCommunity.GoogleMfa.csproj", "{104B1F22-5CF1-4364-8C89-62CA11B032FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.GroupDataExport", "code\FourRoads.TelligentCommunity.GroupDataExport\FourRoads.TelligentCommunity.GroupDataExport.csproj", "{47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.ApplicationInsights", "code\FourRoads.TelligentCommunity.ApplicationInsights\FourRoads.TelligentCommunity.ApplicationInsights.csproj", "{2234D44A-7C66-4241-8C54-DCC1D0E602E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -327,6 +329,18 @@ Global
 		{47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21}.Release|Any CPU.Build.0 = Release|Any CPU
 		{47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21}.Release|x86.ActiveCfg = Release|Any CPU
 		{47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21}.Release|x86.Build.0 = Release|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Debug|x86.Build.0 = Debug|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Release Output|Any CPU.Build.0 = Release|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Release Output|x86.ActiveCfg = Release|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Release Output|x86.Build.0 = Release|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Release|x86.ActiveCfg = Release|Any CPU
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -355,8 +369,10 @@ Global
 		{1780110F-EF88-4134-8C8F-94E5C411B29D} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{104B1F22-5CF1-4364-8C89-62CA11B032FE} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
+		{2234D44A-7C66-4241-8C54-DCC1D0E602E1} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		VisualSVNWorkingCopyRoot = ..
+		SolutionGuid = {5B785602-01D1-4484-95F3-DB067E847B0F}
 	EndGlobalSection
 EndGlobal
