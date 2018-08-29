@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -353,7 +354,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 string folderPath = Path.Combine(path, $"themefiles\\s\\fd\\{name:N}\\{folder}");
 
                 var fileDict = Directory.GetFiles(folderPath).ToDictionary(Path.GetFileName, v => v);
+                var removeElements = new List<XmlElement>();
 
+                // update any existing elements
                 foreach (XmlElement file in files)
                 {
                     string fileName = $"{file.Attributes["name"].Value}";
@@ -376,11 +379,21 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
                     else
                     {
-                        files.RemoveChild(file);
+                        // keep for later, otherwise enumeration stops.....
+                        removeElements.Add(file);
                     }
                 }
 
+                // remove any entries which no longer exist
+                if (removeElements.Any())
+                {
+                    foreach(var element in removeElements)
+                    {
+                        var result = files.RemoveChild(element);
+                    }
+                }
 
+                // add any new elements
                 foreach (string fileDictKey in fileDict.Keys)
                 {
                     /*  <file name="defaultbannerimage.jpg" configuration="">
@@ -393,6 +406,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         {
                             tw.WriteStartElement("file");
                             tw.WriteAttributeString("name", fileDictKey);
+                            // set default context for the new stylesheet
+                            if (folder == "styleSheetFiles")
+                            {
+                                tw.WriteAttributeString("configuration", "ApplyToModals=true&ApplyToNonModals=true");
+                            }
                             tw.WriteStartElement("content");
 
                             tw.WriteCData(GetBase64FileData(fileDict[fileDictKey]));
