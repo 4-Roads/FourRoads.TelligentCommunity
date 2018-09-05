@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using FourRoads.TelligentCommunity.ForumLastPost.DataProvider;
 using FourRoads.TelligentCommunity.GoogleMfa.Extensions;
 using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
 using FourRoads.TelligentCommunity.GoogleMfa.Logic;
+using FourRoads.TelligentCommunity.GoogleMfa.Resources;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -30,13 +32,15 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
 
         public IEnumerable<Type> Plugins => new[]
         {
-            typeof (GoogleAuthenticatorExtension),
+            typeof (MfaSqlScriptsInstaller),
             typeof (FactoryDefaultWidgetProviderInstaller),
+            typeof (GoogleAuthenticatorExtension)
         };
 
         public void LoadBindings(IContainer container)
         {
             container.Register<IMfaLogic, MfaLogic>(Reuse.Singleton);
+            container.Register<IMfaDataProvider, MfaDataProvider>(Reuse.Singleton);
         }
 
         public int LoadOrder => 0;

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Net.Http;
+using System.Threading;
 using System.Web;
 using System.Web.Security;
+using FourRoads.Common.Interfaces;
 using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
 using Google.Authenticator;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
@@ -9,21 +12,82 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using FourRoads.Common.TelligentCommunity.Routing;
+using Telligent.Evolution.Components;
+using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 
 namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 {
-    public class MfaLogic
-        : IMfaLogic
+    public interface ILock<T>
+    {
+        IDisposable Enter(T id);
+    }
+
+    public class ActionDisposable : IDisposable
+    {
+        private readonly Action action;
+
+        public ActionDisposable(Action action)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException("action");
+            }
+
+            this.action = action;
+        }
+
+        public void Dispose()
+        {
+            action();
+        }
+    }
+
+    public class NamedItemLockSpin<T> : ILock<T>
+    {
+
+        private readonly ConcurrentDictionary<T, object> locks = new ConcurrentDictionary<T, object>();
+
+        private readonly int spinWait;
+
+        public NamedItemLockSpin(int spinWait)
+        {
+            this.spinWait = spinWait;
+        }
+
+        public IDisposable Enter(T id)
+        {
+            while (!locks.TryAdd(id, new object()))
+            {
+                Thread.SpinWait(spinWait);
+            }
+
+            return new ActionDisposable(() => exit(id));
+        }
+
+        private void exit(T id)
+        {
+            object obj;
+            locks.TryRemove(id, out obj);
+        }
+    }
+
+    public class MfaLogic : IMfaLogic
     {
         private static readonly string _pageName = "mfa";
         private readonly IUsers _usersService;
         private readonly IUrl _urlService;
+        private readonly IMfaDataProvider _mfaDataProvider;
+        private readonly ICache _cache;
+        private readonly NamedItemLockSpin<int> _namedLocks = new NamedItemLockSpin<int>(10);
+
         //{295391e2b78d4b7e8056868ae4fe8fb3}
         private static readonly string _defaultPageLayout = " <contentFragmentPage pageName=\"mfa\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::295391e2b78d4b7e8056868ae4fe8fb3\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
-        public MfaLogic(IUsers usersService, IUrl urlService)
+        public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
         {
             _usersService = usersService;
             _urlService = urlService;
+            _mfaDataProvider = mfaDataProvider;
+            _cache = cache;
         }
 
         public void Initialize()
@@ -89,6 +153,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 
                     // suppress any callbacks re search, notifications, header links etc
                     if (request.Path.StartsWith("/api.ashx") ||
+                        request.Path.StartsWith("/oauth.ashx") ||
                         (request.Url.LocalPath == "/utility/scripted-file.ashx" &&
                         request.QueryString["_cf"] != null &&
                         request.QueryString["_cf"] != "logout.vm" &&
@@ -125,24 +190,29 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             if (cookie != null)
                 return cookie.Value.Substring(0, 10); //Chances of collission with 10 chars is small
 
-            return null;
+            return string.Empty;
         }
 
         private void SetTwoFactorState(User user, bool passed)
         {
-            //ensure we have access to user.ExtendedAttributes
-            Apis.Get<IUsers>().RunAsUser("admin", () =>
+            using (var sync = _namedLocks.Enter(user.Id.GetValueOrDefault(0)))
             {
-                UsersUpdateOptions updateOptions = new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes };
+                string cacheKey = GetCacheKey(user);
 
-                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "__mfaState_" + GetSessionID(HttpContext.Current), Value = passed.ToString() });
+                _cache.Remove(cacheKey);
 
-                _usersService.Update(updateOptions);
-            });
+                _mfaDataProvider.SetUserState(user.Id.Value, GetSessionID(HttpContext.Current), passed);
+            }
         }
 
         public bool TwoFactorEnabled(User user)
         {
+            //WARNING: Non API Safe code
+            if (CSContext.Current.Impersonator != null)
+            {
+                return false;
+            }
+
             bool require2F = false;
 
             //ensure we have access to user.ExtendedAttributes
@@ -186,22 +256,28 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             return false;
         }
 
+        private string GetCacheKey(User user)
+        {
+            return $"MFA:CACHE:{user.Id}";
+        }
+
         private bool TwoFactorState(User user)
         {
-            bool state = false;
+            string cacheKey = GetCacheKey(user);
 
-            //ensure we have access to user.ExtendedAttributes
-            Apis.Get<IUsers>().RunAsUser("admin", () =>
+            var valid = _cache.Get<bool?>(cacheKey);
+
+            if (!valid.HasValue)
             {
-                var mfaState = user.ExtendedAttributes.Get("__mfaState_" + GetSessionID(HttpContext.Current));
-
-                if (mfaState != null)
+                using (var sync = _namedLocks.Enter(user.Id.GetValueOrDefault(0)))
                 {
-                    bool.TryParse(mfaState.Value, out state);
-                }
-            });
+                    valid = _mfaDataProvider.GetUserState(user.Id.Value, GetSessionID(HttpContext.Current));
 
-            return state;
+                    _cache.Insert(cacheKey, valid);
+                }
+            }
+
+            return valid.Value;
         }
 
         public void RegisterUrls(IUrlController controller)
