@@ -153,7 +153,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 
                     // suppress any callbacks re search, notifications, header links etc
                     if (request.Path.StartsWith("/api.ashx") ||
-                        request.Path.StartsWith("/oauth.ashx") ||
+                        request.Path.StartsWith("/oauth") ||
                         (request.Url.LocalPath == "/utility/scripted-file.ashx" &&
                         request.QueryString["_cf"] != null &&
                         request.QueryString["_cf"] != "logout.vm" &&
