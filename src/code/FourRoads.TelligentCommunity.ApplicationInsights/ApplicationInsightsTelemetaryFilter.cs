@@ -20,7 +20,7 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
         {
             if (ExludeSynthetic)
             {
-                if (!string.IsNullOrEmpty(item.Context.Operation.SyntheticSource))
+                if (!string.IsNullOrEmpty(item?.Context?.Operation?.SyntheticSource))
                 {
                     return;
                 }
@@ -32,14 +32,14 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
                 if (request != null)
                 {
                     // Determine tenant
-                    string url = request.Url.PathAndQuery.ToLower();
+                    string url = request.Url?.PathAndQuery.ToLower();
 
-                    if (IgnorePathsRegex.IsMatch(url))
+                    if (IgnorePathsRegex.IsMatch(url?? string.Empty))
                         return;
                 }
             }
 
-            Next.Process(item);
+            Next?.Process(item);
         }
 
         public bool ExludeSynthetic { get; set; }
