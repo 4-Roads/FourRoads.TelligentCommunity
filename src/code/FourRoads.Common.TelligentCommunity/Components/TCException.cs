@@ -1,35 +1,56 @@
 ﻿using System;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using Telligent.Evolution.Components;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Platform.Logging;
 
 namespace FourRoads.Common.TelligentCommunity.Components
 {
-    // ReSharper disable once InconsistentNaming
+    [Serializable]
     public class TCException : Exception, IUserRenderableException, ILoggableException
     {
         private readonly Func<string> _getTranslatedMessage;
 
-        public TCException(string internalMessage, Exception inner) :
-         this(internalMessage , null , inner)
-        {
-        }
-
-        public TCException(string internalMessage, Func<string> getTranslatedMessage = null):
+        public TCException(string internalMessage, Func<string> getTranslatedMessage = null) :
             base(internalMessage)
         {
             _getTranslatedMessage = getTranslatedMessage;
         }
 
-        public TCException(string internalMessage, Func<string> getTranslatedMessage, Exception inner):
-               base(internalMessage , inner)
+        public TCException(string internalMessage, string resourceName, params string[] argv) :
+            base(internalMessage)
+        {
+            _getTranslatedMessage += () => GetResourceMessage(resourceName, argv);
+        }
+
+        public TCException(string internalMessage, Exception ex, string resourceName=null, params string[] argv) :
+            base(internalMessage, ex)
+        {
+            _getTranslatedMessage += () => GetResourceMessage(resourceName, argv);
+        }
+
+        protected ITranslatablePluginController PluginResourceController { get; set; }
+
+        private string GetResourceMessage(string resourceName, string[] argv)
+        {
+            if (PluginResourceController != null)
+            {
+                return string.Format(PluginResourceController.GetLanguageResourceValue(resourceName), argv);
+            }
+
+            return "Translation controller not initialized:" + resourceName + ":" + String.Join(",",argv);
+        }
+
+        public TCException(string internalMessage, Func<string> getTranslatedMessage, Exception inner) :
+            base(internalMessage, inner)
         {
             _getTranslatedMessage = getTranslatedMessage;
         }
 
         public string GetUserRenderableMessage()
         {
-            if ( _getTranslatedMessage != null )
+            if (_getTranslatedMessage != null)
             {
                 return _getTranslatedMessage();
             }
@@ -39,25 +60,9 @@ namespace FourRoads.Common.TelligentCommunity.Components
 
         public string Category => "4 Roads";
 
-        protected class NotSafeCsException : CSException
-        {
-            public NotSafeCsException(CSExceptionType t, string internalMessage) : base(t, internalMessage)
-            {
-            }
-
-            public NotSafeCsException(CSExceptionType t, string internalMessage, Exception inner) : base(t, internalMessage, inner)
-            {
-            }
-
-            public void Log()
-            {
-                ExceptionHelper.Handle(this);
-            }
-        }
-
         public void Log()
         {
-            new NotSafeCsException(CSExceptionType.UnknownError, "Logged Error", this).Log();
+            new Error(this);
         }
     }
 }
