@@ -74,16 +74,16 @@ namespace FourRoads.TelligentCommunity.MetaData
             {
                 if (_pluginGroupLoader == null)
                 {
-                    Type[] priorityPlugins =
-                    {
-                        typeof (DependencyInjectionPlugin),
-                        typeof (FactoryDefaultWidgetProviderInstaller)
-                    };
-
                     _pluginGroupLoader = new PluginGroupLoader();
-
-                    _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
                 }
+
+                Type[] priorityPlugins =
+                {
+                    typeof (DependencyInjectionPlugin),
+                    typeof (FactoryDefaultWidgetProviderInstaller)
+                };
+
+                _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
 
                 return _pluginGroupLoader.GetPlugins();
             }

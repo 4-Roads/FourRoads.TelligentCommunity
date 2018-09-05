@@ -92,9 +92,9 @@ namespace FourRoads.TelligentCommunity.SocialProfileControls
                 if (_pluginGroupLoader == null)
                 {
                     _pluginGroupLoader = new PluginGroupLoader();
-
-                    _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor());
                 }
+
+                _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor());
 
                 return _pluginGroupLoader.GetPlugins();
             }

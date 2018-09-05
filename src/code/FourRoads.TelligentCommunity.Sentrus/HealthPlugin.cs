@@ -58,17 +58,17 @@ namespace FourRoads.TelligentCommunity.Sentrus
             {
                 if (_pluginGroupLoader == null)
                 {
-                    Type[] priorityPlugins =
-                    {
-                        typeof(DependencyInjectionPlugin),
-                        typeof(HealthJob),
-                         typeof(Resources.SqlScriptsInstaller)
-                    };
-
                     _pluginGroupLoader = new PluginGroupLoader();
-
-                    _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
                 }
+
+                Type[] priorityPlugins =
+                {
+                    typeof(DependencyInjectionPlugin),
+                    typeof(HealthJob),
+                    typeof(Resources.SqlScriptsInstaller)
+                };
+
+                _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
 
                 return _pluginGroupLoader.GetPlugins();
             }

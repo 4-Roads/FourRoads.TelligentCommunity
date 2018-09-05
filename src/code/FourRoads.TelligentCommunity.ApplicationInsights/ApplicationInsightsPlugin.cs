@@ -80,15 +80,15 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
             {
                 if (_pluginGroupLoader == null)
                 {
-                    Type[] priorityPlugins =
-                    {
-                       
-                    };
-
                     _pluginGroupLoader = new PluginGroupLoader();
-
-                    _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
                 }
+
+                Type[] priorityPlugins =
+                {
+
+                };
+
+                _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
 
                 return _pluginGroupLoader.GetPlugins();
             }

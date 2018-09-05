@@ -122,15 +122,15 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
             {
                 if (_pluginGroupLoader == null)
                 {
-                    Type[] priorityPlugins =
-                    {
-                        typeof (FactoryDefaultWidgetProviderInstaller)
-                    };
-                    
                     _pluginGroupLoader = new PluginGroupLoader();
-
-                    _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
                 }
+
+                Type[] priorityPlugins =
+                {
+                    typeof (FactoryDefaultWidgetProviderInstaller)
+                };
+
+                _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
 
                 return _pluginGroupLoader.GetPlugins();
             }

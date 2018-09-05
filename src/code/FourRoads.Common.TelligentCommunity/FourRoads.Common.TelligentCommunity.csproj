@@ -123,6 +123,7 @@
     <Compile Include="Plugins\Base\PluginGroupLoader.cs" />
     <Compile Include="Plugins\Base\ScriptableInstaller.cs" />
     <Compile Include="Plugins\Base\SqlScriptsInstaller.cs" />
+    <Compile Include="Plugins\Base\ThemeVersionHelper.cs" />
     <Compile Include="Plugins\Base\VideoFileViewerBase.cs" />
     <Compile Include="Plugins\Extensions\ContentExtension.cs" />
     <Compile Include="Plugins\Interfaces\IBindingsLoader.cs" />

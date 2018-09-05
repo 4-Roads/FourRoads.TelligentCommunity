@@ -2,14 +2,13 @@
 using System.Data;
 using System.Data.SqlClient;
 using FourRoads.TelligentCommunity.ForumLastPost.Interfaces;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.DataProvider
 {
     public class LastReadPostDataProvider : ILastReadPostDataProvider
     {
-        public readonly static string DefaultConnectionString = Telligent.Common.DataProvider.GetConnectionString();
-
-
         public void UpdateLastReadPost(Guid appicationId, Guid contentId, int userId, Guid lastReadContentId , int replyCount , DateTime postDate)
         {
             using (var connection = GetSqlConnection())
@@ -60,12 +59,7 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.DataProvider
 
         private static SqlConnection GetSqlConnection()
         {
-            return GetSqlConnection(DefaultConnectionString);
-        }
-
-        private static SqlConnection GetSqlConnection(string connectionString)
-        {
-            return new SqlConnection(connectionString);
+            return Apis.Get<IDatabaseConnections>().GetConnection("SiteSqlServer");
         }
 
         private static SqlCommand CreateSprocCommand(string sprocName, SqlConnection connection)

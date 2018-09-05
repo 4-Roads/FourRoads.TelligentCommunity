@@ -4,13 +4,13 @@ using System.Data;
 using System.Data.SqlClient;
 using FourRoads.TelligentCommunity.Rules.ThreadViews.Entities;
 using FourRoads.TelligentCommunity.Rules.ThreadViews.Interfaces;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 
 namespace FourRoads.TelligentCommunity.Rules.ThreadViews.DataProvider
 {
     public class ThreadViewDataProvider : IThreadViewDataProvider
     {
-        public readonly static string DefaultConnectionString = Telligent.Common.DataProvider.GetConnectionString();
-
         public void Create(Guid appicationId, Guid contentId, int userId, DateTime viewDate, int status = 1)
         {
             using (var connection = GetSqlConnection())
@@ -63,12 +63,7 @@ namespace FourRoads.TelligentCommunity.Rules.ThreadViews.DataProvider
 
         private static SqlConnection GetSqlConnection()
         {
-            return GetSqlConnection(DefaultConnectionString);
-        }
-
-        private static SqlConnection GetSqlConnection(string connectionString)
-        {
-            return new SqlConnection(connectionString);
+            return Apis.Get<IDatabaseConnections>().GetConnection("SiteSqlServer");
         }
 
         private static SqlCommand CreateSprocCommand(string sprocName, SqlConnection connection)
