@@ -34,7 +34,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
 
-        public string Name => ProjectName + " - Factory Default Theme installer";
+        public string Name => ProjectName + " - Theme";
 
         public string Description => "Installs the default theme for " + ProjectName + ".";
 
@@ -55,6 +55,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     _configuration.Commit();
                 }
             }
+
+            ThemeVersionHelper.LocalVersionCheck("themeVersion.txt", Version, Install);
         }
 
         #endregion

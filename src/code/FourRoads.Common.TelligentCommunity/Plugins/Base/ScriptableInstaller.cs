@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
-using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -11,16 +10,15 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
     public abstract class ScriptableInstaller : IInstallablePlugin
     {
-
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
         public virtual void Initialize()
         {
-
+            ThemeVersionHelper.LocalVersionCheck("scriptVersion.txt", Version, Install);
         }
 
-        public string Name => ProjectName + " - Scriptable Plugin";
+        public string Name => ProjectName + " - Script";
 
         public string Description => "Defines the scriptable plugin for " + ProjectName + ".";
 

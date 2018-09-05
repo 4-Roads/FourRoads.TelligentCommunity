@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Web;
 using System.Xml.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -17,12 +22,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         #region IPlugin Members
 
-        public string Name => ProjectName + " - Factory Default Widget Provider";
+        public string Name => ProjectName + " - Widgets";
 
         public string Description => "Defines the default widget set for " + ProjectName+ ".";
 
         public void Initialize()
         {
+            ThemeVersionHelper.LocalVersionCheck("widgetVersion.txt", Version, Install);
         }
 
         #endregion

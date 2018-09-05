@@ -55,6 +55,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     _configuration.Commit();
                 }
             }
+
+            ThemeVersionHelper.LocalVersionCheck("widgetVersion.txt", Version, Install);
         }
 
         #endregion
