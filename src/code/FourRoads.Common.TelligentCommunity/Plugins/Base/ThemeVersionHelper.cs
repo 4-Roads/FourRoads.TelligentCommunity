@@ -1,18 +1,20 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Storage.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
     public static class ThemeVersionHelper
     {
-        static object _threadLock = new object();
+        private static object _threadLock = new object();
+        private static readonly Regex MakeSafeFileNameRegEx = new Regex(CentralizedFileStorage.ValidFileNameRegexPattern, RegexOptions.Compiled);
 
-
-        public static void LocalVersionCheck(string fileName,Version currentVersion, Action<Version> installFunction)
+        public static void LocalVersionCheck(string name, Version currentVersion, Action<Version> installFunction)
         {
             lock (_threadLock)
             {
@@ -25,35 +27,46 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                         Directory.CreateDirectory(widgetVersionFileName);
 
-                        widgetVersionFileName = Path.Combine(widgetVersionFileName, fileName);
+                        widgetVersionFileName = Path.Combine(widgetVersionFileName, MakeSafeFileName(name) + ".txt");
 
-                        using (var versionFile = System.IO.File.Open(widgetVersionFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                        string version = null;
+
+                        if (File.Exists(widgetVersionFileName))
                         {
-                            using (TextReader tr = new StreamReader(versionFile))
-                            {
-                                string version = tr.ReadToEnd();
+                            version = File.ReadAllText(widgetVersionFileName, Encoding.UTF8);
 
-                                if (string.IsNullOrWhiteSpace(version))
-                                {
-                                    version = "0.0.0.0";
-                                }
-
-                                installFunction(new Version(version));
-
-                                versionFile.Seek(0, SeekOrigin.Begin);
-
-                                byte[] bytes = Encoding.UTF8.GetBytes(currentVersion.ToString());
-
-                                versionFile.Write(bytes, 0, bytes.Length);
-                            }
+                            Apis.Get<IEventLog>().Write($"Version {version}", new EventLogEntryWriteOptions() {Category = "4 Roads"});
                         }
+
+                        if (string.IsNullOrWhiteSpace(version))
+                        {
+                            version = "0.0.0.1";
+                        }
+
+                        Apis.Get<IEventLog>().Write($"calling installl {version}", new EventLogEntryWriteOptions() { Category = "4 Roads" });
+
+                        installFunction(new Version(version));
+
+                        File.WriteAllText(widgetVersionFileName, currentVersion.ToString(), Encoding.UTF8);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Apis.Get<IEventLog>().Write("Unable to store local widget version for plugins, aborting attempt:" + ex.ToString(), new EventLogEntryWriteOptions() {Category = "Theme", EventType = "Warning"});
+                    Apis.Get<IEventLog>().Write("Unable to store local widget version for plugins, aborting attempt:" + ex.ToString(), new EventLogEntryWriteOptions() { Category = "Theme", EventType = "Warning" });
                 }
             }
+        }
+
+        private static string MakeSafeFileName(string name)
+        {
+            string result = string.Empty;
+
+            foreach (Match match in MakeSafeFileNameRegEx.Matches(name))
+            {
+                result += match.Value;
+            }
+
+            return result;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
         public virtual void Initialize()
         {
-            ThemeVersionHelper.LocalVersionCheck("scriptVersion.txt", Version, Install);
+            ThemeVersionHelper.LocalVersionCheck($"scripted-{ProjectName}", Version, Install);
         }
 
         public string Name => ProjectName + " - Script";

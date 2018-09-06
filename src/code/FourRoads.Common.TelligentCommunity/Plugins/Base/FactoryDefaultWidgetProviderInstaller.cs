@@ -28,7 +28,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Initialize()
         {
-            ThemeVersionHelper.LocalVersionCheck("widgetVersion.txt", Version, Install);
+            ThemeVersionHelper.LocalVersionCheck($"widgets-{ProjectName}", Version, Install);
         }
 
         #endregion
@@ -51,6 +51,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                         using (var stream = EmbeddedResources.GetStream(resourceName))
                         {
+                            Apis.Get<IEventLog>().Write($"Installting widget {widgetName}", new EventLogEntryWriteOptions() {Category = "4 Roads - Widgets"});
+
                             FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(this, widgetName, stream);
                         }
 

@@ -22,7 +22,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Initialize()
         {
-            ThemeVersionHelper.LocalVersionCheck("themeVersion.txt", Version, Install);
+            ThemeVersionHelper.LocalVersionCheck($"theme-{ProjectName}", Version, Install);
         }
 
         #endregion

@@ -56,7 +56,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             }
 
-            ThemeVersionHelper.LocalVersionCheck("themeVersion.txt", Version, Install);
+            ThemeVersionHelper.LocalVersionCheck($"theme-{ProjectName}", Version, Install);
         }
 
         #endregion

@@ -12,6 +12,8 @@ using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.ScriptedContentFragments.Services;
@@ -56,7 +58,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             }
 
-            ThemeVersionHelper.LocalVersionCheck("widgetVersion.txt", Version, Install);
+            ThemeVersionHelper.LocalVersionCheck($"widgets-{ProjectName}", Version, Install);
         }
 
         #endregion
@@ -93,6 +95,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                     if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
                         return;
+
+                    Apis.Get<IEventLog>().Write($"Installting widget '{resourceName}'", new EventLogEntryWriteOptions() { Category = "4 Roads" });
 
                     // If this widget's provider ID is not the one we're installing, then ignore it:
                     if (providerId != ScriptedContentFragmentFactoryDefaultIdentifier)
