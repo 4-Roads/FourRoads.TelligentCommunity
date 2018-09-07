@@ -19,7 +19,7 @@
     <files>
         <file src="bin\**\FourRoads.TelligentCommunity.Performance.dll" target="lib\net462" exclude="*Tests*" />
     </files>
-    <ItemGroup>
+    <!--<ItemGroup>
         <PackageReference Include="AngleSharp" version="0.9.9">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
@@ -41,5 +41,5 @@
         <PackageReference Include="WebGrease" version="1.6.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-    </ItemGroup>
+    </ItemGroup>-->
 </package>

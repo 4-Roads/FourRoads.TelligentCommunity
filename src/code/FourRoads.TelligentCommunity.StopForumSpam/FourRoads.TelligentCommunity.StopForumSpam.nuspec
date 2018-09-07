@@ -16,9 +16,9 @@
     <files>
         <file src="bin\**\FourRoads.TelligentCommunity.StopForumSpam.dll" target="lib\net462" exclude="*Tests*" />
     </files>
-    <ItemGroup>
+    <!--<ItemGroup>
         <PackageReference Include="Newtonsoft.Json" version="9.0.1">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-    </ItemGroup>
+    </ItemGroup>-->
 </package>
