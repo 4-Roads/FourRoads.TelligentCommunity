@@ -1,19 +1,57 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <metadata>
-    <id>FourRoads.TelligentCommunity101.ApplicationInsights</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
-    <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
-    <projectUrl>https://github.com/4-Roads/FourRoads.TelligentCommunity</projectUrl>
-    <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <copyright>Copyright © Four Roads Ltd 2012-2017</copyright>
-	<description>$description$</description>
-    <tags>Telligent utility</tags>
-  </metadata>
-	<files>
-      <file src="bin\**\FourRoads.TelligentCommunity.ApplicationInsights.dll" target="lib\net462" exclude="*Tests*" />
+    <metadata>
+        <id>FourRoads.TelligentCommunity101.ApplicationInsights</id>
+        <version>$version$</version>
+        <title>$title$</title>
+        <authors>$author$</authors>
+        <owners>$author$</owners>
+        <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
+        <projectUrl>https://github.com/4-Roads/FourRoads.TelligentCommunity</projectUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <copyright>Copyright © Four Roads Ltd 2012-2017</copyright>
+        <description>$description$</description>
+        <tags>Telligent utility</tags>
+    </metadata>
+    <files>
+        <file src="bin\**\FourRoads.TelligentCommunity.ApplicationInsights.dll" target="lib\net462" exclude="*Tests*" />
     </files>
+    <dependencies>
+        <dependency id="FourRoads.Common" version="5.2.27" />
+    </dependencies>
+    <ItemGroup>
+        <PackageReference Include="Castle.NVelocity" version="1.1.1">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.ApplicationInsights" version="2.6.4">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.ApplicationInsights.Agent.Intercept" version="2.4.0">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" version="2.6.4">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.ApplicationInsights.PerfCounterCollector" version="2.6.4">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.ApplicationInsights.Web" version="2.6.4">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.ApplicationInsights.WindowsServer" version="2.6.4">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel" version="2.6.4">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.AspNet.TelemetryCorrelation" version="1.0.3">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Web.Infrastructure" version="1.0.0.0">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="System.Diagnostics.DiagnosticSource" version="4.4.0">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
 </package>
