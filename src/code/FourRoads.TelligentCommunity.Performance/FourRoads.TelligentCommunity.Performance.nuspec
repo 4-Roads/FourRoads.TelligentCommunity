@@ -1,19 +1,45 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <metadata>
-    <id>FourRoads.TelligentCommunity101.Performance</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
-    <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
-    <projectUrl>https://github.com/4-Roads/FourRoads.TelligentCommunity</projectUrl>
-    <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <copyright>Copyright © Four Roads Ltd 2012-2017</copyright>
-	<description>$description$</description>
-    <tags>Telligent utility</tags>
-  </metadata>
-	<files>
-      <file src="bin\**\FourRoads.TelligentCommunity.Performance.dll" target="lib\net462" exclude="*Tests*" />
+    <metadata>
+        <id>FourRoads.TelligentCommunity101.Performance</id>
+        <version>$version$</version>
+        <title>$title$</title>
+        <authors>$author$</authors>
+        <owners>$author$</owners>
+        <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
+        <projectUrl>https://github.com/4-Roads/FourRoads.TelligentCommunity</projectUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <copyright>Copyright © Four Roads Ltd 2012-2017</copyright>
+        <description>$description$</description>
+        <tags>Telligent utility</tags>
+        <dependencies>
+            <dependency id="FourRoads.Common" version="5.2.27" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="bin\**\FourRoads.TelligentCommunity.Performance.dll" target="lib\net462" exclude="*Tests*" />
     </files>
+    <!--<ItemGroup>
+        <PackageReference Include="AngleSharp" version="0.9.9">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Antlr" version="3.5.0.2">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Castle.NVelocity" version="1.1.1">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.AspNet.Web.Optimization" version="1.1.3">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Web.Infrastructure" version="1.0.0.0">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" version="9.0.1">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="WebGrease" version="1.6.0">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>-->
 </package>
