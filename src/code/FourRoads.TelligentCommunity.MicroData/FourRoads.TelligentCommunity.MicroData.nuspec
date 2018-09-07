@@ -1,24 +1,24 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <metadata>
-    <id>FourRoads.TelligentCommunity101.MicroData</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
-    <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
-    <projectUrl>https://github.com/4-Roads/FourRoads.TelligentCommunity</projectUrl>
-    <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <copyright>Copyright © Four Roads Ltd 2012-2017</copyright>
-	<description>$description$</description>
-    <tags>Telligent utility</tags>
-  </metadata>
-	<files>
-      <file src="bin\**\FourRoads.TelligentCommunity.MicroData.dll" target="lib\net462" exclude="*Tests*" />
+    <metadata>
+        <id>FourRoads.TelligentCommunity101.MicroData</id>
+        <version>$version$</version>
+        <title>$title$</title>
+        <authors>$author$</authors>
+        <owners>$author$</owners>
+        <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
+        <projectUrl>https://github.com/4-Roads/FourRoads.TelligentCommunity</projectUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <copyright>Copyright © Four Roads Ltd 2012-2017</copyright>
+        <description>$description$</description>
+        <tags>Telligent utility</tags>
+        <dependencies>
+            <dependency id="FourRoads.Common" version="5.2.27" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="bin\**\FourRoads.TelligentCommunity.MicroData.dll" target="lib\net462" exclude="*Tests*" />
     </files>
-    <dependencies>
-        <dependency id="FourRoads.Common" version="5.2.27" />
-    </dependencies>
     <ItemGroup>
         <PackageReference Include="Castle.NVelocity" version="1.1.1">
             <PrivateAssets>all</PrivateAssets>
