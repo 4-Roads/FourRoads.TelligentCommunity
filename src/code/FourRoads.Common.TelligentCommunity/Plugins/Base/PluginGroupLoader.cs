@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using FourRoads.Common.TelligentCommunity.Components;
+using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
@@ -14,21 +15,44 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
     public class PluginGroupLoader
     {
         private IEnumerable<Type> _plugins = null;
+        private readonly object _lockplugins = new object();
+
+        public PluginGroupLoader()
+        {
+            PluginManager.BeforeInitialization += PluginManager_BeforeInitialization;
+        }
+
+        private void PluginManager_BeforeInitialization(object sender, EventArgs e)
+        {
+            lock (_lockplugins)
+            {
+                _plugins = null;
+            }
+        }
 
         public void Initialize(PluginGroupLoaderTypeVisitor visitor, Type[] priorityPlugins = null)
         {
-            _plugins = GetPlugins(visitor, priorityPlugins);
+            lock (_lockplugins)
+            {
+                if (_plugins == null)
+                {
+                    _plugins = GetPlugins(visitor, priorityPlugins);
+                }
+            }
         }
 
         public IEnumerable<Type> GetPlugins()
         {
-            if (_plugins == null)
-                throw new InvalidOperationException("Must call Initialize first");
+            lock (_lockplugins)
+            {
+                if (_plugins == null)
+                    throw new InvalidOperationException("Must call Initialize first");
 
-            return _plugins;
+                return _plugins;
+            }
         }
 
-        private IEnumerable<Type> GetPlugins(PluginGroupLoaderTypeVisitor visitor , Type[] priorityPlugins)
+        private IEnumerable<Type> GetPlugins(PluginGroupLoaderTypeVisitor visitor, Type[] priorityPlugins)
         {
             Type type = visitor.GetPluginType();
 

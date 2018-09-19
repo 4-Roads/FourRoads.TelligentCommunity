@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Web;
 using System.Xml.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -17,18 +22,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         #region IPlugin Members
 
-        public string Name
-        {
-            get { return ProjectName + " - Factory Default Widget Provider"; }
-        }
+        public string Name => ProjectName + " - Widgets";
 
-        public string Description
-        {
-            get { return "Defines the default widget set for " + ProjectName+ "."; }
-        }
+        public string Description => "Defines the default widget set for " + ProjectName+ ".";
 
         public void Initialize()
         {
+            ThemeVersionHelper.LocalVersionCheck($"widgets-{ProjectName}", Version, Install);
         }
 
         #endregion
@@ -51,6 +51,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                         using (var stream = EmbeddedResources.GetStream(resourceName))
                         {
+                            Apis.Get<IEventLog>().Write($"Installting widget {widgetName}", new EventLogEntryWriteOptions() {Category = "4 Roads - Widgets"});
+
                             FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(this, widgetName, stream);
                         }
 
@@ -93,7 +95,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
                     catch (Exception exception)
                     {
-                        new TCException(string.Format("Couldn't load widget from '{0}' embedded resource.", resourceName), exception).Log();
+                        new TCException($"Couldn't load widget from '{resourceName}' embedded resource.", exception).Log();
                     }
                 });
             }
@@ -110,15 +112,12 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
                 catch (Exception exception)
                 {
-                    new TCException( string.Format("Couldn't delete factory default widgets from provider ID: '{0}'.", ScriptedContentFragmentFactoryDefaultIdentifier), exception).Log();
+                    new TCException($"Couldn't delete factory default widgets from provider ID: '{ScriptedContentFragmentFactoryDefaultIdentifier}'.", exception).Log();
                 }
             }
         }
 
-        public Version Version
-        {
-            get { return GetType().Assembly.GetName().Version; }
-        }
+        public Version Version => GetType().Assembly.GetName().Version;
 
         #endregion
     }

@@ -42,10 +42,6 @@
     <Reference Include="FourRoads.Common.Web, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FourRoads.Common.5.0.0.121\lib\net462\FourRoads.Common.Web.dll</HintPath>
     </Reference>
-    <Reference Include="NVelocity, Version=1.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Castle.NVelocity.1.1.1\lib\net40\NVelocity.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -69,6 +65,10 @@
     <Reference Include="Telligent.Evolution.Api, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Telligent.Evolution.Blogs, Version=10.1.6.9599, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Components, Version=8.0.0.37997, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -105,6 +105,7 @@
     <Compile Include="Components\TCPagedQuery.cs" />
     <Compile Include="Components\Tokenizers\TokenizedTemplateEnumerableToken.cs" />
     <Compile Include="Components\Utility\EmbeddedResourcesBase.cs" />
+    <Compile Include="Controls\ApiSafeBlogLookup.cs" />
     <Compile Include="Controls\ApiSafeUserLookup.cs" />
     <Compile Include="Controls\MultiSelectRepeater.cs" />
     <Compile Include="Controls\PasswordPropertyControl.cs" />
@@ -115,10 +116,14 @@
     <Compile Include="DryIoc\ImTools.cs" />
     <Compile Include="Plugins\Base\CFSFilestoreInstaller.cs" />
     <Compile Include="Plugins\Base\FactoryDefaultThemeInstaller.cs" />
+    <Compile Include="Plugins\Base\FactoryDefaultThemeInstallerV2.cs" />
     <Compile Include="Plugins\Base\FactoryDefaultWidgetProviderInstaller.cs" />
+    <Compile Include="Plugins\Base\FactoryDefaultWidgetProviderInstallerv2.cs" />
     <Compile Include="Plugins\Base\PluginBase.cs" />
     <Compile Include="Plugins\Base\PluginGroupLoader.cs" />
+    <Compile Include="Plugins\Base\ScriptableInstaller.cs" />
     <Compile Include="Plugins\Base\SqlScriptsInstaller.cs" />
+    <Compile Include="Plugins\Base\ThemeVersionHelper.cs" />
     <Compile Include="Plugins\Base\VideoFileViewerBase.cs" />
     <Compile Include="Plugins\Extensions\ContentExtension.cs" />
     <Compile Include="Plugins\Interfaces\IBindingsLoader.cs" />
@@ -134,13 +139,14 @@
     <Compile Include="Routing\SiteRootRouteConstraint.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Controls\MultiSelectRepeater.js" />
-    <Content Include="Plugins\insertmarkup.js" />
+    <EmbeddedResource Include="Controls\MultiSelectRepeater.js" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Javascript\insertmarkup.js" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

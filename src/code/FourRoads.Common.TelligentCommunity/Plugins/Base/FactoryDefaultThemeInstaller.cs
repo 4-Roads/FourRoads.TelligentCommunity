@@ -16,18 +16,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
 
-        public string Name
-        {
-            get { return ProjectName + " - Factory Default Theme installer"; }
-        }
+        public string Name => ProjectName + " - Theme";
 
-        public string Description
-        {
-            get { return "Installs the default theme for " + ProjectName + "."; }
-        }
+        public string Description => "Installs the default theme for " + ProjectName + ".";
 
         public void Initialize()
         {
+            ThemeVersionHelper.LocalVersionCheck($"theme-{ProjectName}", Version, Install);
         }
 
         #endregion

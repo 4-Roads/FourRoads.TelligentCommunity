@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Controls;
 using Telligent.DynamicConfiguration.Components;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
@@ -15,7 +17,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
-        public readonly static string DefaultConnectionString = Telligent.Common.DataProvider.GetConnectionString();
+
         private string _connectionString = null;
 
         #region IPlugin Members
@@ -83,7 +85,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         private SqlConnection GetSqlConnection()
         {
-            return new SqlConnection(ConnectionString);
+            return Apis.Get<IDatabaseConnections>().GetConnection(ConnectionString);
         }
 
         private static IEnumerable<string> GetStatementsFromSqlBatch(string sqlBatch)
@@ -97,14 +99,14 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
 
-        public Version Version { get { return GetType().Assembly.GetName().Version; } }
+        public Version Version => GetType().Assembly.GetName().Version;
 
         protected string ConnectionString
         {
             get
             {
                 if (string.IsNullOrEmpty(_connectionString))
-                    _connectionString = DefaultConnectionString;
+                    _connectionString = "SiteSqlServer";
 
                 return _connectionString;
             }

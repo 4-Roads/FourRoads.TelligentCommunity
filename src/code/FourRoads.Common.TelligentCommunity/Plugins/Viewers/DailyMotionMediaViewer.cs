@@ -56,7 +56,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Viewers
                 string videoId = "video_" + Guid.NewGuid().ToString();
                 StringBuilder embedHtml = new StringBuilder();
                 embedHtml.Append("<script type=\"text/javascript\" src=\"");
-                embedHtml.Append(Globals.FullPath(handler.ClientScript.GetWebResourceUrl(typeof(DailyMotionMediaViewer), "FourRoads.Common.TelligentCommunity.Plugins.insertmarkup.js")));
+                embedHtml.Append(Globals.FullPath(handler.ClientScript.GetWebResourceUrl(typeof(DailyMotionMediaViewer), "FourRoads.Common.TelligentCommunity.Resources.Javascript.insertmarkup.js")));
                 embedHtml.Append("\"></script>");
                 embedHtml.AppendFormat("<div id=\"{0}\"><noscript>{1}</noscript></div>", videoId, playerHtml);
                 embedHtml.Append("<script type=\"text/javascript\">\n");

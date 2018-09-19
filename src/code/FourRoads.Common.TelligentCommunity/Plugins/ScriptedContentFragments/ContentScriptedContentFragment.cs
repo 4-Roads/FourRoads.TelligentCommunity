@@ -27,35 +27,24 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.ScriptedContentFragments
 
         protected IContentLogic ContentLogic { get; private set; }
 
-
-        public string GetBestImageUrl(string contentId)
+        public string GetBestImageUrl(Guid contentId , Guid contentTypeId)
         {
-            return GetBestImageUrl(new Guid(contentId));
+            return ContentLogic.GetBestImageUrl(contentId , contentTypeId);
         }
 
-        public ApiList<string> GetAllImageUrls(string contentId)
+        public ApiList<string> GetAllImageUrls(Guid contentId, Guid contentTypeId)
         {
-            return GetAllImageUrls(new Guid(contentId));
+            return new ApiList<string> (ContentLogic.GetAllImageUrls(contentId, contentTypeId));
         }
 
-        public string GetBestImageUrl(Guid contentId)
+        public ApiList<string> GetVideoUrls(Guid contentId, Guid contentTypeId)
         {
-            return ContentLogic.GetBestImageUrl(contentId);
+            return new ApiList<string>(ContentLogic.GetAllVideoUrls(contentId, contentTypeId));
         }
 
-        public ApiList<string> GetAllImageUrls(Guid contentId)
+        public string GetFirstVideoUrl(Guid contentId, Guid contentTypeId)
         {
-            return new ApiList<string> (ContentLogic.GetAllImageUrls(contentId));
-        }
-
-        public ApiList<string> GetVideoUrls(Guid contentId)
-        {
-            return new ApiList<string>(ContentLogic.GetAllVideoUrls(contentId));
-        }
-
-        public string GetFirstVideoUrl(Guid contentId)
-        {
-            return ContentLogic.GetFirstVideoUrl(contentId);
+            return ContentLogic.GetFirstVideoUrl(contentId, contentTypeId);
         }
 
         public string GetVideoPlayerHtml(string videoUrl, int maxWidth, int maxHeight)

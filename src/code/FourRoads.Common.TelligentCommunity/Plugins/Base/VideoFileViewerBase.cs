@@ -2,6 +2,7 @@
 using System.Web;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -75,7 +76,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
             if (current != null)
             {
-                return PublicApi.UI.GetResizedImageHtml(current.Response.ApplyAppPathModifier(this.GetPreviewImageUrl(url)), options.Height.HasValue ? options.Height.Value : 0, options.Width.HasValue ? options.Width.Value : 0);
+                return Apis.Get<IUI>().GetResizedImageHtml(current.Response.ApplyAppPathModifier(this.GetPreviewImageUrl(url)), options.Height.HasValue ? options.Height.Value : 0, options.Width.HasValue ? options.Width.Value : 0);
             }
 
             return string.Empty;
