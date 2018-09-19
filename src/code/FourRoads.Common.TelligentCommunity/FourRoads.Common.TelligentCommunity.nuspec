@@ -16,4 +16,12 @@
             <dependency id="FourRoads.Common" version="5.0.0.121" />
         </dependencies>
     </metadata>
+    <files>
+        <file src="bin\**\FourRoads.Common.TelligentCommunity.dll" target="lib\net462" exclude="*Tests*" />
+    </files>
+    <!--<ItemGroup>
+        <PackageReference Include="Castle.NVelocity" version="1.1.1">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>-->
 </package>
