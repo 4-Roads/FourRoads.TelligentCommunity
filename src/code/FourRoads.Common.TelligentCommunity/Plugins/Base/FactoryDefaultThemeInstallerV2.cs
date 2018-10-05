@@ -29,6 +29,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         private FileSystemWatcher _fileSystemWatcher;
         private IPluginConfiguration _configuration;
         private static Mutex _pool = new Mutex(false, "ThemeProcess");
+        private static readonly object _updateLocker = new object();
 
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
@@ -84,7 +85,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Install(Version lastInstalledVersion)
         {
-            if (lastInstalledVersion < Version || IsDebugBuild)
+            if (lastInstalledVersion < Version)
             {
                 Uninstall();
 
@@ -143,33 +144,59 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         private static void UpdateTheme(XmlDocument xmlDocument)
         {
-            XmlNode node = xmlDocument.SelectSingleNode("/theme/themeImplementation");
-
-            if (node != null)
+            lock (_updateLocker)
             {
-                Telligent.Evolution.Components.Theme theme = ThemeConfigurations.DeserializeTheme(node, true, false);
 
-                Guid name = new Guid(xmlDocument.SelectSingleNode("/theme/@name").Value);
-                Guid themeTypeid = new Guid(xmlDocument.SelectSingleNode("/theme/themeImplementation/themeInformation/@themeTypeId").Value);
+                XmlNode node = xmlDocument.SelectSingleNode("/theme/themeImplementation");
 
-                ThemeConfigurationData data = new ThemeConfigurationData(themeTypeid, CSContext.Current.SiteThemeData.ThemeContextID, name.ToString("N"));
+                if (node != null)
+                {
+                    Telligent.Evolution.Components.Theme theme = ThemeConfigurations.DeserializeTheme(node, true, false);
 
-                ThemeConfigurationDataImporter importer = new ThemeConfigurationDataImporter(data, CSContext.Current);
+                    Guid name = new Guid(xmlDocument.SelectSingleNode("/theme/@name").Value);
+                    Guid themeTypeid = new Guid(xmlDocument.SelectSingleNode("/theme/themeImplementation/themeInformation/@themeTypeId").Value);
 
-                importer.Import(node.SelectSingleNode("themeInformation/factoryDefaultConfiguration"));
+                    ThemeConfigurationData data = new ThemeConfigurationData(themeTypeid, CSContext.Current.SiteThemeData.ThemeContextID, name.ToString("N"));
 
-                ThemeConfigurations.SaveFactoryDefaults(theme, data);
+                    ThemeConfigurationDataImporter importer = new ThemeConfigurationDataImporter(data, CSContext.Current);
 
-                ClearCacheNotApiSafe();
+                    importer.Import(node.SelectSingleNode("themeInformation/factoryDefaultConfiguration"));
+
+                    ThemeConfigurations.SaveFactoryDefaults(theme, data);
+
+                    ClearCacheNotApiSafe(theme.ThemeID, theme.ThemeTypeID);
+                }
             }
         }
 
-        private static void ClearCacheNotApiSafe()
+        private static void ClearCacheNotApiSafe(Guid id, Guid ThemeTypeId)
         {
             Telligent.Common.Services.Get<IFactoryDefaultScriptedContentFragmentService>().ExpireCache();
             Telligent.Common.Services.Get<IScriptedContentFragmentService>().ExpireCache();
             Telligent.Common.Services.Get<IContentFragmentPageService>().RemoveAllFromCache();
             Telligent.Common.Services.Get<IContentFragmentService>().RefreshContentFragments();
+
+            
+            // in theory this should refresh the cache >= 10.2.2.4296
+            //var theme = Themes.List(ThemeTypeId).FirstOrDefault(t => t.Id == id);
+            //if (theme != null)
+            //{
+            //    byte[] byteArray = Encoding.ASCII.GetBytes(".dummy.4roads {padding: 21px;}");
+            //    MemoryStream stream = new MemoryStream(byteArray);
+
+            //    // add an remove a file to trigger a cache clear and reload
+            //    Telligent.Evolution.Extensibility.UI.Version1.ThemeFiles.AddUpdateFactoryDefault(theme, ThemeProperties.StyleSheetFiles, "Test.less", stream, (int)stream.Length , new CssThemeFileOptions() { ApplyToModals = true, ApplyToNonModals = true });
+            //    Telligent.Evolution.Extensibility.UI.Version1.ThemeFiles.RemoveFactoryDefault(theme, ThemeProperties.StyleSheetFiles, "Test.less");
+            //}
+
+            // the calls below are not reliable when called during init phase
+            //Telligent.Evolution.Components.ThemeFiles.RequestHostVersionedThemeFileRegeneration();
+            //SystemFileStore.RequestHostVersionedThemeFileRegeneration();
+        }
+
+        private static void InteractiveClearCacheNotApiSafe()
+        {
+            // the calls below are not reliable when called during init phase
             Telligent.Evolution.Components.ThemeFiles.RequestHostVersionedThemeFileRegeneration();
             SystemFileStore.RequestHostVersionedThemeFileRegeneration();
         }
@@ -331,6 +358,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                                         UpdatePageLayouts(xmlDocument);
 
                                         UpdateTheme(xmlDocument);
+                                        InteractiveClearCacheNotApiSafe();
                                     }
                                     catch (Exception ex)
                                     {
