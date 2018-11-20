@@ -365,7 +365,8 @@ namespace FourRoads.TelligentCommunity.PowerBI
                             new Column() { name = "JoinedOn", dataType = "DateTime" },
                             new Column() { name = "LastVisitedOn", dataType = "DateTime" },
                             new Column() { name = "UpdatedOn", dataType = "DateTime" },
-                            new Column() { name = "TotalPosts", dataType = "Int64" }
+                            new Column() { name = "TotalPosts", dataType = "Int64" },
+                            new Column() { name = "AgeGroup", dataType = "string" }
                         }
                     },
                     new Table()
@@ -550,7 +551,8 @@ namespace FourRoads.TelligentCommunity.PowerBI
                     new Column() { name = "JoinedOn", dataType = "DateTime" },
                     new Column() { name = "LastVisitedOn", dataType = "DateTime" },
                     new Column() { name = "UpdatedOn", dataType = "DateTime" },
-                    new Column() { name = "TotalPosts", dataType = "Int64" }
+                    new Column() { name = "TotalPosts", dataType = "Int64" },
+                    new Column() { name = "AgeGroup", dataType = "string" }
                 }
             };
 
@@ -773,7 +775,7 @@ namespace FourRoads.TelligentCommunity.PowerBI
                 sb.Append($"{delimiter}\"LastVisitedOn\":\"{Helpers.UserProfile.FormatDateTime(user.LastVisitedDate)}\"");
                 sb.Append($"{delimiter}\"UpdatedOn\":\"{Helpers.UserProfile.FormatDate()}\"");
                 sb.Append($"{delimiter}\"TotalPosts\":{user.TotalPosts}");
-
+                
                 foreach (var field in Helpers.UserProfile.GetUserProfileFields().Where(k => fields.Contains(k.Name) || fields.Count == 0))
                 {
                     sb.Append($"{delimiter}\"{field.Title}\":{Helpers.UserProfile.ExtractUserProfileValue(user, field)}");
