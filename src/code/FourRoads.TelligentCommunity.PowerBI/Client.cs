@@ -55,13 +55,12 @@ namespace FourRoads.TelligentCommunity.PowerBI
                 azureLanguage = new AzureLanguage(azureRegion, azuretextAnalyticsAPI);
             }
 
-            string watsonUserName = configuration.GetString("watsonUserName");
-            string watsonPassword = configuration.GetString("watsonPassword");
             string watsonLanguageUrl = configuration.GetString("watsonLanguageUrl");
+            string watsontextAnalyticsAPI = configuration.GetString("watsonTextAnalyticsAPI");
 
-            if (!string.IsNullOrWhiteSpace(watsonUserName) && !string.IsNullOrWhiteSpace(watsonPassword) && !string.IsNullOrWhiteSpace(watsonLanguageUrl))
+            if (!string.IsNullOrWhiteSpace(watsontextAnalyticsAPI) && !string.IsNullOrWhiteSpace(watsonLanguageUrl))
             {
-                watsonLanguage = new WatsonLanguage(watsonUserName, watsonPassword, watsonLanguageUrl);
+                watsonLanguage = new WatsonLanguage(watsontextAnalyticsAPI, watsonLanguageUrl);
             }
 
         }

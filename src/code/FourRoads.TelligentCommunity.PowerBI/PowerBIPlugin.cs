@@ -1,4 +1,5 @@
 ﻿using FourRoads.Common.TelligentCommunity.Controls;
+using FourRoads.TelligentCommunity.PowerBI.Analytics.Language.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+using TelligentProperty = Telligent.DynamicConfiguration.Components.Property;
 
 namespace FourRoads.TelligentCommunity.PowerBI
 {
@@ -54,6 +56,10 @@ namespace FourRoads.TelligentCommunity.PowerBI
                     _client.UpdateUserProfileSchema(_fields);
                 }
             }
+        }
+        public IPluginConfiguration GetConfiguration()
+        {
+            return _configuration;
         }
 
         public void UpdateUserProfiles()
@@ -161,13 +167,21 @@ namespace FourRoads.TelligentCommunity.PowerBI
                 PropertyGroup azureGroup = new PropertyGroup("AzureAnalytics", "Azure Analytics", 0);
 
                 azureGroup.Properties.Add(new Property("azureRegion", "Azure Analytics Region", PropertyType.String, 0, "Westeurope"));
-                azureGroup.Properties.Add(new Property("azureTextAnalyticsAPI", "Text Analytics API Key", PropertyType.String, 0, ""));
+                AddPrivateProp("azureTextAnalyticsAPI", "Text Analytics API Key", azureGroup);
 
+                var azureTestControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
+                azureTestControl.ControlType = typeof(AzureTestControl);
+                azureGroup.Properties.Add(azureTestControl);
+                
                 PropertyGroup watsonGroup = new PropertyGroup("WatsonAnalytics", "Watson Analytics", 0);
 
-                watsonGroup.Properties.Add(new Property("watsonLanguageUrl", "NLP Url", PropertyType.Url, 0, "https://gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2018-03-16"));
-                watsonGroup.Properties.Add(new Property("watsonUserName", "User Name", PropertyType.String, 0, ""));
-                AddPrivateProp("watsonPassword", "Password", watsonGroup);
+                watsonGroup.Properties.Add(new Property("watsonLanguageUrl", "NLP Url", PropertyType.Url, 0,
+                    "https://gateway-fra.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2018-03-16"));
+                AddPrivateProp("watsonTextAnalyticsAPI", "NLP API Key", watsonGroup);
+
+                var watsonTestControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
+                watsonTestControl.ControlType = typeof(WatsonTestControl);
+                watsonGroup.Properties.Add(watsonTestControl);
 
                 PropertyGroup userprofileGroup = new PropertyGroup("UserProfileFields", "User Profile Fields", 0);
 

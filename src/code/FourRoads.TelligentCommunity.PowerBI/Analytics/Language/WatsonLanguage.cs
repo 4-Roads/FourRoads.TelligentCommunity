@@ -15,10 +15,10 @@ namespace FourRoads.TelligentCommunity.PowerBI
         private static string AuthToken;
         private static string LanguageUrl;
 
-        public WatsonLanguage(string username , string password, string url)
+        public WatsonLanguage(string apikey, string url)
         {
             LanguageUrl = url;
-            AuthToken = Base64Encode(username + ":" + password);
+            AuthToken = Base64Encode("apikey:" + apikey);
         }
 
         #region Anaylse a piece of text using watson nlp to csv 
