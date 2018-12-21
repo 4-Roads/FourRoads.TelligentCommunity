@@ -11,7 +11,8 @@ namespace FourRoads.TelligentCommunity.PowerBI.Helpers
         {
             List<UserProfileField> results = new List<UserProfileField>();
 
-            results.Add(new UserProfileField() { Name = "DisplayName" , Title = "Display Name", FieldType = new UserProfileFieldType() { Name = "string" } });
+            results.Add(new UserProfileField() { Name = "DisplayName", Title = "Display Name", FieldType = new UserProfileFieldType() { Name = "string" } });
+            results.Add(new UserProfileField() { Name = "AgeGroup", Title = "Age Group", FieldType = new UserProfileFieldType() { Name = "string" } });
 
             // this does not work in 10.1 as when called from ConfigurationOptions 
             // 
@@ -56,6 +57,7 @@ namespace FourRoads.TelligentCommunity.PowerBI.Helpers
                 }
             }
 
+
             return dataType;
         }
 
@@ -66,7 +68,15 @@ namespace FourRoads.TelligentCommunity.PowerBI.Helpers
 
             if (user.ProfileFields[field.Name] != null)
             {
-                fieldValue = user.ProfileFields[field.Name].Value;
+                switch (field.Name)
+                {
+                    case "core_Gender":
+                        fieldValue = user.Gender;
+                        break;
+                    default:
+                        fieldValue = user.ProfileFields[field.Name].Value;
+                        break;
+                }
             }
             else
             {
@@ -76,8 +86,42 @@ namespace FourRoads.TelligentCommunity.PowerBI.Helpers
                     case "DisplayName":
                         fieldValue = user.DisplayName;
                         break;
+                    case "AgeGroup":
+                        if (user.Birthday.HasValue && user.Birthday.Value.Year > 1)
+                        {
+                            var age = CalculateAge((DateTime)user.Birthday);
+                            if (age < 20)
+                            {
+                                fieldValue = "under 20";
+                            }
+                            else if (age >= 20 && age < 30)
+                            {
+                                fieldValue = "20 to 30";
+                            }
+                            else if (age >= 30 && age < 40)
+                            {
+                                fieldValue = "30 to 40";
+                            }
+                            else if (age >= 40 && age < 50)
+                            {
+                                fieldValue = "40 to 50";
+                            }
+                            else if (age >= 50 && age < 60)
+                            {
+                                fieldValue = "50 to 60";
+                            }
+                            else if (age >= 60 && age < 70)
+                            {
+                                fieldValue = "60 to 70";
+                            }
+                            else if (age >= 70)
+                            {
+                                fieldValue = "70 and over";
+                            }
+                        }
+                        break;
                     default:
-                        fieldValue = string.Empty;
+                        fieldValue = "";
                         break;
                 }
             }
@@ -87,8 +131,28 @@ namespace FourRoads.TelligentCommunity.PowerBI.Helpers
                 case "DateTime":
                     return $"\"{FormatDate("yyyy-MM-dd HH:mm:ss", fieldValue)}\"";
                 default:
+                    if (string.IsNullOrWhiteSpace(fieldValue) || fieldValue.Equals("NotSet", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        fieldValue = "Unknown";
+                    }
+
                     return $"\"{fieldValue}\"";
             }
+        }
+
+        /// <summary>  
+        /// For calculating only age  
+        /// </summary>  
+        /// <param name="dateOfBirth">Date of birth</param>  
+        /// <returns> age e.g. 26</returns>  
+        private static int CalculateAge(DateTime dateOfBirth)
+        {
+            int age = 0;
+            age = DateTime.Now.Year - dateOfBirth.Year;
+            if (DateTime.Now.DayOfYear < dateOfBirth.DayOfYear)
+                age = age - 1;
+
+            return age;
         }
 
         public static string FormatDate(string format = "yyyy-MM-ddTHH:mm:ssZ", string date = null)

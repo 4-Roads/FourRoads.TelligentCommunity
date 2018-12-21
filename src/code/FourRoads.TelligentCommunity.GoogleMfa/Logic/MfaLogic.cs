@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Web;
@@ -152,12 +153,12 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                     var response = HttpContext.Current.Response;
 
                     // suppress any callbacks re search, notifications, header links etc
-                    if (request.Path.StartsWith("/api.ashx") ||
+                    if (IsOauthRequest(request) == false && (request.Path.StartsWith("/api.ashx") ||
                         request.Path.StartsWith("/oauth") ||
                         (request.Url.LocalPath == "/utility/scripted-file.ashx" &&
                         request.QueryString["_cf"] != null &&
                         request.QueryString["_cf"] != "logout.vm" &&
-                        request.QueryString["_cf"] != "validate.vm"))
+                        request.QueryString["_cf"] != "validate.vm")))
                     {
                         // this should only happen when in the second auth stage 
                         // for blocked callbacks so a bit brutal
@@ -174,6 +175,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                         //Is this a main page and not a callback etc 
                         (request.CurrentExecutionFilePathExtension == ".aspx" ||
                          request.CurrentExecutionFilePathExtension == ".htm" ||
+                         request.CurrentExecutionFilePathExtension == ".ashx" ||
                          request.CurrentExecutionFilePathExtension == string.Empty))
                     {
                         //redirect to 2 factor page
@@ -181,6 +183,28 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                     }
                 }
             }
+        }
+
+        private bool IsOauthRequest(HttpRequest request)
+        {
+            // path is authorize url
+            if (request.Path == "/api.ashx/v2/oauth/authorize") return true;
+
+            // path is 'get token' 
+            if (request.Path == "/api.ashx/v2/oauth/token") return true;
+
+            // or allow/deny page
+            var result = (request.Path == "/utility/scripted-file.ashx"
+                    && request.QueryString["client_id"] != null
+                    && (request.QueryString["redirect_uri"] != null
+                        || request.QueryString["response_type"] != null)
+                        || request.QueryString["client_secret"] != null
+                        || request.QueryString["code"] != null
+                        || request.QueryString["grant_type"] != null
+                        || request.QueryString["username"] != null
+                    );
+
+            return result;
         }
 
         private string GetSessionID(HttpContext context)

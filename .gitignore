@@ -241,4 +241,4 @@ $RECYCLE.BIN/
 **/lib/Telligent*/*.xml
 /src/code/TelligentCommunity
 /src/lib/Telligent
-/src/.vs/FourRoads.TelligentCommunity/v15/sqlite3
+src/.vs/FourRoads.TelligentCommunity/v15/Server/sqlite3

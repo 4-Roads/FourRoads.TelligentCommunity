@@ -46,7 +46,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         static DependencyContainer()
         {
-            
         }
 
         public static Container Container()
@@ -57,34 +56,56 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 {
                     // Only include one instance of common bindings
                     Type type = typeof(IBindingsLoader);
+                    var containingAssembly = type.Assembly.GetName().FullName;
 
-                    IEnumerable<Type> types = AppDomain.CurrentDomain.GetAssemblies().ToList().SelectMany(a =>
-                    {
-                        try
+                    var assemblyArray = AppDomain.CurrentDomain.GetAssemblies();
+                    
+                    var assemblies = assemblyArray.Where(asm => {
+
+                        // Only interested in assemblies which reference this one.
+                        // If they don't then they can't possibly contain any IBindingsLoader implementors.
+                        // This filters hundreds of assemblies (which take minutes to scan during startup) to usually a handful:
+                        var refs = asm.GetReferencedAssemblies();
+                        
+                        foreach (var reference in refs)
                         {
-                            return a.GetTypes();
-                        }
-                        catch (Exception ex)
-                        {
-                            if (ex is ReflectionTypeLoadException)
+                            if (reference.FullName == containingAssembly)
                             {
-                                ReflectionTypeLoadException rtl = ex as ReflectionTypeLoadException;
+                                return true;
+                            }
+                        }
 
-                                foreach (Exception rtlEx in rtl.LoaderExceptions)
+                        return false;
+                    });
+
+                    var asmList = assemblies.ToList();
+
+                    IEnumerable<Type> types = assemblies.SelectMany(a =>
+                        {
+                            try
+                            {
+                                return a.ExportedTypes.Where(t => type.IsAssignableFrom(t) && !t.IsInterface() && !t.IsAbstract());
+                            }
+                            catch (Exception ex)
+                            {
+                                if (ex is ReflectionTypeLoadException)
                                 {
-                                    new TCException(string.Format("Failed to load bindings extension from {0}, because of:", a.FullName), rtlEx).Log();
-                                }
+                                    ReflectionTypeLoadException rtl = ex as ReflectionTypeLoadException;
 
+                                    foreach (Exception rtlEx in rtl.LoaderExceptions)
+                                    {
+                                        new TCException(string.Format("Failed to load bindings extension from {0}, because of:", a.FullName), rtlEx).Log();
+                                    }
+
+                                }
+                                else
+                                {
+                                    new TCException(string.Format("Failed to load bindings extension from {0}", a.FullName), ex).Log();
+                                }
                             }
-                            else
-                            {
-                                new TCException(string.Format("Failed to load bindings extension from {0}", a.FullName), ex).Log();
-                            }
+                            return new Type[0];
                         }
-                        return new Type[0];
-                    }
-                        ).
-                        Where(t => type.IsAssignableFrom(t) && !t.IsInterface() && !t.IsAbstract());
+                    );
                     List<IBindingsLoader> bindingsLoaders = new List<IBindingsLoader>();
 
                     foreach (var bindingsType in types)
@@ -134,6 +155,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
 
             }
+            
             return _container;
         }
     }
@@ -147,7 +169,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Initialize()
         {
-            
+
         }
 
         public string Name => "4-Roads DI";

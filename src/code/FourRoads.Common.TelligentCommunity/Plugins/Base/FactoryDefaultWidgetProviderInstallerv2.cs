@@ -67,7 +67,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public virtual void Install(Version lastInstalledVersion)
         {
-            if (lastInstalledVersion < Version || IsDebugBuild)
+            if (lastInstalledVersion < Version)
             {
                 InstallNow();
             }
@@ -226,6 +226,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             Services.Get<IScriptedContentFragmentService>().ExpireCache();
             Services.Get<IContentFragmentPageService>().RemoveAllFromCache();
             Services.Get<IContentFragmentService>().RefreshContentFragments();
+            // the calls below are not reliable when called during init phase
             ThemeFiles.RequestHostVersionedThemeFileRegeneration();
             SystemFileStore.RequestHostVersionedThemeFileRegeneration();
         }
