@@ -6,6 +6,7 @@
 
 using System;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
@@ -15,17 +16,23 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.ScriptedContentFragments
 {
     public class ContentScriptedContentFragment
     {
+        private IContentLogic _contentLogic;
+
         public ContentScriptedContentFragment(IContentLogic contentLogic)
         {
-            if (contentLogic == null)
-            {
-                throw new ArgumentNullException("contentLogic");
-            }
-
-            ContentLogic = contentLogic;
+            _contentLogic = contentLogic;
         }
 
-        protected IContentLogic ContentLogic { get; private set; }
+        protected IContentLogic ContentLogic
+        {
+            get
+            {
+                if (_contentLogic == null)
+                    _contentLogic = Injector.Get<IContentLogic>();
+
+                return _contentLogic;
+            }
+        }
 
         public string GetBestImageUrl(Guid contentId , Guid contentTypeId)
         {
