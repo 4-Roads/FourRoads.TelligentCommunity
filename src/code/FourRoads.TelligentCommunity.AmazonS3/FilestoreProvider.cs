@@ -8,74 +8,90 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
+using FourRoads.Common;
+using FourRoads.Common.Interfaces;
 using FourRoads.Common.TelligentCommunity.Components;
-using Telligent.Evolution.Components;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using Telligent.Evolution.Configuration;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 
 namespace FourRoads.TelligentCommunity.AmazonS3
 {
-    public class FilestoreProvider :  ICentralizedFileStorageProvider, IEventEnabledCentralizedFileStorageProvider
+    internal class FileStorageFileCache : SimpleCachedCollection<FileStorageFile>
+    {
+        public FileStorageFileCache(ICache cacheProvider)
+            : base(cacheProvider)
+        {
+            //Cache provider does not automatically get file
+            GetDataSingle = id => null;
+        }
+
+        public static string CreateCacheId(string filestoreKey, string path, string file)
+        {
+            return $"S3Cache-{filestoreKey}-{path}-{file}";;
+        }
+    }
+
+    public class FilestoreProvider :  IEventEnabledCentralizedFileStorageProvider
     {
         private string _bucketName;
         private AmazonS3Client s3Client;
         private bool _acellerationEnabled;
         private const string PlaceHolderFilename = "__path__place__holder.cfs.s3";
         private static readonly object InitLock = new Object();
-        private static HashSet<string> _fileSet;
+        private FileStorageFileCache _fileSet;
+        private int _cacheTime;
 
         public void Initialize(string fileStoreKey, XmlNode node)
         {
+    
+            if (s3Client != null)
+                return;
+
+            _fileSet = new FileStorageFileCache(Injector.Get<ICache>());
+
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            if (string.IsNullOrWhiteSpace(fileStoreKey))
+            {
+                throw new ArgumentNullException(nameof(fileStoreKey));
+            }
+
+            FileStoreKey = fileStoreKey;
+
+            _bucketName = node.Attributes?["bucket"].Value ?? throw new ArgumentNullException(nameof(node), "No attributes defined on xml configuration, please specify at least awsSecretAccessKey, awsAccessKeyId, bucket");
+
+            var credentials = new BasicAWSCredentials(node.Attributes["awsSecretAccessKey"].Value, node.Attributes["awsAccessKeyId"].Value);
+
+            string regionString = node.Attributes["region"]?.Value;
+
+            var configuration = new AmazonS3Config() {SignatureMethod = SigningAlgorithm.HmacSHA256};
+
+            if (!string.IsNullOrWhiteSpace(regionString))
+            {
+                var region = RegionEndpoint.GetBySystemName(regionString);
+
+                configuration.RegionEndpoint = region;
+            }
+
+            _cacheTime = Convert.ToInt32(node.Attributes["cacheTimeSeconds"]?.Value);
+
+            s3Client = new AmazonS3Client(credentials, configuration);
+
+            bool enableAcceleration;
+
+            bool.TryParse(node.Attributes["enableAcceleration"]?.Value, out enableAcceleration);
+
             lock (InitLock)
             {
-                if (s3Client != null)
-                    return;
-
-                _fileSet = new HashSet<string>();
-
-                if (node == null)
-                {
-                    throw new ArgumentNullException(nameof(node));
-                }
-
-                if (node.Attributes == null)
-                {
-                    throw new ArgumentNullException(nameof(node), "No attributes defined on xml configuration, please specify at least awsSecretAccessKey, awsAccessKeyId, bucket");
-                }
-
-                if (string.IsNullOrWhiteSpace(fileStoreKey))
-                {
-                    throw new ArgumentNullException(nameof(fileStoreKey));
-                }
-
-                FileStoreKey = fileStoreKey;
-
-                _bucketName = node.Attributes["bucket"].Value;
-
-                var credentials = new BasicAWSCredentials(node.Attributes["awsSecretAccessKey"].Value, node.Attributes["awsAccessKeyId"].Value);
-
-                string regionString = node.Attributes["region"]?.Value;
-
-                var configuration = new AmazonS3Config() {SignatureMethod = SigningAlgorithm.HmacSHA256};
-
-                if (!string.IsNullOrWhiteSpace(regionString))
-                {
-                    var region = RegionEndpoint.GetBySystemName(regionString);
-
-                    configuration.RegionEndpoint = region;
-                }
-
-                s3Client = new AmazonS3Client(credentials, configuration);
-
-                bool enableAcceleration;
-
-                bool.TryParse(node.Attributes["enableAcceleration"]?.Value, out enableAcceleration);
-
-                TestAcceleration().Wait(10000);
+                TestAcceleration().Wait(2000);
 
                 if (enableAcceleration && !_acellerationEnabled)
                 {
-                    EnableAccelerationAsync().Wait(10000);
+                    EnableAccelerationAsync().Wait(2000);
                 }
 
                 if (_acellerationEnabled)
@@ -130,11 +146,11 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         {
             System.Diagnostics.Debug.WriteLine($"GetFile:{path}\\{fileName}");
 
-            FileStorageFile file = new FileStorageFile(FileStoreKey, path, fileName);
+            string cacheKey = FileStorageFileCache.CreateCacheId(FileStoreKey, path, fileName);
 
-            string hashKey = $"{FileStoreKey}-{path}-{fileName}";
+            FileStorageFile file  = _fileSet.Get(cacheKey);
 
-            if (!_fileSet.Contains(hashKey))
+            if (file == null)
             {
                 //Since we don't know if it exists let's do a check
                 if (!DoesFileExist(path , fileName))
@@ -142,7 +158,9 @@ namespace FourRoads.TelligentCommunity.AmazonS3
                     return null;
                 }
 
-                _fileSet.Add(hashKey);
+                file = new FileStorageFile(FileStoreKey, path, fileName) {CacheRefreshInterval = _cacheTime};
+
+                _fileSet.Add(file);
             }
 
             return file;
@@ -150,21 +168,19 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
         private bool DoesFileExist(string path, string fileName)
         {
-            var request = new ListObjectsRequest();
-
-            request.BucketName = _bucketName;
-            request.Prefix = MakeKey(path, fileName);
-            request.MaxKeys = 1;
+            var request = new ListObjectsRequest
+            {
+                BucketName = _bucketName,
+                Prefix = MakeKey(path, fileName),
+                MaxKeys = 1
+            };
 
             ListObjectsResponse response = s3Client.ListObjects(request);
 
             if (response.S3Objects.Count == 0)
                 return false;
 
-            if (String.Compare(response.S3Objects[0].Key , request.Prefix, StringComparison.OrdinalIgnoreCase) != 0)
-                return false;
-
-            return true;
+            return string.Compare(response.S3Objects[0].Key , request.Prefix, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         public int GetContentLength(string path, string fileName)
@@ -192,10 +208,12 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         {
             List<FileStorageFile> files = new List<FileStorageFile>();
 
-            ListObjectsRequest request = new ListObjectsRequest();
-            request.BucketName = _bucketName;
-            request.Prefix = MakeKey(path, "");
-            request.MaxKeys = int.MaxValue;
+            ListObjectsRequest request = new ListObjectsRequest
+            {
+                BucketName = _bucketName,
+                Prefix = MakeKey(path, ""),
+                MaxKeys = int.MaxValue
+            };
 
             if (searchOption == PathSearchOption.TopLevelPathOnly)
             {
@@ -214,16 +232,16 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
                     if (includePlaceholders || string.Compare(fileName, PlaceHolderFilename, StringComparison.OrdinalIgnoreCase) != 0)
                     {
-                        FileStorageFile result = new FileStorageFile(FileStoreKey, filePath, fileName, Convert.ToInt32(entry.Size));
+                        string cacheKey = FileStorageFileCache.CreateCacheId(FileStoreKey, path, fileName);
 
-                        files.Add(result);
+                        FileStorageFile file = _fileSet.Get(cacheKey);
 
-                        string hashKey = $"{FileStoreKey}-{path}-{fileName}";
-
-                        if (!_fileSet.Contains(hashKey))
+                        if (file == null)
                         {
-                            _fileSet.Add(hashKey);
+                            file = new FileStorageFile(FileStoreKey, filePath, fileName, Convert.ToInt32(entry.Size)) {CacheRefreshInterval = _cacheTime};
+                            _fileSet.Add(file);
                         }
+                        files.Add(file);
                     }
 
                 }
@@ -268,10 +286,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             s3Client.DeleteObject(_bucketName, key);
 
-            if (_fileSet.Contains(key))
-            {
-                _fileSet.Remove(key);
-            }
+             _fileSet.Remove((FileStorageFile)GetFile(path, fileName));
 
             EventExecutor?.OnAfterDelete(FileStoreKey, path, fileName);
         }
@@ -371,30 +386,13 @@ namespace FourRoads.TelligentCommunity.AmazonS3
  
         public ICentralizedFileEventExecutor EventExecutor { get; set; }
 
-        public Stream GetContentStream(string path, string fileName)
+        public GetObjectResponse GetContentStream(string path, string fileName)
         {
-            System.Diagnostics.Debug.WriteLine($"GetContentStream:{path}\\{fileName}");
-
             string fileKey = MakeKey(path, fileName);
 
             if (DoesFileExist(path, fileName))
             {
-                using (var responseObjectStranStream = s3Client.GetObject(new GetObjectRequest() {BucketName = _bucketName, Key = fileKey}).ResponseStream)
-                {
-                    //Put all content into local filecache avoids memory issues
-                    string randomTempFileName = Path.GetTempFileName();
-
-                    FileInfo fileInfo = new FileInfo(randomTempFileName);
-
-                    fileInfo.Attributes = FileAttributes.Temporary;
-
-                    using (var tempFileStream = fileInfo.Open(FileMode.Truncate))
-                    {
-                        responseObjectStranStream.CopyTo(tempFileStream);
-                    }
-
-                    return new FileStream(randomTempFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose);
-                }
+                return s3Client.GetObject(new GetObjectRequest() {BucketName = _bucketName, Key = fileKey});
             }
 
             return null;
