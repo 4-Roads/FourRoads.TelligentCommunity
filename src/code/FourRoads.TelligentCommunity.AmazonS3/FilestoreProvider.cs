@@ -71,16 +71,18 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
                 bool.TryParse(node.Attributes["enableAcceleration"]?.Value, out enableAcceleration);
 
-                if (enableAcceleration)
-                {
-                    EnableAccelerationAsync().Wait(2000);
+                TestAcceleration().Wait(10000);
 
-                    if (_acellerationEnabled)
-                    {
-                        configuration.UseAccelerateEndpoint = _acellerationEnabled;
-                        //replace the client with accellerated version
-                        s3Client = new AmazonS3Client(credentials, configuration);
-                    }
+                if (enableAcceleration && !_acellerationEnabled)
+                {
+                    EnableAccelerationAsync().Wait(10000);
+                }
+
+                if (_acellerationEnabled)
+                {
+                    configuration.UseAccelerateEndpoint = _acellerationEnabled;
+                    //replace the client with accellerated version
+                    s3Client = new AmazonS3Client(credentials, configuration);
                 }
             }
         }
@@ -91,8 +93,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             {
                 if (! _acellerationEnabled)
                 {
-                    await TestAcceleration();
-
+  
                     var putRequest = new PutBucketAccelerateConfigurationRequest
                     {
                         BucketName = _bucketName,
