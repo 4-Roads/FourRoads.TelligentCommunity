@@ -80,6 +80,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                     var asmList = assemblies.ToList();
 
+                    //Add yourself as you contain bindings
+                    asmList.Add(typeof(DependencyContainer).Assembly);
+
                     IEnumerable<Type> types = assemblies.SelectMany(a =>
                         {
                             try

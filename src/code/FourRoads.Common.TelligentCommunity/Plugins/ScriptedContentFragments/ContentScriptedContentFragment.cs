@@ -16,23 +16,12 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.ScriptedContentFragments
 {
     public class ContentScriptedContentFragment
     {
-        private IContentLogic _contentLogic;
-
         public ContentScriptedContentFragment(IContentLogic contentLogic)
         {
-            _contentLogic = contentLogic;
+            ContentLogic = contentLogic;
         }
 
-        protected IContentLogic ContentLogic
-        {
-            get
-            {
-                if (_contentLogic == null)
-                    _contentLogic = Injector.Get<IContentLogic>();
-
-                return _contentLogic;
-            }
-        }
+        protected IContentLogic ContentLogic { get; private set; }
 
         public string GetBestImageUrl(Guid contentId , Guid contentTypeId)
         {
