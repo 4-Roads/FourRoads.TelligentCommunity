@@ -28,14 +28,13 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             FileName = fileName;
             Path = path;
             FileStoreKey = fileStoreKey;
-
         }
 
         #endregion
 
         public void Dispose()
         {
-            //_mmf?.Dispose();
+
         }
 
         #region ICentralizedFile Members
@@ -95,6 +94,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
                         using (Stream source = response.ResponseStream)
                         {
                             _cachedData = ReadFully(source);
+                            _contentLength = _cachedData.Length;
                         }
                     }
                     else
