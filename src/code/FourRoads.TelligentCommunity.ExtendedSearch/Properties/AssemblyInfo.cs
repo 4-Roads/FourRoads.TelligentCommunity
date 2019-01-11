@@ -7,5 +7,4 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.ExtendedSearch")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.ExtendedSearch")]

@@ -47,6 +47,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="EmbeddedResources.cs" />
     <Compile Include="FactoryDefaultWidgetProviderInstaller.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
