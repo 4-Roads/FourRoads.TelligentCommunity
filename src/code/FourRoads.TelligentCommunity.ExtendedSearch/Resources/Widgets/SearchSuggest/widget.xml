@@ -1,0 +1,40 @@
+<scriptedContentFragments>
+	<scriptedContentFragment name="${resource:Core_SearchSuggestList_Name}" version="10.1.8.10498" description="${resource:Core_SearchSuggestList_Description}" instanceIdentifier="1b9618a3849846d3a00f0be0716722dc" theme="" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" cssClass="search-result-list" provider="D9589449A65F4477A67F6E25F525E25F" >
+		<contentScript>
+      <![CDATA[
+      
+    #set ($query = false)
+    #set ($query = $core_v2_utility.Trim($core_v2_page.GetQueryStringValue('q')))
+
+     #set($sugestions= false)
+    #set($sugestions = $fr_search_ext.GetSuggestions($query, 5)) 
+
+    #if ($sugestions && $sugestions.Count() > 0)
+    <span>Did you mean:</span>
+    <ul>
+        #foreach ($sugestion in $sugestions)
+            <li><a href="$core_v2_encoding.HtmlAttributeEncode($sugestion.Url)">$sugestion.FullQuery</a></li>
+        #end
+    </ul>
+    #end
+
+	]]></contentScript>
+		<headerScript><![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Core_SearchSuggestList_Name}'))
+	]]></headerScript>
+		<configuration><![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="CF_Title" dataType="string" defaultValue="${resource:Core_SearchSuggestList_Name}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Platform" />
+</propertyGroup>
+	]]></configuration>
+		<languageResources><language key="en-us">
+
+  <resource name="CF_Title">Widget Title</resource>
+  <resource name="Core_SearchSuggestList_Description">Displays a list of alternative search suggestions.</resource>
+  <resource name="Core_SearchSuggestList_Name">4 Roads - Search Suggestion List</resource>
+</language></languageResources>
+		<files>
+
+		</files>
+	</scriptedContentFragment>
+</scriptedContentFragments>
