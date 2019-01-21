@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
-using FourRoads.Common;
 using FourRoads.Common.Interfaces;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
@@ -18,54 +16,12 @@ using Telligent.Evolution.Extensibility.Storage.Version1;
 
 namespace FourRoads.TelligentCommunity.AmazonS3
 {
-    internal sealed class CacheableDictionary<k, v> : Dictionary<k, v>, ICacheable where k : class
-    {
-        public CacheableDictionary(int cacheRefreshInterval, string[] cacheTags, CacheScopeOption cacheScope)
-        {
-            CacheRefreshInterval = cacheRefreshInterval;
-            CacheTags = cacheTags;
-            CacheScope = cacheScope;
-        }
-
-        public string CacheID => string.Join("-", Array.ConvertAll<object, string>(Keys.ToArray(), Convert.ToString));
-
-        public int CacheRefreshInterval { get; }
-
-        public string[] CacheTags { get; }
-
-        public CacheScopeOption CacheScope { get; }
-    }
-
-
-    internal class FileStorageFileCache : SimpleCachedCollection<FileStorageFile>
-    {
-        private FilestoreProvider _provider;
-
-        public FileStorageFileCache(ICache cacheProvider , FilestoreProvider provider)
-            : base(cacheProvider)
-        {
-            //Cache provider does not automatically get file
-            GetDataSingle = id =>
-            {
-                string[] parts = id.Replace($"$$S3Cache-{provider.FileStoreKey}-", "").Split('|');
-
-                return provider.GetInternal(parts[0], parts[1]);
-            };
-        }
-
-        public static string CreateCacheId(string filestoreKey, string path, string file)
-        {
-            return $"$$S3Cache-{filestoreKey}-{path}|{file}";;
-        }
-    }
-
     public class FilestoreProvider :  IEventEnabledCentralizedFileStorageProvider
     {
         private string _bucketName;
         private AmazonS3Client s3Client;
         private bool _acellerationEnabled;
         private const string PlaceHolderFilename = "__path__place__holder.cfs.s3";
-        private static readonly object InitLock = new Object();
         private FileStorageFileCache _fileSet;
         private int _cacheTime;
         private Dictionary<string, DateTime> _knownFiles = new Dictionary<string, DateTime>();
@@ -91,7 +47,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             _bucketName = node.Attributes?["bucket"].Value ?? throw new ArgumentNullException(nameof(node), "No attributes defined on xml configuration, please specify at least awsSecretAccessKey, awsAccessKeyId, bucket");
 
-            var credentials = new BasicAWSCredentials(node.Attributes["awsSecretAccessKey"].Value, node.Attributes["awsAccessKeyId"].Value);
+            var credentials = new BasicAWSCredentials(node.Attributes["awsAccessKeyId"].Value, node.Attributes["awsSecretAccessKey"].Value);
 
             string regionString = node.Attributes["region"]?.Value;
 
@@ -159,14 +115,21 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
         private void TestAcceleration()
         {
-            var getRequest = new GetBucketAccelerateConfigurationRequest
+            try
             {
-                BucketName = _bucketName
-            };
+                var getRequest = new GetBucketAccelerateConfigurationRequest
+                {
+                    BucketName = _bucketName
+                };
 
-            var response = s3Client.GetBucketAccelerateConfiguration(getRequest);
+                var response = s3Client.GetBucketAccelerateConfiguration(getRequest);
 
-            _acellerationEnabled = response.Status == BucketAccelerateStatus.Enabled;
+                _acellerationEnabled = response.Status == BucketAccelerateStatus.Enabled;
+            }
+            catch (Exception ex)
+            {
+                new TCException("Failed to test for Amazon S3 Acceleration", ex).Log();
+            }
         }
 
         public FileStorageFile GetInternal(string path, string fileName)

@@ -74,6 +74,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="FileStorageFile.cs" />
+    <Compile Include="FileStorageFileCache.cs" />
     <Compile Include="FilestoreProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
