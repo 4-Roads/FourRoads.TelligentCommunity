@@ -100,11 +100,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <EmbeddedResource Include="Resources\Widgets\6d9264a6f6c4434c9d9954b87a865e57\validate.vm" />
-    <EmbeddedResource Include="Resources\Widgets\295391e2b78d4b7e8056868ae4fe8fb3\validate.vm" />
+    <EmbeddedResource Include="Resources\Widgets\SyncMfa\validate.vm" />
+    <EmbeddedResource Include="Resources\Widgets\ValidateMfa\validate.vm" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\6d9264a6f6c4434c9d9954b87a865e57\mfa.js" />
+    <EmbeddedResource Include="Resources\Widgets\SyncMfa\mfa.js" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
@@ -113,17 +113,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\SyncMfa.xml">
+    <EmbeddedResource Include="Resources\Widgets\SyncMfa\widget.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\ValidateMfa.xml">
+    <EmbeddedResource Include="Resources\Widgets\ValidateMfa\widget.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\295391e2b78d4b7e8056868ae4fe8fb3\mfa.js" />
+    <EmbeddedResource Include="Resources\Widgets\ValidateMfa\mfa.js" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Sql\GoogleMFA.install.sql" />
