@@ -443,7 +443,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             {
                 string fileKey = MakeKey(path, fileName);
 
-                return s3Client.GetPreSignedURL(new GetPreSignedUrlRequest() { BucketName = _bucketName, Key = fileKey, Expires = DateTime.Now.AddHours(1)});
+                return s3Client.GetPreSignedURL(new GetPreSignedUrlRequest() { BucketName = _bucketName, Key = fileKey, Expires = DateTime.Now.AddHours(12)});
             }
 
             return null;
