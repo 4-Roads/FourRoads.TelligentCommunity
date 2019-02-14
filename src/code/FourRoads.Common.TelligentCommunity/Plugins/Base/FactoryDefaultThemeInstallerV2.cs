@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Controls;
@@ -17,7 +18,6 @@ using Theme = Telligent.Evolution.Extensibility.UI.Version1.Theme;
 
 #if DEBUG
     using System.IO;
-    using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Web.Script.Serialization;
