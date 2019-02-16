@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,9 +14,35 @@ using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using Telligent.Evolution.Configuration;
 using Telligent.Evolution.Extensibility.Storage.Version1;
+using Telligent.Evolution.Extensibility.Urls.Version1;
+
 
 namespace FourRoads.TelligentCommunity.AmazonS3
 {
+    public class AmazonS3FilterRequest : IHttpRequestFilter
+    {
+        public void Initialize()
+        {
+
+        }
+
+        public string Name => "Amazon S3 Patch for 301";
+        public string Description => "Amazon S3 Patch for 301, Telligent returns a 301 for CFS filestores where the path is redirected, the problem is that with extenal providers that use signed access this means the signed access must match the redirect period.  Also an expiring 301 is bad parctice, 301 are forever.";
+        public void FilterRequest(IHttpRequest request)
+        {
+            if (request.PageContext.UrlName == "cfs-file")
+            {
+                if (request.HttpContext.Response.StatusCode == 301)
+                {
+                    if (request.HttpContext.Response.RedirectLocation.Contains("amazonaws.com"))
+                    {
+                        request.HttpContext.Response.StatusCode = 302;
+                    }
+                }
+            }
+        }
+    }
+
     public class FilestoreProvider :  IEventEnabledCentralizedFileStorageProvider
     {
         private string _bucketName;
@@ -51,7 +78,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             string regionString = node.Attributes["region"]?.Value;
 
-            var configuration = new AmazonS3Config() {SignatureMethod = SigningAlgorithm.HmacSHA256};
+            var configuration = new AmazonS3Config {SignatureMethod = SigningAlgorithm.HmacSHA256};
 
             if (!string.IsNullOrWhiteSpace(regionString))
             {
@@ -68,7 +95,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             bool.TryParse(node.Attributes["enableAcceleration"]?.Value, out enableAcceleration);
 
-            System.Diagnostics.Debug.WriteLine($"Initialize Filestore: {fileStoreKey}");
+            Debug.WriteLine($"Initialize Filestore: {fileStoreKey}");
 
             TestAcceleration();
 
@@ -139,7 +166,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
         public ICentralizedFile GetFile(string path, string fileName)
         {
-            System.Diagnostics.Debug.WriteLine($"GetFile:{path}\\{fileName}");
+            Debug.WriteLine($"GetFile:{path}\\{fileName}");
 
             //Since we don't know if it exists let's do a check
             if (!DoesFileExist(path, fileName))
@@ -218,7 +245,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
         public IEnumerable<ICentralizedFile> GetFiles(string path, PathSearchOption searchOption, bool includePlaceholders)
         {
-            System.Diagnostics.Debug.WriteLine($"GetFiles:{path}\\{searchOption}");
+            Debug.WriteLine($"GetFiles:{path}\\{searchOption}");
 
             List <FileStorageFile> files = new List<FileStorageFile>();
 
@@ -226,7 +253,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             {
                 BucketName = _bucketName,
                 Prefix = MakeKey(path, ""),
-                MaxKeys = int.MaxValue,
+                MaxKeys = int.MaxValue
             };
 
             if (searchOption == PathSearchOption.TopLevelPathOnly)
@@ -392,7 +419,8 @@ namespace FourRoads.TelligentCommunity.AmazonS3
                 contentStream.CopyTo(tempFileStream);
             }
 
-            s3Client.PutObject(new PutObjectRequest() {
+            s3Client.PutObject(new PutObjectRequest
+            {
                 BucketName = _bucketName,
                 Key = MakeKey(path, fileName),
                 InputStream = new FileStream(randomTempFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose),
@@ -430,7 +458,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             if (DoesFileExist(path, fileName))
             {
-                return s3Client.GetObject(new GetObjectRequest() {BucketName = _bucketName, Key = fileKey});
+                return s3Client.GetObject(new GetObjectRequest {BucketName = _bucketName, Key = fileKey});
             }
 
             return null;
@@ -438,12 +466,12 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
         public string GetDownloadUrl(string path, string fileName)
         {
-            System.Diagnostics.Debug.WriteLine($"GetDownloadUrl:{path}\\{fileName}");
+            Debug.WriteLine($"GetDownloadUrl:{path}\\{fileName}");
             if (DoesFileExist(path, fileName))
             {
                 string fileKey = MakeKey(path, fileName);
 
-                return s3Client.GetPreSignedURL(new GetPreSignedUrlRequest() { BucketName = _bucketName, Key = fileKey, Expires = DateTime.Now.AddHours(12)});
+                return s3Client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucketName, Key = fileKey, Expires = DateTime.Now.AddMinutes(30)});
             }
 
             return null;
