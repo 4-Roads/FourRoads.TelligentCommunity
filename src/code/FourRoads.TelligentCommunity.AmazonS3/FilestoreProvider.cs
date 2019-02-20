@@ -18,6 +18,8 @@ using Telligent.Evolution.Configuration;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
+using Telligent.Evolution.Extensibility.Urls.Version1;
+using Telligent.Evolution.Extensibility.Version1;
 
 
 namespace FourRoads.TelligentCommunity.AmazonS3
@@ -35,22 +37,42 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
     public class FilestoreHelperModule : IHttpModule
     {
+        public static bool Enabled { get; set; }
+
         public void Init(HttpApplication context)
         {
-          context.EndRequest += ContextOnEndRequest;
+            context.EndRequest += ContextOnEndRequest;
         }
 
         private void ContextOnEndRequest(object sender, EventArgs eventArgs)
         {
-            if (Apis.Get<IUrl>().CurrentContext.UrlName == "cfs-file")
+            if (Enabled)
             {
-                if (HttpContext.Current.Response.StatusCode == 301)
+                if (Url.CurrentContext.UrlName == "cfs-file")
                 {
-                    if (HttpContext.Current.Response.RedirectLocation.Contains("amazonaws.com"))
+                    var response = HttpContext.Current.Response;
+
+                    if (response.StatusCode == 301)
                     {
-                        HttpContext.Current.Response.StatusCode = 302;
+                        if (response.RedirectLocation.IndexOf("amazonaws.com", StringComparison.OrdinalIgnoreCase) > 1)
+                        {
+                            response.StatusCode = 302;
+                        }
                     }
                 }
+
+            }
+        }
+
+        private IUrl _url;
+        private IUrl Url
+        {
+            get
+            {
+                if (_url == null)
+                    _url = Apis.Get<IUrl>();
+
+                return _url;
             }
         }
 
@@ -58,6 +80,17 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         {
 
         }
+    }
+
+    public class AmazonS3FilterRequest : IPlugin
+    {
+        public void Initialize()
+        {
+            FilestoreHelperModule.Enabled = PluginManager.IsEnabled(this);
+        }
+
+        public string Name => "Amazon S3 Patch for 301";
+        public string Description => "Amazon S3 Patch for 301, Telligent returns a 301 for CFS filestores where the path is redirected, the problem is that with extenal providers that use signed access this means the signed access must match the redirect period.  Also an expiring 301 is bad parctice, 301 are forever.";
     }
 
     public class FilestoreProvider :  IEventEnabledCentralizedFileStorageProvider

@@ -88,7 +88,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\packages\AWSSDK.S3.3.3.31.4\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
