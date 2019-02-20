@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web;
 using System.Xml;
 using Amazon;
 using Amazon.Runtime;
@@ -12,34 +13,50 @@ using Amazon.S3.Model;
 using FourRoads.Common.Interfaces;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Telligent.Evolution.Configuration;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
-using Telligent.Evolution.Extensibility.Urls.Version1;
 
 
 namespace FourRoads.TelligentCommunity.AmazonS3
 {
-    public class AmazonS3FilterRequest : IHttpRequestFilter
+    public class FilestoreHelperApplicationStart
     {
-        public void Initialize()
+        /// <summary>
+        /// Dynamically registers HTTP Module
+        /// </summary>
+        public static void Start()
         {
+            DynamicModuleUtility.RegisterModule(typeof(FilestoreHelperModule));
+        }
+    }
 
+    public class FilestoreHelperModule : IHttpModule
+    {
+        public void Init(HttpApplication context)
+        {
+          context.EndRequest += ContextOnEndRequest;
         }
 
-        public string Name => "Amazon S3 Patch for 301";
-        public string Description => "Amazon S3 Patch for 301, Telligent returns a 301 for CFS filestores where the path is redirected, the problem is that with extenal providers that use signed access this means the signed access must match the redirect period.  Also an expiring 301 is bad parctice, 301 are forever.";
-        public void FilterRequest(IHttpRequest request)
+        private void ContextOnEndRequest(object sender, EventArgs eventArgs)
         {
-            if (request.PageContext.UrlName == "cfs-file")
+            if (Apis.Get<IUrl>().CurrentContext.UrlName == "cfs-file")
             {
-                if (request.HttpContext.Response.StatusCode == 301)
+                if (HttpContext.Current.Response.StatusCode == 301)
                 {
-                    if (request.HttpContext.Response.RedirectLocation.Contains("amazonaws.com"))
+                    if (HttpContext.Current.Response.RedirectLocation.Contains("amazonaws.com"))
                     {
-                        request.HttpContext.Response.StatusCode = 302;
+                        HttpContext.Current.Response.StatusCode = 302;
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
+
         }
     }
 
