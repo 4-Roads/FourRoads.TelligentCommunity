@@ -48,16 +48,20 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         {
             if (Enabled)
             {
-                if (Url.CurrentContext.UrlName == "cfs-file")
-                {
-                    var response = HttpContext.Current.Response;
+                var response = HttpContext.Current.Response;
 
-                    if (response.StatusCode == 301)
+                if (response.StatusCode == 301)
+                {
+                    if (Url.CurrentContext != null)
                     {
-                        if (response.RedirectLocation.IndexOf("amazonaws.com", StringComparison.OrdinalIgnoreCase) > 1)
+                        if (string.Compare(Url.CurrentContext?.UrlName, "cfs-file", StringComparison.OrdinalIgnoreCase) == 0)
                         {
-                            response.StatusCode = 302;
+                            if (response.RedirectLocation.IndexOf("amazonaws.com", StringComparison.OrdinalIgnoreCase) > 1)
+                            {
+                                response.StatusCode = 302;
+                            }
                         }
+
                     }
                 }
 
