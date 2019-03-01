@@ -19,13 +19,10 @@ using Telligent.Evolution.Components.Jobs;
 using Telligent.Jobs;
 using System.Configuration;
 using Telligent.Common;
-
-#if DEBUG
-    using System.IO;
-    using System.Text;
-    using System.Threading;
-    using System.Web.Script.Serialization;
-#endif
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Web.Script.Serialization;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
@@ -58,12 +55,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Initialize()
         {
-#if DEBUG
-            if (_enableFilewatcher)
+            if (IsDebugBuild && _enableFilewatcher)
             {
                 InitializeFilewatcher();
             }
-#endif
         }
 
         #endregion
@@ -278,15 +273,17 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             }
         }
+        private bool IsDebugBuild => Diagnostics.IsDebug(GetType().Assembly);
 
         public Version Version => GetType().Assembly.GetName().Version;
 
         public void Update(IPluginConfiguration configuration)
         {
             _configuration = configuration;
-#if DEBUG
-            _enableFilewatcher = configuration.GetBool("filewatcher");
-#endif
+            if (IsDebugBuild)
+            {
+                _enableFilewatcher = configuration.GetBool("filewatcher");
+            }
         }
 
         internal class InstallButtonPropertyControl : PluginButtonPropertyControl
@@ -315,9 +312,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 button.Attributes.Add("CallingType", GetType().AssemblyQualifiedName);
                 propertyGroup.Properties.Add(button);
 
-#if DEBUG
-                propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
-#endif
+                if (IsDebugBuild)
+                {
+                    propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
+                }
+
                 return new[] { propertyGroup };
             }
         }
@@ -357,7 +356,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         }
         protected abstract ICallerPathVistor CallerPath();
 
-#if DEBUG
         private bool _enableFilewatcher = false;
         private static readonly object _pageLocker = new object();
         private FileSystemWatcher _fileSystemWatcher;
@@ -741,8 +739,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             }
         }
-#endif
-
         #endregion
     }
 }

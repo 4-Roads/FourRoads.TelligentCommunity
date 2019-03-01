@@ -19,12 +19,9 @@ using Telligent.Evolution.Components.Jobs;
 using Telligent.Jobs;
 using System.Configuration;
 using Telligent.Common;
-
-#if DEBUG
 using Telligent.Evolution.Components;
 using Telligent.Evolution.ScriptedContentFragments.Services;
 using ThemeFiles = Telligent.Evolution.Components.ThemeFiles;
-#endif
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
@@ -43,12 +40,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Initialize()
         {
-#if DEBUG
-            if (_enableFilewatcher)
+            if (IsDebugBuild && _enableFilewatcher)
             {
                 InitializeFilewatcher();
             }
-#endif
         }
 
         #endregion
@@ -247,9 +242,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Update(IPluginConfiguration configuration)
         {
-#if DEBUG
-            _enableFilewatcher = configuration.GetBool("filewatcher");
-#endif
+            if (IsDebugBuild)
+            {
+                _enableFilewatcher = configuration.GetBool("filewatcher");
+            }
         }
 
         public PropertyGroup[] ConfigurationOptions
@@ -264,9 +260,10 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 button.Attributes.Add("CallingType", GetType().AssemblyQualifiedName);
                 propertyGroup.Properties.Add(button);
 
-#if DEBUG
-                propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
-#endif
+                if (IsDebugBuild)
+                {
+                    propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
+                }
                 return new[] { propertyGroup };
             }
         }
@@ -406,7 +403,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// </summary>
 
         protected abstract ICallerPathVistor CallerPath();
-#if DEBUG
+
         //Becuase this is ont API safe and also relies on file paths this should never go into a release build
         private bool _enableFilewatcher;
         private FileSystemWatcher _fileSystemWatcher;
@@ -484,6 +481,5 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             }
         }
-#endif
     }
 }
