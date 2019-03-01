@@ -15,6 +15,10 @@ using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.ScriptedContentFragments.Services;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 using Theme = Telligent.Evolution.Extensibility.UI.Version1.Theme;
+using Telligent.Evolution.Components.Jobs;
+using Telligent.Jobs;
+using System.Configuration;
+using Telligent.Common;
 
 #if DEBUG
     using System.IO;
@@ -39,9 +43,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
     public abstract class FactoryDefaultThemeInstallerV2 : IInstallablePlugin, IConfigurablePlugin, IEvolutionJob
     {
-#region IPlugin Members
+        #region IPlugin Members
 
-        private bool _installOnNextLoad = false;
         private IPluginConfiguration _configuration;
         private static readonly object _updateLocker = new object();
 
@@ -61,19 +64,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 InitializeFilewatcher();
             }
 #endif
-            if (_installOnNextLoad)
-            {
-                if (_configuration != null)
-                {
-                    _configuration.SetBool("installNextLoad", false);
-                    _configuration.Commit();
-
-                    ScheduelInstall();
-                }
-            }
         }
 
-#endregion
+        #endregion
 
         private void EnumerateResourceFolder(string basePath, string extension, Action<string> handleResource)
         {
@@ -99,7 +92,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// </summary>
         protected virtual bool SupportAutoInstall => true;
 
-#region IInstallablePlugin Members
+        #region IInstallablePlugin Members
 
         public virtual void Install(Version lastInstalledVersion)
         {
@@ -107,7 +100,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             {
                 if (lastInstalledVersion < Version)
                 {
-                    ScheduelInstall();
+                    ScheduleInstall();
                 }
             }
         }
@@ -117,16 +110,45 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             InstallNow();
         }
 
-        protected void ScheduelInstall()
+        protected void ScheduleInstall()
         {
-            Apis.Get<IJobService>().Schedule(GetType(), DateTime.UtcNow.AddSeconds(30));
+            JobInfo[] jobs = null;
+            try
+            {
+                var runAllJobsLocally = ConfigurationManager.AppSettings["RunJobsInternally"] != null && ConfigurationManager.AppSettings["RunJobsInternally"].ToLower() == "true";
+
+                PeekFilter filter = new PeekFilter()
+                {
+                    JobNameTypeFilter = GetType().FullName,
+                    SortBy = JobSortBy.StateAndName,
+                    SortOrder = Telligent.Jobs.SortOrder.Ascending
+                };
+
+                if (runAllJobsLocally)
+                {
+                    Services.Get<IJobCoreService>().LocalJobStore.Peek(out jobs, 0, 500, filter);
+                }
+                else
+                {
+                    Services.Get<IJobCoreService>().RemoteJobStore.Peek(out jobs, 0, 500, filter);
+                }
+            }
+            catch (Exception)
+            {
+                // failed to determine if we have an existing job queued
+            }
+
+            if (jobs == null || jobs.Count(j => j.State == JobState.Ready) == 0)
+            {
+                Apis.Get<IJobService>().Schedule(GetType(), DateTime.UtcNow.AddSeconds(15));
+            }
         }
 
         public void InstallNow()
         {
             Uninstall();
 
-#region Install custom theme
+            #region Install custom theme
 
             EnumerateResourceFolder(
                 "Themes.",
@@ -150,9 +172,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                 });
 
-#endregion
+            #endregion
 
-#region Install custom pages into theme (and revert any configured defaults or contextual versions of these pages)
+            #region Install custom pages into theme (and revert any configured defaults or contextual versions of these pages)
 
             EnumerateResourceFolder(
                 "Pages.",
@@ -175,8 +197,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             );
 
-#endregion
- 
+            #endregion
+
         }
 
         private static void UpdateTheme(XmlDocument xmlDocument)
@@ -257,28 +279,26 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
 
-        private bool IsDebugBuild => Diagnostics.IsDebug(GetType().Assembly);
         public Version Version => GetType().Assembly.GetName().Version;
 
         public void Update(IPluginConfiguration configuration)
         {
             _configuration = configuration;
 #if DEBUG
-             _enableFilewatcher = configuration.GetBool("filewatcher");
+            _enableFilewatcher = configuration.GetBool("filewatcher");
 #endif
-            _installOnNextLoad = configuration.GetBool("installNextLoad");
         }
 
         internal class InstallButtonPropertyControl : PluginButtonPropertyControl
         {
             protected override void OnClick()
             {
-                FactoryDefaultThemeInstallerV2 plugin = (PluginManager.Get<IScriptedContentFragmentFactoryDefaultProvider>().First(o => o.GetType().AssemblyQualifiedName == CallingType)) as FactoryDefaultThemeInstallerV2;
+                FactoryDefaultThemeInstallerV2 plugin = (PluginManager.Get<IInstallablePlugin>().First(o => o.GetType().AssemblyQualifiedName == CallingType)) as FactoryDefaultThemeInstallerV2;
 
-                plugin?.ScheduelInstall();
+                plugin?.ScheduleInstall();
             }
 
-            public override string Text => "Install Widgets";
+            public override string Text => "Install Theme";
 
             public string CallingType => this.ConfigurationProperty.Attributes["CallingType"];
         }
@@ -287,23 +307,18 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         {
             get
             {
-                if (IsDebugBuild)
-                {
-                    PropertyGroup propertyGroup = new PropertyGroup("options", "Options", 0);
+                PropertyGroup propertyGroup = new PropertyGroup("options", "Options", 0);
 
-                    Property button = new Property("installNextLoad", "Install", PropertyType.Custom, 0, "");
-                    button.ControlType = typeof(InstallButtonPropertyControl);
-                    button.Attributes.Add("Text", "Install");
-                    button.Attributes.Add("CallingType", GetType().AssemblyQualifiedName);
-                    propertyGroup.Properties.Add(button);
+                Property button = new Property("installNextLoad", "Install (via job)", PropertyType.Custom, 0, "");
+                button.ControlType = typeof(InstallButtonPropertyControl);
+                button.Attributes.Add("Text", "Install");
+                button.Attributes.Add("CallingType", GetType().AssemblyQualifiedName);
+                propertyGroup.Properties.Add(button);
 
 #if DEBUG
-                    propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
+                propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
 #endif
-                    return new[] { propertyGroup };
-                }
-
-                return new PropertyGroup[0];
+                return new[] { propertyGroup };
             }
         }
 
@@ -358,7 +373,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
             return new JavaScriptSerializer().Deserialize<dynamic>(File.ReadAllText(metaFilePath));
         }
-   
+
 
         private static void InteractiveClearCacheNotApiSafe()
         {
@@ -728,6 +743,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         }
 #endif
 
-#endregion
+        #endregion
     }
 }

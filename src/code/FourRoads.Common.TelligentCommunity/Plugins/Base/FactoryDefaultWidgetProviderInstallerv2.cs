@@ -15,11 +15,15 @@ using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
+using Telligent.Evolution.Components.Jobs;
+using Telligent.Jobs;
+using System.Configuration;
+using Telligent.Common;
+
 #if DEBUG
-    using Telligent.Common;
-    using Telligent.Evolution.Components;
-    using Telligent.Evolution.ScriptedContentFragments.Services;
-    using ThemeFiles = Telligent.Evolution.Components.ThemeFiles;
+using Telligent.Evolution.Components;
+using Telligent.Evolution.ScriptedContentFragments.Services;
+using ThemeFiles = Telligent.Evolution.Components.ThemeFiles;
 #endif
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
@@ -31,7 +35,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
 
-#region IPlugin Members
+        #region IPlugin Members
 
         public string Name => ProjectName + " - Widgets";
 
@@ -47,7 +51,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 #endif
         }
 
-#endregion
+        #endregion
         /// <summary>
         /// Set this to false to prevent the installer from installing when version numbers are lower
         /// </summary>
@@ -61,7 +65,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             {
                 if (lastInstalledVersion < Version)
                 {
-                    ScheduelInstall();
+                    ScheduleInstall();
                 }
             }
         }
@@ -71,14 +75,44 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             InstallNow();
         }
 
-        protected void ScheduelInstall()
+        protected void ScheduleInstall()
         {
-            Apis.Get<IJobService>().Schedule(GetType(), DateTime.UtcNow.AddSeconds(30));
+            JobInfo[] jobs = null;
+            try
+            {
+                var runAllJobsLocally = ConfigurationManager.AppSettings["RunJobsInternally"] != null && ConfigurationManager.AppSettings["RunJobsInternally"].ToLower() == "true";
+
+                PeekFilter filter = new PeekFilter()
+                {
+                    JobNameTypeFilter = GetType().FullName,
+                    SortBy = JobSortBy.StateAndName,
+                    SortOrder = Telligent.Jobs.SortOrder.Ascending
+                };
+
+                if (runAllJobsLocally)
+                {
+                    Services.Get<IJobCoreService>().LocalJobStore.Peek(out jobs, 0, 500, filter);
+                }
+                else
+                {
+                    Services.Get<IJobCoreService>().RemoteJobStore.Peek(out jobs, 0, 500, filter);
+                }
+            }
+            catch (Exception)
+            {
+                // failed to determine if we have an existing job queued
+            }
+
+            if (jobs == null || jobs.Count(j => j.State == JobState.Ready) == 0)
+            {
+                Apis.Get<IJobService>().Schedule(GetType(), DateTime.UtcNow.AddSeconds(15));
+            }
         }
 
-        protected void InstallNow(){
+        protected void InstallNow()
+        {
             Uninstall();
-            
+
             string basePath = BaseResourcePath + "Widgets.";
 
             EmbeddedResources.EnumerateReosurces(basePath, "widget.xml", resourceName =>
@@ -118,7 +152,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                     if (!supplementaryResources.Any())
                         return;
-                   
+
                     foreach (string supplementPath in supplementaryResources)
                     {
                         string supplementName = supplementPath.Substring(widgetPath.Length);
@@ -137,7 +171,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             });
         }
-        
+
         private bool GetInstanceIdFromWidgetXml(string widhgetXml, out Guid instanceId, out string cssClass, out Guid providerId)
         {
             instanceId = Guid.Empty;
@@ -195,7 +229,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public Version Version => GetType().Assembly.GetName().Version;
 
-#endregion
+        #endregion
 
         internal class InstallButtonPropertyControl : PluginButtonPropertyControl
         {
@@ -203,7 +237,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             {
                 FactoryDefaultWidgetProviderInstallerV2 plugin = (PluginManager.Get<IScriptedContentFragmentFactoryDefaultProvider>().First(o => o.GetType().AssemblyQualifiedName == CallingType)) as FactoryDefaultWidgetProviderInstallerV2;
 
-                plugin?.ScheduelInstall();
+                plugin?.ScheduleInstall();
             }
 
             public override string Text => "Install Widgets";
@@ -224,17 +258,14 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             {
                 PropertyGroup propertyGroup = new PropertyGroup("options", "Options", 0);
 
-                Property button = new Property("installNextLoad", "Install", PropertyType.Custom, 0, "");
+                Property button = new Property("installNextLoad", "Install (via job)", PropertyType.Custom, 0, "");
                 button.ControlType = typeof(InstallButtonPropertyControl);
-                button.Attributes.Add("Text","Install");
-                button.Attributes.Add("CallingType" , GetType().AssemblyQualifiedName);
+                button.Attributes.Add("Text", "Install");
+                button.Attributes.Add("CallingType", GetType().AssemblyQualifiedName);
                 propertyGroup.Properties.Add(button);
 
 #if DEBUG
-                if (IsDebugBuild)
-                {
-                    propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
-                }
+                propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
 #endif
                 return new[] { propertyGroup };
             }
@@ -260,7 +291,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 {
                     result = File.ReadAllBytes(path);
                 }
-                catch (IOException e)
+                catch (IOException)
                 {
                     Thread.Sleep(100);
                 }
@@ -373,11 +404,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// <summary>
         /// Builds all widgets that belong to this installer.
         /// </summary>
-    
+
         protected abstract ICallerPathVistor CallerPath();
 #if DEBUG
         //Becuase this is ont API safe and also relies on file paths this should never go into a release build
-         private bool _enableFilewatcher;
+        private bool _enableFilewatcher;
         private FileSystemWatcher _fileSystemWatcher;
 
         public void BuildAllWidgets(string dirPath)

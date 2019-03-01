@@ -43,6 +43,7 @@
       <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Web.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
