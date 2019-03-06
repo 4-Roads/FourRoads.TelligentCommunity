@@ -1,27 +1,29 @@
-using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Controls;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Xml;
+using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
+using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.ScriptedContentFragments.Services;
+using Telligent.Jobs;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 using Theme = Telligent.Evolution.Extensibility.UI.Version1.Theme;
-
-#if DEBUG
-    using System.IO;
-    using System.Text;
-    using System.Threading;
-    using System.Web.Script.Serialization;
-#endif
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
@@ -39,15 +41,18 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
     public abstract class FactoryDefaultThemeInstallerV2 : IInstallablePlugin, IConfigurablePlugin, IEvolutionJob
     {
-#region IPlugin Members
+        #region IPlugin Members
 
-        private bool _installOnNextLoad = false;
+        private bool _enableFilewatcher = false;
+        private FileSystemWatcher _fileSystemWatcher;
         private IPluginConfiguration _configuration;
         private static readonly object _updateLocker = new object();
+        private static readonly object _pageLocker = new object();
 
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
+        protected abstract ICallerPathVistor CallerPath();
 
         public string Name => ProjectName + " - Theme";
 
@@ -55,25 +60,13 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Initialize()
         {
-#if DEBUG
-            if (_enableFilewatcher)
+            if (IsDebugBuild && _enableFilewatcher)
             {
                 InitializeFilewatcher();
             }
-#endif
-            if (_installOnNextLoad)
-            {
-                if (_configuration != null)
-                {
-                    _configuration.SetBool("installNextLoad", false);
-                    _configuration.Commit();
-
-                    ScheduelInstall();
-                }
-            }
         }
 
-#endregion
+        #endregion
 
         private void EnumerateResourceFolder(string basePath, string extension, Action<string> handleResource)
         {
@@ -99,7 +92,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// </summary>
         protected virtual bool SupportAutoInstall => true;
 
-#region IInstallablePlugin Members
+        #region IInstallablePlugin Members
 
         public virtual void Install(Version lastInstalledVersion)
         {
@@ -107,7 +100,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             {
                 if (lastInstalledVersion < Version)
                 {
-                    ScheduelInstall();
+                    ScheduleInstall();
                 }
             }
         }
@@ -117,16 +110,45 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             InstallNow();
         }
 
-        protected void ScheduelInstall()
+        protected void ScheduleInstall()
         {
-            Apis.Get<IJobService>().Schedule(GetType(), DateTime.UtcNow.AddSeconds(30));
+            JobInfo[] jobs = null;
+            try
+            {
+                var runAllJobsLocally = ConfigurationManager.AppSettings["RunJobsInternally"] != null && ConfigurationManager.AppSettings["RunJobsInternally"].ToLower() == "true";
+
+                PeekFilter filter = new PeekFilter()
+                {
+                    JobNameTypeFilter = GetType().FullName,
+                    SortBy = JobSortBy.StateAndName,
+                    SortOrder = Telligent.Jobs.SortOrder.Ascending
+                };
+
+                if (runAllJobsLocally)
+                {
+                    Services.Get<IJobCoreService>().LocalJobStore.Peek(out jobs, 0, 500, filter);
+                }
+                else
+                {
+                    Services.Get<IJobCoreService>().RemoteJobStore.Peek(out jobs, 0, 500, filter);
+                }
+            }
+            catch (Exception)
+            {
+                // failed to determine if we have an existing job queued
+            }
+
+            if (jobs == null || jobs.Count(j => j.State == JobState.Ready) == 0)
+            {
+                Apis.Get<IJobService>().Schedule(GetType(), DateTime.UtcNow.AddSeconds(15));
+            }
         }
 
         public void InstallNow()
         {
             Uninstall();
 
-#region Install custom theme
+            #region Install custom theme
 
             EnumerateResourceFolder(
                 "Themes.",
@@ -150,9 +172,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                 });
 
-#endregion
+            #endregion
 
-#region Install custom pages into theme (and revert any configured defaults or contextual versions of these pages)
+            #region Install custom pages into theme (and revert any configured defaults or contextual versions of these pages)
 
             EnumerateResourceFolder(
                 "Pages.",
@@ -175,8 +197,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             );
 
-#endregion
- 
+            #endregion
+
         }
 
         private static void UpdateTheme(XmlDocument xmlDocument)
@@ -207,6 +229,39 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             }
         }
+
+        private static void ClearCacheNotApiSafe(Guid id, Guid ThemeTypeId)
+        {
+            Telligent.Common.Services.Get<IFactoryDefaultScriptedContentFragmentService>().ExpireCache();
+            Telligent.Common.Services.Get<IScriptedContentFragmentService>().ExpireCache();
+            Telligent.Common.Services.Get<IContentFragmentPageService>().RemoveAllFromCache();
+            Telligent.Common.Services.Get<IContentFragmentService>().RefreshContentFragments();
+
+
+            // in theory this should refresh the cache >= 10.2.2.4296
+            //var theme = Themes.List(ThemeTypeId).FirstOrDefault(t => t.Id == id);
+            //if (theme != null)
+            //{
+            //    byte[] byteArray = Encoding.ASCII.GetBytes(".dummy.4roads {padding: 21px;}");
+            //    MemoryStream stream = new MemoryStream(byteArray);
+
+            //    // add an remove a file to trigger a cache clear and reload
+            //    Telligent.Evolution.Extensibility.UI.Version1.ThemeFiles.AddUpdateFactoryDefault(theme, ThemeProperties.StyleSheetFiles, "Test.less", stream, (int)stream.Length , new CssThemeFileOptions() { ApplyToModals = true, ApplyToNonModals = true });
+            //    Telligent.Evolution.Extensibility.UI.Version1.ThemeFiles.RemoveFactoryDefault(theme, ThemeProperties.StyleSheetFiles, "Test.less");
+            //}
+
+            // the calls below are not reliable when called during init phase
+            //Telligent.Evolution.Components.ThemeFiles.RequestHostVersionedThemeFileRegeneration();
+            //SystemFileStore.RequestHostVersionedThemeFileRegeneration();
+        }
+
+        private static void InteractiveClearCacheNotApiSafe()
+        {
+            // the calls below are not reliable when called during init phase
+            Telligent.Evolution.Components.ThemeFiles.RequestHostVersionedThemeFileRegeneration();
+            SystemFileStore.RequestHostVersionedThemeFileRegeneration();
+        }
+
 
         public void Uninstall()
         {
@@ -256,29 +311,29 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             }
         }
-
         private bool IsDebugBuild => Diagnostics.IsDebug(GetType().Assembly);
+
         public Version Version => GetType().Assembly.GetName().Version;
 
         public void Update(IPluginConfiguration configuration)
         {
             _configuration = configuration;
-#if DEBUG
-             _enableFilewatcher = configuration.GetBool("filewatcher");
-#endif
-            _installOnNextLoad = configuration.GetBool("installNextLoad");
+            if (IsDebugBuild)
+            {
+                _enableFilewatcher = configuration.GetBool("filewatcher");
+            }
         }
 
         internal class InstallButtonPropertyControl : PluginButtonPropertyControl
         {
             protected override void OnClick()
             {
-                FactoryDefaultThemeInstallerV2 plugin = (PluginManager.Get<IScriptedContentFragmentFactoryDefaultProvider>().First(o => o.GetType().AssemblyQualifiedName == CallingType)) as FactoryDefaultThemeInstallerV2;
+                FactoryDefaultThemeInstallerV2 plugin = (PluginManager.Get<IInstallablePlugin>().First(o => o.GetType().AssemblyQualifiedName == CallingType)) as FactoryDefaultThemeInstallerV2;
 
-                plugin?.ScheduelInstall();
+                plugin?.ScheduleInstall();
             }
 
-            public override string Text => "Install Widgets";
+            public override string Text => "Install Theme";
 
             public string CallingType => this.ConfigurationProperty.Attributes["CallingType"];
         }
@@ -287,67 +342,24 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         {
             get
             {
+                PropertyGroup propertyGroup = new PropertyGroup("options", "Options", 0);
+
+                Property button = new Property("installNextLoad", "Install (via job)", PropertyType.Custom, 0, "");
+                button.ControlType = typeof(InstallButtonPropertyControl);
+                button.Attributes.Add("Text", "Install");
+                button.Attributes.Add("CallingType", GetType().AssemblyQualifiedName);
+                propertyGroup.Properties.Add(button);
+
                 if (IsDebugBuild)
                 {
-                    PropertyGroup propertyGroup = new PropertyGroup("options", "Options", 0);
-
-                    Property button = new Property("installNextLoad", "Install", PropertyType.Custom, 0, "");
-                    button.ControlType = typeof(InstallButtonPropertyControl);
-                    button.Attributes.Add("Text", "Install");
-                    button.Attributes.Add("CallingType", GetType().AssemblyQualifiedName);
-                    propertyGroup.Properties.Add(button);
-
-#if DEBUG
                     propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
-#endif
-                    return new[] { propertyGroup };
                 }
 
-                return new PropertyGroup[0];
+                return new[] { propertyGroup };
             }
         }
 
-
-        /// <summary>Telligents type IDs for the various theme segments.</summary>
-        private Dictionary<string, Guid> themeSegmentIds = new Dictionary<string, Guid>(){
-            {"Group", ThemeTypes.Group},
-            {"Blog", ThemeTypes.Weblog},
-            {"Site", ThemeTypes.Site},
-            {"User", ThemeTypes.User}
-        };
-
-        private static void ClearCacheNotApiSafe(Guid id, Guid ThemeTypeId)
-        {
-            Telligent.Common.Services.Get<IFactoryDefaultScriptedContentFragmentService>().ExpireCache();
-            Telligent.Common.Services.Get<IScriptedContentFragmentService>().ExpireCache();
-            Telligent.Common.Services.Get<IContentFragmentPageService>().RemoveAllFromCache();
-            Telligent.Common.Services.Get<IContentFragmentService>().RefreshContentFragments();
-
-
-            // in theory this should refresh the cache >= 10.2.2.4296
-            //var theme = Themes.List(ThemeTypeId).FirstOrDefault(t => t.Id == id);
-            //if (theme != null)
-            //{
-            //    byte[] byteArray = Encoding.ASCII.GetBytes(".dummy.4roads {padding: 21px;}");
-            //    MemoryStream stream = new MemoryStream(byteArray);
-
-            //    // add an remove a file to trigger a cache clear and reload
-            //    Telligent.Evolution.Extensibility.UI.Version1.ThemeFiles.AddUpdateFactoryDefault(theme, ThemeProperties.StyleSheetFiles, "Test.less", stream, (int)stream.Length , new CssThemeFileOptions() { ApplyToModals = true, ApplyToNonModals = true });
-            //    Telligent.Evolution.Extensibility.UI.Version1.ThemeFiles.RemoveFactoryDefault(theme, ThemeProperties.StyleSheetFiles, "Test.less");
-            //}
-
-            // the calls below are not reliable when called during init phase
-            //Telligent.Evolution.Components.ThemeFiles.RequestHostVersionedThemeFileRegeneration();
-            //SystemFileStore.RequestHostVersionedThemeFileRegeneration();
-        }
-        protected abstract ICallerPathVistor CallerPath();
-
-#if DEBUG
-        private bool _enableFilewatcher = false;
-        private static readonly object _pageLocker = new object();
-        private FileSystemWatcher _fileSystemWatcher;
-
-        public dynamic LoadThemeMeta(string themePath)
+        public Newtonsoft.Json.Linq.JObject LoadThemeMeta(string themePath)
         {
             var metaFilePath = Path.Combine(themePath, "theme.json");
 
@@ -356,17 +368,16 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 return null;
             }
 
-            return new JavaScriptSerializer().Deserialize<dynamic>(File.ReadAllText(metaFilePath));
-        }
-   
-
-        private static void InteractiveClearCacheNotApiSafe()
-        {
-            // the calls below are not reliable when called during init phase
-            Telligent.Evolution.Components.ThemeFiles.RequestHostVersionedThemeFileRegeneration();
-            SystemFileStore.RequestHostVersionedThemeFileRegeneration();
+            return JsonConvert.DeserializeObject(File.ReadAllText(metaFilePath)) as Newtonsoft.Json.Linq.JObject;
         }
 
+        /// <summary>Telligents type IDs for the various theme segments.</summary>
+        private Dictionary<string, Guid> themeSegmentIds = new Dictionary<string, Guid>(){
+            {"Group", ThemeTypes.Group},
+            {"Blog", ThemeTypes.Weblog},
+            {"Site", ThemeTypes.Site},
+            {"User", ThemeTypes.User}
+        };
 
         private void InitializeFilewatcher()
         {
@@ -482,7 +493,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                             // If it's the site segment, we should also update the files too:
                             if (segment.Value == ThemeTypes.Site)
                             {
-                                var customFileConfigs = themeMetadata.fileConfigurations;
+                                var customFileConfigs = themeMetadata.GetValue("fileConfigurations") as JObject;
 
                                 // Rebuild all the files for the stylesheets etc.
                                 UpdateFileDataNodes(
@@ -599,7 +610,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// <param name="preserveOrder">An optional list of file names. 
         /// These files will always appear at the start of the files set in the exact provided order. 
         /// This is particularly important for the stylesheetFiles where order matters.</param>
-        private void UpdateFileDataNodes(XmlDocument xmlDocument, string themePath, dynamic customFileConfigs, string folder, string[] preserveOrder = null)
+        private void UpdateFileDataNodes(XmlDocument xmlDocument, string themePath, JObject customFileConfigs, string folder, string[] preserveOrder = null)
         {
             var camelCaseFolderName = LowerCaseFirstLetter(folder);
 
@@ -610,11 +621,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 return;
             }
 
-            dynamic fileConfigsForNode = null;
+            JObject fileConfigsForNode = null;
 
             if (customFileConfigs != null)
             {
-                fileConfigsForNode = customFileConfigs.GetValue(camelCaseFolderName);
+                fileConfigsForNode = customFileConfigs.GetValue(camelCaseFolderName) as JObject;
             }
 
             // The files are located in..
@@ -726,8 +737,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
             }
         }
-#endif
-
-#endregion
+        #endregion
     }
 }
