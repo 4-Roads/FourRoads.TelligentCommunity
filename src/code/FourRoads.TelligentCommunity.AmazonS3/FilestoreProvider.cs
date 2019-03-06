@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -58,6 +59,24 @@ namespace FourRoads.TelligentCommunity.AmazonS3
                         {
                             if (response.RedirectLocation.IndexOf("amazonaws.com", StringComparison.OrdinalIgnoreCase) > 1)
                             {
+                                try
+                                {
+                                    //Get the expiry time of the aws security token
+                                    Uri myUri = new Uri(response.RedirectLocation);
+
+                                    var parsedUrl = HttpUtility.ParseQueryString(myUri.Query);
+
+                                    string date = parsedUrl.Get("X-Amz-Date");
+
+                                    int expire = int.Parse(parsedUrl.Get("X-Amz-Expires"));
+
+                                    response.Cache.SetExpires(DateTime.ParseExact(date, "yyyyMMddTHHmmssZ", CultureInfo.InvariantCulture).AddSeconds(expire));
+                                }
+                                catch
+                                {
+                                    response.Cache.SetExpires(DateTime.UtcNow.AddSeconds(10));
+                                }
+
                                 response.StatusCode = 302;
                             }
                         }
