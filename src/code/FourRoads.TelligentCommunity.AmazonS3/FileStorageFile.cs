@@ -28,6 +28,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             FileName = fileName;
             Path = path;
             FileStoreKey = fileStoreKey;
+            _downloadExpires = DateTime.UtcNow;
         }
 
         #endregion
@@ -116,8 +117,11 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             //This is not cached 
             if (CentralizedFileStorage.GetFileStore(FileStoreKey) is FilestoreProvider fileStore)
             {
-                if (_downloadUrl == null)
+                if (_downloadUrl == null || _downloadExpires < DateTime.UtcNow)
+                {
+                    _downloadExpires = DateTime.UtcNow.AddMinutes(fileStore.PreSignExpiresMins);
                     _downloadUrl = fileStore.GetDownloadUrl(Path, FileName);
+                }
 
                 return _downloadUrl;
             }
@@ -126,6 +130,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         }
         #endregion
 
+        private DateTime _downloadExpires;
         public string CacheID => FileStorageFileCache.CreateCacheId(FileStoreKey,Path,FileName);
         public int CacheRefreshInterval { get; set; }
         public string[] CacheTags => _tags;

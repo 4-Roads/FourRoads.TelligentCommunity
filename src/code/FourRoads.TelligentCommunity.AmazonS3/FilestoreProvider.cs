@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.Web.Util;
 using System.Xml;
 using Amazon;
 using Amazon.Runtime;
@@ -70,11 +71,11 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
                                     int expire = int.Parse(parsedUrl.Get("X-Amz-Expires"));
 
-                                    response.Cache.SetExpires(DateTime.ParseExact(date, "yyyyMMddTHHmmssZ", CultureInfo.InvariantCulture).AddSeconds(expire));
+                                    response.Headers["expires"] = DateTime.ParseExact(date, "yyyyMMddTHHmmssZ", CultureInfo.InvariantCulture).AddSeconds(expire).ToUniversalTime().ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'");
                                 }
                                 catch
                                 {
-                                    response.Cache.SetExpires(DateTime.UtcNow.AddSeconds(10));
+                                    response.Headers["expires"] = DateTime.UtcNow.AddSeconds(10).ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'");
                                 }
 
                                 response.StatusCode = 302;
@@ -124,6 +125,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         private const string PlaceHolderFilename = "__path__place__holder.cfs.s3";
         private FileStorageFileCache _fileSet;
         private int _cacheTime;
+        private int _preSignMinutes;
         private Dictionary<string, DateTime> _knownFiles = new Dictionary<string, DateTime>();
 
         public void Initialize(string fileStoreKey, XmlNode node)
@@ -158,6 +160,15 @@ namespace FourRoads.TelligentCommunity.AmazonS3
                 var region = RegionEndpoint.GetBySystemName(regionString);
 
                 configuration.RegionEndpoint = region;
+            }
+
+            if (node.Attributes["preSignMinutes"] != null)
+            {
+                _preSignMinutes = Convert.ToInt32(node.Attributes["preSignMinutes"]?.Value);
+            }
+            else
+            {
+                _preSignMinutes = 60;
             }
 
             _cacheTime = Convert.ToInt32(node.Attributes["cacheTimeSeconds"]?.Value);
@@ -537,6 +548,8 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             return null;
         }
 
+        public int PreSignExpiresMins => _preSignMinutes;
+
         public string GetDownloadUrl(string path, string fileName)
         {
             Debug.WriteLine($"GetDownloadUrl:{path}\\{fileName}");
@@ -544,7 +557,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             {
                 string fileKey = MakeKey(path, fileName);
 
-                return s3Client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucketName, Key = fileKey, Expires = DateTime.Now.AddMinutes(30)});
+                return s3Client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucketName, Key = fileKey, Expires = DateTime.Now.AddMinutes(_preSignMinutes)});
             }
 
             return null;
