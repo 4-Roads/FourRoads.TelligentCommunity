@@ -1,0 +1,20 @@
+{
+  "name": "nsdev-tasks",
+  "version": "1.0.0",
+  "description": "some tasks to simplify development",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.0",
+    "gulp-debug": "^4.0.0",
+    "gulp-filesize": "0.0.6",
+    "gulp-fn": "0.0.3",
+    "gulp-post": "^1.0.2",
+    "gulp-rename": "^1.4.0",
+    "gulp-watch": "^5.0.1"
+  }
+}

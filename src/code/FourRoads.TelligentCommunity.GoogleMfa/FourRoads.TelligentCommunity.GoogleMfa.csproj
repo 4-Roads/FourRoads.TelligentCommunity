@@ -89,7 +89,10 @@
     <Compile Include="Extensions\GoogleAuthenticatorExtension.cs" />
     <Compile Include="Interfaces\IMfaDataProvider.cs" />
     <Compile Include="Interfaces\IMfaLogic.cs" />
+    <Compile Include="Logic\MfaCryptoExtension.cs" />
     <Compile Include="Logic\MfaLogic.cs" />
+    <Compile Include="Model\OneTimeCode.cs" />
+    <Compile Include="Model\OneTimeCodesStatus.cs" />
     <Compile Include="Plugins\FactoryDefaultWidgetProviderInstaller.cs" />
     <Compile Include="Resources\EmbeddedResources.cs" />
     <Compile Include="Resources\MfaSqlScriptsInstaller.cs" />

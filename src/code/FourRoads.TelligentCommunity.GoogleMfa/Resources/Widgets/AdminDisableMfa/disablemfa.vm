@@ -1,0 +1,20 @@
+﻿#set($errorMessage = "Something went wrong")
+#if(!$ns_v1_SupportPermissions.IsAdmin($core_v2_user.Accessing.Id))
+	$core_v2_page.SendJsonError($errorMessage)
+#end
+#set($user = false)
+#set($user = $core_v2_user.Current)
+#if(!$user)
+	$core_v2_page.SendJsonError($errorMessage)
+#end
+#set($isMfaEnabled = '')
+#set($isMfaEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled($user.Id))
+#if($isMfaEnabled == '' || !$isMfaEnabled)
+	$core_v2_page.SendJsonError($errorMessage)
+#end
+#if(!$core_v2_page.IsPost)
+	$core_v2_page.SendJsonError($errorMessage)
+#end
+$frcommon_v1_googleMfa.EnableTwoFactor($user.Id, false)
+$core_v2_page.SetContentType('application/json')
+true

@@ -15,6 +15,10 @@ using Telligent.Evolution.Extensibility.Urls.Version1;
 using FourRoads.Common.TelligentCommunity.Routing;
 using Telligent.Evolution.Components;
 using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
+using FourRoads.TelligentCommunity.GoogleMfa.Model;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Globalization;
 
 namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 {
@@ -83,6 +87,16 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 
         //{295391e2b78d4b7e8056868ae4fe8fb3}
         private static readonly string _defaultPageLayout = " <contentFragmentPage pageName=\"mfa\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::295391e2b78d4b7e8056868ae4fe8fb3\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
+
+        //this is version flag to distinguish major changes in MFA logic, so we can tell users if they should regenerate their keys
+        private static readonly int _mfaLogicVersion = 2;
+        private static readonly int _oneTimeCodesToGenerate = 10;
+        //Plaintext length of the code with any spaces removed
+        private static readonly int _oneTimeCodeLength = 8;
+        private static readonly string _eakey_mfaEnabled = "__mfaEnabled";
+        private static readonly string _eakey_codesGeneratedOnUtc = "__mfaCodesGeneratedOnUtc";
+        private static readonly string _eakey_mfaVersion = "__mfaVersion";
+
         public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
         {
             _usersService = usersService;
@@ -231,8 +245,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 
         public bool TwoFactorEnabled(User user)
         {
-            //WARNING: Non API Safe code
-            if (CSContext.Current.Impersonator != null)
+            if (IsImpersonator())
             {
                 return false;
             }
@@ -240,9 +253,9 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             bool require2F = false;
 
             //ensure we have access to user.ExtendedAttributes
-            Apis.Get<IUsers>().RunAsUser("admin", () =>
+            _usersService.RunAsUser(_usersService.ServiceUserName, () =>
             {
-                var mfaEnabled = user.ExtendedAttributes.Get("__mfaEnabled");
+                var mfaEnabled = user.ExtendedAttributes.Get(_eakey_mfaEnabled);
 
                 if (mfaEnabled != null)
                 {
@@ -253,24 +266,56 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             return require2F;
         }
 
+        private bool IsImpersonator()
+        {
+            var context = HttpContext.Current;
+            if (context == null)
+            {
+                return false;
+            }
+            HttpCookie httpCookie = context.Request.Cookies["Impersonator"];
+            return (httpCookie != null && !string.IsNullOrEmpty(httpCookie.Value));
+        }
+
         public void EnableTwoFactor(User user, bool enabled)
         {
             //ensure we have access to user.ExtendedAttributes
-            Apis.Get<IUsers>().RunAsUser("admin", () =>
+            _usersService.RunAsUser(_usersService.ServiceUserName, () =>
             {
                 UsersUpdateOptions updateOptions = new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes };
-
-                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = "__mfaEnabled", Value = enabled.ToString() });
-
+                if (enabled == false)
+                {
+                    //old codes should be deleted
+                    _mfaDataProvider.ClearCodes(user.Id.Value);
+                    _mfaDataProvider.ClearUserKey(user.Id.Value);
+                    //remove version number
+                    updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaVersion, Value = string.Empty });
+                }
+                else
+                {
+                    //store plugin version in EA
+                    updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture) });
+                }
+                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaEnabled, Value = enabled.ToString() });
                 _usersService.Update(updateOptions);
             });
         }
 
         public bool ValidateTwoFactorCode(User user, string code)
         {
-            TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
+            //check to see if we got backup code which is 8 digits, 
+            //while the Authenticator app generates 6 digit codes
+            if (code.Length == _oneTimeCodeLength)
+            {
+                if (ValidateOneTimeCode(user, code))
+                {
+                    SetTwoFactorState(user, true);
+                    return true;
+                }
+            }
 
-            if (tfa.ValidateTwoFactorPIN(user.ContentId.ToString(), code))
+            TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
+            if (tfa.ValidateTwoFactorPIN(GetAccountSecureKey(user), code))
             {
                 SetTwoFactorState(user, true);
 
@@ -280,9 +325,36 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             return false;
         }
 
+        private bool ValidateOneTimeCode(User user, string code)
+        {
+            return _mfaDataProvider.RedeemCode(user.Id.Value, code.Encrypt(GetAccountSecureKey(user), user.Id.Value));
+        }
+
         private string GetCacheKey(User user)
         {
             return $"MFA:CACHE:{user.Id}";
+        }
+
+        private string GetUserKeyCacheKey(User user)
+        {
+            return $"MFA:KEY:{user.Id}";
+        }
+        public string GetAccountSecureKey(User user)
+        {
+            var key = _cache.Get<string>(GetUserKeyCacheKey(user));
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                Guid userKey = _mfaDataProvider.GetUserKey(user.Id.Value);
+                if(userKey == Guid.Empty)
+                {
+                    userKey = Guid.NewGuid();
+                    _mfaDataProvider.SetUserKey(user.Id.Value, userKey);
+                }
+                //N prints like '67be0d0d7e894d0cb1ee483d1e1f43fb'
+                key = userKey.ToString("N");
+                _cache.Insert(GetUserKeyCacheKey(user), key);
+            }
+            return key;
         }
 
         private bool TwoFactorState(User user)
@@ -319,8 +391,69 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                         }
                     }
                 }
+            });
+        }
+
+
+
+        public List<OneTimeCode> GenerateCodes(User user)
+        {
+            //old codes should be deleted
+            _mfaDataProvider.ClearCodes(user.Id.Value);
+
+            var codes = new List<OneTimeCode>(_oneTimeCodesToGenerate);
+            var generatedOnUtc = DateTime.UtcNow;
+
+            for (int i = 0; i < _oneTimeCodesToGenerate; i++)
+            {
+                //generatig the code in form of XXXX XXXX with zero-padding
+                string plainTextCode = $"{MfaCryptoExtension.RandomInteger(0, 9999):D4} {MfaCryptoExtension.RandomInteger(0, 9999):D4}";
+                string encryptedCode = plainTextCode.Encrypt(GetAccountSecureKey(user), user.Id.Value);
+                //we store just the hash value of the code, but...
+                OneTimeCode code = _mfaDataProvider.CreateCode(user.Id.Value, encryptedCode);
+                //..but return plain text code so users could see and print/save them
+                code.PlainTextCode = plainTextCode;
+
+                codes.Add(code);
             }
-            );
+            // add note about time when codes were generated
+            _usersService.RunAsUser(_usersService.ServiceUserName, () =>
+            {
+                UsersUpdateOptions updateOptions = new UsersUpdateOptions() { Id = user.Id.Value, ExtendedAttributes = user.ExtendedAttributes };
+                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_codesGeneratedOnUtc, Value = DateTime.UtcNow.ToString("O") });
+                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture) });
+                _usersService.Update(updateOptions);
+            });
+            return codes;
+        }
+
+        public OneTimeCodesStatus GetCodesStatus(User user)
+        {
+            var result = new OneTimeCodesStatus();
+            //ensure we have access to user.ExtendedAttributes
+            _usersService.RunAsUser(_usersService.ServiceUserName, () =>
+            {
+                var mfaVersion = user.ExtendedAttributes.Get(_eakey_mfaVersion);
+                if (mfaVersion != null)
+                {
+                    if (int.TryParse(mfaVersion.Value, out int version))
+                    {
+                        result.Version = version;
+                    }
+                }
+
+                var codesGenerated = user.ExtendedAttributes.Get(_eakey_codesGeneratedOnUtc);
+                if (codesGenerated != null)
+                {
+                    if (DateTime.TryParse(codesGenerated.Value, out DateTime generatedOnUtc))
+                    {
+                        result.CodesGeneratedOn = generatedOnUtc;
+                    }
+                }
+
+                result.CodesLeft = _mfaDataProvider.CountCodesLeft(user.Id.Value);
+            });
+            return result;
         }
     }
 }
