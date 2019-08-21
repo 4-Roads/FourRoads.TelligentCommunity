@@ -114,6 +114,7 @@
     <Compile Include="Components\TCPagedQuery.cs" />
     <Compile Include="Components\Tokenizers\TokenizedTemplateEnumerableToken.cs" />
     <Compile Include="Components\Utility\EmbeddedResourcesBase.cs" />
+    <Compile Include="Controls\ApiSafeBlogPostLookup.cs" />
     <Compile Include="Controls\ApiSafeBlogLookup.cs" />
     <Compile Include="Controls\ApiSafeUserLookup.cs" />
     <Compile Include="Controls\MultiSelectRepeater.cs" />
