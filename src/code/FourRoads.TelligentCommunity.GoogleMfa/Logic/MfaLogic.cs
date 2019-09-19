@@ -289,15 +289,20 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                     _mfaDataProvider.ClearCodes(user.Id.Value);
                     _mfaDataProvider.ClearUserKey(user.Id.Value);
                     //remove version number
+#if !SIMULATE_OLDMFA_KEY_VERSION 
                     updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaVersion, Value = string.Empty });
+#endif
                 }
                 else
                 {
+#if !SIMULATE_OLDMFA_KEY_VERSION
                     //store plugin version in EA
                     updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture) });
+#endif
                 }
                 updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaEnabled, Value = enabled.ToString() });
                 _usersService.Update(updateOptions);
+                _cache.Remove(GetUserKeyCacheKey(user));
             });
         }
 
@@ -339,22 +344,64 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
         {
             return $"MFA:KEY:{user.Id}";
         }
-        public string GetAccountSecureKey(User user)
+
+        public string GetAccountSecureKey(User user, bool useCache)
         {
-            var key = _cache.Get<string>(GetUserKeyCacheKey(user));
+            var key = useCache ? _cache.Get<string>(GetUserKeyCacheKey(user)) : null;
             if (string.IsNullOrWhiteSpace(key))
             {
-                Guid userKey = _mfaDataProvider.GetUserKey(user.Id.Value);
-                if(userKey == Guid.Empty)
+                if (IsOldVersionUser(user))
                 {
-                    userKey = Guid.NewGuid();
-                    _mfaDataProvider.SetUserKey(user.Id.Value, userKey);
+                    key = user.ContentId.ToString();
                 }
-                //N prints like '67be0d0d7e894d0cb1ee483d1e1f43fb'
-                key = userKey.ToString("N");
+                else
+                {
+                    Guid userKey = _mfaDataProvider.GetUserKey(user.Id.Value);
+                    if (userKey == Guid.Empty)
+                    {
+                        userKey = Guid.NewGuid();
+                        _mfaDataProvider.SetUserKey(user.Id.Value, userKey);
+                    }
+                    key = userKey.ToString().ToUpperInvariant();
+                }
                 _cache.Insert(GetUserKeyCacheKey(user), key);
             }
             return key;
+        }
+        public string GetAccountSecureKey(User user)
+        {
+
+            return GetAccountSecureKey(user, true);
+         
+        }
+
+        private bool IsOldVersionUser(User user)
+        {
+#if SIMULATE_OLDMFA_KEY_VERSION
+            return true;
+#else
+            var result = false;
+            try
+            {
+                if (user != null)
+                {
+                    _usersService.RunAsUser(_usersService.ServiceUserName, () =>
+                    {
+                        var mfaVersionEA = user.ExtendedAttributes.Get(_eakey_mfaVersion);
+                        var mfaEnabled = user.ExtendedAttributes.Get(_eakey_mfaEnabled);
+                        //if user has no version stored and had mfa enabled, then it's old version user
+                        result = (mfaVersionEA == null || string.IsNullOrEmpty(mfaVersionEA.Value.Trim())) 
+                                 && mfaEnabled != null && mfaEnabled.Value == "True";
+
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                new Common.TelligentCommunity.Components.TCException($"Could not get user MFA version via EA '{_eakey_mfaVersion}'", ex).Log();
+            }
+            return result;
+#endif
         }
 
         private bool TwoFactorState(User user)
@@ -449,11 +496,12 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                     {
                         result.CodesGeneratedOn = generatedOnUtc;
                     }
+                    result.CodesLeft = _mfaDataProvider.CountCodesLeft(user.Id.Value);
                 }
 
-                result.CodesLeft = _mfaDataProvider.CountCodesLeft(user.Id.Value);
             });
             return result;
         }
+
     }
 }

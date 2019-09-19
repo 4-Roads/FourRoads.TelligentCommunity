@@ -16,6 +16,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Interfaces
         bool ValidateTwoFactorCode(User user, string code);
 
         string GetAccountSecureKey(User user);
+        string GetAccountSecureKey(User user, bool useCache);
 
         List<OneTimeCode> GenerateCodes(User user);
         OneTimeCodesStatus GetCodesStatus(User user);

@@ -24,7 +24,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.ScriptedFragments
             {
                 TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
 
-                var secretKey = Injector.Get<IMfaLogic>().GetAccountSecureKey(user);
+                var secretKey = Injector.Get<IMfaLogic>().GetAccountSecureKey(user, false);
                 var setupInfo = tfa.GenerateSetupCode(groupsService.GetRootGroup().Name, user.PrivateEmail, secretKey, 300, 300);
 
                 return new SetupInfo() { ManualEntrySetupCode = setupInfo.ManualEntryKey, QrCodeImageUrl = setupInfo.QrCodeSetupImageUrl };
