@@ -251,4 +251,4 @@ src/.vs/FourRoads.TelligentCommunity/v15/Server/sqlite3
 /gulpfile.js
 /package.json
 /package-lock.json
-
+.ignorei ## ag-searcher ignore file
