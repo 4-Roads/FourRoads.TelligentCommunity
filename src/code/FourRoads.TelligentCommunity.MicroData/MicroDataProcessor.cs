@@ -11,8 +11,8 @@ using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using IContent = Telligent.Evolution.Extensibility.Content.Version1.IContent;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
-using AngleSharp.Dom.Html;
 using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
 
 namespace FourRoads.TelligentCommunity.MicroData
 {

@@ -1,12 +1,22 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.Common.TelligentCommunity.Components.Interfaces;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 
 namespace FourRoads.TelligentCommunity.ContentDiscuss
 {
-    public class FactoryDefaultWidgetProviderInstaller : Common.TelligentCommunity.Plugins.Base.FactoryDefaultWidgetProviderInstaller, IApplicationPlugin, IInstallablePlugin
+    internal class InternalCallerPath : ICallerPathVistor
+    {
+        public string GetPath() => InternalGetPath();
+
+        protected string InternalGetPath([CallerFilePath] string path = null) => path;
+    }
+
+    public class FactoryDefaultWidgetProviderInstaller : FactoryDefaultWidgetProviderInstallerV3<FactoryDefaultWidgetProviderInstaller>, IApplicationPlugin, IInstallablePlugin, IScriptedContentFragmentFactoryDefaultProvider
     {
         private readonly Guid _scriptedContentFragmentFactoryDefaultIdentifier = new Guid("{84CC3E33-4337-4212-9E4A-3700EE06F721}");
 
@@ -55,6 +65,11 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
         protected string GetScriptedFragmentName(string id)
         {
             return string.Format(_leaderAssemblyName, id);
+        }
+
+        protected override ICallerPathVistor CallerPath()
+        {
+            return new InternalCallerPath();
         }
     }
 }

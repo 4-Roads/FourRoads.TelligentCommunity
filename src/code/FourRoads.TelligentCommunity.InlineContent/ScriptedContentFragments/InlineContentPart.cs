@@ -6,172 +6,393 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.InlineContent.CentralizedFileStore;
-using FourRoads.TelligentCommunity.InlineContent.Controls;
-using FourRoads.TelligentCommunity.InlineContent.HeaderExtensions;
 using FourRoads.TelligentCommunity.InlineContent.Security;
-using Telligent.Common;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Components;
-using Telligent.Evolution.Controls;
-using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
-using Telligent.Evolution.Platform.Logging;
-using DryIoc;
-using IContainer = Telligent.Evolution.Extensibility.Content.Version1.IContainer;
+using Telligent.Evolution.Extensibility.UI.Version2;
+using IContent = Telligent.Evolution.Extensibility.Content.Version1.IContent;
+using PropertyGroup = Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup;
+using Property = Telligent.Evolution.Extensibility.Configuration.Version1.Property;
 
 namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 {
-    public class InlineContentPart : ConfigurableContentFragmentBase, ITranslatablePlugin, IPluginGroup, IFileEmbeddableContentType,ISingletonPlugin
+    public class InlineContentContext
+    {
+        public InlineContentContext(string inlineContentName, string defaultContent, string defaultAnonymousContent, string currentCOntent, string currentAnonymousContent, bool canEdit)
+        {
+            InlineContentName = inlineContentName;
+            DefaultContent = defaultContent;
+            DefaultAnonymousContent = defaultAnonymousContent;
+            CurrentContent = currentCOntent;
+            CurrentAnonymousContent = currentAnonymousContent;
+            CanEdit = canEdit;
+        }
+
+        public string InlineContentName { get; private set; }
+        public string DefaultContent { get; private set; }
+        public string DefaultAnonymousContent { get; private set; }
+        public string CurrentContent { get; private set; }
+        public string CurrentAnonymousContent { get; private set; }
+        public bool CanEdit { get; private set; }
+        public string ContentTypeId => InlineContentPart.InlineContentContentTypeId.ToString();
+
+        public void UpdateContent(string inlineCOntentName, string content, string anonymousContent)
+        {
+            Injector.Get<InlineContentLogic>().UpdateInlineContent(inlineCOntentName, content, anonymousContent);
+        }
+    }
+
+    public class InlineContentPanel : IScriptablePlugin
+    {
+        public static Guid _scriptedFragmentGuid = new Guid("a8ec6c5fe7c045d3848d25930503e153");
+        private static Guid _instanceIdentifier = new Guid("17af3cb782e44f8e8903ba64404cd913");
+        private IScriptedContentFragmentController _controller;
+
+        public void Initialize()
+        {
+           
+        }
+
+        public string Name => "Inline Content Panel";
+        public string Description => "Inline content rendering";
+        public Guid ScriptedContentFragmentFactoryDefaultIdentifier => _scriptedFragmentGuid;
+        public void Register(IScriptedContentFragmentController controller)
+        {
+            var options = new ScriptedContentFragmentOptions(_instanceIdentifier)
+            {
+                CanBeThemeVersioned = false,
+                CanHaveHeader = false,
+                CanHaveWrapperCss = false,
+                CanReadPluginConfiguration = false,
+                IsEditable = true,
+
+            };
+            options.Extensions.Add(new PanelContext());
+
+            controller.Register(options);
+
+            _controller = controller;
+        }
+
+        public string Render(NameValueCollection nv)
+        {
+            return _controller.RenderContent(_instanceIdentifier, nv);
+        }
+
+        public class PanelContext : IContextualScriptedContentFragmentExtension
+        {
+            public string ExtensionName
+            {
+                get { return "context"; }
+            }
+
+            public object GetExtension(NameValueCollection context)
+            {
+                return new InlineContentContext(context["InlineContentName"], context["DefaultContent"], context["AnonymousContnet"], context["CurrentContent"], context["CurrentAnonymousContent"], bool.Parse(context["CanEdit"]));
+            }
+        }
+    }
+
+    public class InlineContentPart : Telligent.Evolution.Extensibility.UI.Version2.ConfigurableContentFragmentBase, ITranslatablePlugin, IPluginGroup, IFileEmbeddableContentType
     {
         private ITranslatablePluginController _translatablePluginController;
         private IFileEmbeddableContentTypeController _ftController;
 
-        public override bool HasRequiredContext(Control control)
+        public override bool RenderContent(TextWriter writer, ContentFragmentRenderOptions options)
         {
-            if (PluginManager.IsEnabled(this))
+            string inlineContentName = string.Empty;
+
+            if (DynamicName)
             {
-                return base.HasRequiredContext(control);
+                inlineContentName = Apis.Get<IUrl>().CurrentContext.PageName + "_";
             }
 
-            return false;
+            if (ContextualMode == ContextMode.GroupContext || ContextualMode == ContextMode.Context)
+            {
+                //This allows the control to have several instances on a single page
+                if (!string.IsNullOrWhiteSpace(InlineContentName))
+                    inlineContentName += InlineContentName + "_";
+
+                ContextualItem(a =>
+                {
+                    inlineContentName += a.ApplicationId.ToString();
+
+                }, c =>
+                {
+                    if (c != null && c.ContainerId != Apis.Get<IGroups>().Root.ContainerId)
+                    {
+                        inlineContentName += c.ContainerId.ToString();
+                    }
+                    else
+                    {
+                        inlineContentName += "SiteRoot";
+                    }
+                }, ta =>
+                {
+                    inlineContentName += GetHashString(string.Join("", ta.OrderBy(s => s)));
+                });
+            }
+            else
+            {
+                inlineContentName += InlineContentName;
+            }
+
+            var logic = Injector.Get<InlineContentLogic>();
+            var inlineCOnetntObject = logic.GetInlineContent(inlineContentName);
+
+            NameValueCollection nv = new NameValueCollection()
+            {
+                {"InlineContentName", inlineContentName},
+                {"DefaultContent", GetContentText()},
+                {"AnonymousContent", GetAnonymousContentText()},
+                {"CurrentContent" , inlineCOnetntObject?.Content ?? string.Empty },
+                {"CurrentAnonymousContent" ,inlineCOnetntObject?.AnonymousContent ?? string.Empty },
+                {"CanEdit" ,logic.CanEdit.ToString() }
+            };
+
+            writer.Write(PluginManager.Get<InlineContentPanel>().FirstOrDefault().Render(nv));
+
+            return true;
         }
 
-        public override bool ShowHeaderByDefault
+        private bool DynamicName
         {
-            get { return false; }
+            get
+            {
+                return GetBoolValue("dynamicName", false);
+            }
+        }
+
+        private ContextMode ContextualMode
+        {
+            get
+            {
+                switch (GetStringValue("inlinecontenttype", "Contextual"))
+                {
+                    case "ByName":
+                        return ContextMode.Name;
+
+                    case "Contextual":
+                        return ContextMode.Context;
+                }
+
+                return ContextMode.GroupContext;
+            }
+        }
+
+        protected string InlineContentName
+        {
+            get { return GetStringValue("inlinecontentname", string.Empty); }
+        }
+
+        public string GetContentText()
+        {
+            return GetHtmlValue("default_content", "");
+        }
+
+        public string GetAnonymousContentText()
+        {
+            return GetHtmlValue("anonymous_content", "");
         }
 
         public override string FragmentName
         {
-            get { return TranslatablePluginController.GetLanguageResourceValue("fragment_name"); }
+            get { return "4 Roads - Inline Content"; }
         }
 
         public override string FragmentDescription
         {
-            get { return TranslatablePluginController.GetLanguageResourceValue("fragment_description"); }
-        }
-
-        public override string GetAdditionalCssClasses(Control control)
-        {
-            string results = base.GetAdditionalCssClasses(control);
-
-            return results + " inlinecontent";
-        }
-
-        protected override bool IsCacheable
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override string GetFragmentHeader(Control control)
-        {
-            string headerText = GetStringValue("headerTitle", string.Empty);
-
-            if (headerText == "${resource:default_property_title}" && ContextualMode != ContextMode.Name)
-            {
-                ContextualItem(a =>
-                {
-                    headerText = a.HtmlName("web");
-
-                }, c =>
-                {
-                    headerText = c.HtmlName("web");
-                },
-                ta =>
-                {
-                        
-                });
-            }
-
-            return headerText;
+            get { return "Provides a simpler content editor experience that is decoupled from the main theme editing"; }
         }
 
         private enum ContextMode
         {
-            Name=1,
-            Context=0,
-            GroupContext=2
+            Name = 1,
+            Context = 0,
+            GroupContext = 2
         }
 
-        public override PropertyGroup[] GetPropertyGroups()
+        public override Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup[] GetPropertyGroups()
         {
-            PropertyGroup group = new PropertyGroup("GeneralSettings",TranslatablePluginController.GetLanguageResourceValue("fragment_propertygroup_general"), 0);
+            PropertyGroup group = new PropertyGroup() {Id = "GeneralSettings", LabelText = "General" };
 
-            Property headerTitle = new Property("headerTitle",
-                TranslatablePluginController.GetLanguageResourceValue("fragment_property_title"), PropertyType.String, 0, "${resource:default_property_title}") 
-                                            {ControlType = typeof (ContentFragmentTokenStringControl)};
+            Property headerTitle = new Property()
+            {
+                Id = "headerTitle",
+                LabelText =  "Widget Title", DataType = "string", DefaultValue = "${resource:default_property_title}"
+            };
+
+            headerTitle.Options.Add("ControlType", "ContentFragmentTokenStringControl");
 
             group.Properties.Add(headerTitle);
 
-            PropertyGroup defaultContent = new PropertyGroup("DefaultContent", TranslatablePluginController.GetLanguageResourceValue("fragment_propertygroup_defaultContent"), 0);
+            PropertyGroup defaultContent = new PropertyGroup() {Id = "DefaultContent", LabelText = "Default" };
 
-        	Property property = new Property("default_content",TranslatablePluginController.GetLanguageResourceValue(
-        	                                 	"fragment_property_content"), PropertyType.Html, 1, ""){ControlType = typeof (HtmlEditorStringControl)};
+            Property property = new Property()
+            {
+                Id = "default_content", LabelText = "Content", DataType = "Html"
+            };
+            
+            headerTitle.Options.Add("rows", "40");
+            headerTitle.Options.Add("sanitize", "false");
+            headerTitle.Options.Add("ContentTypeId",  InlineContentPart.InlineContentContentTypeId.ToString());
 
-        	property.Attributes["EnableHtmlScrubbing"] = "false";
-            property.Attributes["width"] = "100%";
-            property.Attributes["height"] = "300px";
-            property.Attributes["enablehtmlediting"] = "true";
-            property.Attributes["ContentTypeId"] = InlineContentPart.InlineContentContentTypeId.ToString();
             defaultContent.Properties.Add(property);
 
+            PropertyGroup anoymousContent = new PropertyGroup() {Id = "AnonymousContent", LabelText ="Anonymous" };
 
-            PropertyGroup anoymousContent = new PropertyGroup("AnonymousContent", TranslatablePluginController.GetLanguageResourceValue("fragment_propertygroup_anonymousContent"), 0);
+            property = new Property()
+            {
+                Id = "anonymous_content",
+                LabelText ="Content",
+                DataType = "Html"
+            };
 
-            property = new Property("anonymous_content", TranslatablePluginController.GetLanguageResourceValue(
-                                    "fragment_property_content"), PropertyType.Html, 1, "") { ControlType = typeof(HtmlEditorStringControl) };
+            headerTitle.Options.Add("rows", "40");
+            headerTitle.Options.Add("sanitize", "false");
+            headerTitle.Options.Add("ContentTypeId",  InlineContentPart.InlineContentContentTypeId.ToString());
 
-            property.Attributes["EnableHtmlScrubbing"] = "false";
-            property.Attributes["width"] = "100%";
-            property.Attributes["height"] = "300px";
-            property.Attributes["enablehtmlediting"] = "true";
-            property.Attributes["ContentTypeId"] = InlineContentPart.InlineContentContentTypeId.ToString();
             anoymousContent.Properties.Add(property);
 
 
-            property = new Property("inlinecontenttype",
-                TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_type"),
-                PropertyType.String, 2, "Contextual")
+            property = new Property() {Id = "inlinecontenttype", LabelText = "Inline Type", DefaultValue = "Contextual", DataType = "string", DescriptionText = "Select the type of context used to categorize the configuration data" };
+
+            property.SelectableValues.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.PropertyValue(){Value = "Contextual", LabelText ="Contextual" });
+            property.SelectableValues.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.PropertyValue() { Value = "GroupContextual", LabelText ="Group Contextual" });
+            property.SelectableValues.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.PropertyValue() { Value = "ByName", LabelText ="By Name" });
+
+            group.Properties.Add(property);
+
+            property = new Property() {Id = "dynamicname", LabelText = "Use Dynamic Name", DataType = "bool", DefaultValue = bool.FalseString , DescriptionText = "Use a dynamic content name based on the current page context" };
+
+            group.Properties.Add(property);
+
+            property = new Property(){Id = "inlinecontentname", LabelText = "Inline Content Name" , DataType = "string"};
+            group.Properties.Add(property);
+
+            return new[] { group, defaultContent, anoymousContent };
+        }
+
+        public void Initialize()
+        {
+            
+        }
+
+        public string Name
+        {
+            get { return "4 Roads - Inline Content Plugin"; }
+        }
+
+        public string Description
+        {
+            get { return "This plugin allows a user with ManageContent permission to edit content on the page"; }
+        }
+
+        public void SetController(ITranslatablePluginController controller)
+        {
+            _translatablePluginController = controller;
+        }
+
+        public Translation[] DefaultTranslations
+        {
+            get
             {
-                DescriptionResourceName ="fragment_property_inlinecontent_type_description"
-            };
+                Translation[] defaultTranslation = new[] { new Translation("en-us") };
 
-            property.SelectableValues.Add(new PropertyValue("Contextual", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_contextual"), (int)ContextMode.Context));
-            property.SelectableValues.Add(new PropertyValue("GroupContextual", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_groupcontextual"), (int)ContextMode.GroupContext));
-            property.SelectableValues.Add(new PropertyValue("ByName", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_byname"), (int)ContextMode.Name));
+                return defaultTranslation;
+            }
+        }
 
-            group.Properties.Add(property);
-
-            property = new Property("dynamicname", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_dynamicname"), PropertyType.Bool, 3, bool.FalseString)
+        protected ITranslatablePluginController TranslatablePluginController
+        {
+            get
             {
-                DescriptionResourceName ="fragment_property_inlinecontent_dynamicname_description"
-            };
 
-            group.Properties.Add(property);
+                return _translatablePluginController;
+            }
+        }
 
-            property = new Property("inlinecontentname", TranslatablePluginController.GetLanguageResourceValue("fragment_property_inlinecontent_name"), PropertyType.String, 4, string.Empty);
-            group.Properties.Add(property);
 
-            return new[] { group , defaultContent , anoymousContent };
+        public IEnumerable<Type> Plugins
+        {
+            get
+            {
+                return new[]
+                {
+                    typeof (InlineContentStore),
+                    typeof (DependencyInjectionPlugin),
+                    typeof (PermissionRegistrar),
+                    typeof(InlinePanelInstaller),
+                    typeof(InlineContentPanel)
+                };
+            }
+        }
+
+        public bool CanAddFiles(int userId)
+        {
+            return true;
+        }
+
+        public void SetController(IFileEmbeddableContentTypeController controller)
+        {
+            _ftController = controller;
+        }
+
+        public string UpdateInlineContentFiles(string sourceContent)
+        {
+            var fs = CentralizedFileStorage.GetFileStore(InlineContentLogic.FILESTORE_KEY);
+
+            return _ftController.SaveFilesInHtml(sourceContent, file =>
+            {
+                using (Stream contentStream = file.OpenReadStream())
+                {
+                    ICentralizedFile centralizedFile = fs.AddFile(file.Path, file.FileName, contentStream, true);
+                    if (centralizedFile != null)
+                        return centralizedFile;
+
+                    _ftController.InvalidFile(file, string.Empty);
+                }
+                return (ICentralizedFile)null;
+            });
+        }
+
+        public Guid[] ApplicationTypes
+        {
+            get { return new Guid[0]; }
+        }
+
+        public IContent Get(Guid contentId)
+        {
+            return null;
+        }
+
+        public void AttachChangeEvents(IContentStateChanges stateChanges)
+        {
+
+
+        }
+        public static Guid InlineContentContentTypeId = new Guid("{80F2C530-6183-4277-BE65-A0D771F13ABE}");
+
+        public Guid ContentTypeId
+        {
+            get { return InlineContentContentTypeId; }
+        }
+
+        public string ContentTypeName
+        {
+            get { return "InlineContentType"; }
         }
 
         protected void ContextualItem(Action<IApplication> applicationUse, Action<IContainer> containerUse, Action<string[]> tagsUse)
@@ -182,11 +403,11 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
             foreach (var contextItem in Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems())
             {
-                var app = PluginManager.Get<IApplicationType>().FirstOrDefault(a => a.ApplicationTypeId == contextItem.ApplicationTypeId);
+                var app = Apis.Get<IApplicationTypes>().List().FirstOrDefault(a => a.Id.Value == contextItem.ApplicationTypeId);
 
                 if (app != null && contextItem.ApplicationId.HasValue)
                 {
-                    IApplication application = app.Get(contextItem.ApplicationId.Value);
+                    IApplication application = Apis.Get<IApplications>().Get(contextItem.ApplicationId.Value, contextItem.ApplicationTypeId.Value);
 
                     if (application != null)
                     {
@@ -194,17 +415,17 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
                             currentApplication = application;
                     }
                 }
-                
-                var container = PluginManager.Get<IContainerType>().FirstOrDefault(a => a.ContainerTypeId == contextItem.ContainerTypeId);
+
+                var container = Apis.Get<IContainerTypes>().List().FirstOrDefault(a => a.Id.Value == contextItem.ContainerTypeId);
 
                 if (container != null && contextItem.ContainerId.HasValue && contextItem.ContainerTypeId == Apis.Get<IGroups>().ContainerTypeId)
                 {
-                    currentContainer = container.Get(contextItem.ContainerId.Value);
+                    currentContainer = Apis.Get<IContainers>().Get(contextItem.ContainerId.Value , contextItem.ContainerTypeId.Value);
                 }
 
                 if (contextItem.TypeName == "Tags")
                 {
-                    tags = contextItem.Id.Split(new[] {'/'});
+                    tags = contextItem.Id.Split(new[] { '/' });
                 }
             }
 
@@ -242,242 +463,5 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
             return sb.ToString();
         }
-
-        public override void AddContentControls(Control control)
-        {
-            try
-            {
-                InlineContentControl contentControl = new InlineContentControl(this);
-
-                contentControl.ID = "inlinecontent";
-                contentControl.DefaultContent = GetContentText();
-                contentControl.DefaultAnonymousContent = GetAnonymousContentText();
-
-                if (DynamicName)
-                {
-                    contentControl.InlineContentName  = Apis.Get<IUrl>().CurrentContext.PageName + "_";
-                }
-
-                if (ContextualMode == ContextMode.GroupContext || ContextualMode == ContextMode.Context)
-                {
-                    //This allows the control to have several instances on a single page
-                    if (!string.IsNullOrWhiteSpace(InlineContentName))
-                        contentControl.InlineContentName += InlineContentName + "_";
-
-                    ContextualItem(a =>
-                    {
-                        contentControl.InlineContentName += a.ApplicationId.ToString();
-
-                    }, c =>
-                    {
-                        if (c != null && c.ContainerId != Apis.Get<IGroups>().Root.ContainerId)
-                        {
-                            contentControl.InlineContentName += c.ContainerId.ToString();
-                        }
-                        else
-                        {
-                            contentControl.InlineContentName += "SiteRoot";
-                        }
-                    }, ta =>
-                    {
-                        contentControl.InlineContentName += GetHashString(string.Join("", ta.OrderBy(s => s)));
-                    });
-                }
-                else
-                {
-                    contentControl.InlineContentName += InlineContentName;    
-                }
-                
-                control.Controls.Add(contentControl);
-            }
-            catch (CSException csEx)
-            {
-                ExceptionHelper.Handle(csEx);
-                control.Controls.Add(new LiteralControl(csEx.Message));
-            }
-            catch (Exception ex)
-            {
-                new TCException( "Inline Content Exception", ex).Log();
-                control.Controls.Add(new LiteralControl(ex.Message));
-            }
-        }
-
-        private bool DynamicName
-        {
-            get
-            {
-                return GetBoolValue("dynamicName", false);
-            }
-        }
-
-        private  ContextMode ContextualMode
-        {
-            get
-            {
-                switch (GetStringValue("inlinecontenttype", "Contextual"))
-                {
-                    case "ByName":
-                        return ContextMode.Name;
-
-                    case "Contextual":
-                        return ContextMode.Context;
-                }
-
-                return ContextMode.GroupContext;
-            }
-        }
-
-        protected string InlineContentName
-        {
-            get { return GetStringValue("inlinecontentname", string.Empty); }
-        }
-
-        public override void AddPreviewContentControls(Control control)
-        {
-            string html = GetContentText();
-
-            control.Controls.Add(new Literal() {Text = html});
-        }
-
-        public string GetContentText()
-        {
-            return GetHtmlValue("default_content", "");
-        }
-
-        public string GetAnonymousContentText()
-        {
-            return GetHtmlValue("anonymous_content", "");
-        }
-
-        public void Initialize()
-        {
-            
-
-        }
-
-        public string Name
-        {
-            get { return "4 Roads - Inline Content Plugin"; }
-        }
-
-        public string Description
-        {
-            get { return "This plugin allows a user with ManageContent permission to edit content on the page"; }
-        }
-
-        public void SetController(ITranslatablePluginController controller)
-        {
-            _translatablePluginController = controller;
-        }
-
-        public Translation[] DefaultTranslations
-        {
-            get
-            {
-                Translation[] defaultTranslation = new[] {new Translation("en-us")};
-
-                defaultTranslation[0].Set("fragment_name", "4 Roads - Inline Content");
-                defaultTranslation[0].Set("fragment_description", "Provides an inline content widget for users with the Manage Content permission");
-                defaultTranslation[0].Set("fragment_propertygroup_general", "General");
-                defaultTranslation[0].Set("fragment_propertygroup_defaultContent", "Default Content");
-                defaultTranslation[0].Set("fragment_propertygroup_anonymousContent", "Anonymous Override Content");
-                defaultTranslation[0].Set("fragment_property_content", "Default Content Markup");
-                defaultTranslation[0].Set("fragment_property_inlinecontent_name", "Inline Content Name");
-                defaultTranslation[0].Set("fragment_property_css", "CSS Markup");
-                defaultTranslation[0].Set("fragment_property_title", "<Context Based>");
-                defaultTranslation[0].Set("default_property_title", "Title");
-
-                defaultTranslation[0].Set("fragment_property_inlinecontent_type_description", "Select the type of context used to categorize the configuration data");
-                defaultTranslation[0].Set("fragment_property_inlinecontent_type", "Mode");
-                defaultTranslation[0].Set("fragment_property_inlinecontent_contextual", "Current Context");
-                defaultTranslation[0].Set("fragment_property_inlinecontent_groupcontextual", "Current Group Context");
-                defaultTranslation[0].Set("fragment_property_inlinecontent_byname", "By Name");
-                defaultTranslation[0].Set("fragment_property_inlinecontent_dynamicname", "Use Page Name");
-                defaultTranslation[0].Set("fragment_property_inlinecontent_dynamicname_description", "Use the current theme page name as part of the context");
-
-                return defaultTranslation;
-            }
-        }
-
-        protected ITranslatablePluginController TranslatablePluginController
-        {
-            get
-            {
-                if (_translatablePluginController == null)
-                {
-                    _translatablePluginController = new TranslatablePluginController(this, Services.Get<ITranslatablePluginService>());
-                }
-
-                return _translatablePluginController;
-            }
-        }
-
-
-        public IEnumerable<Type> Plugins {
-            get { return new[]
-                {
-                    typeof(InlineContentHeaderExtension),
-                    typeof (InlineContentStore),
-                    typeof (DependencyInjectionPlugin),
-                     typeof (PermissionRegistrar)
-                }; }
-        }
-
-        public bool CanAddFiles(int userId)
-        {
-            return true;
-        }
-
-        public void SetController(IFileEmbeddableContentTypeController controller)
-        {
-            _ftController = controller;
-        }
-
-        public string UpdateInlineContentFiles(string sourceContent)
-        {
-           var fs =  CentralizedFileStorage.GetFileStore(InlineContentLogic.FILESTORE_KEY);
-
-            return _ftController.SaveFilesInHtml(sourceContent, file =>
-            {
-                using (Stream contentStream = file.OpenReadStream())
-                {
-                    ICentralizedFile centralizedFile = fs.AddFile(file.Path, file.FileName, contentStream, true);
-                    if (centralizedFile != null)
-                        return centralizedFile;
-
-                    _ftController.InvalidFile(file, string.Empty);
-                }
-                return (ICentralizedFile)null;
-            });
-        }
-
-        public Guid[] ApplicationTypes
-        {
-            get {return new Guid[0];}
-        }
-
-        public void AttachChangeEvents(IContentStateChanges stateChanges)
-        {
-            
-
-        }
-        public static Guid InlineContentContentTypeId = new Guid("{80F2C530-6183-4277-BE65-A0D771F13ABE}");
-
-        public Guid ContentTypeId
-        {
-            get { return InlineContentContentTypeId; }
-        }
-
-        public string ContentTypeName
-        {
-            get { return "InlineContentType"; }
-        }
-
-        public Telligent.Evolution.Extensibility.Content.Version1.IContent Get(Guid contentId)
-        {
-            return null;
-        }
-
-
     }
 }

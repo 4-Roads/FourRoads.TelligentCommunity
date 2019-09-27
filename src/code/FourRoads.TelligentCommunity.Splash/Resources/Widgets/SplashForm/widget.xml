@@ -1,5 +1,5 @@
 <scriptedContentFragments>
-  <scriptedContentFragment name="${resource:Splash_Name}" cssClass="splash" description="${resource:Splash_Description}" instanceIdentifier="f83a20b3310940e087bdc6c9658409c7" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false">
+  <scriptedContentFragment name="${resource:Splash_Name}" cssClass="splash" description="${resource:Splash_Description}" instanceIdentifier="f83a20b3310940e087bdc6c9658409c7" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false" provider="d6456600993749278f0432cd79f0052b">
     <contentScript>
       <![CDATA[
           

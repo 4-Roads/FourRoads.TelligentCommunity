@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    $core_v2_page.RenderThemeHeaders("%{IsModal = 'true'}")
+  </head>
+  <body class="inline-content-editor">
+    #set($save =  $core_v2_widget.UniqueId('Save'))
+    #set($tabSet =  $core_v2_widget.UniqueId('TabSet'))
+    #set($tabContent =  $core_v2_widget.UniqueId('tabContent'))
+    #set($tabAnonymousContent =  $core_v2_widget.UniqueId('tabAnonymousContent'))
+    <fieldset>
+      <div id="$tabSet">
+        <div id="$tabContent">
+          #set($contentId =  $core_v2_widget.UniqueId('Content'))
+          <label for="$contentId">Content</label>
+          $core_v2_editor.Render($contentId, "%{ContentTypeId = $context.ContentTypeId, Value = $context.CurrentContent , Width='100%', Height='250px'}")
+        </div>
+        <div id="$tabAnonymousContent">
+          #set($anonymousContentId =  $core_v2_widget.UniqueId('AnonymousContent'))
+          <label for="$anonymousContentId">Anonymous Content</label>
+          $core_v2_editor.Render($anonymousContentId, "%{ContentTypeId = $context.ContentTypeId, Value = $context.CurrentAnonymousContent , Width='100%', Height='250px'}")
+        </div>
+      </div>
+      <div class="field-item">
+        <span class="field-item-input">
+          <a id="$save" class="internal-link button submit-button">Update</a>
+        </span>
+      </div>
+    </fieldset>
+    <script type="text/javascript">
+      jQuery(function(){
+
+      var tabs = [];
+      tabs.push(['$tabContent', 'Content', null]);
+      tabs.push(['$tabAnonymousContent', 'Anonymous Content', null]);
+
+      jQuery('#$tabSet').glowTabbedPanes({
+        cssClass:'',
+        tabSetCssClass:'tab-set with-panes',
+        tabCssClasses:['tab'],
+        tabSelectedCssClasses:['tab selected'],
+        tabHoverCssClasses:['tab hover'],
+        enableResizing:false,
+        tabs: tabs
+      })
+
+      jQuery('#$save').click(function(e){
+
+      e.preventDefault();
+
+      jQuery.telligent.evolution.post({
+      url: '$core_v2_encoding.JavascriptEncode( $core_v2_widget.GetExecutedFileUrl("save.vm"))',
+      data: {
+      inlineContentName: '$core_v2_encoding.JavascriptEncode($context.InlineContentName)',
+      currentContent: $core_v2_editor.GetContentScript($contentId),
+      currentAnonymousContent: $core_v2_editor.GetContentScript($anonymousContentId)
+      },
+      success: function (response) {
+        jQuery.glowModal.close();
+      }
+      });
+      })
+
+      });
+    </script>
+  </body>
+</html>

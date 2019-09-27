@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using AngleSharp.Html.Dom;
 using FourRoads.TelligentCommunity.Splash.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -13,7 +14,6 @@ using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using FourRoads.Common.TelligentCommunity.Routing;
-using AngleSharp.Dom.Html;
 
 namespace FourRoads.TelligentCommunity.Splash.Logic
 {
@@ -126,7 +126,19 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
                                 accessController.Redirect(Apis.Get<ICoreUrls>().Home(false));
                         }
                     }
-                }
+                },
+                DefaultPageXml = @"
+    <contentFragmentPage pageName=""splash"" isCustom=""false"" layout=""Content"" themeType=""0c647246-6735-42f9-875d-c8b991fe739b"">
+      <regions>
+        <region regionName=""Content"">
+          <contentFragments>
+            <contentFragment type=""Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.ScriptedContentFragments::f83a20b3310940e087bdc6c9658409c7"" showHeader=""False"" cssClassAddition=""no-wrapper with-spacing responsive-1"" isLocked=""False"" configuration=""fragmentHeader=%24%7Bresource%3ASplash_Header%7D"" />
+          </contentFragments>
+        </region>
+      </regions>
+      <contentFragmentTabs />
+    </contentFragmentPage>
+"
             });
         }
 

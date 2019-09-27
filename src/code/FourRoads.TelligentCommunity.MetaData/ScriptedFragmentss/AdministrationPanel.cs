@@ -15,7 +15,7 @@ namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
     public class AdministrationPanel : IScriptablePlugin, IApplicationPlugin,IApplicationPanel, IContainerPanel
     {
         //private static Guid _panelGuid = new Guid("{794F9086-EDE9-4313-B90B-61198ADB59AA}");
-        private static Guid _scriptedFragmentGuid = new Guid("{4405A321-03D9-4601-81F3-81B84F6EFB01}");
+        public  static Guid _scriptedFragmentGuid = new Guid("{4405A321-03D9-4601-81F3-81B84F6EFB01}");
         private static Guid _instanceIdentifier = new Guid("411f7656968348e1906a695a01b5f56c");
         private IScriptedContentFragmentController _controller;
 

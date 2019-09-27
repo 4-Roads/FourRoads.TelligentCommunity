@@ -36,19 +36,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AWSSDK.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\AWSSDK.Core.3.3.30.1\lib\net45\AWSSDK.Core.dll</HintPath>
+      <HintPath>..\..\packages\AWSSDK.Core.3.3.103.43\lib\net45\AWSSDK.Core.dll</HintPath>
     </Reference>
     <Reference Include="AWSSDK.S3, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\AWSSDK.S3.3.3.31.4\lib\net45\AWSSDK.S3.dll</HintPath>
+      <HintPath>..\..\packages\AWSSDK.S3.3.3.104.31\lib\net45\AWSSDK.S3.dll</HintPath>
     </Reference>
-    <Reference Include="FourRoads.Common, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common\bin\Release\FourRoads.Common.dll</HintPath>
+    <Reference Include="FourRoads.Common, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common\bin\Release\FourRoads.Common.dll</HintPath>
     </Reference>
-    <Reference Include="FourRoads.Common.Sql, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Sql.dll</HintPath>
+    <Reference Include="FourRoads.Common.Sql, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Sql.dll</HintPath>
     </Reference>
-    <Reference Include="FourRoads.Common.Web, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Web.dll</HintPath>
+    <Reference Include="FourRoads.Common.Web, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Web.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -88,12 +88,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\..\packages\AWSSDK.S3.3.3.31.4\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
+    <Analyzer Include="..\..\packages\AWSSDK.S3.3.3.104.31\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

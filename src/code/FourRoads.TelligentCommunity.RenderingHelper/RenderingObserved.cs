@@ -1,6 +1,5 @@
-﻿using AngleSharp.Dom.Html;
-
-using System;
+﻿using System;
+using AngleSharp.Html.Dom;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {

@@ -18,13 +18,29 @@ using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
 {
-    public class LastReadForumPost : SqlScriptsInstaller , IScriptedContentFragmentExtension, IInstallablePlugin, IBindingsLoader, IPluginGroup
+    public class LastReadForumSqlInstaller : SqlScriptsInstaller
     {
-        void IPlugin.Initialize()
+        protected override string ProjectName
+        {
+            get { return "Last Read Forum Post"; }
+        }
+
+        protected override string BaseResourcePath
+        {
+            get { return "FourRoads.TelligentCommunity.ForumLastPost.Resources."; }
+        }
+
+        protected override EmbeddedResourcesBase EmbeddedResources
+        {
+            get { return new EmbeddedResources(); }
+        }
+    }
+
+    public class LastReadForumPost :  IScriptedContentFragmentExtension, IBindingsLoader, IPluginGroup
+    {
+        public void Initialize()
         {
             Apis.Get<IForumReplies>().Events.Render += ForumReplyRender;
-
-            Initialize();
         }
 
         private void ForumReplyRender(ForumReplyRenderEventArgs e)
@@ -40,27 +56,13 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
             }
         }
 
-        protected override string ProjectName
-        {
-            get { return "Last Read Forum Post"; }
-        }
 
-        protected override string BaseResourcePath
-        {
-            get { return "FourRoads.TelligentCommunity.ForumLastPost.Resources."; }
-        }
-
-        protected override EmbeddedResourcesBase EmbeddedResources
-        {
-            get { return new EmbeddedResources(); }
-        }
-
-        string IPlugin.Name
+        public string Name
         {
             get { return "4 Roads - Last Read Forum Post Plugin"; }
         }
 
-        string IPlugin.Description
+        public string Description
         {
             get { return "This plugin allows a user to navigate to the last post that they read in a forum thread"; }
         }
@@ -89,6 +91,6 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
             }
         }
 
-        public IEnumerable<Type> Plugins { get { return new[] { typeof(DependencyInjectionPlugin) }; } }
+        public IEnumerable<Type> Plugins { get { return new[] { typeof(DependencyInjectionPlugin), typeof(LastReadForumSqlInstaller) }; } }
     }
 }

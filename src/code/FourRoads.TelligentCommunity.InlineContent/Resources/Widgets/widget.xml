@@ -1,0 +1,62 @@
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:InlineContent_Name}" cssClass="inlinecontent" description="${resource:InlineContent_Description}" instanceIdentifier="17af3cb782e44f8e8903ba64404cd913" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" provider="a8ec6c5fe7c045d3848d25930503e153">
+    <contentScript>
+      <![CDATA[
+
+ #if ($context.CanEdit)
+ <div class="editable">
+ #end
+        #if ($core_v2_user.IsRegistered($core_v2_user.Accessing.Id))
+              #if ($context.CurrentContent != "")
+                  $context.CurrentContent
+              #else
+                  $context.DefaultContent
+              #end
+        #else
+              #if ($context.CurrentAnonymousContent != "")
+                  $context.CurrentAnonymousContent
+              #else
+                  $context.DefaultAnonymousContent
+              #end
+        #end
+                                                               
+        #if ($context.CanEdit)
+          #set($editContentId =  $core_v2_widget.UniqueId('contentEditLink'))
+          
+          <div><a href="javascript:void()" id="$editContentId">$core_v2_language.GetResource("EditContent")</a></div>
+       </div>   
+          #registerEndOfPageHtml('fourroads.widgets.inlineContent')
+		        <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('inlinecontent.js'))"></script>
+	        #end
+             
+	        #registerEndOfPageHtml()
+	            <script type="text/javascript">
+		            jQuery(function(){
+			              jQuery.fourroads.widgets.inlineContent.register({   
+                    inlineContentName: '$core_v2_encoding.JavascriptEncode($context.InlineContentName)', 
+                    selectors : {
+                      editContent: "#$editContentId",
+                    },
+					          urls : {
+                      editContent : '$core_v2_encoding.JavascriptEncode( $core_v2_widget.GetExecutedFileUrl("editcontent.vm"))'
+					          }
+				          });
+		            });
+	            </script>
+            #end
+          
+        #end
+        ]]>
+    </contentScript>
+    <languageResources>
+      <language key="en-us">
+        <resource name="InlineContent_Name">4 Roads - Inline Content</resource>
+        <resource name="InlineContent_Header">MetaData Widget</resource>
+        <resource name="InlineContent_Description">Adds support for configurable meta data.</resource>
+        <resource name="Options">Options</resource>
+        <resource name="Save">Save</resource>
+        <resource name="EditContent">Edit</resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

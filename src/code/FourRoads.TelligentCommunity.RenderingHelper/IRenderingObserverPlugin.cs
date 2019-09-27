@@ -1,7 +1,7 @@
 using System;
 
 using Telligent.Evolution.Extensibility.Version1;
-using AngleSharp.Dom.Html;
+using AngleSharp.Html.Dom;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {

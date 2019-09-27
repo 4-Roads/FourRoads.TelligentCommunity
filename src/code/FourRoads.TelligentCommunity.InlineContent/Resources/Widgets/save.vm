@@ -1,0 +1,6 @@
+#if ($core_v2_page.IsPost)
+
+    $context.UpdateContent($core_v2_page.GetFormValue("inlineContentName"),$core_v2_page.GetFormValue("currentContent"),$core_v2_page.GetFormValue("currentAnonymousContent"))
+
+
+#end

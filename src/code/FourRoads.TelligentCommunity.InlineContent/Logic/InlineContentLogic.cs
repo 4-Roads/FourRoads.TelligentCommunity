@@ -100,7 +100,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
                 using (MemoryStream buffer = new MemoryStream(10000))
                 {
                     //Translate the URL's if any have been uploaded
-                    var pluginMgr = PluginManager.GetSingleton<InlineContentPart>();
+                    var pluginMgr = PluginManager.Get<InlineContentPart>().FirstOrDefault();
 
                     content = pluginMgr.UpdateInlineContentFiles(content);
                     anonymousContent = pluginMgr.UpdateInlineContentFiles(anonymousContent);

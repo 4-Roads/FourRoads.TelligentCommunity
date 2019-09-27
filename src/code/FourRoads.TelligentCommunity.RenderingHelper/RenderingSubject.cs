@@ -1,8 +1,8 @@
-﻿using AngleSharp.Dom.Html;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AngleSharp.Html.Dom;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {

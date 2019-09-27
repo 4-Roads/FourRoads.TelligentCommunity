@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,29 +9,31 @@ using System.Xml.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Controls;
+using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
+using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
-using Telligent.Evolution.Components.Jobs;
 using Telligent.Jobs;
-using System.Configuration;
-using Telligent.Common;
-using Telligent.Evolution.Components;
-using Telligent.Evolution.ScriptedContentFragments.Services;
-using ThemeFiles = Telligent.Evolution.Components.ThemeFiles;
+using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
+using File = System.IO.File;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
-    public abstract class FactoryDefaultWidgetProviderInstallerV2 : IScriptedContentFragmentFactoryDefaultProvider, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob
+
+    /// <summary>
+    /// NOTE: this class no longer inherits from IScriptedContentFragmentFactoryDefaultProvider this is to allow for support of the scripted panels
+    /// </summary>
+    public abstract class FactoryDefaultWidgetProviderInstallerV3<TScriptedContentFragmentFactoryDefaultProvider> : IInstallablePlugin, IConfigurablePlugin, IEvolutionJob where TScriptedContentFragmentFactoryDefaultProvider: class, IScriptedContentFragmentFactoryDefaultProvider
     {
         public abstract Guid ScriptedContentFragmentFactoryDefaultIdentifier { get; }
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
+        private TScriptedContentFragmentFactoryDefaultProvider _sourceScriptedFragment;
 
         #region IPlugin Members
 
@@ -40,10 +43,19 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Initialize()
         {
-            if (IsDebugBuild && _enableFilewatcher)
+            _sourceScriptedFragment= PluginManager.Get<TScriptedContentFragmentFactoryDefaultProvider>().FirstOrDefault();
+
+#if DEBUG
+            if (IsDebugBuild)
             {
-                InitializeFilewatcher();
+                if (_enableFilewatcher)
+                {
+                    InitializeFilewatcher();
+                }
+
+                ScheduleInstall();
             }
+#endif
         }
 
         #endregion
@@ -137,7 +149,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
 
                     FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(
-                        this,
+                        _sourceScriptedFragment,
                         instanceId.ToString("N").ToLower() + ".xml",
                         TextAsStream(widgetXml)
                     );
@@ -153,7 +165,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         string supplementName = supplementPath.Substring(widgetPath.Length);
                         var stream = EmbeddedResources.GetStream(supplementPath);
                         FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(
-                            this,
+                            _sourceScriptedFragment,
                             instanceId,
                             supplementName,
                             PreprocessWidgetFile(ReadStream(stream), supplementName, cssClass)
@@ -211,7 +223,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 //Only in release do we want to uninstall widgets, when in development we don't want this to happen
                 try
                 {
-                    FactoryDefaultScriptedContentFragmentProviderFiles.DeleteAllFiles(this);
+                    FactoryDefaultScriptedContentFragmentProviderFiles.DeleteAllFiles(_sourceScriptedFragment);
                 }
                 catch (Exception exception)
                 {
@@ -230,7 +242,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         {
             protected override void OnClick()
             {
-                FactoryDefaultWidgetProviderInstallerV2 plugin = (PluginManager.Get<IScriptedContentFragmentFactoryDefaultProvider>().First(o => o.GetType().AssemblyQualifiedName == CallingType)) as FactoryDefaultWidgetProviderInstallerV2;
+                FactoryDefaultWidgetProviderInstallerV3<TScriptedContentFragmentFactoryDefaultProvider> plugin = (PluginManager.Get<IInstallablePlugin>().First(o => o.GetType().AssemblyQualifiedName == CallingType)) as FactoryDefaultWidgetProviderInstallerV3<TScriptedContentFragmentFactoryDefaultProvider>;
 
                 plugin?.ScheduleInstall();
             }
@@ -349,7 +361,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         /// <summary>
         /// Builds a single widget held in the given file path.
         /// </summary>
-        private void BuildWidget(string pathToWidget)
+        private Guid BuildWidget(string pathToWidget)
         {
 
             // WaitForFile(file, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -362,18 +374,18 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
             if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
             {
-                return;
+                return Guid.Empty;
             }
 
             // If this widget's provider ID is not the one we're installing, then ignore it:
             if (providerId != ScriptedContentFragmentFactoryDefaultIdentifier)
             {
-                return;
+                return Guid.Empty;
             }
 
             // Update the widget's XML:
             FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(
-                this,
+                _sourceScriptedFragment,
                 instanceId.ToString("N").ToLower() + ".xml",
                 TextAsStream(widgetXml)
             );
@@ -389,13 +401,14 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
 
                 FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(
-                    this,
+                    _sourceScriptedFragment,
                     instanceId,
                     fileName,
                     PreprocessWidgetFile(ReadFileBytes(supFile), fileName, cssClass)
                 );
             }
 
+            return instanceId;
         }
 
         /// <summary>
@@ -418,17 +431,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
 
-        private static void ClearCacheNotApiSafe()
-        {
-            Services.Get<IFactoryDefaultScriptedContentFragmentService>().ExpireCache();
-            Services.Get<IScriptedContentFragmentService>().ExpireCache();
-            Services.Get<IContentFragmentPageService>().RemoveAllFromCache();
-            Services.Get<IContentFragmentService>().RefreshContentFragments();
-            // the calls below are not reliable when called during init phase
-            ThemeFiles.RequestHostVersionedThemeFileRegeneration();
-            SystemFileStore.RequestHostVersionedThemeFileRegeneration();
-        }
-
         private void OnChanged(object source, FileSystemEventArgs e)
         {
             // 1. Which widget is this file for?
@@ -439,9 +441,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             {
                 // Build just this widget.
                 BuildWidget(widgetPath);
-
-                // Clear the cache:
-                ClearCacheNotApiSafe();
             }
         }
 

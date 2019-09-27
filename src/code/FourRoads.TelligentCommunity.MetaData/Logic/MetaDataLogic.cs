@@ -357,8 +357,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             ContentDetails details = GetCurrentContentDetails();
 
             MetaData data = GetCurrentMetaData(details);
+            Guid containerId = data.ContainerId;
 
-            while (data.InheritData && data.ContainerId != Guid.Empty)
+            while (data.InheritData && containerId != Guid.Empty)
             {
                 var container = Apis.Get<IContainers>().Get(data.ContainerId, data.ContainerTypeId);
 
@@ -378,7 +379,26 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                         details.ContainerTypeId = container.ParentContainer.ContainerTypeId;
                         details.PageName = context.PageName;
 
-                        data = GetCurrentMetaData(details);
+                        var inherited = GetCurrentMetaData(details);
+
+                        containerId = inherited?.ContainerId ?? Guid.Empty;
+
+                        if (string.IsNullOrWhiteSpace(data.Title))
+                            data.Title = inherited.Title;
+
+                        if (string.IsNullOrWhiteSpace(data.Description))
+                            data.Description = inherited.Description;
+
+                        if (string.IsNullOrWhiteSpace(data.Keywords))
+                            data.Keywords = inherited.Keywords;
+
+                        foreach (var key in data.ExtendedMetaTags.Keys)
+                        {
+                            if (string.IsNullOrWhiteSpace(data.ExtendedMetaTags[key]) && inherited.ExtendedMetaTags.ContainsKey(key))
+                            {
+                                data.ExtendedMetaTags[key] = inherited.ExtendedMetaTags[key];
+                            }
+                        }
                     }
                     else
                     {

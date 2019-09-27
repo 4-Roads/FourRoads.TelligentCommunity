@@ -1,5 +1,5 @@
 <scriptedContentFragments>
-  <scriptedContentFragment name="${resource:ContentDiscuss_Name}" cssClass="content-discussions" description="${resource:ContentDiscuss_Description}" instanceIdentifier="66335d7ac5c841429709a730aec55ac9" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false">
+  <scriptedContentFragment name="${resource:ContentDiscuss_Name}" cssClass="content-discussions" description="${resource:ContentDiscuss_Description}" instanceIdentifier="66335d7ac5c841429709a730aec55ac9" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false"  provider="84cc3e33433742129e4a3700ee06f721" >
     <contentScript>
       <![CDATA[
     
@@ -10,8 +10,9 @@
     $core_v2_widget.RenderFile('contentdiscuss.css')
 </style>
 
+
 #set($textAreaSelector = false)
-#set($textAreaSelector = $core_v2_widget.GetStringValue('textAreaSelector', ''))
+#set($textAreaSelector = $core_v2_widget.GetStringValue('textAreaSelector', '.content.full.text'))
 #set($textSelectionMenuId = $core_v2_widget.UniqueId('selection-menu'))
 #set($threadId = false)
 #set($targetForumId = false)
@@ -95,7 +96,7 @@
       <select id="$core_v2_encoding.HtmlAttributeEncode($selectForumId)">
         <option value="" #if(!$targetForumId) selected #end></option>
         #foreach($forum in $forums)
-          <option value="$forum.Id" #if($targetForumId == $forum.Id) selected #end>$forum.Name</option>
+          <option value="$forum.Id" #if($targetForumId == $forum.Id) selected #end>$forum.Group.Name - $forum.Name</option>
         #end
       </select>
       <a id="$core_v2_encoding.HtmlAttributeEncode($setForumId)" href="javascript:void(0);" class="set-forum" data-blogid="$core_v2_blog.Current.Id" data-wikiid="$core_v2_wiki.Current.Id">Set</a>
@@ -130,7 +131,6 @@
 		      });
 	      </script>
       #end
- 
 			]]>
     </contentScript>
     <headerScript>
@@ -142,7 +142,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
       <![CDATA[
 <propertyGroup id="options" resourceName="Options">
 	<property id="fragmentHeader" resourceName="ContentDiscuss_Name" dataType="string" defaultValue="${resource:ContentDiscuss_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
-  <property id="textAreaSelector" resourceName="TextArea_Selector" dataType="string" defaultValue=".blog-post .post-content.user-defined-markup" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+  <property id="textAreaSelector" resourceName="TextArea_Selector" dataType="string" defaultValue=".content.full.text" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
 </propertyGroup>
 ]]>
     </configuration>
@@ -158,5 +158,8 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
         <resource name="Discussion">Discussion</resource>
       </language>
     </languageResources>
+    <requiredContext>
+      <context id="24fa6951ab1244f5be3df20cc46b361b" />
+    </requiredContext>
   </scriptedContentFragment>
 </scriptedContentFragments>

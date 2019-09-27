@@ -7,7 +7,7 @@ using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using Telligent.Common;
 using Telligent.Evolution.Components;
-using AngleSharp.Dom.Html;
+using AngleSharp.Html.Dom;
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {

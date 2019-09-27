@@ -35,18 +35,14 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FourRoads.Common, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common\bin\Release\FourRoads.Common.dll</HintPath>
+    <Reference Include="FourRoads.Common, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common\bin\Release\FourRoads.Common.dll</HintPath>
     </Reference>
-    <Reference Include="FourRoads.Common.Sql, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Sql.dll</HintPath>
+    <Reference Include="FourRoads.Common.Sql, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Sql.dll</HintPath>
     </Reference>
-    <Reference Include="FourRoads.Common.Web, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Web.dll</HintPath>
-    </Reference>
-    <Reference Include="NVelocity">
-      <HintPath>..\..\packages\Castle.NVelocity.1.1.1\lib\net40\NVelocity.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="FourRoads.Common.Web, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Web.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -110,19 +106,19 @@
     <Folder Include="Resources\Themes\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\66335d7ac5c841429709a730aec55ac9\contentdiscuss.css" />
-    <EmbeddedResource Include="Resources\Widgets\66335d7ac5c841429709a730aec55ac9\contentDiscuss.js" />
-    <EmbeddedResource Include="Resources\Widgets\ContentDiscuss.xml">
+    <EmbeddedResource Include="Resources\Widgets\ContentDiscuss\contentdiscuss.css" />
+    <EmbeddedResource Include="Resources\Widgets\ContentDiscuss\contentDiscuss.js" />
+    <EmbeddedResource Include="Resources\Widgets\ContentDiscuss\widget.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\66335d7ac5c841429709a730aec55ac9\store.vm">
+    <EmbeddedResource Include="Resources\Widgets\ContentDiscuss\store.vm">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\66335d7ac5c841429709a730aec55ac9\setforum.vm" />
+    <EmbeddedResource Include="Resources\Widgets\ContentDiscuss\setforum.vm" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

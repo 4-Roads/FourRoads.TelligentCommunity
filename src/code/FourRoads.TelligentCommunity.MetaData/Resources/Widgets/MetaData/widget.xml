@@ -1,5 +1,5 @@
 <scriptedContentFragments>
-  <scriptedContentFragment name="${resource:MetaData_Name}" cssClass="metadata" description="${resource:MetaData_Description}" instanceIdentifier="f94334edd1cb46ef98c0037741511311" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false">
+  <scriptedContentFragment name="${resource:MetaData_Name}" cssClass="metadata" description="${resource:MetaData_Description}" instanceIdentifier="f94334edd1cb46ef98c0037741511311" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false" provider="2584523cf4054159a2055322f5957f27">
     <contentScript>
       <![CDATA[
           #set($currentMetaData = $frcommon_v1_metaData.GetCurrentMetaData())

@@ -1,4 +1,4 @@
-﻿<scriptedContentFragments><scriptedContentFragment instanceIdentifier="16bc0d7a0c844642a282822d91a3e01d" name="${resource:UserNotifications_Name}" version="8.0.4.40784" description="${UserNotifications_Description}" theme="" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false" cssClass="user-notifications">
+﻿<scriptedContentFragments><scriptedContentFragment instanceIdentifier="16bc0d7a0c844642a282822d91a3e01d" name="${resource:UserNotifications_Name}" version="8.0.4.40784" description="${UserNotifications_Description}" theme="" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false" cssClass="user-notifications" provider="2e58b526724841b19a9908764342c024">
 <contentScript>
 <![CDATA[
 ## check if user is administrator, if not then they can't use this widget

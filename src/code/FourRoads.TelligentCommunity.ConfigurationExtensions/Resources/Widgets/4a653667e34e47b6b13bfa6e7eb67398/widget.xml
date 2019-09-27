@@ -1,5 +1,5 @@
 ﻿<scriptedContentFragments>
-  <scriptedContentFragment name="${resource:CalendarSubscriptionDefaults_Name}" cssClass="subscription-defaults" description="${resource:CalendarSubscriptionDefaults_Description}" instanceIdentifier="4a653667e34e47b6b13bfa6e7eb67398" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false">
+  <scriptedContentFragment name="${resource:CalendarSubscriptionDefaults_Name}" cssClass="subscription-defaults" description="${resource:CalendarSubscriptionDefaults_Description}" instanceIdentifier="4a653667e34e47b6b13bfa6e7eb67398" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" provider="2e58b526724841b19a9908764342c024">
     <contentScript>
       <![CDATA[
       #set ($calendar = $calendar_v1_calendars.Current)

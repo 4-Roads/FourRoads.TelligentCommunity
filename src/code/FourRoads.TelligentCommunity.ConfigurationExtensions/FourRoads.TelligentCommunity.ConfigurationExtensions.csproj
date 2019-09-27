@@ -33,18 +33,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FourRoads.Common, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common\bin\Release\FourRoads.Common.dll</HintPath>
+    <Reference Include="FourRoads.Common, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common\bin\Release\FourRoads.Common.dll</HintPath>
     </Reference>
-    <Reference Include="FourRoads.Common.Sql, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Sql.dll</HintPath>
+    <Reference Include="FourRoads.Common.Sql, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Sql.dll</HintPath>
     </Reference>
-    <Reference Include="FourRoads.Common.Web, Version=5.2.27.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FourRoads.Common.5.2.27\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Web.dll</HintPath>
-    </Reference>
-    <Reference Include="NVelocity, Version=1.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Castle.NVelocity.1.1.1\lib\net40\NVelocity.dll</HintPath>
+    <Reference Include="FourRoads.Common.Web, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Web.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -135,7 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\71c7b6f757bc4d159d8c69eb5a8a8db6\subscriptiondefaults.js" />
-    <EmbeddedResource Include="Resources\Widgets\BlogSubscriptionDefaults.xml" />
+    <EmbeddedResource Include="Resources\Widgets\71c7b6f757bc4d159d8c69eb5a8a8db6\widget.xml" />
     <EmbeddedResource Include="Resources\Widgets\f5deee7523cd48beb23f20eb88397e77\resetSettings.vm" />
     <EmbeddedResource Include="Resources\Widgets\f5deee7523cd48beb23f20eb88397e77\updateSettings.vm" />
     <EmbeddedResource Include="Resources\Widgets\71c7b6f757bc4d159d8c69eb5a8a8db6\resetSettings.vm" />
@@ -145,15 +141,16 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\16bc0d7a0c844642a282822d91a3e01d\notifications.js" />
-    <EmbeddedResource Include="Resources\Widgets\User-Notifications.xml" />
+    <EmbeddedResource Include="Resources\Widgets\16bc0d7a0c844642a282822d91a3e01d\widget.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\ForumSubscriptionDefaults.xml" />
+    <EmbeddedResource Include="Resources\Widgets\f5deee7523cd48beb23f20eb88397e77\widget.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\f5deee7523cd48beb23f20eb88397e77\subscriptiondefaults.js" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\resetSettings.vm" />
     <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\updateSettings.vm" />
@@ -161,13 +158,13 @@
     <EmbeddedResource Include="Resources\Widgets\52fcdd61ca2f4783a331628681290210\updateSettings.vm" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\CalendarSubscriptionDefaults.xml" />
+    <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\widget.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\4a653667e34e47b6b13bfa6e7eb67398\subscriptiondefaults.js" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\GroupDigestSubscriptionDefaults.xml">
+    <EmbeddedResource Include="Resources\Widgets\52fcdd61ca2f4783a331628681290210\widget.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

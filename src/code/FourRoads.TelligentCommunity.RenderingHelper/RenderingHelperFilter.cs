@@ -1,15 +1,15 @@
 using System;
 using System.IO;
 using System.Web;
-
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 using FourRoads.Common.TelligentCommunity.Components;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Urls.Version1;
-using AngleSharp.Parser.Html;
-using AngleSharp.Dom.Html;
+
 
 namespace FourRoads.TelligentCommunity.RenderingHelper
 {
@@ -64,7 +64,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
                             var parser = new HtmlParser();
                             
                             //Just get the DOM representation
-                            IHtmlDocument document = parser.Parse(tmpStream);
+                            IHtmlDocument document = parser.ParseDocument(tmpStream);
                             //CQ document = CQ.CreateDocument(tmpStream, HttpContext.Current.Response.ContentEncoding);
 
                             _renderingObserverPlugin.NotifyObservers(document);
