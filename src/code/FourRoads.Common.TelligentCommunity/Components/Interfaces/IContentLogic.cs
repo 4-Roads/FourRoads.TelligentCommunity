@@ -1,6 +1,6 @@
 // //  ------------------------------------------------------------------------------
-// //  <copyright company="Four Roads LLC">
-// //  Copyright (c) Four Roads LLC.  All rights reserved.
+// //  <copyright company="4 Roads LTD">
+// //  Copyright (c) 4 Roads LTD 2019.  All rights reserved.
 // //  </copyright>
 // //  ------------------------------------------------------------------------------
 
