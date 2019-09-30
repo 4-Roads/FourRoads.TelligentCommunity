@@ -1,4 +1,6 @@
-﻿using Telligent.Evolution.Extensibility.Api.Entities.Version1;
+﻿using System.Collections.Generic;
+using FourRoads.TelligentCommunity.GoogleMfa.Model;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 
 namespace FourRoads.TelligentCommunity.GoogleMfa.Interfaces
@@ -12,5 +14,11 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Interfaces
         bool TwoFactorEnabled(User user);
         void EnableTwoFactor(User user, bool enabled);
         bool ValidateTwoFactorCode(User user, string code);
+
+        string GetAccountSecureKey(User user);
+        string GetAccountSecureKey(User user, bool useCache);
+
+        List<OneTimeCode> GenerateCodes(User user);
+        OneTimeCodesStatus GetCodesStatus(User user);
     }
 }

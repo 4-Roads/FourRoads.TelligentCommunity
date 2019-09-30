@@ -243,3 +243,12 @@ $RECYCLE.BIN/
 /src/lib/Telligent
 src/.vs/FourRoads.TelligentCommunity/v15/Server/sqlite3
 /src/.vs/FourRoads.TelligentCommunity
+
+# ============================
+# gulp config (user specific)
+# ============================
+/myconfig.json
+/gulpfile.js
+/package.json
+/package-lock.json
+.ignorei ## ag-searcher ignore file

@@ -1,0 +1,133 @@
+#set($validateInput = $core_v2_widget.UniqueId('validateInput'))
+#set($submit = $core_v2_widget.UniqueId('submit'))
+#set($disable = $core_v2_widget.UniqueId('disable'))
+#set($activate = $core_v2_widget.UniqueId('activate'))
+#set($configure = $core_v2_widget.UniqueId('configure'))
+#set($toggle = $core_v2_widget.UniqueId('toggle'))
+#set($generateCodes = $core_v2_widget.UniqueId('generateCodes'))
+#set($codesWrapper = $core_v2_widget.UniqueId('codesWrapper'))
+
+#set($twoFactorEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled())
+
+#if (!$twoFactorEnabled)
+    #set($twoFactor = $frcommon_v1_googleMfa.GenerateSetupInfo())
+    
+    <h3 class="warning">$core_v2_language.GetResource('Heading')</h3>
+    
+    <div id="$core_v2_encoding.HtmlAttributeEncode($activate)">
+         <div class="form">
+            <fieldset>
+                <ul class="field-list">
+                    <li class="field-item">  
+                    <span class="field-item-description">$core_v2_language.GetResource('Activate_Desc')</span>
+                    <a class="button" id="$core_v2_encoding.HtmlAttributeEncode($toggle)" href="javascript:void(0)">$core_v2_language.GetResource('ActivateButton')</a>
+                    </li>
+                </ul>
+            </fieldset>  
+        </div>
+    </div>
+    <div id="$core_v2_encoding.HtmlAttributeEncode($configure)" style="display: none;">
+        <p>$core_v2_language.GetResource('Introduction')</p>
+        <div><img src="$core_v2_encoding.HtmlAttributeEncode($twoFactor.QrCodeImageUrl)" /></div>
+        <div><label>Manual Code&nbsp;:&nbsp;</label>$twoFactor.ManualEntrySetupCode</div>
+
+        <div class="form">
+            <p>$core_v2_language.GetResource('Complete_Setup')</p>
+            <fieldset>
+                <ul class="field-list">
+                  <li class="field-item display-name">
+                    <label for="$core_v2_encoding.HtmlAttributeEncode($displayNameId)">$core_v2_language.GetResource('VerifyCode')</label>
+                    <span class="field-item-input"><input autocomplete="off" type="text" size="30" maxlength="254"  id="$core_v2_encoding.HtmlAttributeEncode($validateInput)" name="$core_v2_encoding.HtmlAttributeEncode($validateInput)" /></span>
+                    <span class="field-item-validation" style="display: none;">$core_v2_language.GetResource('InvalidCode')</span>
+                  </li>
+                  <li class="field-item">
+                      <a class="button" id="$core_v2_encoding.HtmlAttributeEncode($submit)" href="javascript:void(0)">$core_v2_language.GetResource('VerifyAndEnable')</a>
+                  </li>
+                </ul> 
+             </fieldset>   
+        </div>
+    </div>
+#else
+   <style>
+      #${codesWrapper} .codes-list .left-col {
+      float: left;
+      }
+      #${codesWrapper} .codes-list ul {
+      padding: 20px;
+      }
+      #${codesWrapper} .codes-list li {
+         margin: 10px;
+         padding: 0 20px;
+      }
+   </style>
+    #set($codesStatus = $frcommon_v1_googleMfa.GetOneTimeCodesStatus($core_v2_user.Accessing.Id))
+    <div class="form">
+        <fieldset>
+            <ul class="field-list">
+                <li class="field-item">  
+                <h3 class="warning">$core_v2_language.GetResource('TwoFactorEnabled')</h3>
+                <span class="field-item-description">$core_v2_language.GetResource('Disable_Desc')</span>
+                <a class="button" id="$core_v2_encoding.HtmlAttributeEncode($disable)" href="javascript:void(0)">$core_v2_language.GetResource('DisableButton')</a>
+                </li>
+                #if($codesStatus.Version > 0)
+                <li class="field-item">
+                     <div id="$core_v2_encoding.HtmlAttributeEncode($codesWrapper)">
+                        <div id="$core_v2_encoding.HtmlAttributeEncode($codesWrapper)">
+                     #if($codesStatus.CodesLeft == 0)
+                          <span class="field-item-description">$core_v2_language.GetResource('GenerateCodes_Desc')</span>
+                          <a class="button" id="$core_v2_encoding.HtmlAttributeEncode($generateCodes)" href="javascript:void(0)">$core_v2_language.GetResource('GenerateCodes')</a>
+                     #else
+                          <div class="stats">
+                            #format($core_v2_language.GetResource('Codes_Left_Format'))
+                              #token('count')
+                                <span class="count">$codesStatus.CodesLeft</span>
+                              #token('datetime')
+                                <span class="generated-on">$core_v2_language.FormatDateAndTime($codesStatus.CodesGeneratedOn)</span>
+                            #end
+                          </div>
+                          <span class="field-item-description">$core_v2_language.GetResource('RegenerateCodes_Desc')</span>
+                          <a class="button" id="$core_v2_encoding.HtmlAttributeEncode($generateCodes)" href="javascript:void(0)">$core_v2_language.GetResource('RegenerateCodes')</a>
+                     #end
+                          <div class="codes-list" style="display:none"></div>
+                     </div>
+                </li>
+                #else 
+                  $core_v2_widget.ExecuteFile('upgrade-notice.vm')
+                #end
+            </ul>
+        </fieldset>  
+    </div>
+#end
+
+#registerEndOfPageHtml('fourroads.widgets.mfa')
+  <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('mfa.js'))"></script>
+#end
+#registerEndOfPageHtml()
+  <script type="text/javascript">
+      jQuery(function(){
+         jQuery.fourroads.widgets.mfa.register({
+               selectors : {
+                  validateInput: '#$core_v2_encoding.JavascriptEncode($validateInput)',
+                  submit: '#$core_v2_encoding.JavascriptEncode($submit)',
+                  disable: '#$core_v2_encoding.JavascriptEncode($disable)',
+                  activate: '#$core_v2_encoding.JavascriptEncode($activate)',
+                  configure: '#$core_v2_encoding.JavascriptEncode($configure)',
+                  toggle: '#$core_v2_encoding.JavascriptEncode($toggle)',
+                  generateCodes: '#$core_v2_encoding.JavascriptEncode($generateCodes)',
+                  codesWrapper: '#$core_v2_encoding.JavascriptEncode($codesWrapper)'
+               },
+               urls : {
+                  validate: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('validate.vm'))',
+                  generateCodes: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('generate-codes.vm'))'
+               },
+               resources : {
+                  requiredField: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Required'))',
+                  invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('InvalidCode'))',
+                  today: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Today'))',
+                  showCodesWarn: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Show_Codes_Warning'))',
+                  showCodesInfo: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Show_Codes_Info'))'
+               }
+         });
+      });
+   </script>
+#end

@@ -1,0 +1,12 @@
+<div class="upgrade-notice message warning">
+   <h1>$core_v2_language.GetResource('UpgradeInformation_Title')</h1>
+   <div>$core_v2_language.GetResource('UpgradeInformation_Desc')</div>
+   <ol style="margin: 20px">
+      <li>$core_v2_language.GetResource('UpgradeStep_1')</li>
+      <li>$core_v2_language.GetResource('UpgradeStep_2')</li>
+      <li>$core_v2_language.GetResource('UpgradeStep_3')</li>
+      <li>$core_v2_language.GetResource('UpgradeStep_4')</li>
+      <li>$core_v2_language.GetResource('UpgradeStep_5')</li>
+      <li>$core_v2_language.GetResource('UpgradeStep_6')</li>
+   </ol>
+</div>
