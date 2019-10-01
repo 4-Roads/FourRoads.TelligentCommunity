@@ -51,7 +51,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         public void Initialize()
         {
             EnsureMomentoExists();
-#if DEBUG
+
             if (IsDebugBuild)
             {
                 if (_enableFilewatcher)
@@ -61,7 +61,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                 ScheduleInstall();
             }
-#endif
         }
 
         #endregion
@@ -243,7 +242,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
 
-#if DEBUG
         protected virtual void InitializeFilewatcher()
         {
             _fileSystemWatcher?.Dispose();
@@ -320,10 +318,8 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     }
                 });
         }
-#endif
     }
 
-#if DEBUG
     internal class FileChangedVisitor : IThemeVistor
     {
         private string _file;
@@ -378,7 +374,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             }
         }
     }
-#endif
+
     internal class ThemeInstallerVisitor : IThemeVistor
     {
         private ICentralizedFileStorageProvider _fileStore;

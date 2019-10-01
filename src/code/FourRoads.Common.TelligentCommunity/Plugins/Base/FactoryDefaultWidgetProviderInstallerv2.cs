@@ -45,7 +45,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         {
             _sourceScriptedFragment= PluginManager.Get<TScriptedContentFragmentFactoryDefaultProvider>().FirstOrDefault();
 
-#if DEBUG
             if (IsDebugBuild)
             {
                 if (_enableFilewatcher)
@@ -55,7 +54,6 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                 ScheduleInstall();
             }
-#endif
         }
 
         #endregion
