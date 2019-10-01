@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:Mfa_Name}" version="10.0.0.4689" description="${resource:Mfa_Description}" instanceIdentifier="8495afe3dB4c4ab2837e839ba8cf7399" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="admin-disable-mfa" provider="3bd55b782e624b77b6e730f6bce17de2">
+    <contentScript>
+      <![CDATA[
+#if(!$ns_v1_SupportPermissions.IsAdmin($core_v2_user.Accessing.Id))
+  $code_v2_widget.Hide()
+#end
+#set($user = false)
+#set($user = $core_v2_user.Current)
+#if(!$user)
+  $code_v2_widget.Hide()
+#end
+#set($isMfaEnabled = '')
+#set($isMfaEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled($core_v2_user.Current.Id))
+#if($isMfaEnabled == '' || !$isMfaEnabled)
+  $core_v2_widget.Hide()
+#end
+#set($url = $core_v2_widget.GetExecutedFileUrl('disablemfa.vm'))
+  <div class="ui-links navigation-list action" data-minlinks="2" data-direction="vertical" data-minlinks="$linksToShow" data-maxlinks="$linksToShow">
+    <ul class="navigation-list">
+      <li class="navigation-list-item"><a class="disable-mfa" href="#">$core_v2_language.GetResource('disableMFA')</a></li>
+    </ul>
+  </div>
+#registerEndOfPageHtml('ns.widgets.disableMFA')
+<script type='text/javascript' src='$core_v2_widget.GetFileUrl("ui.js")'></script>
+#end
+#registerEndOfPageHtml()
+<script type='text/javascript'>
+  jQuery(document).ready(function() {
+    jQuery.ns.widgets.disableMFA.register({
+      successMsg: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource("successMsg"))',
+      disableMfaUrl: '$core_v2_encoding.JavascriptEncode($url)',
+      userId: $user.Id
+    });
+  });
+</script>
+#end
+]]>
+    </contentScript>
+    <languageResources>
+      <language key="en-us">
+        <resource name="Mfa_Name">4 Roads - Admin Disable Google MFA</resource>
+        <resource name="Mfa_Description">Administrators can disable MFA for users by visiting their profile pages.</resource>
+        <resource name="disableMFA">Disable MFA</resource>
+        <resource name="successMsg">MFA was disabled</resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

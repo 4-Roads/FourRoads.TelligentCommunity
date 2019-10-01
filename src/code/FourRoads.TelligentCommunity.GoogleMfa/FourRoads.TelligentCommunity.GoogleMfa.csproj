@@ -89,7 +89,10 @@
     <Compile Include="Extensions\GoogleAuthenticatorExtension.cs" />
     <Compile Include="Interfaces\IMfaDataProvider.cs" />
     <Compile Include="Interfaces\IMfaLogic.cs" />
+    <Compile Include="Logic\MfaCryptoExtension.cs" />
     <Compile Include="Logic\MfaLogic.cs" />
+    <Compile Include="Model\OneTimeCode.cs" />
+    <Compile Include="Model\OneTimeCodesStatus.cs" />
     <Compile Include="Plugins\FactoryDefaultWidgetProviderInstaller.cs" />
     <Compile Include="Resources\EmbeddedResources.cs" />
     <Compile Include="Resources\MfaSqlScriptsInstaller.cs" />
@@ -103,6 +106,10 @@
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\validate.vm" />
     <EmbeddedResource Include="Resources\Widgets\ValidateMfa\validate.vm" />
+    <EmbeddedResource Include="Resources\Widgets\AdminDisableMfa\disablemfa.vm" />
+    <EmbeddedResource Include="Resources\Widgets\SyncMfa\generate-codes.vm" />
+    <EmbeddedResource Include="Resources\Widgets\SyncMfa\index.vm" />
+    <EmbeddedResource Include="Resources\Widgets\SyncMfa\upgrade-notice.vm" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\mfa.js" />
@@ -128,6 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Sql\GoogleMFA.install.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\AdminDisableMfa\ui.js" />
+    <EmbeddedResource Include="Resources\Widgets\AdminDisableMfa\widget.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

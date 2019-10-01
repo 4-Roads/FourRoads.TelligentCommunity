@@ -14,7 +14,7 @@
       <li class="field-item display-name">
         <label for="$core_v2_encoding.HtmlAttributeEncode($displayNameId)">$core_v2_language.GetResource('EnterCode')</label>
         <span class="field-item-description">$core_v2_language.GetResource('TwoFactorEnabled')</span>
-        <span class="field-item-input"><input type="text" size="30" maxlength="254"  id="$core_v2_encoding.HtmlAttributeEncode($validateInput)" name="$core_v2_encoding.HtmlAttributeEncode($validateInput)" /></span>
+        <span class="field-item-input"><input autocomplete="off" type="text" size="30" maxlength="254"  id="$core_v2_encoding.HtmlAttributeEncode($validateInput)" name="$core_v2_encoding.HtmlAttributeEncode($validateInput)" /></span>
         <span class="field-item-validation" style="display: none;">Invalid code entered, please try again</span>
       </li>
       <li class="field-item">
