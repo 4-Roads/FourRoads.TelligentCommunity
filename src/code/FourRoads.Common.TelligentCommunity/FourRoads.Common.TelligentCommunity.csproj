@@ -86,7 +86,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Evolution.Blogs, Version=10.1.6.9599, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Telligent.Evolution.Blogs, Version=10.3.0.6491, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
     </Reference>

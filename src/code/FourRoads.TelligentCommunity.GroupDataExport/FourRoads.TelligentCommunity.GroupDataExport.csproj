@@ -33,6 +33,15 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FourRoads.Common, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common\bin\Release\FourRoads.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.Sql, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="FourRoads.Common.Web, Version=5.2.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FourRoads.Common.5.2.29\lib\net462\FourRoads.Common.Web\bin\Release\FourRoads.Common.Web.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Newtonsoft.Json.dll</HintPath>
@@ -98,12 +107,13 @@
       <Name>FourRoads.Common.TelligentCommunity</Name>
     </ProjectReference>
     <ProjectReference Include="..\FourRoads.TelligentCommunity.ConfigurationExtensions\FourRoads.TelligentCommunity.ConfigurationExtensions.csproj">
-      <Project>{571BC785-5F45-40B9-949C-E33A882CEAE1}</Project>
+      <Project>{571bc785-5f45-40b9-949c-e33a882ceae1}</Project>
       <Name>FourRoads.TelligentCommunity.ConfigurationExtensions</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

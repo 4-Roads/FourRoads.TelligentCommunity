@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web;
+using DryIoc;
 using FourRoads.Common.TelligentCommunity.Components.Logic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.InlineContent.CentralizedFileStore;
@@ -22,6 +24,7 @@ using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Extensibility.UI.Version2;
+using IContainer = Telligent.Evolution.Extensibility.Content.Version1.IContainer;
 using IContent = Telligent.Evolution.Extensibility.Content.Version1.IContent;
 using PropertyGroup = Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup;
 using Property = Telligent.Evolution.Extensibility.Configuration.Version1.Property;
@@ -105,7 +108,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
         }
     }
 
-    public class InlineContentPart : Telligent.Evolution.Extensibility.UI.Version2.ConfigurableContentFragmentBase, ITranslatablePlugin, IPluginGroup, IFileEmbeddableContentType
+    public class InlineContentPart : Telligent.Evolution.Extensibility.UI.Version2.ConfigurableContentFragmentBase, ITranslatablePlugin, IPluginGroup, IFileEmbeddableContentType, IScriptedContentFragmentExtension
     {
         private ITranslatablePluginController _translatablePluginController;
         private IFileEmbeddableContentTypeController _ftController;
@@ -462,6 +465,30 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
                 sb.Append(b.ToString("X2"));
 
             return sb.ToString();
+        }
+
+        public string ExtensionName => "fourroads_v1_inlineContent";
+        public object Extension => new InlineContentExtension();
+    }
+
+    public class InlineContentExtension
+    {
+        public string TrimQueryStringForGetExecutedFileUrl(string pathQuery)
+        {
+            Uri uri = new Uri(HttpUtility.UrlDecode( pathQuery) , UriKind.Relative);
+            var nameValues = HttpUtility.ParseQueryString(pathQuery);
+
+            nameValues["AnonymousContent"] = "";
+            nameValues["DefaultContent"] = "";
+
+            var nameValuesInner = HttpUtility.ParseQueryString(nameValues["_p"]);
+
+            nameValuesInner["AnonymousContent"] = "";
+            nameValuesInner["DefaultContent"] = "";
+
+            nameValues["_p"] = nameValuesInner.ToString();
+
+            return pathQuery.Substring(0, pathQuery.IndexOf("?") )+ "?" + nameValues;
         }
     }
 }
