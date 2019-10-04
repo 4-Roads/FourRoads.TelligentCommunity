@@ -10,7 +10,7 @@ namespace FourRoads.TelligentCommunity.MetaData
     public class ScriptableInstaller : FactoryDefaultWidgetProviderInstallerV3<AdministrationPanel>, IApplicationPlugin
     {
         public override Guid ScriptedContentFragmentFactoryDefaultIdentifier => AdministrationPanel._scriptedFragmentGuid;
-        protected override string ProjectName => "Meta Data";
+        protected override string ProjectName => "Meta Data Scripted Panel";
 
         protected override string BaseResourcePath { get; } = "FourRoads.TelligentCommunity.MetaData.Resources.";
 

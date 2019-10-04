@@ -17,7 +17,7 @@ namespace FourRoads.TelligentCommunity.InlineContent
     public class InlinePanelInstaller : FactoryDefaultWidgetProviderInstallerV3<InlineContentPanel>
     {
         public override Guid ScriptedContentFragmentFactoryDefaultIdentifier => InlineContentPanel._scriptedFragmentGuid;
-        protected override string ProjectName => "Meta Data";
+        protected override string ProjectName => "Inline Content Panel";
 
         protected override string BaseResourcePath { get; } = "FourRoads.TelligentCommunity.InlineContent.Resources.";
 

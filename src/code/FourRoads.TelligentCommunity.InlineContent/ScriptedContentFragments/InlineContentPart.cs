@@ -80,6 +80,13 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
                 CanHaveWrapperCss = false,
                 CanReadPluginConfiguration = false,
                 IsEditable = true,
+                AdjustCallbackContext = (c) =>
+                {
+                    c.Remove("AnonymousContent");
+                    c.Remove("DefaultContent");
+
+                    return c;
+                }
 
             };
             options.Extensions.Add(new PanelContext());
@@ -108,7 +115,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
         }
     }
 
-    public class InlineContentPart : Telligent.Evolution.Extensibility.UI.Version2.ConfigurableContentFragmentBase, ITranslatablePlugin, IPluginGroup, IFileEmbeddableContentType, IScriptedContentFragmentExtension
+    public class InlineContentPart : Telligent.Evolution.Extensibility.UI.Version2.ConfigurableContentFragmentBase, ITranslatablePlugin, IPluginGroup, IFileEmbeddableContentType//, IScriptedContentFragmentExtension
     {
         private ITranslatablePluginController _translatablePluginController;
         private IFileEmbeddableContentTypeController _ftController;
@@ -237,7 +244,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
                 LabelText =  "Widget Title", DataType = "string", DefaultValue = "${resource:default_property_title}"
             };
 
-            headerTitle.Options.Add("ControlType", "ContentFragmentTokenStringControl");
+            headerTitle.Options.Add("ControlType", "TokenString");
 
             group.Properties.Add(headerTitle);
 
@@ -247,10 +254,12 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             {
                 Id = "default_content", LabelText = "Content", DataType = "Html"
             };
-            
-            headerTitle.Options.Add("rows", "40");
-            headerTitle.Options.Add("sanitize", "false");
-            headerTitle.Options.Add("ContentTypeId",  InlineContentPart.InlineContentContentTypeId.ToString());
+
+            property.Options.Add("ControlType", "Html");
+            property.Options.Add("rows", "40");
+            property.Options.Add("sanitize", "false");
+            property.Options.Add("enableRichEditing", "true");
+            property.Options.Add("ContentTypeId",  InlineContentPart.InlineContentContentTypeId.ToString());
 
             defaultContent.Properties.Add(property);
 
@@ -263,9 +272,11 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
                 DataType = "Html"
             };
 
-            headerTitle.Options.Add("rows", "40");
-            headerTitle.Options.Add("sanitize", "false");
-            headerTitle.Options.Add("ContentTypeId",  InlineContentPart.InlineContentContentTypeId.ToString());
+            property.Options.Add("ControlType", "Html");
+            property.Options.Add("rows", "40");
+            property.Options.Add("sanitize", "false");
+            property.Options.Add("enableRichEditing", "true"); 
+            property.Options.Add("ContentTypeId",  InlineContentPart.InlineContentContentTypeId.ToString());
 
             anoymousContent.Properties.Add(property);
 
@@ -467,28 +478,28 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             return sb.ToString();
         }
 
-        public string ExtensionName => "fourroads_v1_inlineContent";
-        public object Extension => new InlineContentExtension();
+        //public string ExtensionName => "fourroads_v1_inlineContent";
+        //public object Extension => new InlineContentExtension();
     }
 
-    public class InlineContentExtension
-    {
-        public string TrimQueryStringForGetExecutedFileUrl(string pathQuery)
-        {
-            Uri uri = new Uri(HttpUtility.UrlDecode( pathQuery) , UriKind.Relative);
-            var nameValues = HttpUtility.ParseQueryString(pathQuery);
+    //public class InlineContentExtension
+    //{
+    //    public string TrimQueryStringForGetExecutedFileUrl(string pathQuery)
+    //    {
+    //        Uri uri = new Uri(HttpUtility.UrlDecode( pathQuery) , UriKind.Relative);
+    //        var nameValues = HttpUtility.ParseQueryString(pathQuery);
 
-            nameValues["AnonymousContent"] = "";
-            nameValues["DefaultContent"] = "";
+    //        nameValues["AnonymousContent"] = "dummy";
+    //        nameValues["DefaultContent"] = "dummy";
 
-            var nameValuesInner = HttpUtility.ParseQueryString(nameValues["_p"]);
+    //        var nameValuesInner = HttpUtility.ParseQueryString(nameValues["_p"]);
 
-            nameValuesInner["AnonymousContent"] = "";
-            nameValuesInner["DefaultContent"] = "";
+    //        nameValuesInner["AnonymousContent"] = "dummy";
+    //        nameValuesInner["DefaultContent"] = "dummy";
 
-            nameValues["_p"] = nameValuesInner.ToString();
+    //        nameValues["_p"] =  string.Join("&" , nameValuesInner.AllKeys.Select(k => Apis.Get<IUrl>().Encode(nameValuesInner[k])));
 
-            return pathQuery.Substring(0, pathQuery.IndexOf("?") )+ "?" + nameValues;
-        }
-    }
+    //        return pathQuery.Substring(0, pathQuery.IndexOf("?") )+ "?" + nameValues; 
+    //    }
+    //}
 }

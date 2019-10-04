@@ -38,7 +38,7 @@
                       editContent: "#$editContentId",
                     },
 					          urls : {
-                      editContent : '$core_v2_encoding.JavascriptEncode( $fourroads_v1_inlineContent.TrimQueryStringForGetExecutedFileUrl($core_v2_widget.GetExecutedFileUrl("editcontent.vm")))'
+                      editContent : '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl("editcontent.vm"))'
 					          }
 				          });
 		            });

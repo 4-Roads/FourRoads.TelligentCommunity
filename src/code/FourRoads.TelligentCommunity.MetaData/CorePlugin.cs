@@ -7,17 +7,18 @@ using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Logic;
 using FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.DynamicConfiguration.Controls;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 
 namespace FourRoads.TelligentCommunity.MetaData
 {
-    public class CorePlugin : IBindingsLoader, IPluginGroup,IConfigurablePlugin
+    public class CorePlugin : IBindingsLoader, IPluginGroup, Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin
     {
         private IMetaDataLogic _metaDataLogic;
         private PluginGroupLoader _pluginGroupLoader;
         private MetaDataConfiguration _metaConfig = null;
+        private Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup[] _configurationOptions;
 
         public void Initialize()
         {
@@ -89,29 +90,29 @@ namespace FourRoads.TelligentCommunity.MetaData
             }
         }
 
-        public void Update(IPluginConfiguration configuration)
+        public void Update(Telligent.Evolution.Extensibility.Version2.IPluginConfiguration configuration)
         {
             if (_metaConfig == null)
             {
                 _metaConfig = new MetaDataConfiguration();
             }
 
-            _metaConfig.ExtendedEntries = configuration.GetString("extendedtags").Split(new[] {','} , StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+            _metaConfig.ExtendedEntries = configuration.GetString("extendedtags").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
         }
 
-        public PropertyGroup[] ConfigurationOptions
+        public Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup[] ConfigurationOptions
         {
             get
             {
                 var propertyGroupArray = new PropertyGroup[]
                 {
-                    new PropertyGroup("options", "Options", 0)
+                    new PropertyGroup(){Id= "options",LabelText = "Options"}
                 };
 
-                var property1 = new Property("extendedtags", "Additional Tags", PropertyType.Custom, 0, "og:title,og:type,og:image,og:url,og:description,fb:admins,twitter:card,twitter:url,twitter:title,twitter:description,twitter:image");
+                var property1 = new Property(){Id= "extendedtags", LabelText = "Additional Tags", DataType = "string", DefaultValue = "og:title,og:type,og:image,og:url,og:description,fb:admins,twitter:card,twitter:url,twitter:title,twitter:description,twitter:image"};
                 property1.DescriptionText = "Provide a list of comma seperated meta tags that will be available to the end user to configure";
-                property1.ControlType = typeof (MultilineStringControl); 
-                
+                property1.Options.Add("multiline", "true");
+
                 propertyGroupArray[0].Properties.Add(property1);
 
                 return propertyGroupArray;
