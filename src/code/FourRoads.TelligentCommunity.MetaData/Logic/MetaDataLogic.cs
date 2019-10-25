@@ -358,17 +358,15 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             MetaData data = GetCurrentMetaData(details);
             Guid containerId = data.ContainerId;
+            Guid containerTypeId = data.ContainerTypeId;
 
             while (data.InheritData && containerId != Guid.Empty)
             {
-                var container = Apis.Get<IContainers>().Get(data.ContainerId, data.ContainerTypeId);
+                var container = Apis.Get<IContainers>().Get(containerId, containerTypeId);
 
                 //Once we start inheriting we go to the group home page
                 if (!container.HasErrors())
                 {
-                    if (container.ContainerId == Apis.Get<IGroups>().Root.ContainerId)
-                        break;
-
                     var context = Apis.Get<IUrl>().ParsePageContext(container.Url);
 
                     if (context != null && container.ParentContainer != null)
@@ -381,7 +379,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
                         var inherited = GetCurrentMetaData(details);
 
-                        containerId = inherited?.ContainerId ?? Guid.Empty;
+                        containerId = container.ParentContainer.ContainerId;
+                        containerTypeId = container.ParentContainer.ContainerTypeId;
 
                         if (string.IsNullOrWhiteSpace(data.Title))
                             data.Title = inherited.Title;
@@ -399,6 +398,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                                 data.ExtendedMetaTags[key] = inherited.ExtendedMetaTags[key];
                             }
                         }
+
+                        if (container.ContainerId == Apis.Get<IGroups>().Root.ContainerId)
+                            break;
                     }
                     else
                     {

@@ -39,7 +39,7 @@
 
             #set($seperator = $core_v2_widget.GetStringValue('seperator' , " "))
             
-            #if ($currentMetaData.Title && $currentMetaData.Title != "")
+            #if ($currentMetaData.Title && $currentMetaData.Title != "")            
               #set($added = $core_v2_page.SetTitle($frcommon_v1_metaData.FormatMetaString($currentMetaData.Title,$seperator , $parameters), false, false))
             #end
             
