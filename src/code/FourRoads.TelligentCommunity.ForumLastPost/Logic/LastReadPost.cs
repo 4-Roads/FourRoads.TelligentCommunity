@@ -6,7 +6,8 @@ using Telligent.Evolution.CoreServices.WebContext.Services;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
-using CacheScope = Telligent.Caching.CacheScope;
+using Telligent.Evolution.Caching.Services;
+using CacheScope = Telligent.Evolution.Caching.Services.CacheScope;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
 {

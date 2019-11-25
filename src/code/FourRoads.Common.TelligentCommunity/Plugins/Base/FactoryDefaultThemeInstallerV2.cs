@@ -10,7 +10,6 @@ using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Controls;
 using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -18,6 +17,7 @@ using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Caching.Services;
 using Telligent.Jobs;
 using File = System.IO.File;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
@@ -309,7 +309,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                             _themeTypeMomento.AcceptThemeVistor(fileChange);
 
-                            Services.Get<ICacheService>().Clear(Telligent.Caching.CacheScope.All);
+                            Services.Get<ICacheService>().Clear(CacheScope.All);
                         }
                     }
                     catch (Exception pe)

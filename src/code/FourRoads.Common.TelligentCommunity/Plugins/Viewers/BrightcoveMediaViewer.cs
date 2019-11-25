@@ -12,7 +12,8 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.UI;
-using Telligent.Caching;
+using Telligent.Evolution.Caching.Services;
+
 using Telligent.Common;
 using Telligent.Evolution.Components;
 

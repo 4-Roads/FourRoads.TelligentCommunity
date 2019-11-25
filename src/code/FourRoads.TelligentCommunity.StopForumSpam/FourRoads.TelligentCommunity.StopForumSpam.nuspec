@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
-        <id>FourRoads.TelligentCommunity103.StopForumSpam</id>
+        <id>FourRoads.TelligentCommunity111.StopForumSpam</id>
         <version>$version$</version>
         <title>$title$</title>
         <authors>$author$</authors>
@@ -14,7 +14,7 @@
         <tags>Telligent utility</tags>
     </metadata>
     <files>
-        <file src="bin\**\FourRoads.TelligentCommunity.StopForumSpam.dll" target="lib\net462" exclude="*Tests*" />
+        <file src="bin\**\FourRoads.TelligentCommunity.StopForumSpam.dll" target="lib\net47" exclude="*Tests*" />
     </files>
     <!--<ItemGroup>
         <PackageReference Include="Newtonsoft.Json" version="9.0.1">
