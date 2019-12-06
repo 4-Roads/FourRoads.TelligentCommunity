@@ -21,7 +21,7 @@ using Telligent.Evolution.Caching.Services;
 using Telligent.Jobs;
 using File = System.IO.File;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
-
+using System.Text.RegularExpressions;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
@@ -39,6 +39,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         private IPluginConfiguration _configuration;
         //private static readonly object _updateLocker = new object();
         private static readonly object _pageLocker = new object();
+
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
@@ -79,7 +80,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                             Apis.Get<IUsers>().ServiceUserName,
                             () =>
                             {
-                                handleResource(basePath , resourceName);
+                                handleResource(basePath, resourceName);
                             });
                 });
         }
@@ -110,7 +111,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             //store the theme definitions
             EnumerateResourceFolder("themefiles.d.", "", (a, b) => _themeTypeMomento.ProcessDefinitions(EmbeddedResources, a, b));
         }
-       
+
         protected virtual void ParseAllFilesIntoMomento()
         {
             //Create a map of the files in the theme
@@ -238,7 +239,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     propertyGroup.Properties.Add(new Property("filewatcher", "Resource Watcher for Development", PropertyType.Bool, 0, bool.TrueString));
                 }
 
-                return new[] {propertyGroup};
+                return new[] { propertyGroup };
             }
         }
 
@@ -305,7 +306,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                             // Get the relative path:
                             var themeRelativePath = e.FullPath.Substring(path.Length + 1);
 
-                            FileChangedVisitor fileChange = new FileChangedVisitor(e.FullPath,themeRelativePath);
+                            FileChangedVisitor fileChange = new FileChangedVisitor(e.FullPath, themeRelativePath);
 
                             _themeTypeMomento.AcceptThemeVistor(fileChange);
 
@@ -325,7 +326,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         private string _file;
         private string _fullPath;
         private ICentralizedFileStorageProvider _fileStore;
-        public FileChangedVisitor(string fullPath , string file)
+        public FileChangedVisitor(string fullPath, string file)
         {
             _file = file;
             _fullPath = fullPath;
@@ -338,7 +339,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             {
                 if (!_file.StartsWith("fd\\"))
                 {
-                    if (themeMomento.ThemeDefinitionFile.FileNamePath == _file.Substring(2)) 
+                    if (themeMomento.ThemeDefinitionFile.FileNamePath == _file.Substring(2))
                     {
                         XmlDocument newDocument = new XmlDocument();
 
@@ -370,7 +371,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         }
                     }
                 }
-    
+
             }
         }
     }
@@ -392,7 +393,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 {
                     var resourceFile = file.Resources.GetStream(file.ResourceName);
 
-                    _fileStore.AddUpdateFile(CentralizedFileStorage.MakePath( Path.Combine("fd", Path.GetDirectoryName(file.FileNamePath)).Split('\\')) , file.FileName, resourceFile);
+                    _fileStore.AddUpdateFile(CentralizedFileStorage.MakePath(Path.Combine("fd", Path.GetDirectoryName(file.FileNamePath)).Split('\\')), file.FileName, resourceFile);
                 }
             }
 
@@ -415,7 +416,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             FileNamePath = fileNamePath;
             Resources = resources;
         }
-        public string FileName{get;set;}
+        public string FileName { get; set; }
         public string ResourceName { get; set; }
         public string FileNamePath { get; set; }
         public EmbeddedResourcesBase Resources { get; set; }
@@ -423,7 +424,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
     public class ThemeMomento
     {
-        public ThemeMomento(Guid themeTypeId , Guid themeId)
+        public ThemeMomento(Guid themeTypeId, Guid themeId)
         {
             FileLists = new Dictionary<string, List<ThemeResourceFileInformation>>();
             ThemeId = themeId;
@@ -437,11 +438,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 FileLists.Add(fileParts[0], new List<ThemeResourceFileInformation>());
             }
 
-            FileLists[fileParts[0]].Add(new ThemeResourceFileInformation(fileParts[fileParts.Length - 1], resourceName, realFileNameAndPath , resources));
+            FileLists[fileParts[0]].Add(new ThemeResourceFileInformation(fileParts[fileParts.Length - 1], resourceName, realFileNameAndPath, resources));
         }
 
         public Guid ThemeTypeId { get; }
-        public Guid ThemeId { get;  }
+        public Guid ThemeId { get; }
         public Dictionary<string, List<ThemeResourceFileInformation>> FileLists { get; }
 
         public ThemeResourceFileInformation ThemeDefinitionFile { get; private set; }
@@ -468,7 +469,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         private void ProcessThemeDefinitions()
         {
-//Now update the file lists in the document to match the files that are held in the dictionary
+            //Now update the file lists in the document to match the files that are held in the dictionary
             //previewImage
             if (FileLists.ContainsKey("preview") && FileLists["preview"].Any())
             {
@@ -514,7 +515,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         public Dictionary<Guid, ThemeMomento> ThemeDictionary { get; }
 
 
-        public void ProcessFile(Guid themeTypeId, string fileNameAndPath, string[] fileParts, string resourceName, EmbeddedResourcesBase resources, Guid? themeIdOverrride=null)
+        public void ProcessFile(Guid themeTypeId, string fileNameAndPath, string[] fileParts, string resourceName, EmbeddedResourcesBase resources, Guid? themeIdOverrride = null)
         {
             Guid themeId = themeIdOverrride ?? Guid.Parse(fileParts[0]);
 
@@ -523,7 +524,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 ThemeDictionary.Add(themeId, new ThemeMomento(themeTypeId, themeId));
             }
 
-            ThemeDictionary[themeId].ProcessFile(fileNameAndPath, fileParts.Skip(1).ToArray(), resourceName , resources);
+            ThemeDictionary[themeId].ProcessFile(fileNameAndPath, fileParts.Skip(1).ToArray(), resourceName, resources);
         }
     }
 
@@ -534,6 +535,12 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
     public class ThemeTypeMomento
     {
+        // see https://regex101.com/ for explanation of regex
+        // locate theme files and extract path and name 
+        // s._05ac58b49cce4ba38714c10e31880ac4.files.grouphome1.jpg
+        // path -> s._05ac58b49cce4ba38714c10e31880ac4.files.
+        // filename -> grouphome1.jpg
+        private Regex _themeFileRegex = new Regex(@"(?<path>^s.+\.(?<type>files|jsfiles|preview|stylesheetfiles)\.)(?<filename>.*\.*?$)");
         public ThemeTypeMomento()
         {
             ThemeTypeThemeMomento = new Dictionary<Guid, ThemeListMomento>();
@@ -573,7 +580,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 Guid themeType = Guid.Parse(fileParts[0]);
                 Guid themeId = themeIdOverride ?? Guid.Parse(fileParts[1].Replace(Path.GetExtension(fileParts[1]), ""));
 
-                ThemeTypeThemeMomento[themeType].ThemeDictionary[themeId].AddThemeDefinition(resources,fileNameAndPath, resourceName);
+                ThemeTypeThemeMomento[themeType].ThemeDictionary[themeId].AddThemeDefinition(resources, fileNameAndPath, resourceName);
             }
         }
 
@@ -611,9 +618,26 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         private string GetFileNameFromResourceName(string resourceName)
         {
+
+            // check if a regular theme file and if so extract the filename and pass over untouched
+            // convert the path to replace . with \
+            MatchCollection matches = _themeFileRegex.Matches(resourceName);
+            if (matches.Count == 1 && matches[0].Groups["path"].Success && matches[0].Groups["type"].Success && matches[0].Groups["filename"].Success)
+            {
+                // filename replace _. for . is for vetsurgeon legacy filenames
+                var filename = matches[0].Groups["filename"].Value.Replace("_.", ".");
+                var path = matches[0].Groups["path"].Value.Replace(".", "\\").Replace("_", "");
+
+                return path + filename;
+            }
+
+            // other files so parse char by char to replace . and escaped _ chars 
+            // this will remove any single _ from filenames etc 
+            StringBuilder sb = new StringBuilder();
+
             int numberOfDots = resourceName.Count(c => c == '.');
             bool escapedNext = false;
-            StringBuilder sb = new StringBuilder();
+
 
             for (int i = 0; i < resourceName.Length; i++)
             {
@@ -624,7 +648,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                     numberOfDots--;
                 }
 
-                if (resourceName[i] == '_')
+                if (!escapedNext && resourceName[i] == '_')
                 {
                     escapedNext = true;
                     continue;
