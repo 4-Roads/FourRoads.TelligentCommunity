@@ -156,6 +156,13 @@
     <Compile Include="Plugins\Viewers\YouTubeMediaViewer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Routing\SiteRootRouteConstraint.cs" />
+    <Compile Include="Services\Interfaces\IFileService.cs" />
+    <Compile Include="Services\Interfaces\IGroupFileService.cs" />
+    <Compile Include="Services\Interfaces\IUserGroupsService.cs" />
+    <Compile Include="Services\Interfaces\IService.cs" />
+    <Compile Include="Services\Interfaces\IUserRolesService.cs" />
+    <Compile Include="Services\UserGroupsServiceBase.cs" />
+    <Compile Include="Services\UserRolesServiceBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\MultiSelectRepeater.js" />
