@@ -563,7 +563,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 foreach (Guid themeId in ThemeTypeThemeMomento[themTypeId].ThemeDictionary.Keys)
                 {
                     var themeMomento = ThemeTypeThemeMomento[themTypeId].ThemeDictionary[themeId];
-
+                    Apis.Get<IEventLog>().Write($"Installing theme '{themeId}'", new EventLogEntryWriteOptions() { Category = "4 Roads" });
                     themeVistor.Visit(themeMomento);
                 }
             }
