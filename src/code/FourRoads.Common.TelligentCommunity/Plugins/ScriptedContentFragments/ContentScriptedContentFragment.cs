@@ -6,11 +6,10 @@
 
 using System;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
-using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
+using TelligentServices = Telligent.Common.Services;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.ScriptedContentFragments
 {
@@ -45,7 +44,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.ScriptedContentFragments
 
         public string GetVideoPlayerHtml(string videoUrl, int maxWidth, int maxHeight)
         {
-            var fvs = Services.Get<IFileViewerService>();
+            var fvs = TelligentServices.Get<IFileViewerService>();
             if (fvs == null)
             {
                 return null;

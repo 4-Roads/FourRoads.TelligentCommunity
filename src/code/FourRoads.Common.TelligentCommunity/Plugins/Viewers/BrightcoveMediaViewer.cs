@@ -11,11 +11,9 @@ using System;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web.UI;
 using Telligent.Evolution.Caching.Services;
-
-using Telligent.Common;
 using Telligent.Evolution.Components;
+using TelligentServices = Telligent.Common.Services;
 
 #endregion
 
@@ -81,7 +79,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Viewers
           return url.ToString();
         }
         string cacheKey = url.ToString();
-        var cacheService = Services.Get<ICacheService>();
+        var cacheService = TelligentServices.Get<ICacheService>();
         object cachedObj = cacheService.Get(cacheKey, CacheScope.All);
         if (cachedObj !=null)
         {

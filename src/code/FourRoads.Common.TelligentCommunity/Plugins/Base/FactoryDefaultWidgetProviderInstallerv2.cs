@@ -9,7 +9,6 @@ using System.Xml.Linq;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Controls;
-using Telligent.Common;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
@@ -20,6 +19,7 @@ using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Jobs;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 using File = System.IO.File;
+using TelligentServices = Telligent.Common.Services;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
@@ -96,11 +96,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                 if (runAllJobsLocally)
                 {
-                    Services.Get<IJobCoreService>().LocalJobStore.Peek(out jobs, 0, 500, filter);
+                    TelligentServices.Get<IJobCoreService>().LocalJobStore.Peek(out jobs, 0, 500, filter);
                 }
                 else
                 {
-                    Services.Get<IJobCoreService>().RemoteJobStore.Peek(out jobs, 0, 500, filter);
+                    TelligentServices.Get<IJobCoreService>().RemoteJobStore.Peek(out jobs, 0, 500, filter);
                 }
             }
             catch (Exception)
