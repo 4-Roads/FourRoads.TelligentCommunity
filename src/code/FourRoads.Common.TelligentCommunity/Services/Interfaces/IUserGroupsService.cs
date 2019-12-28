@@ -1,4 +1,5 @@
-﻿using Telligent.Evolution.Extensibility.Api.Entities.Version1;
+﻿using System.Collections.Specialized;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Services.Interfaces
 {
@@ -24,12 +25,12 @@ namespace FourRoads.Common.TelligentCommunity.Services.Interfaces
         /// </summary>
         /// <param name="groupName">The group name</param>
         /// <param name="groupDescription">The group description</param>
-        /// <param name="groupCategory">The group category</param>
         /// <param name="groupType">The group type</param>
+        /// <param name="configuration">A set of configuration values</param>
         /// <param name="createApps">Whether applications should be created within the group or not</param>
         /// <param name="parentId">The parent group ID</param>
         /// <returns>The newly-created group</returns>
-        Group CreateGroup(string groupName, string groupDescription, string groupCategory, string groupType, bool createApps, int? parentId = null);
+        Group CreateGroup(string groupName, string groupDescription, string groupType, NameValueCollection configuration, bool createApps, int? parentId = null);
 
         /// <summary>
         /// Removes a user from a group

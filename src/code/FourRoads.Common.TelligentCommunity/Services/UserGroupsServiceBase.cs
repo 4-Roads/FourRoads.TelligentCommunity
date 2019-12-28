@@ -2,7 +2,9 @@
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Services.Interfaces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -76,20 +78,20 @@ namespace FourRoads.Common.TelligentCommunity.Services
             });
         }
 
-        public virtual Group CreateGroup(string groupName, string groupDescription, string groupCategory, string groupType, bool createApps, int? groupId = null)
+        public virtual Group CreateGroup(string groupName, string groupDescription, string groupType, NameValueCollection configuration, bool createApps, int? parentGroupId = null)
         {
-            if (string.IsNullOrWhiteSpace(groupCategory))
-            {
-                groupCategory = "Product";
-            }
-
             if (string.IsNullOrWhiteSpace(groupDescription))
             {
-                groupDescription = $"{groupCategory} Group - {groupName}";
+                groupDescription = $"{groupName} Group";
             }
 
-            // TODO: Replace with abstract method
-            var groupOptions = CreateGroupOptions();
+            var groupOptions = new GroupsCreateOptions
+            {
+                Description = groupDescription,
+                ParentGroupId = parentGroupId,
+            };
+
+            ConfigureGroupsCreateOptions(groupOptions, configuration);
 
             _process.RunProcessWithDisabledActivityStories(() =>
             {
@@ -103,61 +105,10 @@ namespace FourRoads.Common.TelligentCommunity.Services
             //it raises an error trying to create it
             // so have to try and read to ensure it exists
             var newGroup = GetGroup(groupName);
+
             if (newGroup != null && !newGroup.HasErrors())
             {
-
-                // when adding group the avatar is incorrectly assigned to group id 00 so 
-                // have to do here otherwise you only get one group icon for 00 regardless of 
-                // how many are created
-                var filename = new string(groupName.Where(c => char.IsLetterOrDigit(c)).ToArray()).ToLower();
-                byte[] icon = GetEmbeddedIcon(groupCategory, filename + ".svg");
-                if (icon == null)
-                {
-                    icon = GetEmbeddedIcon(groupCategory, filename + ".png");
-                }
-                if (icon != null)
-                {
-                    _groupsService.Update(newGroup.Id.Value, new GroupsUpdateOptions()
-                    {
-                        AvatarFileName = filename,
-                        AvatarFileData = icon
-                    });
-                }
-
-                // the avatar url is incorrectly formed when adding to a group
-                // so need to fix this after upload 
-                // starts with ~/__key/ rather than ~/cfs-file/__key/
-                if (icon != null)
-                {
-                    // reload the group to get the avatar url
-                    newGroup = GetGroup(groupName);
-
-                    var avatarUrl = newGroup.ExtendedAttributes["AvatarUrl"];
-                    if (avatarUrl != null && avatarUrl.Value.StartsWith("~/__key/"))
-                    {
-                        avatarUrl.Value = avatarUrl.Value.Replace("~/__key/", "~/cfs-file/__key/");
-                        var exAttr = new List<ExtendedAttribute>() { avatarUrl };
-                        _groupsService.Update(newGroup.Id.Value, new GroupsUpdateOptions() { ExtendedAttributes = exAttr });
-                    }
-                }
-
-                // check and see if we have a background resource and if so add it
-                Stream background = GetEmbeddedBackgroundStream(filename + ".jpg");
-                if (background != null && background.Length > 0)
-                {
-                    newGroup = GetGroup(groupName);
-
-                    var cfs = GroupFileService.AddFile(newGroup.Id.Value, background, background.Length, filename + ".jpg");
-                    if (cfs != null && !string.IsNullOrWhiteSpace(cfs.GetDownloadUrl()))
-                    {
-                        var banner = new ExtendedAttribute() { Key = "Banner", Value = filename + ".jpg" };
-                        var bannerUrl = new ExtendedAttribute() { Key = "BannerUrl", Value = cfs.GetDownloadUrl() };
-                        var hideWelcome = new ExtendedAttribute() { Key = "HideWelcome", Value = "0" };
-
-                        var exAttr = new List<ExtendedAttribute>() { banner, bannerUrl, hideWelcome };
-                        _groupsService.Update(newGroup.Id.Value, new GroupsUpdateOptions() { ExtendedAttributes = exAttr });
-                    }
-                }
+                ConfigureGroup(newGroup, configuration);
 
                 if (createApps)
                 {
@@ -168,9 +119,26 @@ namespace FourRoads.Common.TelligentCommunity.Services
             return newGroup;
         }
 
+        /// <summary>
+        /// Configures a new group using a set of custom configuration values
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="configuration"></param>
+        protected virtual void ConfigureGroup(Group group, NameValueCollection configuration) { }
+
+        /// <summary>
+        /// Creates child applications for a group
+        /// </summary>
+        /// <param name="group"></param>
         protected abstract void CreateApplications(Group group);
 
-        protected abstract GroupsCreateOptions CreateGroupOptions();
+        /// <summary>
+        /// Configures group creation options.
+        /// </summary>
+        /// <param name="groupCreateOptions">The group creation options</param>
+        /// <param name="configuration">A collection of configuration values</param>
+        /// <returns></returns>
+        protected abstract void ConfigureGroupsCreateOptions(GroupsCreateOptions groupCreateOptions, NameValueCollection configuration);
 
         protected virtual byte[] GetEmbeddedIcon(string type, string name)
         {
