@@ -66,7 +66,7 @@
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Platform">
-      <HintPath>..\..\lib\Telligent.Evolution.Platform.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Rest">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Rest.dll</HintPath>

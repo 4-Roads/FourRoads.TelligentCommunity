@@ -84,7 +84,7 @@
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Platform">
-      <HintPath>..\..\lib\Telligent.Evolution.Platform.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.ScriptedContentFragments">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.ScriptedContentFragments.dll</HintPath>
