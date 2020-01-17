@@ -20,6 +20,13 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.ScriptedFragmentss
             return _lastReadPostLogic.GetLastReadPost(appicationId, contentId, userId);
         }
 
+
+        [Documentation(Category = "Forum Extensions", Description = @"Used to record the last read forum post")]
+        public void SetLastReadPost(Guid appicationId, Guid contentId)
+        {
+            _lastReadPostLogic.SetLastReadPost(appicationId, contentId);
+        }
+
         [
         Documentation(Category = "Forum Extensions" , Description = @"
 
