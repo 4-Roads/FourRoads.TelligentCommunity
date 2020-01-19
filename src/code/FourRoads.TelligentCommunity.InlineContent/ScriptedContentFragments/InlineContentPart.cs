@@ -110,7 +110,10 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
             public object GetExtension(NameValueCollection context)
             {
-                return new InlineContentContext(context["InlineContentName"], context["DefaultContent"], context["AnonymousContnet"], context["CurrentContent"], context["CurrentAnonymousContent"], bool.Parse(context["CanEdit"]));
+                if (!string.IsNullOrWhiteSpace(context["InlineContentName"]))
+                    return new InlineContentContext(context["InlineContentName"], context["DefaultContent"], context["AnonymousContnet"], context["CurrentContent"], context["CurrentAnonymousContent"], bool.Parse(context["CanEdit"]));
+
+                return null;
             }
         }
     }

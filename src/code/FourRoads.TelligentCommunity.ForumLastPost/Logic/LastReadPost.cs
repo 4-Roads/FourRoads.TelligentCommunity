@@ -28,49 +28,52 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
             _forumThreads = forumThreads;
         }
 
-        public void UpdateLastReadPost(Guid appicationId, int userId, int threadId , int forumId, int replyId,  Guid lastReadContentId , DateTime postDateTime)
+        public void UpdateLastReadPost(Guid appicationId, int userId, int threadId, int forumId, int replyId, Guid lastReadContentId, DateTime postDateTime)
         {
             ForumThread thread = _forumThreads.Get(threadId, new ForumThreadsGetOptions() {ForumId = forumId});
 
-            LastReadPostInfo lastReadPost = GetLastReadPost(appicationId, thread.ContentId, userId);
-
-            if (lastReadPost.ContentId.GetValueOrDefault(Guid.Empty) != lastReadContentId)
+            if (thread != null)
             {
-                //Get this posts post date
-                if (postDateTime > lastReadPost.PostDate)
+                LastReadPostInfo lastReadPost = GetLastReadPost(appicationId, thread.ContentId, userId);
+
+                if (lastReadPost.ContentId.GetValueOrDefault(Guid.Empty) != lastReadContentId)
                 {
-                    //Work out the reply count all posts previous to this date
-                    int pageIndex = _forumReplies.GetPageIndex(threadId, replyId, new ForumRepliesGetPageIndexOptions() {IncludeThreadStarter = true, PageSize = 10});
-                    int replyCount = pageIndex*10;
-
-                    var replies = _forumReplies.List(threadId, new ForumRepliesListOptions() {PageIndex = pageIndex, PageSize = 10, IncludeThreadStarter = true});
-
-                    foreach (ForumReply forumReply in replies)
+                    //Get this posts post date
+                    if (postDateTime > lastReadPost.PostDate)
                     {
-                        if (forumReply.Id != replyId)
+                        //Work out the reply count all posts previous to this date
+                        int pageIndex = _forumReplies.GetPageIndex(threadId, replyId, new ForumRepliesGetPageIndexOptions() {IncludeThreadStarter = true, PageSize = 10});
+                        int replyCount = pageIndex * 10;
+
+                        var replies = _forumReplies.List(threadId, new ForumRepliesListOptions() {PageIndex = pageIndex, PageSize = 10, IncludeThreadStarter = true});
+
+                        foreach (ForumReply forumReply in replies)
                         {
-                            replyCount++;
+                            if (forumReply.Id != replyId)
+                            {
+                                replyCount++;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
-                        else
-                        {
-                            break;
-                        }
+
+                        _lastReadPostDataProvider.UpdateLastReadPost(appicationId, thread.ContentId, userId, lastReadContentId, replyCount, postDateTime);
+
+                        lastReadPost.PostDate = postDateTime;
+                        lastReadPost.ContentId = lastReadContentId;
+                        lastReadPost.ReplyCount = replyCount;
+
+                        string key = CreateCacheKey(appicationId, thread.ContentId, userId);
+
+                        _cacheService.Remove(key, CacheScope.Process);
+                        _cacheService.Put(key, lastReadPost, CacheScope.Process);
                     }
-
-                    _lastReadPostDataProvider.UpdateLastReadPost(appicationId, thread.ContentId, userId, lastReadContentId, replyCount, postDateTime);
-
-                    lastReadPost.PostDate = postDateTime;
-                    lastReadPost.ContentId = lastReadContentId;
-                    lastReadPost.ReplyCount = replyCount;
-
-                    string key = CreateCacheKey(appicationId, thread.ContentId, userId);
-
-                    _cacheService.Remove(key, CacheScope.Process);
-                    _cacheService.Put(key, lastReadPost, CacheScope.Process);
                 }
             }
         }
-    
+
         public LastReadPostInfo GetLastReadPost(Guid appicationId, Guid contentId, int userId)
         {
             string key = CreateCacheKey(appicationId, contentId, userId);
