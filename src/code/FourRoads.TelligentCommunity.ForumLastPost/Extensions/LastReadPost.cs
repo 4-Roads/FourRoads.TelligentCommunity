@@ -36,7 +36,39 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
         }
     }
 
-    public class LastReadForumPost :  IScriptedContentFragmentExtension, IBindingsLoader, IPluginGroup
+    public class LastReadForumPostContentFragmentProvider : IScriptedContentFragmentExtension
+    {
+        public void Initialize()
+        {
+        }
+
+        public string Name
+        {
+            get { return "4 Roads - Last Read Forum Post Plugin Scripted Fragment Extension"; }
+        }
+
+        public string Description
+        {
+            get { return "This plugin allows a user to navigate to the last post that they read in a forum thread"; }
+        }
+
+
+        public string ExtensionName
+        {
+            get { return "frcommon_v1_forumPost"; }
+        }
+
+        public object Extension
+        {
+            get
+            {
+                return Injector.Get<ILastReadPostScriptedFragment>();
+            }
+        }
+
+    }
+
+    public class LastReadForumPost :   IBindingsLoader, IPluginGroup
     {
         public void Initialize()
         {
@@ -55,7 +87,6 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
                 }
             }
         }
-
 
         public string Name
         {
@@ -79,18 +110,6 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
             module.Register<ILastReadPostScriptedFragment, LastReadPostScriptedFragment>(Reuse.Singleton);
         }
 
-        public string ExtensionName {
-            get { return "frcommon_v1_forumPost"; }
-        }
-
-        public object Extension
-        {
-            get
-            {
-                return Injector.Get<ILastReadPostScriptedFragment>(); 
-            }
-        }
-
-        public IEnumerable<Type> Plugins { get { return new[] { typeof(DependencyInjectionPlugin), typeof(LastReadForumSqlInstaller) }; } }
+        public IEnumerable<Type> Plugins { get { return new[] { typeof(DependencyInjectionPlugin), typeof(LastReadForumSqlInstaller) , typeof(LastReadForumPostContentFragmentProvider) }; } }
     }
 }

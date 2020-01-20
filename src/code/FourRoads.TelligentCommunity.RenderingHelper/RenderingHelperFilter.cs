@@ -65,14 +65,19 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
                             
                             //Just get the DOM representation
                             IHtmlDocument document = parser.ParseDocument(tmpStream);
-                            //CQ document = CQ.CreateDocument(tmpStream, HttpContext.Current.Response.ContentEncoding);
 
-                            _renderingObserverPlugin.NotifyObservers(document);
-
-                            using (StreamWriter sw = new StreamWriter(_sink, HttpContext.Current.Response.ContentEncoding,(int) Length + 1000))
+                            if (document.Doctype != null)
                             {
-                                sw.Write(document.DocumentElement.OuterHtml);
-                                //document.Render(OutputFormatters.HtmlEncodingNone, sw);
+                                _renderingObserverPlugin.NotifyObservers(document);
+
+                                using (StreamWriter sw = new StreamWriter(_sink, HttpContext.Current.Response.ContentEncoding, (int)Length + 1000))
+                                {
+                                    sw.Write(document.DocumentElement.OuterHtml);
+                                }
+                            }
+                            else
+                            {
+                                CopyTo(_sink);
                             }
                         }
                     }
@@ -99,7 +104,7 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
 
             if (!resposne.IsRequestBeingRedirected && (resposne.StatusCode > 199 && resposne.StatusCode < 300))
             {
-            _isClosing = true;
+                _isClosing = true;
             }
 
             Flush();

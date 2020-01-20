@@ -17,6 +17,7 @@ using FourRoads.Common.TelligentCommunity.Components.Logic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.InlineContent.CentralizedFileStore;
 using FourRoads.TelligentCommunity.InlineContent.Security;
+using Microsoft.Web.Infrastructure;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
@@ -110,7 +111,10 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
             public object GetExtension(NameValueCollection context)
             {
-                return new InlineContentContext(context["InlineContentName"], context["DefaultContent"], context["AnonymousContnet"], context["CurrentContent"], context["CurrentAnonymousContent"], bool.Parse(context["CanEdit"]));
+                if (!string.IsNullOrWhiteSpace(context["InlineContentName"]))
+                    return new InlineContentContext(context["InlineContentName"], context["DefaultContent"], context["AnonymousContnet"], context["CurrentContent"], context["CurrentAnonymousContent"], bool.Parse(context["CanEdit"]));
+
+                return null;
             }
         }
     }
@@ -122,57 +126,56 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
         public override bool RenderContent(TextWriter writer, ContentFragmentRenderOptions options)
         {
-            string inlineContentName = string.Empty;
-
-            if (DynamicName)
+            if (PluginManager.IsEnabled(this))
             {
-                inlineContentName = Apis.Get<IUrl>().CurrentContext.PageName + "_";
-            }
+                string inlineContentName = string.Empty;
 
-            if (ContextualMode == ContextMode.GroupContext || ContextualMode == ContextMode.Context)
-            {
-                //This allows the control to have several instances on a single page
-                if (!string.IsNullOrWhiteSpace(InlineContentName))
-                    inlineContentName += InlineContentName + "_";
-
-                ContextualItem(a =>
+                if (DynamicName)
                 {
-                    inlineContentName += a.ApplicationId.ToString();
+                    inlineContentName = Apis.Get<IUrl>().CurrentContext.PageName + "_";
+                }
 
-                }, c =>
+                if (ContextualMode == ContextMode.GroupContext || ContextualMode == ContextMode.Context)
                 {
-                    if (c != null && c.ContainerId != Apis.Get<IGroups>().Root.ContainerId)
-                    {
-                        inlineContentName += c.ContainerId.ToString();
-                    }
-                    else
-                    {
-                        inlineContentName += "SiteRoot";
-                    }
-                }, ta =>
+                    //This allows the control to have several instances on a single page
+                    if (!string.IsNullOrWhiteSpace(InlineContentName))
+                        inlineContentName += InlineContentName + "_";
+
+                    ContextualItem(
+                        a => { inlineContentName += a.ApplicationId.ToString(); },
+                        c =>
+                        {
+                            if (c != null && c.ContainerId != Apis.Get<IGroups>().Root.ContainerId)
+                            {
+                                inlineContentName += c.ContainerId.ToString();
+                            }
+                            else
+                            {
+                                inlineContentName += "SiteRoot";
+                            }
+                        },
+                        ta => { inlineContentName += GetHashString(string.Join("", ta.OrderBy(s => s))); });
+                }
+                else
                 {
-                    inlineContentName += GetHashString(string.Join("", ta.OrderBy(s => s)));
-                });
+                    inlineContentName += InlineContentName;
+                }
+
+                var logic = Injector.Get<InlineContentLogic>();
+                var inlineCOnetntObject = logic.GetInlineContent(inlineContentName);
+
+                NameValueCollection nv = new NameValueCollection()
+                {
+                    {"InlineContentName", inlineContentName},
+                    {"DefaultContent", GetContentText()},
+                    {"AnonymousContent", GetAnonymousContentText()},
+                    {"CurrentContent", inlineCOnetntObject?.Content ?? string.Empty},
+                    {"CurrentAnonymousContent", inlineCOnetntObject?.AnonymousContent ?? string.Empty},
+                    {"CanEdit", logic.CanEdit.ToString()}
+                };
+
+                writer.Write(PluginManager.Get<InlineContentPanel>().FirstOrDefault().Render(nv));
             }
-            else
-            {
-                inlineContentName += InlineContentName;
-            }
-
-            var logic = Injector.Get<InlineContentLogic>();
-            var inlineCOnetntObject = logic.GetInlineContent(inlineContentName);
-
-            NameValueCollection nv = new NameValueCollection()
-            {
-                {"InlineContentName", inlineContentName},
-                {"DefaultContent", GetContentText()},
-                {"AnonymousContent", GetAnonymousContentText()},
-                {"CurrentContent" , inlineCOnetntObject?.Content ?? string.Empty },
-                {"CurrentAnonymousContent" ,inlineCOnetntObject?.AnonymousContent ?? string.Empty },
-                {"CanEdit" ,logic.CanEdit.ToString() }
-            };
-
-            writer.Write(PluginManager.Get<InlineContentPanel>().FirstOrDefault().Render(nv));
 
             return true;
         }
@@ -236,6 +239,9 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
         public override Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup[] GetPropertyGroups()
         {
+            if (HttpContext.Current == null || HttpContext.Current.Request.CurrentExecutionFilePath.EndsWith(".ashx"))
+                return new PropertyGroup[0];
+
             PropertyGroup group = new PropertyGroup() {Id = "GeneralSettings", LabelText = "General" };
 
             Property headerTitle = new Property()
@@ -252,14 +258,15 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
 
             Property property = new Property()
             {
-                Id = "default_content", LabelText = "Content", DataType = "Html"
+                Id = "default_content",
+                LabelText = "Content",
+                DataType = "Html"
             };
 
-            property.Options.Add("ControlType", "Html");
             property.Options.Add("rows", "40");
             property.Options.Add("sanitize", "false");
             property.Options.Add("enableRichEditing", "true");
-            property.Options.Add("ContentTypeId",  InlineContentPart.InlineContentContentTypeId.ToString());
+            property.Options.Add("ContentTypeId", InlineContentPart.InlineContentContentTypeId.ToString());
 
             defaultContent.Properties.Add(property);
 
@@ -268,15 +275,14 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             property = new Property()
             {
                 Id = "anonymous_content",
-                LabelText ="Content",
+                LabelText = "Content",
                 DataType = "Html"
             };
 
-            property.Options.Add("ControlType", "Html");
             property.Options.Add("rows", "40");
             property.Options.Add("sanitize", "false");
-            property.Options.Add("enableRichEditing", "true"); 
-            property.Options.Add("ContentTypeId",  InlineContentPart.InlineContentContentTypeId.ToString());
+            property.Options.Add("enableRichEditing", "true");
+            property.Options.Add("ContentTypeId", InlineContentPart.InlineContentContentTypeId.ToString());
 
             anoymousContent.Properties.Add(property);
 
@@ -296,7 +302,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             property = new Property(){Id = "inlinecontentname", LabelText = "Inline Content Name" , DataType = "string"};
             group.Properties.Add(property);
 
-            return new[] { group, defaultContent, anoymousContent };
+            return new[] { group , defaultContent, anoymousContent };
         }
 
         public void Initialize()
@@ -478,28 +484,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             return sb.ToString();
         }
 
-        //public string ExtensionName => "fourroads_v1_inlineContent";
-        //public object Extension => new InlineContentExtension();
     }
 
-    //public class InlineContentExtension
-    //{
-    //    public string TrimQueryStringForGetExecutedFileUrl(string pathQuery)
-    //    {
-    //        Uri uri = new Uri(HttpUtility.UrlDecode( pathQuery) , UriKind.Relative);
-    //        var nameValues = HttpUtility.ParseQueryString(pathQuery);
-
-    //        nameValues["AnonymousContent"] = "dummy";
-    //        nameValues["DefaultContent"] = "dummy";
-
-    //        var nameValuesInner = HttpUtility.ParseQueryString(nameValues["_p"]);
-
-    //        nameValuesInner["AnonymousContent"] = "dummy";
-    //        nameValuesInner["DefaultContent"] = "dummy";
-
-    //        nameValues["_p"] =  string.Join("&" , nameValuesInner.AllKeys.Select(k => Apis.Get<IUrl>().Encode(nameValuesInner[k])));
-
-    //        return pathQuery.Substring(0, pathQuery.IndexOf("?") )+ "?" + nameValues; 
-    //    }
-    //}
+ 
 }
