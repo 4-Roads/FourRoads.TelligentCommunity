@@ -116,6 +116,11 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         protected void InstallNow()
         {
+            if(_sourceScriptedFragment == null)
+            {
+                new TCException($"Couldn't load DefaultProvider plugin \"{typeof(TScriptedContentFragmentFactoryDefaultProvider).Name}\". Widgets installation aborted").Log();
+            }
+
             Uninstall();
 
             string basePath = BaseResourcePath + "Widgets.";
