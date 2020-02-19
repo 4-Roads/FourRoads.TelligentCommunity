@@ -77,12 +77,14 @@ namespace FourRoads.TelligentCommunity.RenderingHelper
                             }
                             else
                             {
+                                Seek(0, SeekOrigin.Begin);
                                 CopyTo(_sink);
                             }
                         }
                     }
                     else
                     {
+                        Seek(0, SeekOrigin.Begin);
                         CopyTo(_sink);
                     }
 
