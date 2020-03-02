@@ -414,9 +414,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         public void Delete(string path, string fileName)
         {
             if (!CentralizedFileStorage.IsValid(FileStoreKey, path, fileName))
-            {
-                return;
-            }
+                throw CreateFilePathInvalidException(path, fileName);
 
             string key = MakeKey(path, fileName);
 
