@@ -1,0 +1,27 @@
+#if ($core_v2_page.IsPost) 
+	
+	#set($userId =  $core_v2_utility.ParseInt($core_v2_page.GetFormValue("userId")))
+	#set($newToken =  $core_v2_page.GetFormValue("token"))
+
+	#if ($userId == $core_v2_user.Accessing.Id)
+
+		#set($tokens = $core_v2_user.Accessing.ExtendedAttributes.get_item('FcmId').Value)
+
+		#set($splitTokens = $core_v2_utility.Split(",", $tokens))
+
+		#set($found = false)
+		#foreach($token in $splitTokens)
+			#if ($token == $newToken)
+				#set($found = true)
+			#end
+		#end
+
+		#if (!$found)
+			#set($ignore = $splitTokens.Add($newToken))
+
+			#set($tokens = $core_v2_utility.Join(",", $splitTokens))
+
+			#set($userResponse = $core_v2_user.Update("%{Id = $userId , _ExtendedAttributes_FcmId = $tokens}"))
+		#end
+	#end
+#end

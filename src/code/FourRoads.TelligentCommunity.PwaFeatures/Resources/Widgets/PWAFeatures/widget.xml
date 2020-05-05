@@ -1,0 +1,144 @@
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:Widget_Title}" cssClass="pwa" description="${resource:Widget_Description}" instanceIdentifier="40f571f3d5e2431b9c10cc87340da788" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" provider="77ff006373644dc29aa39293e4ed8aed">
+    <contentScript>
+      <![CDATA[
+      #set($appleMeta = "<meta name='apple-mobile-web-app-capable' content='yes'>")
+      #set($appleMeta = "$appleMeta<meta name='apple-mobile-web-app-status-bar-style' content='black'>")
+      #set($appleMeta = "$appleMeta<meta name='apple-mobile-web-app-title' content='$core_v2_configuration.SiteName'>")
+      #set($appleMeta = "$appleMeta<link rel='apple-touch-icon' href='$core_v2_configuration.SiteLogoUrl'>")
+      
+      $fr_pwa_features.RegisterPwaMeta($appleMeta)
+      
+      ##Service worker and manifest are handled by registered routes in plugin which then callback to render via a scripted panel
+      $core_v2_page.AddLink("manifest", "/manifest.json")
+      #set($serviceWorkerUrl = "/serviceworker.js")
+      
+      #registerEndOfPageHtml("serviceworker")
+         
+      <script src='https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js'></script>
+      <script src='https://www.gstatic.com/firebasejs/7.14.2/firebase-messaging.js'></script>
+      <script>
+      
+          if ('serviceWorker' in navigator) {
+              #if ($core_v2_user.IsRegistered($core_v2_user.Accessing.Id))
+                
+                function sendTokenToServer(token){
+                
+                   if (!isTokenSentToServer()) {
+                        jQuery.telligent.evolution.post({
+					                url: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl("storetoken.vm"))',
+					                data: {
+                              userId:$core_v2_user.Accessing.Id,
+                              token:token
+                          },
+                          success: function(){
+                             console.log('registered Firebase');
+                          }
+				                });
+
+                      setTokenSentToServer(true);
+                    }
+                }
+
+              function askPermission() {
+                return new Promise(function(resolve, reject) {
+                  const permissionResult = Notification.requestPermission(function(result) {
+                    resolve(result);
+                  });
+
+                  if (permissionResult) {
+                    permissionResult.then(resolve, reject);
+                  }
+                })
+                .then(function(permissionResult) {
+                  if (permissionResult !== 'granted') {
+                    throw new Error('We weren\'t granted permission.');
+                  }
+                });
+              }
+              
+              function isTokenSentToServer() {
+                return window.localStorage.getItem('sentToServer') === '1';
+              }
+
+              function setTokenSentToServer(sent) {
+                window.localStorage.setItem('sentToServer', sent ? '1' : '0');
+              }
+              
+              function deleteToken() {
+                  messaging.getToken().then((currentToken) => {
+                    messaging.deleteToken(currentToken).then(() => {
+                      console.log('Token deleted.');
+                      setTokenSentToServer(false);
+                    }).catch((err) => {
+                      console.log('Unable to delete token. ', err);
+                    });
+                  }).catch((err) => {
+                    console.log('Error retrieving Instance ID token. ', err);
+                  });
+                }
+              
+              function register(){
+                const messaging = firebase.messaging();
+
+	              messaging.getToken().then((currentToken) => {
+		              if (currentToken) {
+			              sendTokenToServer(currentToken);
+		              } else {
+			              askPermission();
+			              setTokenSentToServer(false);
+		              }
+	              }).catch((err) => {
+		              console.log('An error occurred while retrieving token. ', err);
+		              setTokenSentToServer(false);
+	              });
+
+	              messaging.onTokenRefresh(() => {
+		              messaging.getToken().then((refreshedToken) => {
+			              setTokenSentToServer(false);
+			              sendTokenToServer(refreshedToken);
+		              }).catch((err) => {
+			              console.log('Unable to retrieve refreshed token ', err);
+		              });
+	              });
+
+              };
+              
+               #end
+
+              navigator.serviceWorker
+                  .register('$serviceWorkerUrl', {scope: '/'})
+                  .then(function(registration) {
+                          $fr_pwa_features.FirebaseConfig
+                        
+	                        // Initialize Firebase
+	                        firebase.initializeApp(firebaseConfig);
+                          
+                          firebase.messaging().useServiceWorker(registration);
+                          register();
+                  })
+                  .catch((e) => {
+                    console.error("Install failed due to the path restriction violation.", e);
+                  });
+          }
+          
+        </script>
+      #end
+			]]></contentScript>
+    <headerScript><![CDATA[
+
+			]]></headerScript>
+    <configuration><![CDATA[
+<propertyGroup id="options" resourceName="Options">
+
+</propertyGroup>
+			]]></configuration>
+    <languageResources>
+      <language key="en-us">
+        <resource name="Widget_Title">4 Roads - PWA Features Footer Control</resource>
+        <resource name="Widget_Description">Used for adding PWA Features to Telligent.</resource>
+        <resource name="Options">Options</resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

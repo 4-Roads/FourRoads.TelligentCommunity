@@ -1,0 +1,29 @@
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:Widget_Title}" cssClass="pwa" description="${resource:Widget_Description}" instanceIdentifier="b42ccd131e544565a6916706deac683c" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" provider="1fe74a21eab446279f261d167bd86d0a">
+    <contentScript>
+      <![CDATA[
+      #if ($context.Page == "manifest")
+          $core_v2_widget.ExecuteFile("manifest.vm")
+      #elseif ($context.Page == "serviceworker")
+          $core_v2_widget.ExecuteFile("serviceworker.vm")
+      #else
+          $core_v2_widget.ExecuteFile("offline.vm")
+      #end
+			]]></contentScript>
+    <headerScript><![CDATA[
+
+			]]></headerScript>
+    <configuration><![CDATA[
+<propertyGroup id="options" resourceName="Options">
+
+</propertyGroup>
+			]]></configuration>
+    <languageResources>
+      <language key="en-us">
+        <resource name="Widget_Title">4 Roads - PWA Service Worker and Manifest</resource>
+        <resource name="Widget_Description">Used for adding PWA Features to Telligent.</resource>
+        <resource name="Options">Options</resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>
