@@ -5,7 +5,6 @@ using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using Telligent.Evolution.Extensibility.UI.Version1;
-using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.MetaData
 {

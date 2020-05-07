@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity101.Sentrus")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity111.Sentrus")]
 [assembly: AssemblyDescription("Provides several features to enhance community performance")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

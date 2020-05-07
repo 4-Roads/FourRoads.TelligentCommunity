@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.UserDataExport</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.UserDataExport</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -45,9 +45,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Telligent.Caching">
-      <HintPath>..\..\lib\Telligent\Telligent.Caching.dll</HintPath>
-    </Reference>
     <Reference Include="Telligent.Common">
       <HintPath>..\..\lib\Telligent\Telligent.Common.dll</HintPath>
     </Reference>
