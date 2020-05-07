@@ -24,7 +24,7 @@ CREATE TABLE [dbo].[fr_PwaTokens](
 	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 
 END
-
+GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[fr_PwaSession_StoreToken]'))
 	DROP PROCEDURE [dbo].[fr_PwaSession_StoreToken]
