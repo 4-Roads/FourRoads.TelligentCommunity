@@ -151,6 +151,7 @@ namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
                                     {"title", title},
                                     {"body", body},
                                     {"url", url},
+                                    {"targetUserId", user.Id.GetValueOrDefault(-1).ToString()},
                                 },
                                 Tokens = registrationTokens
                             };
