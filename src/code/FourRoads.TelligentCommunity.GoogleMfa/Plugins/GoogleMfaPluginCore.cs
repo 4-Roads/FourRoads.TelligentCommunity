@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
-using FourRoads.TelligentCommunity.ForumLastPost.DataProvider;
+using FourRoads.TelligentCommunity.GoogleMfa.DataProvider;
 using FourRoads.TelligentCommunity.GoogleMfa.Extensions;
 using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
 using FourRoads.TelligentCommunity.GoogleMfa.Logic;
