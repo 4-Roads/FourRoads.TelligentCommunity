@@ -1,7 +1,7 @@
 ﻿using System;
 using Telligent.Evolution.Extensibility.UI.Version1;
 
-namespace FourRoads.TelligentCommunity.PwaFeatures
+namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
 {
     public class WidgetScriptedFragmentPlugin : IScriptedContentFragmentFactoryDefaultProvider
     {

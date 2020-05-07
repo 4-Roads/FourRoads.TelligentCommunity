@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.TelligentCommunity.PwaFeatures.Resources;
-using Telligent.Evolution.Extensibility.Version1;
+using FourRoads.TelligentCommunity.PwaFeatures.Plugins;
 
-namespace FourRoads.TelligentCommunity.PwaFeatures
+namespace FourRoads.TelligentCommunity.PwaFeatures.Resources
 {
-    public class PwaServiceWorkerInstaller : FactoryDefaultWidgetProviderInstallerV3<PwaFeaturesPlugin>
+    public class CustomUrlsPanelInstaller : FactoryDefaultWidgetProviderInstallerV3<PwaFeaturesPlugin>
     {
         protected override ICallerPathVistor CallerPath()
         {

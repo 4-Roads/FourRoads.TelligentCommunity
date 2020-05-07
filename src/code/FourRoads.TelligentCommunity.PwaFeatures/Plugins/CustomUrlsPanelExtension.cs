@@ -1,8 +1,8 @@
-﻿namespace FourRoads.TelligentCommunity.PwaFeatures
+﻿namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
 {
-    public class ServiceWorkerPanelExtension
+    public class CustomUrlsPanelExtension
     {
-        public ServiceWorkerPanelExtension(string userId , string page, string firebaseSenderId, string firebaseConfig)
+        public CustomUrlsPanelExtension(string userId , string page, string firebaseSenderId, string firebaseConfig)
         {
             UserId = int.Parse(userId);
             Page = page;

@@ -131,7 +131,7 @@
 	self.addEventListener('notificationclick', function(event) {
 		  switch(event.action){
 			case 'open_url':
-			clients.openWindow(event.notification.data.url); //which we got from above
+			clients.openWindow(event.notification.data.url); 
 			break;
 		  }
 		}
@@ -139,19 +139,16 @@
 
 	$context.FirebaseConfig
 
-	// Initialize Firebase
 	firebase.initializeApp(firebaseConfig);
 
 	const messaging = firebase.messaging();
 
 	messaging.setBackgroundMessageHandler(function(payload) {
-			console.log('[firebase-messaging-sw.js] Received background message ', payload);
-			// Customize notification here
 			const notificationTitle = payload.data.title;
 			const notificationOptions = {
 				body: payload.data.body,
 				icon: "$core_v2_ui.GetResizedImageUrl($core_v2_configuration.SiteLogoUrl, 40, 40, "%{OutputIsPersisted = 'true', ResizeMethod = 'ZoomAndCrop' }")",
-				data: { url:payload.data.url }, //the url which we gonna use later
+				data: { url:payload.data.url }, 
 				actions: [{action: "open_url", title: "Read Now"}],
 				click_action: payload.data.url
 			};

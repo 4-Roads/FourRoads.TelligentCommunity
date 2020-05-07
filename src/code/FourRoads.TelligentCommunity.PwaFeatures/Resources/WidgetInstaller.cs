@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.TelligentCommunity.PwaFeatures.Resources;
+using FourRoads.TelligentCommunity.PwaFeatures.Plugins;
 using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.TelligentCommunity.PwaFeatures
+namespace FourRoads.TelligentCommunity.PwaFeatures.Resources
 {
-    public class PwaWidgetInstaller : FactoryDefaultWidgetProviderInstallerV3<WidgetScriptedFragmentPlugin>, IPluginGroup
+    public class WidgetInstaller : FactoryDefaultWidgetProviderInstallerV3<WidgetScriptedFragmentPlugin>, IPluginGroup
     {
         protected override ICallerPathVistor CallerPath()
         {

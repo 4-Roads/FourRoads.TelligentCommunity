@@ -1,11 +1,10 @@
 ﻿using System.Web;
 
-namespace FourRoads.TelligentCommunity.PwaFeatures
+namespace FourRoads.TelligentCommunity.PwaFeatures.Extensions
 {
-    public class PwaFeaturesExtension
+    public class UtilityExtension
     {
-
-        public PwaFeaturesExtension(string firebaseConfig)
+        public UtilityExtension(string firebaseConfig)
         {
             FirebaseConfig = firebaseConfig;
         }

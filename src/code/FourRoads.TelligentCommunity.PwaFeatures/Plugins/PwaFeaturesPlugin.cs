@@ -7,6 +7,9 @@ using System.Web;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using FourRoads.TelligentCommunity.PwaFeatures.DataProvider;
+using FourRoads.TelligentCommunity.PwaFeatures.Extensions;
+using FourRoads.TelligentCommunity.PwaFeatures.Resources;
 using Google.Apis.Auth.OAuth2;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
@@ -22,7 +25,7 @@ using Property = Telligent.Evolution.Extensibility.Configuration.Version1.Proper
 using PropertyGroup = Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup;
 
 
-namespace FourRoads.TelligentCommunity.PwaFeatures
+namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
 {
     public class PwaFeaturesPlugin : IConfigurablePlugin, INotificationDistributionType, ITranslatablePlugin,  IPluginGroup, INavigable, IHtmlHeaderExtension , IScriptedContentFragmentExtension, IScriptablePlugin
     {
@@ -73,13 +76,16 @@ namespace FourRoads.TelligentCommunity.PwaFeatures
         }
 
         public string ExtensionName => "fr_pwa_features";
-        public object Extension => new PwaFeaturesExtension(_configuration.GetString("FirebaseConfig"));
+        public object Extension => new UtilityExtension(_configuration.GetString("FirebaseConfig"));
         private ITranslatablePluginController _translation;
         private IPluginConfiguration _configuration;
         private IScriptedContentFragmentController _controller;
+        private PwaDataProvider _data;
 
         public void Initialize()
         {
+            _data = new PwaDataProvider();
+
             FirebaseApp.Create(
                 new AppOptions()
                 {
@@ -128,14 +134,12 @@ namespace FourRoads.TelligentCommunity.PwaFeatures
 
         private void PushGoogleNotification(User user, string notificationId, string title, string body, string url)
         {
-            if (user.ExtendedAttributes["FcmId"] != null && !string.IsNullOrWhiteSpace(user.ExtendedAttributes["FcmId"].Value))
-            {
-                // Subscribe the devices corresponding to the registration tokens to the
+            // Subscribe the devices corresponding to the registration tokens to the
                 // topic
                 var response = Task.Run(
                     () =>
                     {
-                        var registrationTokens = new List<string>(user.ExtendedAttributes["FcmId"].Value.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries));
+                        var registrationTokens = _data.ListUserTokens(user.Id.Value);
 
                         if (registrationTokens.Count > 0)
                         {
@@ -159,7 +163,6 @@ namespace FourRoads.TelligentCommunity.PwaFeatures
                     }).Result;
 
                 System.Diagnostics.Debugger.Log(0, "", response.SuccessCount.ToString());
-            }
 
         }
 
@@ -221,7 +224,14 @@ namespace FourRoads.TelligentCommunity.PwaFeatures
             }
         }
 
-        public IEnumerable<Type> Plugins  => new[] { typeof (PwaWidgetInstaller), typeof(PwaServiceWorkerInstaller) }.ToList();
+        public IEnumerable<Type> Plugins  => new[]
+        {
+            typeof (WidgetInstaller),
+            typeof(CustomUrlsPanelInstaller),
+            typeof(PwaSqlScriptsInstaller),
+            typeof(RestEndpoint)
+        };
+
         public string GetHeader(RenderTarget target)
         {
             return Convert.ToString(HttpContext.Current.Items["pwa_manifest_path"]) ?? string.Empty;
@@ -242,7 +252,7 @@ namespace FourRoads.TelligentCommunity.PwaFeatures
                     CanWritePluginConfiguration = false,
                     CanHaveHeader = false,
                     IsEditable = true,
-                    Extensions = { Injector.Get<ServiceWorkerPanelContext>() },
+                    Extensions = { Injector.Get<CustomUrlsPanelContext>() },
 
                 });
         }

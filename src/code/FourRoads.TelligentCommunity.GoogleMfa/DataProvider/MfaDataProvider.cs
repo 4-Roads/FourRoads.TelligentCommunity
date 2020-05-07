@@ -6,7 +6,7 @@ using FourRoads.TelligentCommunity.GoogleMfa.Model;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 
-namespace FourRoads.TelligentCommunity.ForumLastPost.DataProvider
+namespace FourRoads.TelligentCommunity.GoogleMfa.DataProvider
 {
     public class MfaDataProvider : IMfaDataProvider
     {
