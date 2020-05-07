@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
-        <id>FourRoads.TelligentCommunity103.PowerBI</id>
+        <id>FourRoads.TelligentCommunity111.PowerBI</id>
         <version>$version$</version>
         <title>$title$</title>
         <authors>$author$</authors>
@@ -14,7 +14,7 @@
         <tags>Telligent utility</tags>
     </metadata>
     <files>
-        <file src="bin\**\FourRoads.TelligentCommunity.PowerBI.dll" target="lib\net462" exclude="*Tests*" />
+        <file src="bin\**\FourRoads.TelligentCommunity.PowerBI.dll" target="lib\net47" exclude="*Tests*" />
     </files>
     <!--<ItemGroup>
         <PackageReference Include="Microsoft.Azure.CognitiveServices.Language" version="1.0.1-preview">

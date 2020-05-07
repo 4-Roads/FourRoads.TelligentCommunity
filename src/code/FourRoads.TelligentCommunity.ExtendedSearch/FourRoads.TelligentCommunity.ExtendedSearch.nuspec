@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
-        <id>FourRoads.TelligentCommunity103.ExtendedSearch</id>
+        <id>FourRoads.TelligentCommunity111.ExtendedSearch</id>
         <version>$version$</version>
         <title>$title$</title>
         <authors>$author$</authors>
@@ -17,6 +17,6 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\**\FourRoads.TelligentCommunity.ExtendedSearch.dll" target="lib\net462" exclude="*Tests*" />
+        <file src="bin\**\FourRoads.TelligentCommunity.ExtendedSearch.dll" target="lib\net47" exclude="*Tests*" />
     </files>
 </package>
