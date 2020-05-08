@@ -63,13 +63,13 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\SearchSuggest\widget.xml" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
       <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
       <Name>FourRoads.Common.TelligentCommunity</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Widgets\SearchSuggest\widget.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
