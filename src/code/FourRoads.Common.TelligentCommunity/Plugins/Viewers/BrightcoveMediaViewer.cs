@@ -11,8 +11,9 @@ using System;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using Telligent.Evolution.Caching.Services;
 using Telligent.Evolution.Components;
+using Telligent.Evolution.Extensibility.Caching.Version1;
+using CacheService = Telligent.Evolution.Extensibility.Caching.Version1.CacheService;
 using TelligentServices = Telligent.Common.Services;
 
 #endregion
@@ -80,7 +81,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Viewers
         }
         string cacheKey = url.ToString();
         var cacheService = TelligentServices.Get<ICacheService>();
-        object cachedObj = cacheService.Get(cacheKey, CacheScope.All);
+        object cachedObj = CacheService.Get(cacheKey, CacheScope.All);
         if (cachedObj !=null)
         {
           return cachedObj.ToString();
@@ -91,7 +92,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Viewers
         if (_responseUri != null)
         {
           string resolved = _responseUri.ToString();
-          cacheService.Put(cacheKey, resolved, CacheScope.All);
+          CacheService.Put(cacheKey, resolved, CacheScope.All);
           return resolved;
         }
         //if no luck resolving, return the original url

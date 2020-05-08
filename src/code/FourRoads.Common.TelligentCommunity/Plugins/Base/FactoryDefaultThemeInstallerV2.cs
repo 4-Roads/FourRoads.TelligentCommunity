@@ -16,12 +16,12 @@ using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Caching.Services;
 using Telligent.Jobs;
 using File = System.IO.File;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 using TelligentServices = Telligent.Common.Services;
 using System.Text.RegularExpressions;
+using Telligent.Evolution.Extensibility.Caching.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
@@ -310,7 +310,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
                             _themeTypeMomento.AcceptThemeVistor(fileChange);
 
-                            TelligentServices.Get<ICacheService>().Clear(CacheScope.All);
+                            CacheService.RemoveByTags(new []{"Theme"}, CacheScope.All);
                         }
                     }
                     catch (Exception pe)
