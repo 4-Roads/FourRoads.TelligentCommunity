@@ -12,11 +12,11 @@ using DryIoc;
 using FourRoads.Common.Interfaces;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using Telligent.Common;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api;
 using Telligent.Evolution.Extensibility.Version1;
 using FourRoads.Common.Sql;
-using TelligentServices = Telligent.Common.Services;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
@@ -139,7 +139,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                                 return method.Invoke(null, null);
                             }
 
-                            var results = TelligentServices.GetAll(request.ServiceType);
+                            var results = Services.GetAll(request.ServiceType);
 
                             return results.FirstOrDefault();
                         }

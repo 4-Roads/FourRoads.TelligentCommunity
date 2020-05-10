@@ -1,21 +1,28 @@
 ﻿using System;
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.ForumLastPost.Interfaces;
+using Telligent.Common;
+using Telligent.Evolution.Components;
+using Telligent.Evolution.CoreServices.WebContext.Services;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.Extensibility.Caching.Version1;
+using Telligent.Evolution.Extensibility;
+using CacheScope = Telligent.Caching.CacheScope;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
 {
     public class LastReadPost : ILastReadPostLogic
     {
+        private ICacheService _cacheService;
         private ILastReadPostDataProvider _lastReadPostDataProvider;
         private IUsers _users;
         private IForumReplies _forumReplies;
         private IForumThreads _forumThreads;
 
-        public LastReadPost(ILastReadPostDataProvider lastReadPostDataProvider, IUsers users , IForumReplies forumReplies, IForumThreads forumThreads)
+        public LastReadPost(ICacheService cacheService , ILastReadPostDataProvider lastReadPostDataProvider, IUsers users , IForumReplies forumReplies, IForumThreads forumThreads)
         {
             _lastReadPostDataProvider = lastReadPostDataProvider;
+            _cacheService = cacheService;
             _users = users;
             _forumReplies = forumReplies;
             _forumThreads = forumThreads;
@@ -60,8 +67,8 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
 
                         string key = CreateCacheKey(appicationId, thread.ContentId, userId);
 
-                        CacheService.Remove(key, CacheScope.Process);
-                        CacheService.Put(key, lastReadPost, CacheScope.Process);
+                        _cacheService.Remove(key, CacheScope.Process);
+                        _cacheService.Put(key, lastReadPost, CacheScope.Process);
                     }
                 }
             }
@@ -71,13 +78,13 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
         {
             string key = CreateCacheKey(appicationId, contentId, userId);
 
-            LastReadPostInfo? lastReadPost = CacheService.Get(key, CacheScope.Process) as LastReadPostInfo?;
+            LastReadPostInfo? lastReadPost = _cacheService.Get(key, CacheScope.Process) as LastReadPostInfo?;
 
             if (lastReadPost == null || lastReadPost.Value.ContentId.GetValueOrDefault(Guid.Empty) == Guid.Empty)
             {
                 lastReadPost = _lastReadPostDataProvider.GetLastReadPost(appicationId, contentId, userId);
 
-                CacheService.Put(key, lastReadPost, CacheScope.Process);
+                _cacheService.Put(key, lastReadPost, CacheScope.Process);
             }
 
             return lastReadPost.Value;

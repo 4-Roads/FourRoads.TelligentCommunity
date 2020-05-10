@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.ForumLastPost</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.ForumLastPost</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
@@ -52,6 +52,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Telligent.Caching">
+      <HintPath>..\..\lib\Telligent\Telligent.Caching.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Common">
       <HintPath>..\..\lib\Telligent\Telligent.Common.dll</HintPath>
     </Reference>

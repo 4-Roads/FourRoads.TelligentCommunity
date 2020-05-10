@@ -3,5 +3,5 @@
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity111.Splash")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity103.Splash")]
 [assembly: AssemblyDescription("Enables a community splash page to be configured")]

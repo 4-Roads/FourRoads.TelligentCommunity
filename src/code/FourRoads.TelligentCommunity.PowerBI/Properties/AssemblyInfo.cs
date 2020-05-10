@@ -3,7 +3,7 @@
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity111.UserDataExport")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity103.UserDataExport")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.UserDataExport")]
 [assembly: AssemblyDescription("Enables a list of all community users to be exported to a CSV file")]
 
