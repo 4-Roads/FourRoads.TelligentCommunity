@@ -14,6 +14,6 @@
         <tags>Telligent utility</tags>
     </metadata>
     <files>
-        <file src="bin\**\FourRoads.TelligentCommunity.PWAFeatures.dll" target="lib\net47" exclude="*Tests*" />
+        <file src="bin\**\FourRoads.TelligentCommunity.PWAFeatures.dll" target="lib\net462" exclude="*Tests*" />
     </files>
 </package>
