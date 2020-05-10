@@ -6,6 +6,7 @@
       #set($appleMeta = "$appleMeta<meta name='apple-mobile-web-app-status-bar-style' content='black'>")
       #set($appleMeta = "$appleMeta<meta name='apple-mobile-web-app-title' content='$core_v2_configuration.SiteName'>")
       #set($appleMeta = "$appleMeta<link rel='apple-touch-icon' href='$core_v2_configuration.SiteLogoUrl'>")
+      #set($appleMeta = "$appleMeta<meta name='theme-color' content='#2196f3'>")
       
       $fr_pwa_features.RegisterPwaMeta($appleMeta)
       
@@ -20,12 +21,40 @@
         <script src='https://www.gstatic.com/firebasejs/7.14.2/firebase-messaging.js'></script>
       #end
       
+      <div id="$core_v2_widget.UniqueId('install-banner')" style="font-size:1.2em;display:none;position:fixed;bottom:0px;padding:20px;background-color:#fff;width:100%;z-index:100; border:solid 1px #fefefe; background-color:#ccc;">
+        <a class="install-pwa">$core_v2_language.FormatString($core_v2_language.GetResource('AddToHome'), $core_v2_configuration.SiteName)</a>
+        <a class="hide-prompt" style="float:right">$core_v2_language.GetResource('NoThanks')</a>
+      </div>
       <script>
       
           if ('serviceWorker' in navigator) {
+              
+              if (window.localStorage.getItem('nopwa') !== '1'){
+                window.addEventListener('beforeinstallprompt', function(e){
+                    var addDiv = jQuery('#$core_v2_widget.UniqueId("install-banner")');
+                    e.preventDefault();
+                    addDiv.fadeIn();
+                    
+                    jQuery('.hide-prompt', addDiv).click(function(e){
+                      addDiv.fadeOut();
+                      window.localStorage.setItem('nopwa' , '1');
+                     });
+                    
+                    deferredPrompt = e;
+                    jQuery('.install-pwa', addDiv).click(function(e){
+                      addDiv.fadeOut();
+                      deferredPrompt.prompt();
+                      deferredPrompt.userChoice.then((choiceResult) => {
+                          deferredPrompt = null;
+                          window.localStorage.setItem('nopwa' , '1');
+                        });
+                    });
+                });
+              }
+              
+
               #if ($core_v2_user.IsRegistered($core_v2_user.Accessing.Id))
-    
-                function sendTokenToServer(token){
+              function sendTokenToServer(token){
                    if (!isTokenSentToServer()) {
                         jQuery.telligent.evolution.post({
 					                url: jQuery.telligent.evolution.site.getBaseUrl() + 'api.ashx/v2/user/firebase_token.json',
@@ -91,11 +120,6 @@
 
               };
       
-              jQuery.telligent.evolution.messaging.subscribe('user.logout', function() {
-                  console.log('logout deleting token');
-
-              });
-
               function deleteToken() {
                 console.log('request deleting token');
                 const messaging = firebase.messaging();
@@ -129,8 +153,6 @@
                       firebase.initializeApp(firebaseConfig);
 
                       firebase.messaging().useServiceWorker(registration);
-
-                      console.log('$core_v2_urls.Current');
                       
                       #if ($core_v2_urls.Current != "LogOut")
                           register();
@@ -146,6 +168,9 @@
           
         </script>
       #end
+      <noscript>
+         <div>This site requires Javascript to be enabled to function correctly</div>
+      </noscript>
 			]]></contentScript>
     <headerScript><![CDATA[
 
@@ -160,6 +185,8 @@
         <resource name="Widget_Title">4 Roads - PWA Features Footer Control</resource>
         <resource name="Widget_Description">Used for adding PWA Features to Telligent.</resource>
         <resource name="Options">Options</resource>
+        <resource name="NoThanks">No Thanks</resource>
+        <resource name="AddToHome">Add {0} To Home Screen?</resource>
       </language>
     </languageResources>
   </scriptedContentFragment>

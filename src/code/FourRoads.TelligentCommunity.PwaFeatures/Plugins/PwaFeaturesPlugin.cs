@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using FirebaseAdmin;
+using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.PwaFeatures.DataProvider;
@@ -143,6 +144,17 @@ namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
 
                         if (registrationTokens.Count > 0)
                         {
+                            //foreach (var token in registrationTokens)
+                            //{
+                            //    //Test the tokens, revoke any broken ones
+                            //    FirebaseToken decodedToken = Task.Run(() => FirebaseMessaging.DefaultInstance.(token)).Result;
+
+                            //    if (decodedToken == null || decodedToken.Uid == "")
+                            //    {
+                            //        _data.RevokeToken(user.Id.Value, token);
+                            //    }
+                            //}
+
                             // See documentation on defining a message payload.
                             var message = new MulticastMessage()
                             {

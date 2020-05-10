@@ -1,6 +1,6 @@
 $core_v2_page.SetContentType('application/json')
 {
-  "name": "$core_v2_configuration.SiteName Progressive Web App",
+  "name": "$core_v2_configuration.SiteName Web App",
   "short_name": "$core_v2_configuration.SiteName",
   #if ($context.FirebaseSenderId)
 	 "gcm_sender_id": "$context.FirebaseSenderId",
@@ -9,15 +9,21 @@ $core_v2_page.SetContentType('application/json')
 		"gcm"
 	], 
   #end
-  "description": "Extensions for Telligent to support PWA features",
+  "prefer_related_applications": false,
+  "description": "$core_v2_configuration.SiteName",
   "theme_color": "#2196f3",
   "background_color": "#2196f3",
   "display": "standalone", 
-  "start_url": "/",
+  "start_url": "$core_v2_urls.Home()",
   "icons": [
     {
-      "src": "$core_v2_ui.GetResizedImageUrl($core_v2_configuration.SiteLogoUrl, 192, 192, "%{OutputIsPersisted = 'true', ResizeMethod = 'ZoomAndCrop' }")",
+      "src": "$core_v2_ui.GetResizedImageUrl($core_v2_configuration.SiteLogoUrl, 192, 192, "%{OutputIsPersisted = 'true' , ResizeMethod = 'ZoomAndCrop'}")",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+	   {
+      "src": "$core_v2_ui.GetResizedImageUrl($core_v2_configuration.SiteLogoUrl, 512, 512, "%{OutputIsPersisted = 'true',  ResizeMethod = 'ZoomAndCrop' }")",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
