@@ -1,7 +1,9 @@
+<!DOCTYPE html>
 <html>
-  <head>
-  </head>
-  <body>
-  Offfline page
+<head>
+    $core_v2_page.AddLink('stylesheet', $core_v2_widget.GetExecutedFileUrl('style.less'), "%{ Position = 'AfterTheme' }")
+</head>
+  <body class="offline-page">
+  <h2>Sorry this site has very limited functionality when offline, please try later.</h2>
   </body>
-  </html>
+</html>

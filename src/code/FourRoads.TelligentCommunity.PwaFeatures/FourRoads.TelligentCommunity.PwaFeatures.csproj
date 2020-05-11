@@ -119,6 +119,9 @@
     <EmbeddedResource Include="Resources\Widgets\CustomUrls\offline.vm" />
     <None Include="FourRoads.TelligentCommunity.PwaFeatures.nuspec" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\Widgets\CustomUrls\style.less">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\PWAFeatures\widget.xml">
@@ -144,6 +147,11 @@
       <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
       <Name>FourRoads.Common.TelligentCommunity</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\PWAFeatures\style.less">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
