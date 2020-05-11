@@ -2,6 +2,8 @@
   <scriptedContentFragment name="${resource:Widget_Title}" cssClass="pwa" description="${resource:Widget_Description}" instanceIdentifier="40f571f3d5e2431b9c10cc87340da788" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" provider="77ff006373644dc29aa39293e4ed8aed">
     <contentScript>
       <![CDATA[
+      $core_v2_page.AddLink('stylesheet', $core_v2_widget.GetExecutedFileUrl('style.less'), "%{ Position = 'AfterTheme' }")
+
       #set($appleMeta = "<meta name='apple-mobile-web-app-capable' content='yes'>")
       #set($appleMeta = "$appleMeta<meta name='apple-mobile-web-app-status-bar-style' content='black'>")
       #set($appleMeta = "$appleMeta<meta name='apple-mobile-web-app-title' content='$core_v2_configuration.SiteName'>")
@@ -21,9 +23,9 @@
         <script src='https://www.gstatic.com/firebasejs/7.14.2/firebase-messaging.js'></script>
       #end
       
-      <div id="$core_v2_widget.UniqueId('install-banner')" style="font-size:1.2em;display:none;position:fixed;bottom:0px;padding:20px;background-color:#fff;width:100%;z-index:100; border:solid 1px #fefefe; background-color:#ccc;">
-        <a class="install-pwa">$core_v2_language.FormatString($core_v2_language.GetResource('AddToHome'), $core_v2_configuration.SiteName)</a>
-        <a class="hide-prompt" style="float:right">$core_v2_language.GetResource('NoThanks')</a>
+      <div class="pwa-banner" id="$core_v2_widget.UniqueId('install-banner')" style="">
+        <a class="pwa-install">$core_v2_language.FormatString($core_v2_language.GetResource('AddToHome'), $core_v2_configuration.SiteName)</a>
+        <a class="pwa-hide-prompt">$core_v2_language.GetResource('NoThanks')</a>
       </div>
       <script>
       
@@ -35,13 +37,13 @@
                     e.preventDefault();
                     addDiv.fadeIn();
                     
-                    jQuery('.hide-prompt', addDiv).click(function(e){
+                    jQuery('.pwa-hide-prompt', addDiv).click(function(e){
                       addDiv.fadeOut();
                       window.localStorage.setItem('nopwa' , '1');
                      });
                     
                     deferredPrompt = e;
-                    jQuery('.install-pwa', addDiv).click(function(e){
+                    jQuery('.pwa-install', addDiv).click(function(e){
                       addDiv.fadeOut();
                       deferredPrompt.prompt();
                       deferredPrompt.userChoice.then((choiceResult) => {
