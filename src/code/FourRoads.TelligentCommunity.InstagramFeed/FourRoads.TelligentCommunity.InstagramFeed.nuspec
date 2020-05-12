@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>FourRoads.TelligentCommunity.InstagramFeed</id>
+        <version>$version$</version>
+        <title>$title$</title>
+        <authors>$author$</authors>
+        <owners>$author$</owners>
+        <licenseUrl>http://www.4-roads.com/OpenLicense</licenseUrl>
+        <projectUrl>https://github.com/4-Roads/FourRoads.TelligentCommunity</projectUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <copyright>Copyright © 4 Roads LTD Ltd 2012-2018</copyright>
+        <description>$description$</description>
+        <tags>Telligent utility</tags>
+        <dependencies>
+            <dependency id="FourRoads.Common" version="5.2.29" />
+			<dependency id="FourRoads.TelligentCommunity101.Common" version="17.3.97" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="bin\**\FourRoads.TelligentCommunity.InstagramFeed.dll" target="lib\net462" exclude="*Tests*" />
+    </files>
+</package>
