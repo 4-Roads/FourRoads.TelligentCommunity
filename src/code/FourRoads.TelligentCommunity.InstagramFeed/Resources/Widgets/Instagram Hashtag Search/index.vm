@@ -46,27 +46,28 @@
 <div class="media-container">
     #foreach($media in $mediaList)
         #set($imageUrl = false)
-        #set($shortCode = false)
-        #set($shortCode = $media.ShortCode)
-        <div class="col-$col media-tiles">
-            <div class="clearfix js-same-height">
-                #if($shortCode)
-                    <a href="https://www.instagram.com/p/$shortCode">
-                #end
-                    #set($imageUrl = $media.MediaUrl)
-
-                    #if ($imageUrl && $imageUrl!='')
-                        $core_v2_ui.GetResizedImageHtml($media.MediaUrl, $width, $height, "%{OutputIsPersisted = 'true', ResizeMethod = 'ZoomAndCrop'}")
-                    #else
-                        #if (!$imageUrl || $imageUrl=='')
-                            #set ($imageUrl="/cfs-file/__key/communityserver-components-sitefiles/img/placeholder.jpg")                  
-                            <img class="media-image" src="$imageUrl" alt="$media.Caption"/>
-                        #end     
-                    #end    
-                #if($shortCode)
-                    </a>
-                #end
+        #set($permalink = false)
+        #set($permalink = $media.Permalink)
+        #if($media.MediaType == 'IMAGE')
+            <div class="col-$col media-tiles">
+                <div class="clearfix js-same-height">
+                    #if($permalink)
+                        <a href="$permalink" target="_blank">
+                    #end
+                        #set($imageUrl = $media.MediaUrl)
+                        #if ($imageUrl && $imageUrl!='')
+                            $core_v2_ui.GetResizedImageHtml($media.MediaUrl, $width, $height, "%{OutputIsPersisted = 'true', ResizeMethod = 'ZoomAndCrop'}")
+                        #else
+                            #if (!$imageUrl || $imageUrl=='')
+                                #set ($placeholder="/cfs-file/__key/communityserver-components-sitefiles/img/placeholder.jpg")                  
+                                <img class="media-image" src="$placeholder" alt="$media.Caption" style="width: $widthpx;height:$widthpx;"/>
+                            #end     
+                        #end    
+                    #if($shortCode)
+                        </a>
+                    #end
+                </div>
             </div>
-        </div>
+        #end
     #end
 </div>

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace FourRoads.TelligentCommunity.InstagramFeed.Models
 {
@@ -21,5 +22,25 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Models
 
         [JsonProperty("like_count")]
         public int LikeCount { get; set; }
+
+        [JsonProperty("timestamp")]
+        public string TimeStamp { get; set; }
+
+        [JsonProperty("permalink")]
+        public string Permalink { get; set; }
+
+        public DateTime Date 
+        { 
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(TimeStamp) && DateTime.TryParse(TimeStamp, out DateTime date))
+                {
+                    return date;
+                }
+
+                return DateTime.UtcNow;
+            }
+
+        }
     }
 }

@@ -63,7 +63,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
                     var hashTagNodeId = GetHashTagNodeFromCache(account, request.AccessToken, request.Query);
                     var edge = request.MostRecent ? "recent_media" : "top_media";
 
-                    var req = $"/{hashTagNodeId}/{edge}?user_id={account}&access_token={request.AccessToken}&fields=caption,comments_count,id,like_count,media_type,media_url";
+                    var req = $"/{hashTagNodeId}/{edge}?user_id={account}&access_token={request.AccessToken}&fields=caption,comments_count,id,like_count,media_type,media_url,timestamp,permalink";
                     if (request.Limit.HasValue)
                     {
                         req += $"&limit={request.Limit}";
@@ -71,7 +71,15 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
 
                     var response = SendGetRequest<MediaResponse<Media>>(req);
 
-                    return response?.Data;
+                    if(response != null)
+                    {
+                        if (request.MostRecent)
+                        {
+                            return response.Data.OrderByDescending(d => d.Date).ToList();
+                        }
+
+                        return response.Data;
+                    }
                 }
             }
 
