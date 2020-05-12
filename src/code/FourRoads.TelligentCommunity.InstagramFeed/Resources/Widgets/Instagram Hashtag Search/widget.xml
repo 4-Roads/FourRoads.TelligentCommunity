@@ -1,0 +1,46 @@
+<scriptedContentFragments>
+	<scriptedContentFragment name="${resource:Core_IGHashTagSearch_Name}" version="10.1.8.10498" description="${resource:Core_IGHashTagSearch_Desription}" instanceIdentifier="d49a2ec4e16e49dd956c242b4a66213f" theme="" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" cssClass="fourroads-ig-hashtag-search" provider="340f00f88a92449ab952aa6e15a44620" >
+        <contentScript>
+            <![CDATA[$core_v2_widget.ExecuteFile('index.vm')]]>
+        </contentScript>
+		<headerScript>
+            <![CDATA[$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Core_IGHashTagSearch_Name}'))]]></headerScript>
+		<configuration>
+			<![CDATA[
+				<propertyGroup id="options" resourceName="Options">
+					<property id="fragmentHeader" resourceName="CF_Title" dataType="string" defaultValue="${resource:Core_IGHashTagSearch_Name}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Platform" />
+					<property id="pageId" resourceName="CF_FbPageId" dataType="string" defaultValue="" />
+					<property id="accessToken" resourceName="CF_FbGraphAccessToken" dataType="string" defaultValue="" />
+                    <property id="query" resourceName="CF_Query" dataType="string" defaultValue="" />
+                    <property id="limit" resourceName="CF_Limit" dataType="int" defaultValue="6">
+						<propertyRule type="Telligent.Evolution.Controls.PropertyRules.MinMaxValueRule, Telligent.Evolution.Platform" minValue="1" maxValue="100" />
+					</property>
+                    <property id="columns" resourceName="CF_Columns" dataType="int" defaultValue="3">
+						<propertyRule type="Telligent.Evolution.Controls.PropertyRules.MinMaxValueRule, Telligent.Evolution.Platform" minValue="2" maxValue="4" />
+					</property>
+                    <property id="edge" resourceName="CF_SortMode" defaultValue="top_media">
+					  <propertyValue value="top_media" resourceName="CF_SortMode_Top" />
+					  <propertyValue value="recent_media" resourceName="CF_SortMode_Recent" />
+					</property>
+				</propertyGroup>
+			]]>
+        </configuration>
+		<languageResources>
+            <language key="en-us">
+				<resource name="CF_Title">Widget Title</resource>
+				<resource name="Core_IGHashTagSearch_Desription">Displays Instagram media by hashtag</resource>
+				<resource name="Core_IGHashTagSearch_Name">4 Roads - Instagram Hashtag Search</resource>
+                <resource name="CF_FbGraphAccessToken">Access Token</resource>
+                <resource name="CF_FbPageId">Facebook Page Id</resource>
+                <resource name="CF_Query">Hashtag</resource>
+                <resource name="CF_Limit">Result limit</resource>
+                <resource name="CF_Columns">Columns per row (Min 2, Max 4)</resource>
+                <resource name="CF_SortMode">Sort by</resource>
+                <resource name="CF_SortMode_Top">Top Media</resource>
+                <resource name="CF_SortMode_Recent">Recent Media</resource>
+			</language>
+        </languageResources>
+		<files>
+		</files>
+	</scriptedContentFragment>
+</scriptedContentFragments>

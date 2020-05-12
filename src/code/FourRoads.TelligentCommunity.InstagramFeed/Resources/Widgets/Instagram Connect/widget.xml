@@ -1,0 +1,33 @@
+<scriptedContentFragments>
+	<scriptedContentFragment name="${resource:Core_FacebookLogin_Name}" version="10.1.8.10498" description="${resource:Core_FacebookLogin_Description}" instanceIdentifier="e88147a7f5fb4cb1b3f1cbda84355a26" theme="" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" cssClass="fr-instagram-connect" provider="340f00f88a92449ab952aa6e15a44620" >
+		<contentScript>
+			<![CDATA[$core_v2_widget.ExecuteFile('index.vm')]]>
+        </contentScript>
+		<headerScript>
+            <![CDATA[$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Core_FacebookLogin_Name}'))]]>
+        </headerScript>
+		<configuration>
+			<![CDATA[
+				<propertyGroup id="options" resourceName="Options">
+					<property id="fragmentHeader" resourceName="CF_Title" dataType="string" defaultValue="${resource:Core_FacebookLogin_Name}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Platform" />
+                    <property id="appId" text="${resource:FacebookAppId}" dataType="string" defaultValue="" />
+				</propertyGroup>
+			]]>
+        </configuration>
+		<languageResources>
+            <language key="en-us">
+				<resource name="CF_Title">Widget Title</resource>
+				<resource name="Core_FacebookLogin_Description">Log in to connect Facebook App to Instagram Business account</resource>
+				<resource name="Core_FacebookLogin_Name">4 Roads - Instagram Connect</resource>
+                <resource name="PleaseLogIn">Please log into this webpage.</resource>
+                <resource name="LoggedIn">Thanks for logging in, </resource>
+                <resource name="MissingAppId">Facebook App Id unknown. Please contact your administrator.</resource>
+                <resource name="PageId">Page Id</resource>
+                <resource name="PageName">Page Name</resource>
+                <resource name="AccessToken">Access Token</resource>
+            </language>
+        </languageResources>
+		<files>
+		</files>
+	</scriptedContentFragment>
+</scriptedContentFragments>

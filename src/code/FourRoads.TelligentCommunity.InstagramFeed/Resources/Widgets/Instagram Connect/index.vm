@@ -1,0 +1,80 @@
+#set($appId = false)
+#set($appId = $frcommon_v1_instagramFeed.GetAppId())
+#set($status = $core_v2_widget.UniqueId('status'))
+#set($pages = $core_v2_widget.UniqueId('pages'))
+#set($loginDisplay = $core_v2_widget.UniqueId('fb-login-display'))
+
+<style type='text/css'>
+    .fr-instagram-connect {
+        max-width: 1140px;
+        margin: auto;
+    }
+
+    .fr-instagram-connect .pages-list {
+      margin-top: 2rem;
+    }
+    
+    .fr-instagram-connect table {
+      width: 100%;
+    }
+
+    .fr-instagram-connect th, td  {
+        border-bottom: 1px solid #ddd;
+        width: 33%;
+        overflow-wrap: anywhere;
+        text-align: center;
+    }    
+</style>
+
+<div class='fr-instagram-feed'>
+    <div id="$loginDisplay">
+        <fb:login-button scope="instagram_basic,pages_show_list" onlogin="jQuery.fourroads.widgets.instagramFeed.checkLoginState();">
+        </fb:login-button>
+    </div>
+
+    <div id="$status">
+    </div>
+
+    <div id="$pages" class="pages-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>$core_v2_language.GetResource('PageId')</th>
+                    <th>$core_v2_language.GetResource('PageName')</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+#registerEndOfPageHtml('fourroads.widgets.instagramFeed')
+  <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('ui.js'))"></script>
+#end
+#registerEndOfPageHtml()
+  <script type="text/javascript">
+       (function(d, s, id) {                      // Load the SDK asynchronously
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+
+      jQuery(function(){
+         jQuery.fourroads.widgets.instagramFeed.register({
+               appId: '$appId',
+               selectors : {
+                  status: '#$core_v2_encoding.JavascriptEncode($status)',
+                  pages: '#$core_v2_encoding.JavascriptEncode($pages)',
+                  loginDisplay: '#$loginDisplay'
+               },
+               resources : {
+                  missingAppId: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('MissingAppId'))',
+                  pleaseLogIn: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('PleaseLogIn'))',
+                  loggedIn: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('LoggedIn'))'
+               }
+         });
+      });
+   </script>
+#end

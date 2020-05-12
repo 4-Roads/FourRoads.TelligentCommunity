@@ -1,0 +1,72 @@
+#set($pageId = $core_v2_widget.GetStringValue('pageId', ''))
+#set($accessToken = $core_v2_widget.GetStringValue('accessToken', ''))
+#set($query = $core_v2_widget.GetStringValue('query', ''))
+#set($limit = $core_v2_widget.GetIntValue('limit', 6))
+#set($columns = $core_v2_widget.GetIntValue('columns', 3))
+#set($edge = $core_v2_widget.GetStringValue('edge', 'top_media'))
+
+#set($width=255)
+#set($height=255)
+#set($showRecentFirst = false)
+#if($edge == 'recent_media')
+    #set($showRecentFirst = true)
+#end
+
+#if(($columns % 2) == 0)
+    #set($col = 6)
+    #set($width=540)
+    #set($height=540)
+#end
+
+#if(($columns % 3) == 0 || ($columns % 5) == 0 || ($columns % 6) == 0)
+    #set($col = 4)
+    #set($width=350)
+    #set($height=350)
+#end
+
+#if(($columns % 4) == 0)
+    #set($col = 3)
+    #set($width=255)
+    #set($height=255)
+#end
+
+<style type='text/css'>
+    .fourroads-ig-hashtag-search .media-container{
+        max-width: 1140px;
+        margin: auto;
+    }
+
+    .fourroads-ig-hashtag-search .media-tiles{
+        padding: 10px;
+    }
+</style>
+
+#set($mediaList = false)
+#set($mediaList = $frcommon_v1_instagramFeed.GetMediaByHashtag($pageId, $accessToken, $query, $showRecentFirst, $limit))
+<div class="media-container">
+    #foreach($media in $mediaList)
+        #set($imageUrl = false)
+        #set($shortCode = false)
+        #set($shortCode = $media.ShortCode)
+        <div class="col-$col media-tiles">
+            <div class="clearfix js-same-height">
+                #if($shortCode)
+                    <a href="https://www.instagram.com/p/$shortCode">
+                #end
+                    #set($imageUrl = $media.MediaUrl)
+
+                    #if ($imageUrl && $imageUrl!='')
+                        $core_v2_ui.GetResizedImageHtml($media.MediaUrl, $width, $height, "%{OutputIsPersisted = 'true', ResizeMethod = 'ZoomAndCrop'}")
+                    #else
+                        #if (!$imageUrl || $imageUrl=='')
+                            #set ($imageUrl="/cfs-file/__key/communityserver-components-sitefiles/img/placeholder.jpg")                  
+                            <img class="media-image" src="$imageUrl" alt="$media.Caption"/>
+                        #end     
+                    #end    
+                #if($shortCode)
+                    </a>
+                #end
+            </div>
+        </div>
+    #end
+</div>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.RenderingHelper", "code\FourRoads.TelligentCommunity.RenderingHelper\FourRoads.TelligentCommunity.RenderingHelper.csproj", "{20BC9498-6E57-4F6E-BB23-38BFEF110161}"
 EndProject
@@ -98,6 +98,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.AmazonS3", "code\FourRoads.TelligentCommunity.AmazonS3\FourRoads.TelligentCommunity.AmazonS3.csproj", "{185591A1-4068-47C2-95B5-C63172787744}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.ExtendedSearch", "code\FourRoads.TelligentCommunity.ExtendedSearch\FourRoads.TelligentCommunity.ExtendedSearch.csproj", "{3DD12B46-736E-4252-B164-109159AC44DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.InstagramFeed", "code\FourRoads.TelligentCommunity.InstagramFeed\FourRoads.TelligentCommunity.InstagramFeed.csproj", "{F292D49A-C0C9-4811-911C-C1A2A755FE05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -387,6 +389,18 @@ Global
 		{3DD12B46-736E-4252-B164-109159AC44DC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3DD12B46-736E-4252-B164-109159AC44DC}.Release|x86.ActiveCfg = Release|Any CPU
 		{3DD12B46-736E-4252-B164-109159AC44DC}.Release|x86.Build.0 = Release|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Debug|x86.Build.0 = Debug|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release Output|Any CPU.Build.0 = Release|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release Output|x86.ActiveCfg = Release|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release Output|x86.Build.0 = Release|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release|x86.ActiveCfg = Release|Any CPU
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -419,9 +433,10 @@ Global
 		{9DFA3DB2-CD6E-471D-B3B6-FFE5EF3E4A05} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{185591A1-4068-47C2-95B5-C63172787744} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{3DD12B46-736E-4252-B164-109159AC44DC} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
+		{F292D49A-C0C9-4811-911C-C1A2A755FE05} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {3A9DD161-2AAF-4401-A077-06C1133BA207}
 		VisualSVNWorkingCopyRoot = ..
+		SolutionGuid = {3A9DD161-2AAF-4401-A077-06C1133BA207}
 	EndGlobalSection
 EndGlobal
