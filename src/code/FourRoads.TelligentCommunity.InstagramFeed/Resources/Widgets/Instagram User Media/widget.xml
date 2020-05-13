@@ -1,0 +1,37 @@
+<scriptedContentFragments>
+	<scriptedContentFragment name="${resource:Core_IGUserMedia_Name}" version="10.1.8.10498" description="${resource:Core_IGUserMedia_Desription}" instanceIdentifier="a4f3ddf41bbe46fc9e502bd2c7f7a599" theme="" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" cssClass="fourroads-ig-usermedia" provider="340f00f88a92449ab952aa6e15a44620" >
+        <contentScript>
+            <![CDATA[$core_v2_widget.ExecuteFile('index.vm')]]>
+        </contentScript>
+		<headerScript>
+            <![CDATA[$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Core_IGUserMedia_Name}'))]]></headerScript>
+		<configuration>
+			<![CDATA[
+				<propertyGroup id="options" resourceName="Options">
+					<property id="fragmentHeader" resourceName="CF_Title" dataType="string" defaultValue="${resource:Core_IGHashTagSearch_Name}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Platform" />
+					<property id="pageId" resourceName="CF_FbPageId" dataType="string" defaultValue="" />
+					<property id="accessToken" resourceName="CF_FbGraphAccessToken" dataType="string" defaultValue="" />
+                    <property id="limit" resourceName="CF_Limit" dataType="int" defaultValue="6">
+						<propertyRule type="Telligent.Evolution.Controls.PropertyRules.MinMaxValueRule, Telligent.Evolution.Platform" minValue="1" maxValue="50" />
+					</property>
+                    <property id="columns" resourceName="CF_Columns" dataType="int" defaultValue="3">
+						<propertyRule type="Telligent.Evolution.Controls.PropertyRules.MinMaxValueRule, Telligent.Evolution.Platform" minValue="2" maxValue="4" />
+					</property>
+				</propertyGroup>
+			]]>
+        </configuration>
+		<languageResources>
+            <language key="en-us">
+				<resource name="CF_Title">Widget Title</resource>
+				<resource name="Core_IGUserMedia_Desription">Displays Instagram media by user</resource>
+				<resource name="Core_IGUserMedia_Name">4 Roads - Instagram User Media</resource>
+                <resource name="CF_FbGraphAccessToken">Access Token</resource>
+                <resource name="CF_FbPageId">Facebook Page Id</resource>
+                <resource name="CF_Limit">Result limit (max. 50)</resource>
+                <resource name="CF_Columns">Columns per row (min 2, max 4)</resource>
+			</language>
+        </languageResources>
+		<files>
+		</files>
+	</scriptedContentFragment>
+</scriptedContentFragments>

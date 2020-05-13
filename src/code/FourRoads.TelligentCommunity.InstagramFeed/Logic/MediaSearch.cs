@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
@@ -21,7 +22,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
 
         private string InstagramGraphApiBaseUrl = "https://graph.facebook.com/v7.0";
         private static readonly string _pageName = "instagram-feed-setup";
-        private static readonly string _defaultPageLayout = "<contentFragmentPage pageName=\"instagram-feed\" isCustom=\"false\" layout=\"Content\">\r\n<regions>\r\n<region regionName=\"Content\">\r\n<contentFragments>\r\n<contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::e88147a7f5fb4cb1b3f1cbda84355a26\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\"  configuration=\"\"/><contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::d49a2ec4e16e49dd956c242b4a66213f\" showHeader=\"False\" cssClassAddition=\"no-wrapper with-spacing responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n</contentFragments>\r\n</region>\r\n</regions>\r\n<contentFragmentTabs />\r\n</contentFragmentPage>";
+        private static readonly string _defaultPageLayout = "<contentFragmentPage pageName=\"instagram-feed-setup\" isCustom=\"false\" layout=\"Content\">\r\n<regions>\r\n<region regionName=\"Content\">\r\n<contentFragments>\r\n<contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::e88147a7f5fb4cb1b3f1cbda84355a26\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\"  configuration=\"\"/><contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::d49a2ec4e16e49dd956c242b4a66213f\" showHeader=\"False\" cssClassAddition=\"no-wrapper with-spacing responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n<contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::a4f3ddf41bbe46fc9e502bd2c7f7a599\" showHeader=\"False\" cssClassAddition=\"no-wrapper with-spacing responsive-1\" isLocked=\"False\" configuration=\"\" /></contentFragments>\r\n</region>\r\n</regions>\r\n<contentFragmentTabs />\r\n</contentFragmentPage>";
 
         public MediaSearch(IUsers usersService, ICache cache)
         {
@@ -61,29 +62,21 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
                 if (!string.IsNullOrWhiteSpace(account))
                 {
                     var hashTagNodeId = GetHashTagNodeFromCache(account, request.AccessToken, request.Query);
-                    var edge = request.MostRecent ? "recent_media" : "top_media";
 
-                    var req = $"/{hashTagNodeId}/{edge}?user_id={account}&access_token={request.AccessToken}&fields=caption,comments_count,id,like_count,media_type,media_url,timestamp,permalink";
-                    if (request.Limit.HasValue)
+                    if (!string.IsNullOrWhiteSpace(hashTagNodeId))
                     {
-                        req += $"&limit={request.Limit}";
-                    }
+                        var edge = request.MostRecent ? "recent_media" : "top_media";
 
-                    var response = SendGetRequest<MediaResponse<Media>>(req);
+                        var req = $"/{hashTagNodeId}/{edge}?user_id={account}&access_token={request.AccessToken}&fields=caption,comments_count,id,like_count,media_type,media_url,timestamp,permalink";
 
-                    if(response != null)
-                    {
-                        if (request.MostRecent)
-                        {
-                            return response.Data.OrderByDescending(d => d.Date).ToList();
-                        }
+                        var response = GetByMediaType(req, "IMAGE", request.Limit, request.MostRecent);
 
-                        return response.Data;
+                        return response;
                     }
                 }
             }
 
-            return new List<Media>();
+            return null;
         }
 
         public List<Media> GetUserMedia(BasePageSearchRequest pageRequest)
@@ -94,20 +87,39 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
 
                 if (!string.IsNullOrWhiteSpace(account))
                 {
-                    var req = $"/{account}/media?user_id={account}&access_token={pageRequest.AccessToken}&fields=caption,comments_count,id,like_count,media_type,media_url,shortcode,username";
+                    var req = $"/{account}/media?user_id={account}&access_token={pageRequest.AccessToken}&fields=caption,comments_count,id,like_count,media_type,media_url,shortcode,username,timestamp,permalink";
 
-                    if(pageRequest.Limit.HasValue)
-                    {
-                        req += $"&limit={pageRequest.Limit}";
-                    }
-
-                    var response = SendGetRequest<MediaResponse<Media>>(req);
-
-                    return response?.Data;
+                    var response = GetByMediaType(req, "IMAGE", pageRequest.Limit, true);
+                    
+                    return response;
                 }
             }
 
-            return new List<Media>();
+            return null;
+        }
+
+        private List<Media> GetByMediaType(string endpoint, string mediaType, int? limit, bool sortByDate)
+        {
+            var response = SendGetRequest<MediaResponse<Media>>(endpoint);
+
+            if (response != null)
+            {
+                var filteredResponse = response.Data.Where(d => d.MediaType.Equals(mediaType, StringComparison.InvariantCultureIgnoreCase));
+
+                if (limit.HasValue)
+                {
+                    filteredResponse = filteredResponse.Take(limit.Value);
+                }
+
+                if (sortByDate)
+                {
+                    return filteredResponse.OrderByDescending(d => d.Date).ToList();
+                }
+
+                return filteredResponse.ToList();
+            }
+
+            return null;
         }
 
         private string GetHashTagNodeFromCache(string businessAccountId, string accessToken, string query)
@@ -133,7 +145,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
 
         private string GetHashTagNode(string businessAccountId, string accessToken, string query)
         {
-            var request = $"/ig_hashtag_search?user_id={businessAccountId}&access_token={accessToken}&q={query}";
+            var request = $"/ig_hashtag_search?user_id={businessAccountId}&access_token={accessToken}&q={HttpUtility.UrlEncode(query)}";
             var response = SendGetRequest<MediaResponse<BasePageSearchResponse>>(request);
 
             return response?.Data?.FirstOrDefault()?.Id;
@@ -208,6 +220,8 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
             }
             catch(Exception ex)
             {
+                Apis.Get<IEventLog>().Write($"Instagram Graph API HttpClient Failed : {ex.Message}, {ex.StackTrace}", new EventLogEntryWriteOptions());
+                
                 throw new Exception($"Instagram Graph API HttpClient Failed : {ex.Message}", ex);
             }
 
