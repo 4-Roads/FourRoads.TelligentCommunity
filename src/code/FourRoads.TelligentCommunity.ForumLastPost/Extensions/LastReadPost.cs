@@ -79,12 +79,9 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
         {
             User user = Apis.Get<IUsers>().AccessingUser;
 
-            if (Services.Get<IPluginManager>().IsEnabled(this))
+            if (!user.IsSystemAccount.GetValueOrDefault(false) && user.Id.HasValue && e.RenderTarget == "Web")
             {
-                if (!user.IsSystemAccount.GetValueOrDefault(false) && user.Id.HasValue)
-                {
-                    Injector.Get<ILastReadPostLogic>().UpdateLastReadPost(e.Application.ApplicationId, user.Id.Value, e.ThreadId.GetValueOrDefault(0), e.ForumId.GetValueOrDefault(0), e.Id.GetValueOrDefault(0), e.ContentId, e.Date.GetValueOrDefault(DateTime.MinValue));
-                }
+                Injector.Get<ILastReadPostLogic>().UpdateLastReadPost(e.Application.ApplicationId, user.Id.Value, e.ThreadId.GetValueOrDefault(0), e.ForumId.GetValueOrDefault(0), e.Id.GetValueOrDefault(0), e.ContentId, e.Date.GetValueOrDefault(DateTime.MinValue));
             }
         }
 
