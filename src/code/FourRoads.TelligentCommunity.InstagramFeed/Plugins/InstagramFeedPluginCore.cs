@@ -55,6 +55,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Plugins
 
         public IEnumerable<Type> Plugins => new[]
         {
+            typeof (DependencyInjectionPlugin),
             typeof (FactoryDefaultWidgetProviderInstaller),
             typeof (InstagramGraphExtension)
         };
