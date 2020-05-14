@@ -81,7 +81,7 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
 
             if (Services.Get<IPluginManager>().IsEnabled(this))
             {
-                if (!user.IsSystemAccount.GetValueOrDefault(false) && user.Id.HasValue)
+                if (!user.IsSystemAccount.GetValueOrDefault(false) && user.Id.HasValue && string.Compare(e.RenderTarget,"web", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     Injector.Get<ILastReadPostLogic>().UpdateLastReadPost(e.Application.ApplicationId, user.Id.Value, e.ThreadId.GetValueOrDefault(0), e.ForumId.GetValueOrDefault(0), e.Id.GetValueOrDefault(0), e.ContentId, e.Date.GetValueOrDefault(DateTime.MinValue));
                 }
