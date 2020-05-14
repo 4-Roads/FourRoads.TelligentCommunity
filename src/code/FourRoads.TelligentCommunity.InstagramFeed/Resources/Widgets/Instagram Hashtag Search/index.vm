@@ -63,7 +63,7 @@
                                 <img class="media-image" src="$placeholder" alt="$media.Caption" style="width: $widthpx;height:$widthpx;"/>
                             #end     
                         #end    
-                    #if($shortCode)
+                    #if($permalink)
                         </a>
                     #end
                 </div>
