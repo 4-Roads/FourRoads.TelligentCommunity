@@ -3,36 +3,20 @@
 #set($limit = $core_v2_widget.GetIntValue('limit', 6))
 #set($columns = $core_v2_widget.GetIntValue('columns', 3))
 
-#set($width=255)
-#set($height=255)
-
 #if(($columns % 2) == 0)
     #set($col = 6)
-    #set($width=540)
-    #set($height=540)
 #end
 
 #if(($columns % 3) == 0 || ($columns % 5) == 0 || ($columns % 6) == 0)
     #set($col = 4)
-    #set($width=350)
-    #set($height=350)
 #end
 
 #if(($columns % 4) == 0)
     #set($col = 3)
-    #set($width=255)
-    #set($height=255)
 #end
 
 <style type='text/css'>
-    .fourroads-ig-usermedia .media-container{
-        max-width: 1140px;
-        margin: auto;
-    }
-
-    .fourroads-ig-usermedia .media-tiles{
-        padding: 10px;
-    }
+	$core_v2_widget.ExecuteFile('required-style.css')
 </style>
 
 #set($mediaList = false)
@@ -44,19 +28,17 @@
         #set($permalink = $media.Permalink)
         #if($media.MediaType == 'IMAGE')
             <div class="col-$col media-tiles">
-                <div class="clearfix js-same-height">
+                <div class="clearfix">
                     #if($permalink)
                         <a href="$permalink" target="_blank">
                     #end
                         #set($imageUrl = $media.MediaUrl)
-                        #if ($imageUrl && $imageUrl!='')
-                            $core_v2_ui.GetResizedImageHtml($media.MediaUrl, $width, $height, "%{OutputIsPersisted = 'true', ResizeMethod = 'ZoomAndCrop'}")
-                        #else
-                            #if (!$imageUrl || $imageUrl=='')
-                                #set ($placeholder="/cfs-file/__key/communityserver-components-sitefiles/img/placeholder.jpg")                  
-                                <img class="media-image" src="$placeholder" alt="$media.Caption" style="width: $widthpx;height:$widthpx;"/>
-                            #end     
-                        #end    
+
+                        #if (!$imageUrl || $imageUrl=='')
+                            #set ($imageUrl="/cfs-file/__key/communityserver-components-sitefiles/img/placeholder.jpg")                  
+                        #end                             
+
+                        <div class="media-image" title="$media.Caption" style="background:url('$imageUrl') center center no-repeat;background-size:cover;"></div>
                     #if($permalink)
                         </a>
                     #end
