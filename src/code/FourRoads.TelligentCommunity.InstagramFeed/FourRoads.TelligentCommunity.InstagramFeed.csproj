@@ -97,9 +97,17 @@
     <None Include="packages.config" />
     <None Include="readme.md" />
     <EmbeddedResource Include="Resources\Widgets\Instagram User Media\index.vm" />
+    <EmbeddedResource Include="Resources\Widgets\Instagram User Media\required-style.less" />
+    <EmbeddedResource Include="Resources\Widgets\Instagram Hashtag Search\required-style.less" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\Instagram User Media\widget.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\Instagram User Media\required-style.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\Instagram Hashtag Search\required-style.css" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
