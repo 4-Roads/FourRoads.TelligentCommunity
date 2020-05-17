@@ -16,7 +16,7 @@
 						<propertyRule type="Telligent.Evolution.Controls.PropertyRules.MinMaxValueRule, Telligent.Evolution.Platform" minValue="1" maxValue="50" />
 					</property>
                     <property id="columns" resourceName="CF_Columns" dataType="int" defaultValue="3">
-						<propertyRule type="Telligent.Evolution.Controls.PropertyRules.MinMaxValueRule, Telligent.Evolution.Platform" minValue="2" maxValue="4" />
+						<propertyRule type="Telligent.Evolution.Controls.PropertyRules.MinMaxValueRule, Telligent.Evolution.Platform" minValue="2" maxValue="6" />
 					</property>
                     <property id="edge" resourceName="CF_SortMode" defaultValue="top_media">
 					  <propertyValue value="top_media" resourceName="CF_SortMode_Top" />
@@ -34,7 +34,7 @@
                 <resource name="CF_FbPageId">Facebook Page Id</resource>
                 <resource name="CF_Query">Hashtag</resource>
                 <resource name="CF_Limit">Result limit (max. 50)</resource>
-                <resource name="CF_Columns">Columns per row (min 2, max 4)</resource>
+                <resource name="CF_Columns">Columns per row (min 2, max 6)</resource>
                 <resource name="CF_SortMode">Sort by</resource>
                 <resource name="CF_SortMode_Top">Top Media</resource>
                 <resource name="CF_SortMode_Recent">Recent Media</resource>

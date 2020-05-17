@@ -11,6 +11,7 @@ using System.Web;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
+using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Urls.Routing;
 
 namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
@@ -27,12 +28,20 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
         public MediaSearch(IUsers usersService, ICache cache)
         {
             _usersService = usersService;
-            _cache = cache;
+            _cache = cache;   
         }
 
         public void Initialize()
         {
+        }
 
+        private int CacheMinutes
+        {
+            get
+            {
+                var plugin = PluginManager.GetSingleton<IInstagramFeedPlugin>();
+                return plugin.CacheMinutes;
+            }
         }
 
         public void RegisterUrls(IUrlController controller)
@@ -69,7 +78,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
 
                         var req = $"/{hashTagNodeId}/{edge}?user_id={account}&access_token={request.AccessToken}&fields=caption,comments_count,id,like_count,media_type,media_url,timestamp,permalink";
 
-                        var response = GetByMediaType(req, "IMAGE", request.Limit, request.MostRecent);
+                        var response = GetHashTagMediaFromCache(req, "IMAGE", request.Limit, request.MostRecent, hashTagNodeId);
 
                         return response;
                     }
@@ -89,7 +98,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
                 {
                     var req = $"/{account}/media?user_id={account}&access_token={pageRequest.AccessToken}&fields=caption,comments_count,id,like_count,media_type,media_url,shortcode,username,timestamp,permalink";
 
-                    var response = GetByMediaType(req, "IMAGE", pageRequest.Limit, true);
+                    var response = GetUserMediaFromCache(req, "IMAGE", pageRequest.Limit, true, account);
                     
                     return response;
                 }
@@ -98,25 +107,112 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
             return null;
         }
 
+        private List<Media> GetHashTagMediaFromCache(string request, string mediaType, int? limit, bool sortByDate, string hashTagNodeId)
+        {
+            var edge = (sortByDate) ? "most_recent" : "top_media";
+            var query = $"{hashTagNodeId}-{edge}";
+            return GetByMediaTypeFromCache(request, mediaType, limit, sortByDate, query);
+        }
+
+        private List<Media> GetUserMediaFromCache(string request, string mediaType, int? limit, bool sortByDate, string account)
+        {
+            return GetByMediaTypeFromCache(request, mediaType, limit, sortByDate, account);
+        }
+
+        private List<Media> GetByMediaTypeFromCache(string request, string mediaType, int? limit, bool sortByDate, string query)
+        {
+            var mediaFromParam = $"{mediaType}-{query}-{limit}";
+            string cacheKey = GetCacheKey("MEDIALIST", mediaFromParam);
+
+            if (CacheMinutes == 0)
+            {
+                _cache.Remove(cacheKey);
+            }
+
+            var mediaFromCache = _cache.Get<List<Media>>(cacheKey);
+
+            if (mediaFromCache != null)
+            {
+                return mediaFromCache;
+            }
+
+            var media = GetByMediaType(request, mediaType, limit, sortByDate);
+
+            if (media != null)
+            {
+                if (CacheMinutes > 0)
+                {
+                    var timeout = new TimeSpan(0, CacheMinutes, 0);
+                    _cache.Insert(GetCacheKey("MEDIALIST", mediaFromParam), media, timeout);
+                }
+            }
+
+            return media;
+        }
+
         private List<Media> GetByMediaType(string endpoint, string mediaType, int? limit, bool sortByDate)
         {
-            var response = SendGetRequest<MediaResponse<Media>>(endpoint);
+            var apiResponse = SendGetRequest<MediaResponse<Media>>(endpoint);
+            var result = new List<Media>();
 
-            if (response != null)
+            if (apiResponse != null)
             {
-                var filteredResponse = response.Data.Where(d => d.MediaType.Equals(mediaType, StringComparison.InvariantCultureIgnoreCase));
+                var filteredResponse = apiResponse.Data.Where(d => d.MediaType.Equals(mediaType, StringComparison.InvariantCultureIgnoreCase));
 
-                if (limit.HasValue)
+                if (sortByDate)
+                {
+                    filteredResponse = filteredResponse.OrderByDescending(d => d.Date);
+                }
+
+                if (limit.HasValue && filteredResponse.Count() > limit.Value)
                 {
                     filteredResponse = filteredResponse.Take(limit.Value);
+                    return filteredResponse.ToList();
+                }
+                else
+                {
+                    result.AddRange(filteredResponse);
+
+                    do
+                    {
+                        var mediaNeeded = limit.Value - result.Count();
+
+                        if (string.IsNullOrWhiteSpace(apiResponse?.Paging?.Next))
+                        {
+                            break;
+                        }
+
+                        apiResponse = SendGetRequestUrl<MediaResponse<Media>>(apiResponse.Paging.Next);
+
+                        if (apiResponse == null)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            var responseByMedia = apiResponse.Data.Where(d => d.MediaType.Equals(mediaType, StringComparison.InvariantCultureIgnoreCase));
+                            
+                            if (responseByMedia.Count() >= mediaNeeded)
+                            {
+                                if (sortByDate)
+                                {
+                                    responseByMedia = responseByMedia.OrderByDescending(d => d.Date).Take(mediaNeeded);
+                                }
+                            }
+
+                            result.AddRange(responseByMedia);
+
+                        }
+                    }
+                    while (result.Count() < limit.Value);
                 }
 
                 if (sortByDate)
                 {
-                    return filteredResponse.OrderByDescending(d => d.Date).ToList();
+                    return result.OrderByDescending(d => d.Date).ToList();
                 }
 
-                return filteredResponse.ToList();
+                return result;
             }
 
             return null;
@@ -137,6 +233,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
 
             if (!string.IsNullOrWhiteSpace(hashtagId))
             {
+                // always cache as this will rarely change
                 _cache.Insert(GetCacheKey($"{businessAccountId}-QUERY", query), hashtagId);
             }
 
@@ -166,6 +263,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
 
             if (!string.IsNullOrWhiteSpace(accountId))
             {
+                // always cache as this will rarely change
                 _cache.Insert(GetCacheKey("PAGE", pageId), accountId);
             }
 
@@ -185,13 +283,13 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
             return $"IG:{key}:{value}";
         }
 
-        private T SendGetRequest<T>(string endpoint)
+        private T SendGetRequestUrl<T>(string url)
         {
             try
             {
                 using (var req = new HttpClient())
                 {
-                    var task = req.GetAsync(InstagramGraphApiBaseUrl + endpoint);
+                    var task = req.GetAsync(url);
 
                     task.Wait();
 
@@ -218,14 +316,19 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Logic
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Apis.Get<IEventLog>().Write($"Instagram Graph API HttpClient Failed : {ex.Message}, {ex.StackTrace}", new EventLogEntryWriteOptions());
-                
+
                 throw new Exception($"Instagram Graph API HttpClient Failed : {ex.Message}", ex);
             }
 
             throw new Exception("HttpClient error");
+        }
+
+        private T SendGetRequest<T>(string endpoint)
+        {
+            return SendGetRequestUrl<T>(InstagramGraphApiBaseUrl + endpoint);
         }
     }
 }

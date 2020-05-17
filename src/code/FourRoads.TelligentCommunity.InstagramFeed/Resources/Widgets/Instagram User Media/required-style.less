@@ -6,31 +6,39 @@
         .media-tiles {
             padding: 10px;
 
-            &.col-3 {
-                width: 25%;
+            &.col-2 {
+                /* 6 columns per row */
+                width: 16.6%;
+            }
 
-                .media-image {
-                    overflow: hidden;
-                    width: 255px;
-                    height: 255px;
-                }
+            &.col-2-4 {
+                /* 5 columns per row */
+                width: 20%;
+            }
+
+            &.col-3 {
+                /* 4 columns per row */
+                width: 25%;
             }
 
             &.col-4 {
+                /* 3 columns per row */
                 width: 33.33%;
-
-                .media-image {
-                    width: 350px;
-                    height: 350px;
-                }
             }
 
             &.col-6 {
+                /* 2 columns per row */
                 width: 50%;
+            }
 
-                .media-image {
-                    width: 540px;
-                    height: 540px;
+            .media-image {
+                overflow: hidden;
+                width: 100%;
+
+                &:after {
+                    content: "";
+                    display: block;
+                    padding-bottom: 100%;
                 }
             }
         }
@@ -38,96 +46,18 @@
 }
 
 
-@media only screen and (max-width: 1366px) and (min-width: 1024px) {
+@media only screen and (max-width: 1366px) {
     .fourroads-ig-usermedia {
         .media-container {
             width: 100%;
-
-            .media-tiles {
-                &.col-3 {
-                    .media-image {
-                        width: 230px;
-                        height: 230px;
-                    }
-                }
-
-                &.col-4 {
-                    .media-image {
-                        width: 310px;
-                        height: 310px;
-                    }
-                }
-
-                &.col-6 {
-                    .media-image {
-                        width: 485px;
-                        height: 485px;
-                    }
-                }
-            }
         }
     }
 }
 
-@media only screen and (max-width: 1023px) and (min-width: 768px) {
-    .fourroads-ig-usermedia {
-        .media-container {
-            width: 100%;
-
-            .media-tiles {
-                &.col-3 {
-                    .media-image {
-                        width: 170px;
-                        height: 170px;
-                    }
-                }
-
-                &.col-4 {
-                    .media-image {
-                        width: 230px;
-                        height: 230px;
-                    }
-                }
-
-                &.col-6 {
-                    .media-image {
-                        width: 360px;
-                        height: 360px;
-                    }
-                }
-            }
-        }
-    }
-}
-
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 414px) {
     .fourroads-ig-usermedia .media-container .media-tiles {
-        &.col-3,
-        &.col-4,
-        &.col-6 {
+        &[class*=col-] {
             width: 100%;
-
-            .media-image {
-                width: 350px;
-                height: 350px;
-                margin: auto;
-            }
-        }
-    }
-}
-
-@media only screen and (max-width: 370px) {
-    .fourroads-ig-usermedia .media-container .media-tiles {
-        &.col-3,
-        &.col-4,
-        &.col-6 {
-            width: 100%;
-
-            .media-image {
-                width: 290px;
-                height: 290px;
-                margin: auto;
-            }
         }
     }
 }

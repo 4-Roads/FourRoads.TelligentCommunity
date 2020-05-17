@@ -82,6 +82,14 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Plugins
             }
         }
 
+        public int CacheMinutes
+        {
+            get
+            {
+                return Configuration.GetInt("CacheMinutes");
+            }
+        }
+
         public int LoadOrder => 0;
 
         public PropertyGroup[] ConfigurationOptions
@@ -91,8 +99,9 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Plugins
                 PropertyGroup optionsGroup = new PropertyGroup("settings", "Settings", 0);
 
                 optionsGroup.Properties.Add(new Property("AppId", "App Id", PropertyType.String, 0, ""));
-                optionsGroup.Properties.Add(new Property("AppSecret", "App Secret", PropertyType.String, 0, ""));
-                
+                optionsGroup.Properties.Add(new Property("AppSecret", "App Secret", PropertyType.String, 1, ""));
+                optionsGroup.Properties.Add(new Property("CacheMinutes", "Cache Minutes (Default: 0 - None)", PropertyType.Int, 2, "0"));
+
                 return new[] { optionsGroup };
             }
         }

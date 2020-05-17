@@ -10,16 +10,10 @@
     #set($showRecentFirst = true)
 #end
 
-#if(($columns % 2) == 0)
-    #set($col = 6)
-#end
-
-#if(($columns % 3) == 0 || ($columns % 5) == 0 || ($columns % 6) == 0)
-    #set($col = 4)
-#end
-
-#if(($columns % 4) == 0)
-    #set($col = 3)
+#if($columns == 5)
+    #set($col = '2-4')
+#else
+    #set($col = 12 / $columns)
 #end
 
 <style type='text/css'>

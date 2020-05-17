@@ -7,5 +7,7 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Interfaces
         string AppId { get; }
 
         string AppSecret { get; }
+
+        int CacheMinutes { get; }
     }
 }

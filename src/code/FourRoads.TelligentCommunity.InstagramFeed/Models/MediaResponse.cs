@@ -7,5 +7,14 @@ namespace FourRoads.TelligentCommunity.InstagramFeed.Models
     {
         [JsonProperty("data")]
         public List<T> Data { get; set; }
+
+        [JsonProperty("paging")]
+        public Pagination Paging { get; set; }
+    }
+
+    public class Pagination
+    {
+        [JsonProperty("next")]
+        public string Next { get; set; }
     }
 }
