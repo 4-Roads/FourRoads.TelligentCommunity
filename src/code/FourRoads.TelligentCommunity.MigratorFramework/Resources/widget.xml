@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:Mf_Name}" version="10.0.0.4689" description="${resource:Mf_Description}" instanceIdentifier="1c60e86a1850411baf62e6222e16273f"  provider="405cfc9d3522456d994b6dc4100319f7">
+    <contentScript>
+      <![CDATA[
+<div class="administration">
+#set($migratorName = $context.EnabledMigratorName)
+#if(!$migratorName)
+<div class="warning">
+    You need to enable and configure a migration plugin extension.
+</div>
+#else
+   #set($runningContext = $context.RunningContextId)
+  
+   #set($state = $context.State)
+
+   #set($titleId = $core_v2_widget.UniqueId("title"))
+   #set($processingArea = $core_v2_widget.UniqueId("processingArea"))
+   #set($processingTemplate = $core_v2_widget.UniqueId("processingTemplate"))
+   #set($startTemplate = $core_v2_widget.UniqueId("startTemplate"))
+   #set($actionLink = $core_v2_widget.UniqueId("processingTemplate"))
+      
+   <h2>Migration <span id="$titleId">$state</span></h2>
+   <div id="$processingArea"><span class="ui-loading" width="48" height="48"></span></div>
+   
+   <script type="text/html" id="$processingTemplate">
+    <div>
+      <div>Currently processing <%: response.CurrentObjectType %></div>
+      <div><%: response.ProcessedRows %> rows processed out of a total <%: response.TotalRows %> processing <%: response.RowsProcessingTimeAvg %> per min</div>
+      <a href="javascript:void(0)" class="button" style="color:white" id="$actionLink"><%: response.Action %></a>
+      
+    </div>
+    </script>
+
+   <script type="text/html" id="$startTemplate">
+    <div>
+      <a href="javascript:void(0)" class="button"  style="color:white" id="$actionLink"><%: response.Action %></a>
+    </div>
+    </script>
+   
+   <script src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('migration.js'))"></script>
+  <script type="text/javascript">
+          jQuery(function(j){
+            j.fourroads.migration.register({
+                processingTemplate:'$processingTemplate',
+                startTemplate:'$startTemplate',
+                titleId:'$titleId',
+                processingArea:'$processingArea',
+                actionLink:'$actionLink',
+                cancelCurrentJobUrl:'$context.CancelCurrentJobUrl()',
+                resetUrl:'$context.ResetUrl()',
+                startUrl:'$context.StartJobUrl()',
+                statusUrl:'$context.StatusUrl()'
+            });  
+          });
+  </script>
+#end
+</div>
+]]>
+    </contentScript>
+    <headerScript>
+    </headerScript>
+    <configuration>
+    </configuration>
+    <languageResources>
+      <language key="en-us">
+        <resource name="Mf_Name">4 Roads - Migration Framework Panel</resource>
+        <resource name="Mf_Header">Migration Tool</resource>
+        <resource name="Mf_Description">Configures support for Migrating Content into Telligent.</resource>
+
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>
