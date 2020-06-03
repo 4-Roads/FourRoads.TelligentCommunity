@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,13 +17,15 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         private IMigrationFactory _factory;
         private MigrationContext _lastKnownContext;
         private CancellationToken _cancel;
+        private Dictionary<string, MigratedData> _existingData = new Dictionary<string, MigratedData>();
+        private string[] _userHandlers;
 
         public Migrator()
         {
             _repository = new MigrationRepository();
         }
 
-        private async void Start()
+        private void Start(bool updateIfExistsInDestination)
         {
             //Disable plugins and store in database
             using (new PluginDisabler())
@@ -35,20 +38,29 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 int totalProcessing = 0;
                 foreach (var objectType in objectTypes)
                 {
-                    var handler = _factory.GetHandler(objectType);
+                    if (_userHandlers.Contains(objectType))
+                    {
+                        var handler = _factory.GetHandler(objectType);
 
-                    totalProcessing += (await handler.ListObjectKeys(1, 0)).Total;
+                        totalProcessing += ( handler.ListObjectKeys(1, 0)).Total;
+                    }
                 }
 
                 _repository.SetTotalRecords(totalProcessing);
 
                 //Handle Deletions First
-                EnumerateAll(_repository.List, async
+                EnumerateAll(_repository.List, 
                     k =>
                 {
                     try
                     {
-                        await _factory.GetHandler(k.ObjectType).MigratedObjectExists(k);
+                        if (_userHandlers.Contains(k.ObjectType))
+                        {
+                            if (_factory.GetHandler(k.ObjectType).MigratedObjectExists(k))
+                            {
+                                _existingData.Add(k.ObjectType + k.SourceKey, k);
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -58,58 +70,62 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                 foreach (var objectType in objectTypes)
                 {
-                    var handler = _factory.GetHandler(objectType);
+                    if (_userHandlers.Contains(objectType))
+                    {
+                        var handler = _factory.GetHandler(objectType);
 
-                    double processingTimeTotal = 0;
-                    int counter = 0;
+                        double processingTimeTotal = 0;
+                        int counter = 0;
 
-                    EnumerateAll(
-                        handler.ListObjectKeys, async
-                        k =>
-                        {
-                            long start = DateTime.Now.Ticks;
-                            counter++;
-
-                            try
+                        EnumerateAll(
+                            handler.ListObjectKeys,
+                            
+                                k =>
                             {
-                                var result = await handler.MigrateObject(k, this);
+                                long start = DateTime.Now.Ticks;
+                                counter++;
 
-                                if (result != null)
+                                try
                                 {
-                                    _lastKnownContext = await _repository.CreateUpdate(
-                                        new MigratedData()
-                                        {
-                                            ObjectType = objectType,
-                                            SourceKey = k,
-                                            ResultKey = result
-                                        }, 
-                                        processingTimeTotal / counter);
+                                    var result =  handler.MigrateObject(k, this, updateIfExistsInDestination);
+
+                                    if (result != null)
+                                    {
+                                        _lastKnownContext =  _repository.CreateUpdate(
+                                            new MigratedData()
+                                            {
+                                                ObjectType = objectType,
+                                                SourceKey = k,
+                                                ResultKey = result
+                                            },
+                                            processingTimeTotal / counter);
+                                    }
+                                    else
+                                    {
+                                        _repository.FailedItem(objectType, k, "MigrateObject returned null");
+                                    }
                                 }
-                                else
+                                catch (Exception ex)
                                 {
-                                    _repository.FailedItem(objectType,k, "MigrateObject returned null");
+                                    _repository.FailedItem(objectType, k, ex.ToString());
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                _repository.FailedItem(objectType,k, ex.ToString());
-                            }
 
-                            long end = DateTime.Now.Ticks;
+                                long end = DateTime.Now.Ticks;
 
-                            processingTimeTotal += end - start;
-                        });
+                                processingTimeTotal += end - start;
+                            });
+                    }
                 }
 
                 _repository.SetState(MigrationState.Finished);
             }
         }
 
-        private async void EnumerateAll<T>(Func<int, int, Task<IPagedList<T>>> list, Action<T> func)
+        private void EnumerateAll<T>(Func<int, int, IPagedList<T>> list, Action<T> func)
         {
             int pageIndex = 0;
             int pageSize = 500;
-            var pagedItems = await list( pageSize, pageIndex);
+            var pagedItems = list( pageSize, pageIndex);
 
             if (IsCanceled())
                 return;
@@ -124,7 +140,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 if (HasMoreItems(pageIndex , pageSize , pagedItems.Count() , pagedItems.Total))
                 {
                     pageIndex += 1;
-                    pagedItems = await list(pageSize, pageIndex);
+                    pagedItems = list(pageSize, pageIndex);
                 }
                 else
                 {
@@ -141,7 +157,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             return _cancel.IsCancellationRequested || _lastKnownContext?.State == MigrationState.Cancelling;
         }
 
-        private static bool HasMoreItems(int pageSize , int pageIndex , int currentNumber ,int total)
+        private bool HasMoreItems(int pageSize , int pageIndex , int currentNumber ,int total)
         {
             return pageIndex * pageSize + currentNumber < total;
         }
@@ -153,7 +169,18 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public MigratedData GetMigratedData(string objectType, string sourceKey)
         {
-            return Task.Run(()=> _repository.GetMigratedData(objectType, sourceKey)).Result;
+            string key = objectType + sourceKey;
+
+            if (_existingData.ContainsKey(key))
+                 return _existingData[key];
+
+            //Try and get it from the database
+            var result =_repository.GetMigratedData(objectType, sourceKey);
+
+            if (result != null)
+                _existingData.Add(key, result);
+
+            return result;
         }
 
         public void Execute(JobData jobData)
@@ -163,7 +190,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             _factory = migrator.GetFactory();
             _cancel =jobData.CancellationToken;
 
-            Task.Run(()=> Start(), _cancel);
+            _userHandlers= (jobData.Data["objectHandlers"]).Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+
+            Start(bool.Parse((string) jobData.Data["updateIfExistsInDestination"]));
         }
     }
 }

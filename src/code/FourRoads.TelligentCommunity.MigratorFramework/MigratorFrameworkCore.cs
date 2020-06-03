@@ -14,21 +14,24 @@ using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Administration.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Rest.Infrastructure;
 using Telligent.Jobs;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 
 namespace FourRoads.TelligentCommunity.MigratorFramework
 {
-    public class MigratorFrameworkCore : IPlugin, IInstallablePlugin, IAdministrationPanel, IPluginGroup, IScriptablePlugin, IHttpCallback
+    public class MigratorFrameworkCore : Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin, IInstallablePlugin, IAdministrationPanel, IPluginGroup, IScriptablePlugin, IHttpCallback
     {
         private Guid _panelId = new Guid("{405CFC9D-3522-456D-994B-6DC4100319F7}");
         private Guid _userInterfacePanel = new Guid("{1C60E86A-1850-411B-AF62-E6222E16273F}");
         private IMigrationRepository _repository;
         private IScriptedContentFragmentController _sfController;
         private IHttpCallbackController _cbController;
+        private IPluginConfiguration _configuration;
 
         public void Initialize()
         {
@@ -131,14 +134,19 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             }
             else if (!string.IsNullOrWhiteSpace(httpContext.Request.QueryString["start"]))
             {
-                Apis.Get<IJobService>().Schedule<Migrator>(DateTime.UtcNow.AddSeconds(20));
+
+                Apis.Get<IJobService>().Schedule<Migrator>(DateTime.UtcNow.AddSeconds(20) , new Dictionary<string, string>()
+                {
+                    { "updateIfExistsInDestination", _configuration.GetBool("updateIfExistsInDestination").ToString() }
+                    ,{"objectHandlers" , httpContext.Request.Form["objectHandlers[]"]}
+                });
 
                 _repository.CreateNewContext();
             }
             else
             {
                 //Return the status
-                MigrationContext context = Task.Run(() => _repository.GetMigrationContext()).Result ?? new MigrationContext();
+                MigrationContext context =  _repository.GetMigrationContext() ?? new MigrationContext();
 
                 httpContext.Response.ContentType = "application/json";
                 using (StreamWriter wr = new StreamWriter(httpContext.Response.OutputStream))
@@ -175,7 +183,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 _repository = new MigrationRepository();
             }
 
-            public string State => Task.Run(()=> _repository.GetMigrationContext()).Result.State.ToString();
+            public string State => _repository.GetMigrationContext().State.ToString();
 
             public string StatusUrl() => _callbackUrl + "&status=1";
 
@@ -184,6 +192,21 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             public string CancelCurrentJobUrl() => _callbackUrl + "&cancel=1";
 
             public string StartJobUrl() => _callbackUrl + "&start=1";
+
+            public IEnumerable<string> ObjectHandlers
+            {
+                get
+                {
+                    var migrator = PluginManager.GetSingleton<IMigratorProvider>();
+
+                    if (migrator != null && PluginManager.IsEnabled(migrator))
+                    {
+                        return migrator.GetFactory().GetOrderObjectHandlers();
+                    }
+
+                    return null;
+                }
+            }
 
             public string EnabledMigratorName
             {
@@ -201,6 +224,25 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             }
         }
 
-    
+        public void Update(IPluginConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        public PropertyGroup[] ConfigurationOptions
+        {
+            get
+            {
+                PropertyGroup group = new PropertyGroup() { LabelText = "Options" };
+
+                Property property = new Property() { DataType = "bool", LabelText = "Updated Existing Migrated Content", Id = "updateIfExistsInDestination" , DefaultValue = "True"};
+
+                group.Properties.Add(property);
+
+                return new[] { group };
+
+
+            }
+        }
     }
 }

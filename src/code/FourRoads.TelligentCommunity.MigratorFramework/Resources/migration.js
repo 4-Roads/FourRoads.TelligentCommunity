@@ -52,12 +52,17 @@
                                     j('#' + options.actionLink).click(function(e) {
                                         e.preventDefault();
 
+                                        var data = [];
+                                        $('input:checkbox.object-handlers').each(function () {
+                                            data.push((this.checked ? $(this).val() : ""));
+                                        });
+
                                         j(this).hide();
                                         j('#' + options.processingArea).html(j(spinner));
 
                                         j.telligent.evolution.post({
                                             url: options.startUrl,
-                                            data: null
+                                            data: { objectHandlers: data }
                                         });
                                     });
                                 }

@@ -33,6 +33,11 @@
     </script>
 
    <script type="text/html" id="$startTemplate">
+    <form>
+      #foreach($objectType in $context.ObjectHandlers)
+        <div><input name="ObjectHandlers" class="object-handlers" type="checkbox" value="$objectType" checked/>&nbsp;<span>$objectType</span></div>
+      #end
+    </form>
     <div>
       <a href="javascript:void(0)" class="button"  style="color:white" id="$actionLink"><%: response.Action %></a>
     </div>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Threading.Tasks;
 using FourRoads.TelligentCommunity.MigratorFramework.Entities;
 using FourRoads.TelligentCommunity.MigratorFramework.Interfaces;
 using Telligent.Evolution.Extensibility;
@@ -115,7 +114,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
             }
         }
 
-        public async Task<IPagedList<MigratedData>> List(int pageSize, int pageIndex)
+        public IPagedList<MigratedData> List(int pageSize, int pageIndex)
         {
             int startRow = pageIndex * pageSize;
             int endRow = startRow + pageSize;
@@ -139,7 +138,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
 
                 using (var command = new SqlCommand(query, connection))
                 {
-                    using (var r = await command.ExecuteReaderAsync())
+                    using (var r = command.ExecuteReader())
                     {
                         while (r.Read())
                         {
@@ -162,11 +161,14 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
             return results;
         }
 
-        public async Task<MigrationContext> CreateUpdate(MigratedData migratedData, double processingTimeTotal)
+        public MigrationContext CreateUpdate(MigratedData migratedData, double processingTimeTotal)
         {
             string create = @"
+                    IF (NOT EXISTS (SELECT 1 FROM fr_MigrationProcessed WHERE ObjectType = @ObjectType AND SourceKey = @SourceKey AND ResultKey = @ResultKey))
+                    BEGIN
                     INSERT INTO fr_MigrationProcessed (ObjectType, SourceKey, ResultKey, Created)
-                    VALUES (@ObjectType,@SourceKey,@ResultKey,@Created);
+                            VALUES (@ObjectType,@SourceKey,@ResultKey,@Created);
+                    END
 
                     UPDATE fr_MigrationContext 
                             SET ProcessedRows = ProcessedRows + 1, 
@@ -184,13 +186,13 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
 
                 using (var command = new SqlCommand(create, connection))
                 {
-                    command.Parameters.Add("@ObjectType", SqlDbType.NText, 20).Value = migratedData.ObjectType;
-                    command.Parameters.Add("@SourceKey", SqlDbType.NText, 50).Value = migratedData.SourceKey;
-                    command.Parameters.Add("@ResultKey", SqlDbType.NText, 50).Value = migratedData.ResultKey;
+                    command.Parameters.Add("@ObjectType", SqlDbType.NVarChar, 20).Value = migratedData.ObjectType;
+                    command.Parameters.Add("@SourceKey", SqlDbType.NVarChar, 50).Value = migratedData.SourceKey;
+                    command.Parameters.Add("@ResultKey", SqlDbType.NVarChar, 50).Value = migratedData.ResultKey;
                     command.Parameters.Add("@Created", SqlDbType.DateTime2).Value =DateTime.Now;
                     command.Parameters.Add("@RowsProcessingTimeAvg", SqlDbType.Decimal).Value = processingTimeTotal;
 
-                    using (var r = await command.ExecuteReaderAsync())
+                    using (var r = command.ExecuteReader())
                     {
                         if (r.Read())
                         {
@@ -212,7 +214,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
             return null;
         }
 
-        public async Task<MigratedData> GetMigratedData(string objectType, string sourceKey)
+        public MigratedData GetMigratedData(string objectType, string sourceKey)
         {
             string create = @"
                    SELECT * FROM  fr_MigrationProcessed WHERE ObjectType = @ObjectType AND SourceKey= @SourceKey
@@ -226,19 +228,16 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
                 {
                     command.Parameters.Add("@ObjectType", SqlDbType.NVarChar, 20).Value = objectType;
                     command.Parameters.Add("@SourceKey", SqlDbType.NVarChar, 50).Value = sourceKey;
-                    using (var r = await command.ExecuteReaderAsync())
+                    using (var r = command.ExecuteReader())
                     {
-                        if (r.NextResult())
+                        if (r.Read())
                         {
-                            if (r.Read())
+                            return new MigratedData()
                             {
-                                return new MigratedData()
-                                {
-                                    ObjectType = Convert.ToString(r["ObjectType"]),
-                                    SourceKey = Convert.ToString(r["SourceKey"]),
-                                    ResultKey = Convert.ToString(r["ResultKey"]),
-                                };
-                            }
+                                ObjectType = Convert.ToString(r["ObjectType"]),
+                                SourceKey = Convert.ToString(r["SourceKey"]),
+                                ResultKey = Convert.ToString(r["ResultKey"]),
+                            };
                         }
                     }
                 }
@@ -362,7 +361,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
             }
         }
 
-        public async Task<MigrationContext> GetMigrationContext()
+        public MigrationContext GetMigrationContext()
         {
             string create = @"
                     SELECT TOP 1 * FROM fr_MigrationContext;
@@ -374,7 +373,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
 
                 using (var command = new SqlCommand(create, connection))
                 {
-                    using (var r = await command.ExecuteReaderAsync())
+                    using (var r = command.ExecuteReader())
                     {
                         if (r.Read())
                         {
