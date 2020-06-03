@@ -110,8 +110,8 @@ namespace FourRoads.TelligentCommunity.MetaData
                 };
 
                 var property1 = new Property(){Id= "extendedtags", LabelText = "Additional Tags", DataType = "string", DefaultValue = "og:title,og:type,og:image,og:url,og:description,fb:admins,twitter:card,twitter:url,twitter:title,twitter:description,twitter:image"};
-                property1.DescriptionText = "Provide a list of comma seperated meta tags that will be available to the end user to configure";
-                property1.Options.Add("multiline", "true");
+                property1.DescriptionText = "Provide a list of comma separated meta tags that will be available to the end user to configure";
+                property1.Options.Add("rows", "40");
 
                 propertyGroupArray[0].Properties.Add(property1);
 
