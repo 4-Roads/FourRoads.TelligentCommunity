@@ -25,7 +25,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             _repository = new MigrationRepository();
         }
 
-        private void Start(bool updateIfExistsInDestination)
+        private void Start(bool updateIfExistsInDestination, bool checkForDeletions)
         {
             //Disable plugins and store in database
             using (new PluginDisabler())
@@ -48,25 +48,29 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                 _repository.SetTotalRecords(totalProcessing);
 
-                //Handle Deletions First
-                EnumerateAll(_repository.List, 
-                    k =>
+                if (checkForDeletions)
                 {
-                    try
-                    {
-                        if (_userHandlers.Contains(k.ObjectType))
+                    //Handle Deletions First
+                    EnumerateAll(
+                        _repository.List,
+                        k =>
                         {
-                            if (_factory.GetHandler(k.ObjectType).MigratedObjectExists(k))
+                            try
                             {
-                                _existingData.Add(k.ObjectType + k.SourceKey, k);
+                                if (_userHandlers.Contains(k.ObjectType))
+                                {
+                                    if (_factory.GetHandler(k.ObjectType).MigratedObjectExists(k))
+                                    {
+                                        _existingData.Add(k.ObjectType + k.SourceKey, k);
+                                    }
+                                }
                             }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _repository.FailedItem(k.ObjectType, k.SourceKey, ex.ToString());
-                    }
-                });
+                            catch (Exception ex)
+                            {
+                                _repository.FailedItem(k.ObjectType, k.SourceKey, ex.ToString());
+                            }
+                        });
+                }
 
                 foreach (var objectType in objectTypes)
                 {
@@ -192,7 +196,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
             _userHandlers= (jobData.Data["objectHandlers"]).Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
 
-            Start(bool.Parse((string) jobData.Data["updateIfExistsInDestination"]));
+            Start(bool.Parse((string) jobData.Data["updateIfExistsInDestination"]), bool.Parse((string)jobData.Data["checkForDeletions"]));
         }
     }
 }

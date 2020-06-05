@@ -138,7 +138,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 Apis.Get<IJobService>().Schedule<Migrator>(DateTime.UtcNow.AddSeconds(20) , new Dictionary<string, string>()
                 {
                     { "updateIfExistsInDestination", _configuration.GetBool("updateIfExistsInDestination").ToString() }
-                    ,{"objectHandlers" , httpContext.Request.Form["objectHandlers[]"]}
+                   ,{ "checkForDeletions", _configuration.GetBool("checkForDeletions").ToString()}
+                   ,{"objectHandlers" , httpContext.Request.Form["objectHandlers[]"]}
                 });
 
                 _repository.CreateNewContext();
@@ -238,6 +239,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 Property property = new Property() { DataType = "bool", LabelText = "Updated Existing Migrated Content", Id = "updateIfExistsInDestination" , DefaultValue = "True"};
 
                 group.Properties.Add(property);
+
+                property = new Property() { DataType = "bool", LabelText = "Check for Deletions", Id = "checkForDeletions", DefaultValue = "True" };
+
+                group.Properties.Add(property);
+
 
                 return new[] { group };
 
