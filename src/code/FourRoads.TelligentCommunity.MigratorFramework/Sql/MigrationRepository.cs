@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using FourRoads.TelligentCommunity.MigratorFramework.Entities;
 using FourRoads.TelligentCommunity.MigratorFramework.Interfaces;
 using Telligent.Evolution.Extensibility;
@@ -88,6 +89,22 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
                                 END
             ";
 
+            string logging = @"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[fr_MigrationLogging]') AND type in (N'U'))
+                                BEGIN
+
+                                CREATE TABLE [dbo].[fr_MigrationLogging](
+	                                [Id] [int] NOT NULL IDENTITY(1,1),
+                                    [Created] DateTime2 NOT NULL,
+	                                [Message] [nvarchar](max) NOT NULL,
+	                                [Type] [smallint] NOT NULL,
+                                 CONSTRAINT [PK_fr_MigrationLogging] PRIMARY KEY CLUSTERED 
+                                (
+	                                [Id] ASC
+                                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                                ) ON [PRIMARY]
+
+                                END";
+
             using (var connection = GetSqlConnection())
             {
                 connection.Open();
@@ -111,7 +128,83 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
                 {
                     command.ExecuteNonQuery();
                 }
+
+                using (var command = new SqlCommand(logging, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
             }
+        }
+
+        public void CreateLogEntry(string message, EventLogEntryType type)
+        {
+            string create = @"
+                    INSERT INTO fr_MigrationLogging (Created,Message,Type)
+                            VALUES (GetDate(),@Message,@Type);
+            ";
+
+            using (var connection = GetSqlConnection())
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(create, connection))
+                {
+                    command.Parameters.Add("@Message", SqlDbType.NVarChar, int.MaxValue).Value = message;
+                    command.Parameters.Add("@Type", SqlDbType.Decimal).Value = (Int16)type;
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public IPagedList<MigrationLog> ListLog(int pageSize, int pageIndex)
+        {
+            int startRow = pageIndex * pageSize;
+            int endRow = startRow + pageSize;
+
+            PagedList<MigrationLog> results = new PagedList<MigrationLog>();
+
+            string query = @"  SELECT  *
+                            FROM    ( SELECT  * , ROW_NUMBER() OVER ( ORDER BY CREATED DESC ) AS RowNum 
+                                      FROM      fr_MigrationLogging 
+                                    ) AS RowConstrainedResult
+                            WHERE   RowNum >= @startRow
+                                AND RowNum <= @endRow
+                            ORDER BY RowNum
+            ";
+
+            string count = @" SELECT Count(Id) FROM fr_MigrationLogging";
+
+            using (var connection = GetSqlConnection())
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add("@startRow", SqlDbType.Int).Value = startRow;
+                    command.Parameters.Add("@endRow", SqlDbType.Int).Value = endRow;
+
+                    using (var r = command.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            results.Add(new MigrationLog()
+                            {
+                                Created = Convert.ToDateTime(r["Created"]),
+                                Type = (EventLogEntryType)Convert.ToInt16(r["Type"]),
+                                Message = Convert.ToString(r["Message"])
+                            });
+                        }
+                    }
+                }
+
+                using (var command = new SqlCommand(count, connection))
+                {
+                    results.Total = Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+
+            return results;
         }
 
         public IPagedList<MigratedData> List(int pageSize, int pageIndex)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using FourRoads.TelligentCommunity.MigratorFramework.Entities;
 using FourRoads.TelligentCommunity.MigratorFramework.Sql;
@@ -18,5 +19,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Interfaces
         void ResetJob();
         void FailedItem(string objectType, string key, string error);
         MigrationContext GetMigrationContext();
+        void CreateLogEntry(string message, EventLogEntryType type);
+        IPagedList<MigrationLog> ListLog(int pageSize, int pageIndex);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
@@ -62,6 +63,12 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 _userInterfacePanel,
                 "migration.js",
                 GetType().Assembly.GetManifestResourceStream("FourRoads.TelligentCommunity.MigratorFramework.Resources.migration.js"));
+
+            FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(
+                this,
+                _userInterfacePanel,
+                "list.vm",
+                GetType().Assembly.GetManifestResourceStream("FourRoads.TelligentCommunity.MigratorFramework.Resources.list.vm"));
 
         }
 
@@ -194,6 +201,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
             public string StartJobUrl() => _callbackUrl + "&start=1";
 
+            public IPagedList<MigrationLog> LogEntries(IDictionary options)
+            {
+                return _repository.ListLog((int)options["PageSize"], (int)options["PageIndex"]);
+            }
+
             public IEnumerable<string> ObjectHandlers
             {
                 get
@@ -224,6 +236,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 }
             }
         }
+
 
         public void Update(IPluginConfiguration configuration)
         {

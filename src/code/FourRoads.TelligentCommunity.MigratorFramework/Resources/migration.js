@@ -1,5 +1,6 @@
 ﻿(function (j, global) {
     var spinner = '<span class="ui-loading" width="48" height="48"></span>',
+        lastState,
         api = {
             register: function(options) {
                 var processingTemplate = j.telligent.evolution.template.compile(options.processingTemplate);
@@ -40,12 +41,21 @@
                                                 data: null
                                             });
                                         });
+
+                                        //This forces a refresh of the error list
+                                        j.telligent.evolution.url.hashData({ stamp: Date.now()}, {});
                                     }
+
                                 }
                                 break;
 
-                            case 'Ready':
-                                {
+                            case 'Ready':{
+
+                                    //If the checkbox selectors are being displayed then don't do anything
+                                    if ($('input:checkbox.object-handlers').length > 0) {
+                                        break;
+                                    }
+
                                     j('#' + options.processingArea)
                                         .html(startTemplate({ response: { Action: 'Start' } }));
 
@@ -53,7 +63,7 @@
                                         e.preventDefault();
 
                                         var data = [];
-                                        $('input:checkbox.object-handlers').each(function () {
+                                        $('input:checkbox.object-handlers').each(function() {
                                             data.push((this.checked ? $(this).val() : ""));
                                         });
 
@@ -65,6 +75,7 @@
                                             data: { objectHandlers: data }
                                         });
                                     });
+
                                 }
                                 break;
 
@@ -74,6 +85,7 @@
                                 }
                                 break;
                             }
+                          
                         }
                     });
                 }

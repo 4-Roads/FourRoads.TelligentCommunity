@@ -65,7 +65,9 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Entities\MigrationContext.cs" />
+    <Compile Include="Entities\MigrationLog.cs" />
     <Compile Include="Entities\PagedList.cs" />
+    <Compile Include="FormerMember.cs" />
     <Compile Include="Interfaces\IMigrationFactory.cs" />
     <Compile Include="Interfaces\IMigrationObjectHandler.cs" />
     <Compile Include="Interfaces\IMigrationRepository.cs" />
@@ -91,6 +93,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FourRoads.TelligentCommunity.MigratorFramework.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\list.vm">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -19,9 +19,18 @@
    #set($processingTemplate = $core_v2_widget.UniqueId("processingTemplate"))
    #set($startTemplate = $core_v2_widget.UniqueId("startTemplate"))
    #set($actionLink = $core_v2_widget.UniqueId("processingTemplate"))
-      
-   <h2>Migration <span id="$titleId">$state</span></h2>
-   <div id="$processingArea"><span class="ui-loading" width="48" height="48"></span></div>
+   
+   <div>
+     <h2>Migration <span id="$titleId">$state</span></h2>
+     <div id="$processingArea"><span class="ui-loading" width="48" height="48"></span></div>
+   </div>
+
+   <div style="clear:both">
+    <h2>Migration Log</h2>
+    <div id="$core_v2_ui.PagedContentWrapperElementId()" >
+        $core_v2_ui.PagedContent('list.vm')
+    </div>
+  </div>
    
    <script type="text/html" id="$processingTemplate">
     <div>

@@ -1,20 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using FourRoads.TelligentCommunity.MigratorFramework.Interfaces;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Content.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using PluginManager = Telligent.Evolution.Components.PluginManager;
 
 namespace FourRoads.TelligentCommunity.MigratorFramework
 {
     public class PluginDisabler : IDisposable
     {
-        List<IPlugin> _disabledPlugins = new List<IPlugin>();
+        private readonly IMigrationRepository _repository;
+        private List<IPlugin> _disabledPlugins = new List<IPlugin>();
 
-        public PluginDisabler()
+        public PluginDisabler(IMigrationRepository repository)
         {
+            _repository = repository;
             //Moderation
             var mgr = Services.Get<IPluginManager>();
             IEnumerable<IPlugin> plugins = mgr.GetAll();
@@ -38,6 +41,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 }
             }
 
+            var pluginsNames = string.Join(", ", _disabledPlugins.Select(p => p.Name));
+            _repository.CreateLogEntry($"The following plugins were disabled:{pluginsNames}" , EventLogEntryType.Information);
+
             mgr.SetEnabled(pluginsFiltered);
         }
 
@@ -49,6 +55,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             List<IPlugin> revertList = new List<IPlugin>(plugins.Where(p => mgr.IsEnabled(p)));
 
             revertList.AddRange(_disabledPlugins);
+
+            var pluginsNames = string.Join(", ", _disabledPlugins.Select(p => p.Name));
+            _repository.CreateLogEntry($"The following plugins were enabled:{pluginsNames}", EventLogEntryType.Information);
 
             mgr.SetEnabled(revertList);
         }

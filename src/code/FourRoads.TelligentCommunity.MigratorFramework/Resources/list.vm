@@ -1,0 +1,22 @@
+﻿#set ($pageIndex = $core_v2_ui.GetCurrentPageIndex())
+#set ($pageSize = 50)
+
+#set($query = "%{PageIndex = $pageIndex, PageSize = $pageSize}")
+#set ($logEntries = $context.LogEntries($query))
+
+#foreach($log in $logEntries)
+#beforeall
+<ul class="content-list content margin-bottom">
+  #each
+  <li class="content-item">
+    <div class="content abbreviated">
+      <span style="width:100px;display:inline-block">$core_v2_language.FormatDate($log.Created)</span>
+      <span style="display:inline-block">$log.Message</span>
+    </div>
+  </li>
+  #afterall
+</ul>
+$core_v2_ui.Pager($pageIndex, $pageSize, $logEntries.Total, "%{ PagedContentFile = 'list.vm',LoadOnAnyHashChange = 'true', LoadingIndicator = 'true'}")
+#nodata
+<div class="message norecords">No logs to view</div>
+#end
