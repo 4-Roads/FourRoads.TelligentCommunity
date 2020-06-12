@@ -115,7 +115,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                         }
                                         else
                                         {
-                                            _repository.FailedItem(objectType, k, "MigrateObject returned null");
+                                            _repository.FailedItem(objectType, k, "Item skipped");
                                         }
                                     }
                                     catch (Exception ex)
@@ -200,6 +200,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 _existingData.Add(key, result);
 
             return result;
+        }
+
+        public void CreateLogEntry(string message, EventLogEntryType information)
+        {
+            _repository.CreateLogEntry(message , information);
         }
 
         public void Execute(JobData jobData)

@@ -18,7 +18,7 @@
                             case 'Finished':
                                 {
                                     var rowsProcessingTimeAvg = parseFloat(response.RowsProcessingTimeAvg);
-                                    if (rowsProcessingTimeAvg > 0) {
+                                        if (!isNaN(rowsProcessingTimeAvg)) {
                                         response.RowsProcessingTimeAvg =
                                             (1 / (rowsProcessingTimeAvg / 10000000) * 60).toFixed(3);
 
