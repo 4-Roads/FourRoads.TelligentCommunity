@@ -6,6 +6,8 @@ using System.Configuration;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 using FourRoads.TelligentCommunity.MigratorFramework.Entities;
 using FourRoads.TelligentCommunity.MigratorFramework.Interfaces;
 using FourRoads.TelligentCommunity.MigratorFramework.Sql;
@@ -141,7 +143,6 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             }
             else if (!string.IsNullOrWhiteSpace(httpContext.Request.QueryString["start"]))
             {
-
                 Apis.Get<IJobService>().Schedule<Migrator>(DateTime.UtcNow.AddSeconds(20) , new Dictionary<string, string>()
                 {
                     { "updateIfExistsInDestination", _configuration.GetBool("updateIfExistsInDestination").ToString() }
@@ -150,6 +151,13 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 });
 
                 _repository.CreateNewContext();
+            }
+            else if (!string.IsNullOrWhiteSpace(httpContext.Request.QueryString["rewrite"]))
+            {
+                httpContext.Response.ContentType = "text/xml";
+
+                ProcessRewriteMap(httpContext.Response.OutputStream);
+
             }
             else
             {
@@ -162,6 +170,25 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                     JsonSerializer.Create().Serialize(wr, context);
                 }
 
+            }
+        }
+
+        private void ProcessRewriteMap(Stream stream)
+        {
+            using (XmlTextWriter wr = new XmlTextWriter(stream, Encoding.UTF8))
+            {
+                wr.WriteStartElement("rewriteMaps");
+                wr.WriteStartElement("rewriteMap");
+                wr.WriteAttributeString("name", "StaticRewrites");
+                foreach (Tuple<string,string> redirect in _repository.ListUrlRedirects())
+                {
+                    wr.WriteStartElement("add");
+                    wr.WriteAttributeString("key", redirect.Item1);
+                    wr.WriteAttributeString("value", redirect.Item2);
+                    wr.WriteEndElement();
+                }
+                wr.WriteEndElement();
+                wr.WriteEndElement();
             }
         }
 
@@ -194,6 +221,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             public string State => _repository.GetMigrationContext().State.ToString();
 
             public string StatusUrl() => _callbackUrl + "&status=1";
+
+            public string DownloadRewriteUrl() => _callbackUrl + "&rewrite=1";
 
             public string ResetUrl() => _callbackUrl + "&reset=1";
 

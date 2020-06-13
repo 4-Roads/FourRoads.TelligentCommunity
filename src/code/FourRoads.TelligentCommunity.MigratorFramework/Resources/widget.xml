@@ -19,6 +19,7 @@
    #set($processingTemplate = $core_v2_widget.UniqueId("processingTemplate"))
    #set($startTemplate = $core_v2_widget.UniqueId("startTemplate"))
    #set($actionLink = $core_v2_widget.UniqueId("processingTemplate"))
+   #set($downloadRewriteMap = $core_v2_widget.UniqueId("downloadRewriteMap"))
    
    <div>
      <h2>Migration <span id="$titleId">$state</span></h2>
@@ -37,7 +38,7 @@
       <div>Currently processing <%: response.CurrentObjectType %></div>
       <div><%: response.ProcessedRows %> rows processed out of a total <%: response.TotalRows %> processing <%: response.RowsProcessingTimeAvg %> per min</div>
       <a href="javascript:void(0)" class="button" style="color:white" id="$actionLink"><%: response.Action %></a>
-      
+      <a href="javascript:void(0)" id="$downloadRewriteMap">Download Rewrite Map</a>
     </div>
     </script>
 
@@ -50,7 +51,7 @@
     <div>
       <a href="javascript:void(0)" class="button"  style="color:white" id="$actionLink"><%: response.Action %></a>
     </div>
-    </script>
+  </script>
    
    <script src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('migration.js'))"></script>
   <script type="text/javascript">
@@ -64,7 +65,9 @@
                 cancelCurrentJobUrl:'$context.CancelCurrentJobUrl()',
                 resetUrl:'$context.ResetUrl()',
                 startUrl:'$context.StartJobUrl()',
-                statusUrl:'$context.StatusUrl()'
+                statusUrl:'$context.StatusUrl()',
+                downloadRewriteMap: '$downloadRewriteMap',
+                downloadRewriteMapUrl: '$context.DownloadRewriteUrl()'
             });  
           });
   </script>

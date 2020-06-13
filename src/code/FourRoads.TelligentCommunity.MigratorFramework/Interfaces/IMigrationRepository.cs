@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using FourRoads.TelligentCommunity.MigratorFramework.Entities;
@@ -21,5 +22,6 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Interfaces
         MigrationContext GetMigrationContext();
         void CreateLogEntry(string message, EventLogEntryType type);
         IPagedList<MigrationLog> ListLog(int pageSize, int pageIndex);
+        IEnumerable<Tuple<string, string>> ListUrlRedirects();
     }
 }

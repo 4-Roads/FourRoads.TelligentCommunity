@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -374,6 +375,28 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
                     command.Parameters.Add("@ResultUrl", SqlDbType.NText, int.MaxValue).Value = destination;
 
                     command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public IEnumerable<Tuple<string,string>> ListUrlRedirects()
+        {
+            string create = @"
+                    SELECT SourceUrl , ResultUrl FROM fr_MigrationRedirector 
+            ";
+
+            using (var connection = GetSqlConnection())
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(create, connection))
+                {
+                    var result = command.ExecuteReader();
+
+                    while (result.Read())
+                    {
+                        yield return new Tuple<string, string>(Convert.ToString(result["SourceUrl"]) , Convert.ToString(result["ResultUrl"]));
+                    }
                 }
             }
         }

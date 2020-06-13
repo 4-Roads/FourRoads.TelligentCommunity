@@ -42,6 +42,24 @@
                                             });
                                         });
 
+
+                                        j('#' + options.downloadRewriteMap).click(function (e) {
+                                            e.preventDefault();
+                                            
+                                               fetch(options.downloadRewriteMapUrl)
+                                                    .then(resp => resp.blob())
+                                                    .then(blob => {
+                                                        const url = window.URL.createObjectURL(blob);
+                                                        const a = document.createElement('a');
+                                                        a.style.display = 'none';
+                                                        a.href = url;
+                                                        a.download = 'legacy_rewrite_map.config';
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        window.URL.revokeObjectURL(url);
+                                                    }); 
+                                        });
+
                                         //This forces a refresh of the error list
                                         j.telligent.evolution.url.hashData({ stamp: Date.now()}, {});
                                     }
