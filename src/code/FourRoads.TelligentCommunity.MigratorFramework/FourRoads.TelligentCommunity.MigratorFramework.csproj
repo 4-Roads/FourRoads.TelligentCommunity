@@ -52,6 +52,10 @@
     <Reference Include="Telligent.Evolution.Api">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Api.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Blogs, Version=11.1.1.10427, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.Platform">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>

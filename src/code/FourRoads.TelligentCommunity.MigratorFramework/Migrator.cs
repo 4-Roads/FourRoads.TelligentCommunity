@@ -6,6 +6,9 @@ using System.Threading;
 using FourRoads.TelligentCommunity.MigratorFramework.Entities;
 using FourRoads.TelligentCommunity.MigratorFramework.Interfaces;
 using FourRoads.TelligentCommunity.MigratorFramework.Sql;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -27,7 +30,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         private void Start(bool updateIfExistsInDestination, bool checkForDeletions)
         {
-            using (new FormerMember(_repository))
+            using (var formerMember = new FormerMember(_repository))
             {
                 //Disable plugins and store in database
                 using (new PluginDisabler(_repository))
@@ -140,7 +143,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             }
         }
 
-        private void EnumerateAll<T>(Func<int, int, IPagedList<T>> list, Action<T> func)
+        private void EnumerateAll<T>(Func<int, int, Interfaces.IPagedList<T>> list, Action<T> func)
         {
             int pageIndex = 0;
             int pageSize = 500;
@@ -205,6 +208,70 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         public void CreateLogEntry(string message, EventLogEntryType information)
         {
             _repository.CreateLogEntry(message , information);
+        }
+
+        public User GetUserOrFormerMember(int? userId)
+        {
+            User author = null;
+
+            if (userId == null)
+            {
+                //User deleted so use former member
+                author = Apis.Get<IUsers>().Get(new UsersGetOptions() { Username = Apis.Get<IUsers>().FormerMemberName });
+            }
+            else
+            {
+                author = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = userId.Value });
+            }
+
+            author.ThrowErrors();
+
+            return author;
+        }
+
+        public void EnsureGroupMember(Group @group, User author)
+        {
+            if (!author.IsSystemAccount.GetValueOrDefault(false))
+            {
+                var groupUser = Apis.Get<IEffectiveGroupMembers>().List(
+                    @group.Id.Value,
+                    new EffectiveGroupMembersListOptions()
+                    {
+                        UserNameFilter = author.Username, PageIndex = 0, PageSize = 1
+                    }).FirstOrDefault();
+
+                if (groupUser == null)
+                {
+                    groupUser = Apis.Get<IGroupUserMembers>().Create(@group.Id.Value, author.Id.Value, new GroupUserMembersCreateOptions() {GroupMembershipType = "Member"});
+                }
+
+                groupUser.ThrowErrors();
+            }
+            else
+            {
+                //FOrmer member is an administrator during migration
+                if (author.Username != Apis.Get<IUsers>().FormerMemberName)
+                {
+                    throw new Exception("Trying to add content to a membership based group using a system account like Former Member is not allowed");
+                }
+            }
+        }
+
+        public void EnsureBlogAuthor(Blog blog, User user)
+        {
+            if (blog.Authors.All(a => a.Username != user.Username))
+            {
+                List<string> authors = new List<string>(blog.Authors.Select(a => a.Username));
+
+                authors.Add(user.Username);
+
+                Apis.Get<IBlogs>().Update(
+                    blog.Id.Value,
+                    new BlogsUpdateOptions()
+                    {
+                        Authors = string.Join(",", authors)
+                    }).ThrowErrors();
+            }
         }
 
         public void Execute(JobData jobData)
