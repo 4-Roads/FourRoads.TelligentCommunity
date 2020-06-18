@@ -231,29 +231,35 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public void EnsureGroupMember(Group @group, User author)
         {
-            if (!author.IsSystemAccount.GetValueOrDefault(false))
+            if (string.Compare(@group.GroupType ,"joinless" , StringComparison.OrdinalIgnoreCase) != 0)
             {
-                var groupUser = Apis.Get<IEffectiveGroupMembers>().List(
-                    @group.Id.Value,
-                    new EffectiveGroupMembersListOptions()
+                if (!author.IsSystemAccount.GetValueOrDefault(false))
+                {
+                    var groupUser = Apis.Get<IEffectiveGroupMembers>().List(
+                        @group.Id.Value,
+                        new EffectiveGroupMembersListOptions()
+                        {
+                            UserNameFilter = author.Username,
+                            PageIndex = 0,
+                            PageSize = 1
+                        }).FirstOrDefault();
+
+                    if (groupUser == null)
                     {
-                        UserNameFilter = author.Username, PageIndex = 0, PageSize = 1
-                    }).FirstOrDefault();
+                        groupUser = Apis.Get<IGroupUserMembers>().Create(@group.Id.Value, author.Id.Value, new GroupUserMembersCreateOptions() {GroupMembershipType = "Member"});
+                    }
 
-                if (groupUser == null)
+                    groupUser.ThrowErrors();
+                }
+                else
                 {
-                    groupUser = Apis.Get<IGroupUserMembers>().Create(@group.Id.Value, author.Id.Value, new GroupUserMembersCreateOptions() {GroupMembershipType = "Member"});
+                    //FOrmer member is an administrator during migration
+                    if (author.Username != Apis.Get<IUsers>().FormerMemberName)
+                    {
+                        throw new Exception("Trying to add content to a membership based group using a system account like Former Member is not allowed");
+                    }
                 }
 
-                groupUser.ThrowErrors();
-            }
-            else
-            {
-                //FOrmer member is an administrator during migration
-                if (author.Username != Apis.Get<IUsers>().FormerMemberName)
-                {
-                    throw new Exception("Trying to add content to a membership based group using a system account like Former Member is not allowed");
-                }
             }
         }
 
