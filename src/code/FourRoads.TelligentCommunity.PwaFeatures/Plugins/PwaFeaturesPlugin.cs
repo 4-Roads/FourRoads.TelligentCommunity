@@ -7,6 +7,7 @@ using System.Web;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
+using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.PwaFeatures.DataProvider;
 using FourRoads.TelligentCommunity.PwaFeatures.Extensions;
@@ -21,6 +22,7 @@ using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using IRequiredConfigurationPlugin = Telligent.Evolution.Extensibility.Version2.IRequiredConfigurationPlugin;
 using Notification = Telligent.Evolution.Extensibility.Api.Entities.Version1.Notification;
 using Property = Telligent.Evolution.Extensibility.Configuration.Version1.Property;
 using PropertyGroup = Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup;
@@ -28,7 +30,7 @@ using PropertyGroup = Telligent.Evolution.Extensibility.Configuration.Version1.P
 
 namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
 {
-    public class PwaFeaturesPlugin : IConfigurablePlugin, INotificationDistributionType, ITranslatablePlugin,  IPluginGroup, INavigable, IHtmlHeaderExtension , IScriptedContentFragmentExtension, IScriptablePlugin
+    public class PwaFeaturesPlugin : IConfigurablePlugin, INotificationDistributionType, ITranslatablePlugin,  IPluginGroup, INavigable, IHtmlHeaderExtension , IScriptedContentFragmentExtension, IScriptablePlugin, IRequiredConfigurationPlugin
     {
         public string Name => "4 Roads - PWA Features";
         public string Description => "Extends Telligent to Support PWA features";
@@ -85,50 +87,64 @@ namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
 
         public void Initialize()
         {
-            _data = new PwaDataProvider();
+            if (PluginManager.IsEnabled(this))
+            {
+                _data = new PwaDataProvider();
 
-            FirebaseApp.Create(
-                new AppOptions()
-                {
-                    Credential = GoogleCredential.FromJson(_configuration.GetString("FirebaseAdminJson"))
-                });
+                FirebaseApp.Create(
+                    new AppOptions()
+                    {
+                        Credential = GoogleCredential.FromJson(_configuration.GetString("FirebaseAdminJson"))
+                    });
+            }
         }
-
 
         public bool Distribute(Notification notification, NotificationUserChanges userChanges)
         {
-            if (userChanges != NotificationUserChanges.UsersAdded || (notification == null || notification.UserId == 0))
-                return false;
-
-            NotificationListOptions notificationListOptions = new NotificationListOptions();
-            notificationListOptions.UserId = notification.UserId;
-            notificationListOptions.IsRead = false;
-            notificationListOptions.PageIndex = 0;
-            notificationListOptions.PageSize = 1;
-
-            string notificationId = notification.NotificationId.ToString("N");
-
-            string shortText = Apis.Get<IUrl>().Decode(notification.Message("ShortText"));
-
-            var user = Apis.Get<Users>().Get(new UsersGetOptions() { Id = notification.UserId });
-
-            var pageContext = Apis.Get<IUrl>().ParsePageContext(notification.TargetUrl);
-
-            var item = pageContext?.ContextItems.Find(f => f.ContentTypeId == notification.ContentTypeId);
-
-            var title = "Activity on ";
-
-            if (item != null)
+            try
             {
-                var content=  Apis.Get<IContents>().Get(item.ContentId.Value, item.ContentTypeId.Value);
-
-                if (content != null)
+                if (PluginManager.IsEnabled(this))
                 {
-                    title = content.HtmlName("text");
+                    if (userChanges != NotificationUserChanges.UsersAdded || (notification == null || notification.UserId == 0))
+                        return false;
+
+                    NotificationListOptions notificationListOptions = new NotificationListOptions();
+                    notificationListOptions.UserId = notification.UserId;
+                    notificationListOptions.IsRead = false;
+                    notificationListOptions.PageIndex = 0;
+                    notificationListOptions.PageSize = 1;
+
+                    string notificationId = notification.NotificationId.ToString("N");
+
+                    string shortText = Apis.Get<IUrl>().Decode(notification.Message("ShortText"));
+
+                    var user = Apis.Get<Users>().Get(new UsersGetOptions() {Id = notification.UserId});
+
+                    var pageContext = Apis.Get<IUrl>().ParsePageContext(notification.TargetUrl);
+
+                    var item = pageContext?.ContextItems.Find(f => f.ContentTypeId == notification.ContentTypeId);
+
+                    var title = "Activity on ";
+
+                    if (item != null)
+                    {
+                        var content = Apis.Get<IContents>().Get(item.ContentId.Value, item.ContentTypeId.Value);
+
+                        if (content != null)
+                        {
+                            title = content.HtmlName("text");
+                        }
+                    }
+
+                    PushGoogleNotification(user, notificationId, title, shortText, notification.TargetUrl);
+
+                    return true;
                 }
             }
-
-            PushGoogleNotification(user, notificationId, title ,shortText , notification.TargetUrl);
+            catch (Exception ex)
+            {
+                new TCException("Push Notification General Error", ex).Log();
+            }
 
             return true;
         }
@@ -140,43 +156,37 @@ namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
                 var response = Task.Run(
                     () =>
                     {
-                        var registrationTokens = _data.ListUserTokens(user.Id.Value);
-
-                        if (registrationTokens.Count > 0)
+                        try
                         {
-                            //foreach (var token in registrationTokens)
-                            //{
-                            //    //Test the tokens, revoke any broken ones
-                            //    FirebaseToken decodedToken = Task.Run(() => FirebaseMessaging.DefaultInstance.(token)).Result;
+                            var registrationTokens = _data.ListUserTokens(user.Id.Value);
 
-                            //    if (decodedToken == null || decodedToken.Uid == "")
-                            //    {
-                            //        _data.RevokeToken(user.Id.Value, token);
-                            //    }
-                            //}
-
-                            // See documentation on defining a message payload.
-                            var message = new MulticastMessage()
+                            if (registrationTokens.Count > 0)
                             {
-                                Data = new Dictionary<string, string>()
-                                {
-                                    {"title", title},
-                                    {"body", body},
-                                    {"url", url},
-                                    {"targetUserId", user.Id.GetValueOrDefault(-1).ToString()},
-                                },
-                                Tokens = registrationTokens
-                            };
 
-                            // Send a message to the devices subscribed to the provided topic.
-                            return FirebaseMessaging.DefaultInstance.SendMulticastAsync(message);
+                                // See documentation on defining a message payload.
+                                var message = new MulticastMessage()
+                                {
+                                    Data = new Dictionary<string, string>()
+                                    {
+                                        {"title", title},
+                                        {"body", body},
+                                        {"url", url},
+                                        {"targetUserId", user.Id.GetValueOrDefault(-1).ToString()},
+                                    },
+                                    Tokens = registrationTokens
+                                };
+
+                                // Send a message to the devices subscribed to the provided topic.
+                                return FirebaseMessaging.DefaultInstance.SendMulticastAsync(message);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            new TCException("Google Push Notification Failed" , ex).Log();
                         }
 
                         return null;
                     }).Result;
-
-                System.Diagnostics.Debugger.Log(0, "", response.SuccessCount.ToString());
-
         }
 
         public string NotificationDistributionDescription => _translation.GetLanguageResourceValue("distriubtion_type_description");
@@ -269,6 +279,10 @@ namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
 
                 });
         }
+
+        public bool IsConfigured => !string.IsNullOrWhiteSpace(_configuration.GetString("FirebaseSenderId")) &&
+                                    !string.IsNullOrWhiteSpace(_configuration.GetString("FirebaseConfig")) &&
+                                    !string.IsNullOrWhiteSpace(_configuration.GetString("FirebaseAdminJson"));
     }
 
 }
