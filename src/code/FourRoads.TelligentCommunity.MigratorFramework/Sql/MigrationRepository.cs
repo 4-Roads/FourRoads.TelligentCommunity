@@ -475,6 +475,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
                     command.ExecuteNonQuery();
                 }
             }
+
+            CreateLogEntry($"Migration Item Failed:{key}:{error}", EventLogEntryType.Error);
         }
 
         public MigrationContext GetMigrationContext()

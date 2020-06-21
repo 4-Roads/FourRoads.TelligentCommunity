@@ -32,114 +32,118 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         {
             using (var formerMember = new FormerMember(_repository))
             {
-                //Disable plugins and store in database
-                using (new PluginDisabler(_repository))
+                try
                 {
-                    _factory.SignalMigrationStarting();
-
-                    _repository.SetState(MigrationState.Running);
-
-                    var objectTypes = _factory.GetOrderObjectHandlers();
-
-                    //Enumerate over the entire tree to ensure we know how much work there is to do
-                    _repository.CreateLogEntry("Attempting to calculate the number of items", EventLogEntryType.Information);
-
-                    int totalProcessing = 0;
-                    foreach (var objectType in objectTypes)
+                    //Disable plugins and store in database
+                    using (new PluginDisabler(_repository))
                     {
-                        if (_userHandlers.Contains(objectType))
+                        _factory.SignalMigrationStarting();
+
+                        _repository.SetState(MigrationState.Running);
+
+                        var objectTypes = _factory.GetOrderObjectHandlers();
+
+                        //Enumerate over the entire tree to ensure we know how much work there is to do
+                        _repository.CreateLogEntry("Attempting to calculate the number of items", EventLogEntryType.Information);
+
+                        int totalProcessing = 0;
+                        foreach (var objectType in objectTypes)
                         {
-                            var handler = _factory.GetHandler(objectType);
-
-                            totalProcessing += (handler.ListObjectKeys(1, 0)).Total;
-                        }
-                    }
-
-                    _repository.SetTotalRecords(totalProcessing);
-
-                    if (checkForDeletions)
-                    {
-                        _repository.CreateLogEntry("Checking for deleted items", EventLogEntryType.Information);
-                        //Handle Deletions First
-                        EnumerateAll(
-                            _repository.List,
-                            k =>
+                            if (_userHandlers.Contains(objectType))
                             {
-                                try
-                                {
-                                    if (_userHandlers.Contains(k.ObjectType))
-                                    {
-                                        if (_factory.GetHandler(k.ObjectType).MigratedObjectExists(k))
-                                        {
-                                            _existingData.Add(k.ObjectType + k.SourceKey, k);
-                                        }
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _repository.FailedItem(k.ObjectType, k.SourceKey, ex.ToString());
-                                }
-                            });
-                    }
+                                var handler = _factory.GetHandler(objectType);
 
-                    _repository.CreateLogEntry("Starting Migration", EventLogEntryType.Information);
+                                totalProcessing += (handler.ListObjectKeys(1, 0)).Total;
+                            }
+                        }
 
-                    foreach (var objectType in objectTypes)
-                    {
-                        if (_userHandlers.Contains(objectType))
+                        _repository.SetTotalRecords(totalProcessing);
+
+                        if (checkForDeletions)
                         {
-                            var handler = _factory.GetHandler(objectType);
-
-                            double processingTimeTotal = 0;
-                            int counter = 0;
-
+                            _repository.CreateLogEntry("Checking for deleted items", EventLogEntryType.Information);
+                            //Handle Deletions First
                             EnumerateAll(
-                                handler.ListObjectKeys,
-
+                                _repository.List,
                                 k =>
                                 {
-                                    long start = DateTime.Now.Ticks;
-                                    counter++;
-
                                     try
                                     {
-                                        var result = handler.MigrateObject(k, this, updateIfExistsInDestination);
-
-                                        if (result != null)
+                                        if (_userHandlers.Contains(k.ObjectType))
                                         {
-                                            _lastKnownContext = _repository.CreateUpdate(
-                                                new MigratedData()
-                                                {
-                                                    ObjectType = objectType,
-                                                    SourceKey = k,
-                                                    ResultKey = result
-                                                },
-                                                processingTimeTotal / counter);
-                                        }
-                                        else
-                                        {
-                                            _repository.FailedItem(objectType, k, "Item skipped");
+                                            if (_factory.GetHandler(k.ObjectType).MigratedObjectExists(k))
+                                            {
+                                                _existingData.Add(k.ObjectType + k.SourceKey, k);
+                                            }
                                         }
                                     }
                                     catch (Exception ex)
                                     {
-                                        _repository.FailedItem(objectType, k, ex.ToString());
+                                        _repository.FailedItem(k.ObjectType, k.SourceKey, ex.ToString());
                                     }
-
-                                    long end = DateTime.Now.Ticks;
-
-                                    processingTimeTotal += end - start;
                                 });
                         }
+
+                        _repository.CreateLogEntry("Starting Migration", EventLogEntryType.Information);
+
+                        foreach (var objectType in objectTypes)
+                        {
+                            if (_userHandlers.Contains(objectType))
+                            {
+                                var handler = _factory.GetHandler(objectType);
+
+                                double processingTimeTotal = 0;
+                                int counter = 0;
+
+                                EnumerateAll(
+                                    handler.ListObjectKeys,
+
+                                    k =>
+                                    {
+                                        long start = DateTime.Now.Ticks;
+                                        counter++;
+
+                                        try
+                                        {
+                                            var result = handler.MigrateObject(k, this, updateIfExistsInDestination);
+
+                                            if (result != null)
+                                            {
+                                                _lastKnownContext = _repository.CreateUpdate(
+                                                    new MigratedData()
+                                                    {
+                                                        ObjectType = objectType,
+                                                        SourceKey = k,
+                                                        ResultKey = result
+                                                    },
+                                                    processingTimeTotal / counter);
+                                            }
+                                            else
+                                            {
+                                                _repository.FailedItem(objectType, k, "Item skipped");
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            _repository.FailedItem(objectType, k, ex.ToString());
+                                        }
+
+                                        long end = DateTime.Now.Ticks;
+
+                                        processingTimeTotal += end - start;
+                                    });
+                            }
+                        }
+
+                        _factory.SignalMigrationFinshing();
+
+                        _repository.CreateLogEntry("Migration Finished", EventLogEntryType.Information);
                     }
-
-                    _repository.SetState(MigrationState.Finished);
-
-                    _factory.SignalMigrationFinshing();
-
-                    _repository.CreateLogEntry("Migration Finished", EventLogEntryType.Information);
                 }
-
+                finally
+                {
+                    _repository.SetState(MigrationState.Finished);
+                }
             }
         }
 

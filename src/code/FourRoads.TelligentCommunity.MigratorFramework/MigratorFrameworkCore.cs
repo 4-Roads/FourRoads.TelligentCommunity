@@ -170,6 +170,10 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                     JsonSerializer.Create().Serialize(wr, context);
                 }
 
+                if (context.State == MigrationState.Cancelling && context.LastUpdated.AddMinutes(30) < DateTime.Now ) //FInsihed or borked job 
+                {
+                    _repository.SetState(MigrationState.Finished);
+                }
             }
         }
 
