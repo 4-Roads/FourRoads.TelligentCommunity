@@ -122,6 +122,26 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.ScriptedFragments
             return null;
         }
 
+        public bool ValdaiteEmailVerificationCode(string code)
+        {
+            var user = Apis.Get<IUsers>().AccessingUser;
+
+            if (user.Username != Apis.Get<IUsers>().AccessingUser.Username)
+            {
+                return false;
+            }
+
+            return Injector.Get<IMfaLogic>().ValidateEmailCode(user , code);
+        }
+
+        public bool SendOneTimeEmailVerificationCode(int userId)
+        {
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
+
+            return Injector.Get<IMfaLogic>().SendValidationCode(user);
+        }
+
+
         const string _nonAdminAccessingException = "Accessing user does not have sufficient rights";
         const string _adminRoleName = "Administrators";
     }

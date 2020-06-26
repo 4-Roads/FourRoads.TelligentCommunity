@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Net.Http;
-using System.Threading;
 using System.Web;
 using System.Web.Security;
 using FourRoads.Common.Interfaces;
@@ -10,84 +6,33 @@ using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
 using Google.Authenticator;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using FourRoads.Common.TelligentCommunity.Routing;
-using Telligent.Evolution.Components;
 using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 using FourRoads.TelligentCommunity.GoogleMfa.Model;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Globalization;
+using FourRoads.TelligentCommunity.GoogleMfa.Plugins;
+using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 {
-    public interface ILock<T>
-    {
-        IDisposable Enter(T id);
-    }
-
-    public class ActionDisposable : IDisposable
-    {
-        private readonly Action action;
-
-        public ActionDisposable(Action action)
-        {
-            if (action == null)
-            {
-                throw new ArgumentNullException("action");
-            }
-
-            this.action = action;
-        }
-
-        public void Dispose()
-        {
-            action();
-        }
-    }
-
-    public class NamedItemLockSpin<T> : ILock<T>
-    {
-
-        private readonly ConcurrentDictionary<T, object> locks = new ConcurrentDictionary<T, object>();
-
-        private readonly int spinWait;
-
-        public NamedItemLockSpin(int spinWait)
-        {
-            this.spinWait = spinWait;
-        }
-
-        public IDisposable Enter(T id)
-        {
-            while (!locks.TryAdd(id, new object()))
-            {
-                Thread.SpinWait(spinWait);
-            }
-
-            return new ActionDisposable(() => exit(id));
-        }
-
-        private void exit(T id)
-        {
-            object obj;
-            locks.TryRemove(id, out obj);
-        }
-    }
-
     public class MfaLogic : IMfaLogic
     {
-        private static readonly string _pageName = "mfa";
+        private static readonly string _mfaPageName = "mfa";
+        private static readonly string _pageVerifyEmailName = "verifyemail";
         private readonly IUsers _usersService;
         private readonly IUrl _urlService;
         private readonly IMfaDataProvider _mfaDataProvider;
         private readonly ICache _cache;
         private readonly NamedItemLockSpin<int> _namedLocks = new NamedItemLockSpin<int>(10);
+        private IVerifyEmailProvider _emailProvider;
+        private ISocketMessage _sockentMessager;
+        private bool _enableEmailVerification;
 
         //{295391e2b78d4b7e8056868ae4fe8fb3}
-        private static readonly string _defaultPageLayout = " <contentFragmentPage pageName=\"mfa\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::295391e2b78d4b7e8056868ae4fe8fb3\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
-
+        private static readonly string _defaultMfaPageLayout = $"<contentFragmentPage pageName=\"{_mfaPageName}\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::295391e2b78d4b7e8056868ae4fe8fb3\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
+        private static readonly string _defaultVerifyEmailPageLayout = $"<contentFragmentPage pageName=\"{_pageVerifyEmailName}\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::a8b6e56eac3246169d1727c84c17fd66\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
         //this is version flag to distinguish major changes in MFA logic, so we can tell users if they should regenerate their keys
         private static readonly int _mfaLogicVersion = 2;
         private static readonly int _oneTimeCodesToGenerate = 10;
@@ -96,6 +41,9 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
         private static readonly string _eakey_mfaEnabled = "__mfaEnabled";
         private static readonly string _eakey_codesGeneratedOnUtc = "__mfaCodesGeneratedOnUtc";
         private static readonly string _eakey_mfaVersion = "__mfaVersion";
+        private static readonly string _eakey_emailVerified = "___emailVerified";
+        private static readonly string _eakey_emailVerifyCode = "_eakey_emailVerifyCode"; 
+
 
         public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
         {
@@ -105,8 +53,12 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             _cache = cache;
         }
 
-        public void Initialize()
+        public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider, ISocketMessage sockentMessager)
         {
+            _enableEmailVerification = enableEmailVerification;
+            _emailProvider = emailProvider;
+            _sockentMessager = sockentMessager;
+
             _usersService.Events.AfterIdentify += EventsAfterIdentify;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
         }
@@ -156,46 +108,127 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             {
                 if (TwoFactorEnabled(user) && TwoFactorState(user) == false)
                 {
-                    // user is logged in but has not completed the second auth stage
-                    var request = HttpContext.Current.Request;
+                    ForceRedirect("/mfa" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
+                }
 
-                    if (request.Path.StartsWith("/socket.ashx"))
+                if (_enableEmailVerification && EmailChanged(user))
+                {
+                    ForceRedirect("/verifyemail" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
+
+                    if (EmailNotSent(user))
                     {
-                        return;
-                    }
-
-                    var response = HttpContext.Current.Response;
-
-                    // suppress any callbacks re search, notifications, header links etc
-                    if (IsOauthRequest(request) == false && (request.Path.StartsWith("/api.ashx") ||
-                        request.Path.StartsWith("/oauth") ||
-                        (request.Url.LocalPath == "/utility/scripted-file.ashx" &&
-                        request.QueryString["_cf"] != null &&
-                        request.QueryString["_cf"] != "logout.vm" &&
-                        request.QueryString["_cf"] != "validate.vm")))
-                    {
-                        // this should only happen when in the second auth stage 
-                        // for blocked callbacks so a bit brutal
-                        response.Clear();
-                        response.End();
-                    }
-
-                    // is it a suitable time to redirect the user to the second auth page
-                    if (response.ContentType == "text/html" &&
-                        !request.Path.StartsWith("/tinymce") &&
-                        request.Url.LocalPath != "/logout" &&
-                        request.Url.LocalPath != "/mfa" &&
-                        string.Compare(HttpContext.Current.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) == 0 &&
-                        //Is this a main page and not a callback etc 
-                        (request.CurrentExecutionFilePathExtension == ".aspx" ||
-                         request.CurrentExecutionFilePathExtension == ".htm" ||
-                         request.CurrentExecutionFilePathExtension == ".ashx" ||
-                         request.CurrentExecutionFilePathExtension == string.Empty))
-                    {
-                        //redirect to 2 factor page
-                        response.Redirect("/mfa" + "?ReturnUrl=" + _urlService.Encode(request.RawUrl), true);
+                        SendValidationCode(user);
                     }
                 }
+            }
+        }
+
+        public bool ValidateEmailCode(User user, string code)
+        {
+            var result = false;
+            _usersService.RunAsUser(user.Username, () =>
+            {
+                if (!EmailChanged(user)) {
+                    result = true;
+                }
+                else
+                {
+                    //Read the users profile, if matches then clear the user profile and set _eakey_emailVerified to current email
+                    if (string.Compare(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value, code) == 0)
+                    {
+                        List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
+
+                        attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = ""});
+                        attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerified, Value = user.PrivateEmail});
+
+                        _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes});
+
+                        result = true;
+                    }
+                }
+            });
+
+            if (result)
+            {
+                //Now send a socket message bus response so the current page refreshes
+                _sockentMessager.NotifyCodeAccepted(user);
+            }
+
+            return result;
+        }
+
+        public bool SendValidationCode(User user)
+        {
+            if (string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value))
+            {
+                Random generator = new Random();
+                string code = generator.Next(0, 999999).ToString("D6");
+
+                //Send an emial
+                _emailProvider.SendEmail(user, code);
+
+                //Send a validation code, store it in the users profile extended attributes
+                List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
+
+                attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = code});
+
+                return _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes}).HasErrors();
+            }
+
+            return false;
+        }
+        private bool EmailNotSent(User user)
+        {
+            return string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value);
+        }
+
+        private bool EmailChanged(User user)
+        {
+            return (string.Compare(user.PrivateEmail, user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value, StringComparison.OrdinalIgnoreCase) != 0);
+        }
+
+        private void ForceRedirect(string page)
+        {
+// user is logged in but has not completed the second auth stage
+            var request = HttpContext.Current.Request;
+
+            if (request.Path.StartsWith("/socket.ashx"))
+            {
+                return;
+            }
+
+            var response = HttpContext.Current.Response;
+
+            // suppress any callbacks re search, notifications, header links etc
+            if (IsOauthRequest(request) == false &&
+                (request.Path.StartsWith("/api.ashx") ||
+                 request.Path.StartsWith("/oauth") ||
+                 (request.Url.LocalPath == "/utility/scripted-file.ashx" &&
+                  request.QueryString["_cf"] != null &&
+                  request.QueryString["_cf"] != "logout.vm" &&
+                  request.QueryString["_cf"] != "validate.vm")))
+            {
+                // this should only happen when in the second auth stage 
+                // for blocked callbacks so a bit brutal
+                response.Clear();
+                response.End();
+            }
+
+            // is it a suitable time to redirect the user to the second auth page
+            if (response.ContentType == "text/html" &&
+                !request.Path.StartsWith("/tinymce") &&
+                request.Url.LocalPath != "/logout" &&
+                request.Url.LocalPath != "/mfa" &&
+                request.Url.LocalPath != "/verifyemail" &&
+                string.Compare(HttpContext.Current.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) == 0 &&
+                //Is this a main page and not a callback etc 
+                (request.CurrentExecutionFilePathExtension == ".aspx" ||
+                 request.CurrentExecutionFilePathExtension == ".htm" ||
+                 request.CurrentExecutionFilePathExtension == ".ashx" ||
+                 request.CurrentExecutionFilePathExtension == string.Empty))
+            {
+                //redirect to 2 factor page
+                response.Redirect(page, true);
             }
         }
 
@@ -425,23 +458,50 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 
         public void RegisterUrls(IUrlController controller)
         {
-            controller.AddPage(_pageName, _pageName, new SiteRootRouteConstraint(), null, _pageName, new PageDefinitionOptions
+            controller.AddPage(_mfaPageName, _mfaPageName, new SiteRootRouteConstraint(), null, _mfaPageName, new PageDefinitionOptions
             {
-                DefaultPageXml = _defaultPageLayout,
+                DefaultPageXml = _defaultMfaPageLayout,
+                HasApplicationContext = false,
+                Validate = ValidateNonAnonymous
+            });
+
+            controller.AddPage(_pageVerifyEmailName, _pageVerifyEmailName, new SiteRootRouteConstraint(), null, _pageVerifyEmailName, new PageDefinitionOptions
+            {
+                DefaultPageXml = _defaultVerifyEmailPageLayout,
+                HasApplicationContext = false,
                 Validate = (context, accessController) =>
                 {
-                    if (_usersService.AccessingUser != null)
+                    var user = _usersService.Get(new UsersGetOptions { Id = context.UserId });
+                    if (_usersService.AnonymousUserName == user.Username && 
+                        !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["code"]) &&
+                        !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["userName"]))
                     {
-                        if (_usersService.AnonymousUserName == _usersService.AccessingUser.Username)
+                        var userValidation = _usersService.Get(new UsersGetOptions() {Username = HttpContext.Current.Request.QueryString["userName"]});
+
+                        if (userValidation != null && !userValidation.HasErrors())
                         {
-                            accessController.AccessDenied("This page is not available to you", false);
+                            if (ValidateEmailCode(userValidation, HttpContext.Current.Request.QueryString["code"]))
+                            {
+                                accessController.Redirect(Apis.Get<ICoreUrls>().Home(false));
+                            }
+                            
                         }
                     }
+
+                    ValidateNonAnonymous(context, accessController);
                 }
             });
         }
 
 
+        private void ValidateNonAnonymous(PageContext context, IUrlAccessController accessController)
+        {
+            var user = _usersService.Get(new UsersGetOptions { Id = context.UserId });
+            if (_usersService.AnonymousUserName == user.Username)
+            {
+                accessController.Redirect(Apis.Get<ICoreUrls>().LogIn());
+            }
+        }
 
         public List<OneTimeCode> GenerateCodes(User user)
         {

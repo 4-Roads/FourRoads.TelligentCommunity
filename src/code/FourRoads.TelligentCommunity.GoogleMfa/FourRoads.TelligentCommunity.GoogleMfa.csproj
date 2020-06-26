@@ -89,11 +89,20 @@
     <Compile Include="Extensions\GoogleAuthenticatorExtension.cs" />
     <Compile Include="Interfaces\IMfaDataProvider.cs" />
     <Compile Include="Interfaces\IMfaLogic.cs" />
+    <Compile Include="Logic\ActionDisposable.cs" />
+    <Compile Include="Interfaces\ILock.cs" />
     <Compile Include="Logic\MfaCryptoExtension.cs" />
     <Compile Include="Logic\MfaLogic.cs" />
+    <Compile Include="Logic\NamedItemLockSpin.cs" />
+    <Compile Include="Plugins\EmailTargetExtension.cs" />
+    <Compile Include="Plugins\EmailVerifiedSocketMessage.cs" />
+    <Compile Include="Interfaces\ISocketMessage.cs" />
+    <Compile Include="Interfaces\IVerifyEmailProvider.cs" />
+    <Compile Include="Plugins\VerifyEmailPlugin.cs" />
     <Compile Include="Model\OneTimeCode.cs" />
     <Compile Include="Model\OneTimeCodesStatus.cs" />
     <Compile Include="Plugins\FactoryDefaultWidgetProviderInstaller.cs" />
+    <Compile Include="Plugins\VerifyEmailTokens.cs" />
     <Compile Include="Resources\EmbeddedResources.cs" />
     <Compile Include="Resources\MfaSqlScriptsInstaller.cs" />
     <Compile Include="ScriptedFragments\SetupInfo.cs" />
@@ -110,6 +119,7 @@
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\generate-codes.vm" />
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\index.vm" />
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\upgrade-notice.vm" />
+    <EmbeddedResource Include="Resources\Widgets\ValidateEmail\validate.vm" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\mfa.js" />
@@ -139,6 +149,14 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\AdminDisableMfa\ui.js" />
     <EmbeddedResource Include="Resources\Widgets\AdminDisableMfa\widget.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\ValidateEmail\ui.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\ValidateEmail\widget.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

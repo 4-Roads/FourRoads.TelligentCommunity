@@ -1,0 +1,9 @@
+$core_v2_page.SetContentType('application/json')
+#if ($core_v2_page.IsPost)
+		#set($validationCode = $core_v2_page.GetFormValue('validationCode'))
+		#if($frcommon_v1_googleMfa.ValdaiteEmailVerificationCode($validationCode))
+			{"result":"true"}
+		#else
+			{"result":"false"}
+		#end
+#end
