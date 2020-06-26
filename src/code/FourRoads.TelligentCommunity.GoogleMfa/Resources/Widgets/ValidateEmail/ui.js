@@ -7,7 +7,9 @@
         $.fourroads.widgets = {};
 
     var attachHandlers = function (context) {
-            context.selectors.submit.click(function(){save(context, context.selectors.validateInput.val());});
+        context.selectors.submit.click(function () { save(context, context.selectors.validateInput.val()); });
+
+        context.selectors.newCode.click(function () { newCode(context); });
             
             // enter key on code entry
 			context.selectors.validateInput.bind('keypress', function(e){
@@ -37,8 +39,6 @@
                 data: data,
                 dataType: 'json',
                 success: function(response) {
-                    console.log(response);
-                    console.log(response.result);
                     if (response.result === "true") {
                         window.location = context.urls.returnUrl;
                     } else {
@@ -46,6 +46,19 @@
                         context.selectors.validateInput.closest('.field-item').find('.field-item-validation').show();
                     }
 
+                }
+            });
+        },
+        newCode = function (context) {
+
+            context.selectors.validateInput.closest('.field-item').find('.field-item-validation').hide();
+
+            return $.telligent.evolution.post({
+                url: context.urls.newCode,
+                data: {},
+                dataType: 'json',
+                success: function (response) {
+                    alert('New Code Requested');
                 }
             });
         };

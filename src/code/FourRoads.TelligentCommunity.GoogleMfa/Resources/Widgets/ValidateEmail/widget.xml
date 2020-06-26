@@ -1,10 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <scriptedContentFragments>
   <scriptedContentFragment name="${resource:ValEmail_Name}" version="10.0.0.4689" description="${resource:ValEmail_Description}" instanceIdentifier="a8b6e56eac3246169d1727c84c17fd66" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="varify-email" provider="3bd55b782e624b77b6e730f6bce17de2">
-    <contentScript><![CDATA[
+    <contentScript>
+          <![CDATA[
+           #if(!$core_v2_user.IsRegistered($core_v2_user.Accessing.Id))
+              $core_v2_widget.Hide()
+           #end
     
 #set($validateInput = $core_v2_widget.UniqueId('validateInput'))
 #set($submit = $core_v2_widget.UniqueId('submit'))
+#set($newCode = $core_v2_widget.UniqueId('newCode'))
 #set($code = $core_v2_page.GetQueryStringValue("code"))
 #set($userName = $core_v2_page.GetQueryStringValue("username"))
 
@@ -20,6 +25,7 @@
         </li>
         <li class="field-item">
             <a class="button" id="$submit" href="javascript:void(0)">$core_v2_language.GetResource('Submit')</a>
+            <a class="button" id="$newCode" href="javascript:void(0)">$core_v2_language.GetResource('NewCode')</a>
         </li>
       </ul> 
    </fieldset>   
@@ -43,10 +49,12 @@
             userName: '$!core_v2_encoding.JavascriptEncode($!userName)',
             selectors : {
                 validateInput: '#$core_v2_encoding.JavascriptEncode($validateInput)',
-                submit: '#$core_v2_encoding.JavascriptEncode($submit)'
+                submit: '#$core_v2_encoding.JavascriptEncode($submit)',
+                newCode: '#$core_v2_encoding.JavascriptEncode($newCode)'
             },
             urls : {
                 validate: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('validate.vm'))',
+                newCode: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('newCode.vm'))',
                 returnUrl: '$!core_v2_encoding.JavascriptEncode($returnUrl)'
             },
             resources : {
@@ -75,6 +83,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
   <resource name="Options">Options</resource>
   <resource name="SaveButton">Submit</resource>
   <resource name="Submit">Submit Code</resource>
+      <resource name="NewCode">Request New Code</resource>
   <resource name="EnterCode">Enter Code</resource>
   <resource name="Heading">Email Validation</resource>
   <resource name="Required">This value is mandatory</resource>

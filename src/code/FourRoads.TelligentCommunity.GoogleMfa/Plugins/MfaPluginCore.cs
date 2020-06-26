@@ -5,7 +5,6 @@ using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.GoogleMfa.DataProvider;
-using FourRoads.TelligentCommunity.GoogleMfa.Extensions;
 using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
 using FourRoads.TelligentCommunity.GoogleMfa.Logic;
 using FourRoads.TelligentCommunity.GoogleMfa.Resources;
@@ -17,7 +16,7 @@ using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginC
 
 namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
 {
-    public class GoogleMfaPluginCore : IPluginGroup , IBindingsLoader, INavigable, IConfigurablePlugin, ITranslatablePlugin
+    public class MfaPluginCore : IPluginGroup , IBindingsLoader, INavigable, IConfigurablePlugin, ITranslatablePlugin
     {
         private IPluginConfiguration _configuration;
         private ITranslatablePluginController _translations;
@@ -40,7 +39,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
         {
             typeof (MfaSqlScriptsInstaller),
             typeof (FactoryDefaultWidgetProviderInstaller),
-            typeof (GoogleAuthenticatorExtension),
+            typeof (MfaAuthenticatorExtension),
             typeof (VerifyEmailPlugin),
             typeof (VerifyEmailTokens),
             typeof (EmailVerifiedSocketMessage)

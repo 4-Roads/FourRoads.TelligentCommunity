@@ -86,7 +86,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="DataProvider\MfaDataProvider.cs" />
-    <Compile Include="Extensions\GoogleAuthenticatorExtension.cs" />
+    <Compile Include="Plugins\MfaAuthenticatorExtension.cs" />
     <Compile Include="Interfaces\IMfaDataProvider.cs" />
     <Compile Include="Interfaces\IMfaLogic.cs" />
     <Compile Include="Logic\ActionDisposable.cs" />
@@ -105,9 +105,9 @@
     <Compile Include="Plugins\VerifyEmailTokens.cs" />
     <Compile Include="Resources\EmbeddedResources.cs" />
     <Compile Include="Resources\MfaSqlScriptsInstaller.cs" />
-    <Compile Include="ScriptedFragments\SetupInfo.cs" />
-    <Compile Include="ScriptedFragments\GoogleAuthenticatorScriptedFragment.cs" />
-    <Compile Include="Plugins\GoogleMfaPluginCore.cs" />
+    <Compile Include="Plugins\WidgetApi\SetupInfo.cs" />
+    <Compile Include="Plugins\WidgetApi\MfaScriptedFragment.cs" />
+    <Compile Include="Plugins\MfaPluginCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -120,6 +120,7 @@
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\index.vm" />
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\upgrade-notice.vm" />
     <EmbeddedResource Include="Resources\Widgets\ValidateEmail\validate.vm" />
+    <EmbeddedResource Include="Resources\Widgets\ValidateEmail\newCode.vm" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\mfa.js" />
@@ -157,6 +158,9 @@
     <EmbeddedResource Include="Resources\Widgets\ValidateEmail\widget.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

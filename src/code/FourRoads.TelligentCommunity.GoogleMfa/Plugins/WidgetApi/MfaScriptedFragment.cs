@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.TelligentCommunity.GoogleMfa.Extensions;
 using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
 using FourRoads.TelligentCommunity.GoogleMfa.Model;
 using Google.Authenticator;
@@ -9,9 +8,9 @@ using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.ScriptedFragments
+namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins.WidgetApi
 {
-    public class GoogleAuthenticatorScriptedFragment
+    public class MfaScriptedFragment
     {
         public SetupInfo GenerateSetupInfo()
         {

@@ -12,7 +12,6 @@ using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 using FourRoads.TelligentCommunity.GoogleMfa.Model;
 using System.Collections.Generic;
 using System.Globalization;
-using FourRoads.TelligentCommunity.GoogleMfa.Plugins;
 using Telligent.Evolution.Extensibility;
 
 namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
@@ -159,23 +158,19 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 
         public bool SendValidationCode(User user)
         {
-            if (string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value))
-            {
-                Random generator = new Random();
-                string code = generator.Next(0, 999999).ToString("D6");
+        
+            string code = MfaCryptoExtension.RandomAlphanumeric(6);
+;
+            //Send an emial
+            _emailProvider.SendEmail(user, code);
 
-                //Send an emial
-                _emailProvider.SendEmail(user, code);
+            //Send a validation code, store it in the users profile extended attributes
+            List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
 
-                //Send a validation code, store it in the users profile extended attributes
-                List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
+            attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = code});
 
-                attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = code});
-
-                return _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes}).HasErrors();
-            }
-
-            return false;
+            return _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes}).HasErrors();
+                
         }
         private bool EmailNotSent(User user)
         {
@@ -206,7 +201,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                  (request.Url.LocalPath == "/utility/scripted-file.ashx" &&
                   request.QueryString["_cf"] != null &&
                   request.QueryString["_cf"] != "logout.vm" &&
-                  request.QueryString["_cf"] != "validate.vm")))
+                  request.QueryString["_cf"] != "validate.vm" && request.QueryString["_cf"] != "newCode.vm")))
             {
                 // this should only happen when in the second auth stage 
                 // for blocked callbacks so a bit brutal
@@ -365,7 +360,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 
         private bool ValidateOneTimeCode(User user, string code)
         {
-            return _mfaDataProvider.RedeemCode(user.Id.Value, code.Encrypt(GetAccountSecureKey(user), user.Id.Value));
+            return _mfaDataProvider.RedeemCode(user.Id.Value, code.Hash(GetAccountSecureKey(user), user.Id.Value));
         }
 
         private string GetCacheKey(User user)
@@ -515,7 +510,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             {
                 //generatig the code in form of XXXX XXXX with zero-padding
                 string plainTextCode = $"{MfaCryptoExtension.RandomInteger(0, 9999):D4} {MfaCryptoExtension.RandomInteger(0, 9999):D4}";
-                string encryptedCode = plainTextCode.Encrypt(GetAccountSecureKey(user), user.Id.Value);
+                string encryptedCode = plainTextCode.Hash(GetAccountSecureKey(user), user.Id.Value);
                 //we store just the hash value of the code, but...
                 OneTimeCode code = _mfaDataProvider.CreateCode(user.Id.Value, encryptedCode);
                 //..but return plain text code so users could see and print/save them

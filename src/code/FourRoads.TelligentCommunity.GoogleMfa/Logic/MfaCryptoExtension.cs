@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -13,7 +14,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
         /// <param name="key"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public static string Encrypt(this string code, string key, int userId)
+        public static string Hash(this string code, string key, int userId)
         {
             string input = $"{key}{code}{userId:D8}".Replace(" ", string.Empty);
             MD5 md5 = MD5.Create();
@@ -32,9 +33,21 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
             return sb.ToString();
         }
 
-        public static string Decrypt(this string code, string key, int userId)
+        public static string RandomAlphanumeric(int length)
         {
-            throw new NotImplementedException();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            StringBuilder res = new StringBuilder();
+
+            byte[] uintBuffer = new byte[sizeof(uint)];
+
+            while (length-- > 0)
+            {
+                Rand.GetBytes(uintBuffer);
+                uint num = BitConverter.ToUInt32(uintBuffer, 0);
+                res.Append(chars[(int)(num % (uint)chars.Length)]);
+            }
+
+            return res.ToString();
         }
 
         /// <summary>

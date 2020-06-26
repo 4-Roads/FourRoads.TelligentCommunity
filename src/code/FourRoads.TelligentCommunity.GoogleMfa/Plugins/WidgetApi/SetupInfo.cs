@@ -1,4 +1,4 @@
-﻿namespace FourRoads.TelligentCommunity.GoogleMfa.Extensions
+﻿namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins.WidgetApi
 {
     public class SetupInfo
     {
