@@ -1,5 +1,5 @@
 #if($core_v2_page.IsPost)
-#set($codes = $frcommon_v1_googleMfa.GenerateCodes($core_v2_user.Accessing.Id))
+#set($codes = $frcommon_v1_Mfa.GenerateCodes($core_v2_user.Accessing.Id))
 $core_v2_page.SetContentType('application/json')
 [
 #foreach($code in $codes)

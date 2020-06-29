@@ -1,9 +1,9 @@
-﻿using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
+﻿using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Sockets.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
+namespace FourRoads.TelligentCommunity.Mfa.Plugins
 {
     public class EmailVerifiedSocketMessage :  ISocket, ISocketMessage
     {

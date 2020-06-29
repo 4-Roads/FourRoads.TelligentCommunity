@@ -58,7 +58,7 @@
                 data: {},
                 dataType: 'json',
                 success: function (response) {
-                    alert('New Code Requested');
+                    alert(context.resources.requestNewCode);
                 }
             });
         };

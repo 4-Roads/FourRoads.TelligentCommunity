@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Model
+namespace FourRoads.TelligentCommunity.Mfa.Model
 {
     public class OneTimeCodesStatus
     {

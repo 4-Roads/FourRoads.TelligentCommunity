@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
+using FourRoads.TelligentCommunity.Mfa.Interfaces;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
+namespace FourRoads.TelligentCommunity.Mfa.Logic
 {
     public class NamedItemLockSpin<T> : ILock<T>
     {

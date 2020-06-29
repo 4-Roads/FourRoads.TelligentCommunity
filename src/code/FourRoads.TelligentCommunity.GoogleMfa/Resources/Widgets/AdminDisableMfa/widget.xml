@@ -12,7 +12,7 @@
   $code_v2_widget.Hide()
 #end
 #set($isMfaEnabled = '')
-#set($isMfaEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled($core_v2_user.Current.Id))
+#set($isMfaEnabled = $frcommon_v1_Mfa.TwoFactorEnabled($core_v2_user.Current.Id))
 #if($isMfaEnabled == '' || !$isMfaEnabled)
   $core_v2_widget.Hide()
 #end
@@ -40,7 +40,7 @@
     </contentScript>
     <languageResources>
       <language key="en-us">
-        <resource name="Mfa_Name">4 Roads - Admin Disable Google MFA</resource>
+        <resource name="Mfa_Name">4 Roads - Admin Disable MFA</resource>
         <resource name="Mfa_Description">Administrators can disable MFA for users by visiting their profile pages.</resource>
         <resource name="disableMFA">Disable MFA</resource>
         <resource name="successMsg">MFA was disabled</resource>

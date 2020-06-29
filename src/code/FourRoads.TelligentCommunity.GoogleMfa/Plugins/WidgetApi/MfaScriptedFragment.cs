@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
-using FourRoads.TelligentCommunity.GoogleMfa.Model;
+using FourRoads.TelligentCommunity.Mfa.Interfaces;
+using FourRoads.TelligentCommunity.Mfa.Model;
 using Google.Authenticator;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins.WidgetApi
+namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
 {
     public class MfaScriptedFragment
     {

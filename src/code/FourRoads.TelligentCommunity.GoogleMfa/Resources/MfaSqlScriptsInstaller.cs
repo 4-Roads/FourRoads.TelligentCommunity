@@ -1,12 +1,12 @@
 ﻿using FourRoads.Common.TelligentCommunity.Components;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Resources
+namespace FourRoads.TelligentCommunity.Mfa.Resources
 {
     public class MfaSqlScriptsInstaller : FourRoads.Common.TelligentCommunity.Plugins.Base.SqlScriptsInstaller
     {
-        protected override string ProjectName => "Google MFA";
+        protected override string ProjectName => "MFA SQL Installer";
 
-        protected override string BaseResourcePath => "FourRoads.TelligentCommunity.GoogleMfa.Resources.";
+        protected override string BaseResourcePath => "FourRoads.TelligentCommunity.Mfa.Resources.";
 
         protected override EmbeddedResourcesBase EmbeddedResources => new EmbeddedResources();
     }

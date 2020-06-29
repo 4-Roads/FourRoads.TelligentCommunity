@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Model
+namespace FourRoads.TelligentCommunity.Mfa.Model
 {
     public class OneTimeCode
     {

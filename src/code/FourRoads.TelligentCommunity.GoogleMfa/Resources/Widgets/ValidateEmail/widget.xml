@@ -21,7 +21,7 @@
         <li class="field-item display-name">
           <label for="$core_v2_encoding.HtmlAttributeEncode($displayNameId)">$core_v2_language.GetResource('EnterCode')</label>
           <span class="field-item-input"><input autocomplete="off" type="text" size="30" maxlength="254"  id="$core_v2_encoding.HtmlAttributeEncode($validateInput)" name="$core_v2_encoding.HtmlAttributeEncode($validateInput)" value="$!code" /></span>
-          <span class="field-item-validation" style="display: none;">Invalid code entered, please try again</span>
+          <span class="field-item-validation" style="display: none;">$core_v2_language.GetResource('InvalidCode')</span>
         </li>
         <li class="field-item">
             <a class="button" id="$submit" href="javascript:void(0)">$core_v2_language.GetResource('Submit')</a>
@@ -59,7 +59,8 @@
             },
             resources : {
                requiredField: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Required'))',
-               invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('InvalidCode'))'
+               invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('InvalidCode'))',
+               requestNewCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('RequestNewCode'))'
             }
           });
       });
@@ -88,6 +89,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
   <resource name="Heading">Email Validation</resource>
   <resource name="Required">This value is mandatory</resource>
   <resource name="InvalidCode">Invalid code entered, please try again</resource>
+      <resource name="RequestNewCode">A new code has been requested, any existing requests are now invalid</resource>
     </language></languageResources>
   </scriptedContentFragment>
 </scriptedContentFragments>

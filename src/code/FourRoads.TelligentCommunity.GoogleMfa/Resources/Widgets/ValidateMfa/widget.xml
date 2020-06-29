@@ -5,7 +5,7 @@
   <![CDATA[#set($validateInput = $core_v2_widget.UniqueId('validateInput'))
 #set($submit = $core_v2_widget.UniqueId('submit'))
 
-#set($twoFactorEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled())
+#set($twoFactorEnabled = $frcommon_v1_Mfa.TwoFactorEnabled())
 
 #if ($twoFactorEnabled)
    <form class="form">
@@ -63,9 +63,9 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
 </propertyGroup>
 ]]></configuration>
     <languageResources><language key="en-us">
-  <resource name="Mfa_Name">4 Roads - Google MFA Validation</resource>
+  <resource name="Mfa_Name">4 Roads - MFA Validation</resource>
   <resource name="Mfa_Header">MFA Validation</resource>
-  <resource name="Mfa_Description">Adds support for Google MFA.</resource>
+  <resource name="Mfa_Description">Adds support for MFA.</resource>
   <resource name="Options">Options</resource>
   <resource name="SaveButton">Submit</resource>
   <resource name="TwoFactorEnabled">Two factor authentication is enabled for this account, using your Google Authenticator App please enter the current code</resource>

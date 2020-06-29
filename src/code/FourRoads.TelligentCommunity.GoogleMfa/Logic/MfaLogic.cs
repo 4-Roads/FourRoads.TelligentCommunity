@@ -1,20 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Web;
 using System.Web.Security;
 using FourRoads.Common.Interfaces;
-using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
+using FourRoads.Common.TelligentCommunity.Routing;
+using FourRoads.TelligentCommunity.Mfa.Interfaces;
+using FourRoads.TelligentCommunity.Mfa.Model;
 using Google.Authenticator;
+using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
-using FourRoads.Common.TelligentCommunity.Routing;
 using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
-using FourRoads.TelligentCommunity.GoogleMfa.Model;
-using System.Collections.Generic;
-using System.Globalization;
-using Telligent.Evolution.Extensibility;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
+namespace FourRoads.TelligentCommunity.Mfa.Logic
 {
     public class MfaLogic : IMfaLogic
     {
@@ -100,24 +100,29 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
         /// auth is being performed.
         /// </summary>
         /// <param name="e"></param>
-        protected void EventsAfterIdentify(UserAfterIdentifyEventArgs e)
+        private void EventsAfterIdentify(UserAfterIdentifyEventArgs e)
         {
             var user = _usersService.AccessingUser;
             if (user.Username != _usersService.AnonymousUserName)
             {
-                if (TwoFactorEnabled(user) && TwoFactorState(user) == false)
+                //Make safe for not running in webcontext
+                if (HttpContext.Current != null)
                 {
-                    ForceRedirect("/mfa" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
-                }
-
-                if (_enableEmailVerification && EmailChanged(user))
-                {
-                    ForceRedirect("/verifyemail" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
-
-                    if (EmailNotSent(user))
+                    if (TwoFactorEnabled(user) && TwoFactorState(user) == false)
                     {
-                        SendValidationCode(user);
+                        ForceRedirect("/mfa" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
                     }
+
+                    if (_enableEmailVerification && EmailChanged(user))
+                    {
+                        ForceRedirect("/verifyemail" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
+
+                        if (EmailNotSent(user))
+                        {
+                            SendValidationCode(user);
+                        }
+                    }
+
                 }
             }
         }
@@ -133,7 +138,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                 else
                 {
                     //Read the users profile, if matches then clear the user profile and set _eakey_emailVerified to current email
-                    if (string.Compare(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value, code) == 0)
+                    if (String.CompareOrdinal(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value, code) == 0)
                     {
                         List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
 
@@ -158,16 +163,13 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
 
         public bool SendValidationCode(User user)
         {
-        
             string code = MfaCryptoExtension.RandomAlphanumeric(6);
 ;
             //Send an emial
             _emailProvider.SendEmail(user, code);
 
             //Send a validation code, store it in the users profile extended attributes
-            List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
-
-            attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = code});
+            List<ExtendedAttribute> attributes = new List<ExtendedAttribute> {new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = code}};
 
             return _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes}).HasErrors();
                 
@@ -217,14 +219,19 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
                 request.Url.LocalPath != "/verifyemail" &&
                 string.Compare(HttpContext.Current.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) == 0 &&
                 //Is this a main page and not a callback etc 
-                (request.CurrentExecutionFilePathExtension == ".aspx" ||
-                 request.CurrentExecutionFilePathExtension == ".htm" ||
-                 request.CurrentExecutionFilePathExtension == ".ashx" ||
-                 request.CurrentExecutionFilePathExtension == string.Empty))
+                IsPageRequest(request))
             {
                 //redirect to 2 factor page
                 response.Redirect(page, true);
             }
+        }
+
+        private static bool IsPageRequest(HttpRequest request)
+        {
+            return (request.CurrentExecutionFilePathExtension == ".aspx" ||
+                    request.CurrentExecutionFilePathExtension == ".htm" ||
+                    request.CurrentExecutionFilePathExtension == ".ashx" ||
+                    request.CurrentExecutionFilePathExtension == string.Empty);
         }
 
         private bool IsOauthRequest(HttpRequest request)

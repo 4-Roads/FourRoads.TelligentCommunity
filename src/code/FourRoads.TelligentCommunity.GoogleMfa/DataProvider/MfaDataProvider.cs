@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
-using FourRoads.TelligentCommunity.GoogleMfa.Model;
+using FourRoads.TelligentCommunity.Mfa.Interfaces;
+using FourRoads.TelligentCommunity.Mfa.Model;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.DataProvider
+namespace FourRoads.TelligentCommunity.Mfa.DataProvider
 {
     public class MfaDataProvider : IMfaDataProvider
     {

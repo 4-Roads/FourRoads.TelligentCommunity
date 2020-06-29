@@ -18,12 +18,12 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
     </configuration>
     <languageResources>
       <language key="en-us">
-        <resource name="Mfa_Name">4 Roads - Google MFA Configuration</resource>
+        <resource name="Mfa_Name">4 Roads - MFA Configuration</resource>
         <resource name="Mfa_Header">MFA Setup</resource>
-        <resource name="Mfa_Description">Configures support for Google MFA.</resource>
+        <resource name="Mfa_Description">Configures support for MFA.</resource>
         <resource name="Options">Options</resource>
         <resource name="SaveButton">Submit</resource>
-        <resource name="Introduction">Using the &lt;a href="https://support.google.com/accounts/answer/1066447?hl=en"&gt;Google Authentication App&lt;/a&gt; on your device please scan the QR Code below or enter the manual code.</resource>
+        <resource name="Introduction">Using the &lt;a href="https://support.google.com/accounts/answer/1066447?hl=en"&gt;Google Authentication App&lt;/a&gt; or similar compatible app on your device please scan the QR Code below or enter the manual code.</resource>
         <resource name="Complete_Setup">To complete your setup, please enter the current code displayed in the authenticator</resource>
         <resource name="TwoFactorEnabled">Two Factor Authentication is enabled</resource>
         <resource name="VerifyCode">Verify Code</resource>

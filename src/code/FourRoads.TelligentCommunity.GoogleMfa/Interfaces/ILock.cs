@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Interfaces
+namespace FourRoads.TelligentCommunity.Mfa.Interfaces
 {
     public interface ILock<T>
     {

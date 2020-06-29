@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
+namespace FourRoads.TelligentCommunity.Mfa.Logic
 {
     public class ActionDisposable : IDisposable
     {

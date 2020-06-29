@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Logic
+namespace FourRoads.TelligentCommunity.Mfa.Logic
 {
     public static class MfaCryptoExtension
     {

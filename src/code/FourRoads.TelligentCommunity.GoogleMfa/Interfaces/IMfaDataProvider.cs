@@ -1,7 +1,7 @@
 ﻿using System;
-using FourRoads.TelligentCommunity.GoogleMfa.Model;
+using FourRoads.TelligentCommunity.Mfa.Model;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Interfaces
+namespace FourRoads.TelligentCommunity.Mfa.Interfaces
 {
     public interface IMfaDataProvider
     {

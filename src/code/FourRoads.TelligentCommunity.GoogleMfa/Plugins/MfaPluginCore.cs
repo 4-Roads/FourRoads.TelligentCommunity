@@ -4,17 +4,17 @@ using System.Linq;
 using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
-using FourRoads.TelligentCommunity.GoogleMfa.DataProvider;
-using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
-using FourRoads.TelligentCommunity.GoogleMfa.Logic;
-using FourRoads.TelligentCommunity.GoogleMfa.Resources;
+using FourRoads.TelligentCommunity.Mfa.DataProvider;
+using FourRoads.TelligentCommunity.Mfa.Interfaces;
+using FourRoads.TelligentCommunity.Mfa.Logic;
+using FourRoads.TelligentCommunity.Mfa.Resources;
 using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
+namespace FourRoads.TelligentCommunity.Mfa.Plugins
 {
     public class MfaPluginCore : IPluginGroup , IBindingsLoader, INavigable, IConfigurablePlugin, ITranslatablePlugin
     {
@@ -26,7 +26,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
             Injector.Get<IMfaLogic>().Initialize(_configuration.GetBool("emailVerification").Value , PluginManager.Get<VerifyEmailPlugin>().FirstOrDefault() , PluginManager.Get<EmailVerifiedSocketMessage>().FirstOrDefault());
         }
 
-        public string Name => "4 Roads - Google MFA Plugin";
+        public string Name => "4 Roads - MFA Plugin";
 
         public string Description => "Plugin for adding MFA using the google authenticator";
 

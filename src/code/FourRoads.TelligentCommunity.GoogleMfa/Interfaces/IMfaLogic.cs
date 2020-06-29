@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using FourRoads.TelligentCommunity.GoogleMfa.Model;
-using FourRoads.TelligentCommunity.GoogleMfa.Plugins;
+using FourRoads.TelligentCommunity.Mfa.Model;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Interfaces
+namespace FourRoads.TelligentCommunity.Mfa.Interfaces
 {
     public interface IMfaLogic
     {

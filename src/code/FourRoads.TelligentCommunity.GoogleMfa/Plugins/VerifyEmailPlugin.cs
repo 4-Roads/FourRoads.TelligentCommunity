@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
 using System.Web;
-using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.TelligentCommunity.GoogleMfa.Interfaces;
+using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -12,7 +9,7 @@ using Telligent.Evolution.Extensibility.Email.Version1;
 using Telligent.Evolution.Extensibility.Templating.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
+namespace FourRoads.TelligentCommunity.Mfa.Plugins
 {
     public class VerifyEmailPlugin : ISingletonPlugin, IEmailTemplatePreviewPlugin, IVerifyEmailProvider
     {
@@ -38,7 +35,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
         <![CDATA[
 <p></p>
 <p>Hi&nbsp;${token:fcc0b64e-5df3-4d47-9df7-97944c8fda37:sub-template=%24%7Btoken%3A43d3b489-d151-4d30-96de-f1978a29c450%7D},</p>
-<p>You have been sent this email to verify that you own it on the community&nbsp;${token:7cb0b4af-6718-4330-a231-e712b328f8ea}</p>
+<p>You have been sent this email to verify that you own it.</p>
 <p>Please click on the link to confirm that this is your email and activate your community account or type in the following&nbsp;${token:5da2854d-7831-492b-9d36-080edf1ad458:tag-attributes=&title-template=&internal-template=Code}:&nbsp;</p>
 <p>${token:2d28492c-f737-4523-9ead-b6d7198a0057:tag-attributes=&title-template=&internal-template=Code}</p>
 <p></p>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
-        <id>FourRoads.TelligentCommunity111.GoogleMfa</id>
+        <id>FourRoads.TelligentCommunity111.Mfa</id>
         <version>$version$</version>
         <title>$title$</title>
         <authors>$author$</authors>
@@ -17,7 +17,7 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\**\FourRoads.TelligentCommunity.GoogleMfa.dll" target="lib\net47" exclude="*Tests*" />
+        <file src="bin\**\FourRoads.TelligentCommunity.Mfa.dll" target="lib\net47" exclude="*Tests*" />
     </files>
     <!--<ItemGroup>
         <PackageReference Include="GoogleAuthenticator" version="1.2.1">

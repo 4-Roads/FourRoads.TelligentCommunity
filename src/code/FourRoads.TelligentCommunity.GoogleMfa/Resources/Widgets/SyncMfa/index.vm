@@ -7,10 +7,10 @@
 #set($generateCodes = $core_v2_widget.UniqueId('generateCodes'))
 #set($codesWrapper = $core_v2_widget.UniqueId('codesWrapper'))
 
-#set($twoFactorEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled())
+#set($twoFactorEnabled = $frcommon_v1_Mfa.TwoFactorEnabled())
 
 #if (!$twoFactorEnabled)
-    #set($twoFactor = $frcommon_v1_googleMfa.GenerateSetupInfo())
+    #set($twoFactor = $frcommon_v1_Mfa.GenerateSetupInfo())
     
     <h3 class="warning">$core_v2_language.GetResource('Heading')</h3>
     
@@ -60,7 +60,7 @@
          padding: 0 20px;
       }
    </style>
-    #set($codesStatus = $frcommon_v1_googleMfa.GetOneTimeCodesStatus($core_v2_user.Accessing.Id))
+    #set($codesStatus = $frcommon_v1_Mfa.GetOneTimeCodesStatus($core_v2_user.Accessing.Id))
     <div class="form">
         <fieldset>
             <ul class="field-list">

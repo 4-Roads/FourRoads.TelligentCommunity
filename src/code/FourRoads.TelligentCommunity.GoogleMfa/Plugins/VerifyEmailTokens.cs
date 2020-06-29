@@ -5,7 +5,7 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Templating.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
+namespace FourRoads.TelligentCommunity.Mfa.Plugins
 {
     public class VerifyEmailTokens : ITranslatablePlugin, ITokenRegistrar
     {
@@ -19,7 +19,7 @@ namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
         }
 
         public string Name => "Email Verify Code Tokens";
-        public string Description => "Registers tokens for GoogleMFA plugin";
+        public string Description => "Registers tokens for MFA plugin";
 
         public void RegisterTokens(ITokenizedTemplateTokenController tokenController)
         {

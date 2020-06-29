@@ -4,18 +4,18 @@ $core_v2_page.SetContentType('application/json')
 	#set($validationCode = $core_v2_page.GetFormValue('validationCode'))
 
 	#if ($validationCode == "~~disable~~")
-		$frcommon_v1_googleMfa.EnableTwoFactor(false)
+		$frcommon_v1_Mfa.EnableTwoFactor(false)
 		{"result":"disabled"}
 	#else	
     	#if ($validationCode == "")
-    		$frcommon_v1_googleMfa.EnableTwoFactor(false)
+    		$frcommon_v1_Mfa.EnableTwoFactor(false)
     		{"result":"false"}
     	#else
-    		#if($frcommon_v1_googleMfa.Validate($validationCode))
-    			$frcommon_v1_googleMfa.EnableTwoFactor(true)
+    		#if($frcommon_v1_Mfa.Validate($validationCode))
+    			$frcommon_v1_Mfa.EnableTwoFactor(true)
     			{"result":"true"}
     		#else
-    			$frcommon_v1_googleMfa.EnableTwoFactor(false)
+    			$frcommon_v1_Mfa.EnableTwoFactor(false)
     			{"result":"false"}
     		#end
     	#end

@@ -1,6 +1,6 @@
 ﻿using Telligent.Evolution.Extensibility.Email.Version1;
 
-namespace FourRoads.TelligentCommunity.GoogleMfa.Plugins
+namespace FourRoads.TelligentCommunity.Mfa.Plugins
 {
     internal static class EmailTargetExtension
     {

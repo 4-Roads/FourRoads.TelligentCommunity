@@ -8,13 +8,13 @@
 	$core_v2_page.SendJsonError($errorMessage)
 #end
 #set($isMfaEnabled = '')
-#set($isMfaEnabled = $frcommon_v1_googleMfa.TwoFactorEnabled($user.Id))
+#set($isMfaEnabled = $frcommon_v1_Mfa.TwoFactorEnabled($user.Id))
 #if($isMfaEnabled == '' || !$isMfaEnabled)
 	$core_v2_page.SendJsonError($errorMessage)
 #end
 #if(!$core_v2_page.IsPost)
 	$core_v2_page.SendJsonError($errorMessage)
 #end
-$frcommon_v1_googleMfa.EnableTwoFactor($user.Id, false)
+$frcommon_v1_Mfa.EnableTwoFactor($user.Id, false)
 $core_v2_page.SetContentType('application/json')
 true
