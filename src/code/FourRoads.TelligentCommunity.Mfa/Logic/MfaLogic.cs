@@ -41,7 +41,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private static readonly string _eakey_codesGeneratedOnUtc = "__mfaCodesGeneratedOnUtc";
         private static readonly string _eakey_mfaVersion = "__mfaVersion";
         private static readonly string _eakey_emailVerified = "___emailVerified";
-        private static readonly string _eakey_emailVerifyCode = "_eakey_emailVerifyCode"; 
+        private static readonly string _eakey_emailVerifyCode = "_eakey_emailVerifyCode";
+        private DateTime _emailValilationCutoffDate;
 
 
         public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
@@ -52,11 +53,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _cache = cache;
         }
 
-        public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider, ISocketMessage sockentMessager)
+        public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider, ISocketMessage sockentMessager , DateTime emailValilationCutoffDate)
         {
             _enableEmailVerification = enableEmailVerification;
             _emailProvider = emailProvider;
             _sockentMessager = sockentMessager;
+            _emailValilationCutoffDate = emailValilationCutoffDate;
 
             _usersService.Events.AfterIdentify += EventsAfterIdentify;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
@@ -115,11 +117,19 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
                     if (_enableEmailVerification && EmailChanged(user))
                     {
-                        ForceRedirect("/verifyemail" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
-
-                        if (EmailNotSent(user))
+                        //Never validated and also joined before cutoff date so assumed a valid user
+                        if (user.JoinDate < _emailValilationCutoffDate && string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value))
                         {
-                            SendValidationCode(user);
+                            SetEmailInExtendedAttributes(user);
+                        }
+                        else
+                        {
+                            ForceRedirect("/verifyemail" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
+
+                            if (EmailNotSent(user))
+                            {
+                                SendValidationCode(user);
+                            }
                         }
                     }
 
@@ -140,12 +150,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                     //Read the users profile, if matches then clear the user profile and set _eakey_emailVerified to current email
                     if (String.CompareOrdinal(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value, code) == 0)
                     {
-                        List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
-
-                        attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = ""});
-                        attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerified, Value = user.PrivateEmail});
-
-                        _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes});
+                        SetEmailInExtendedAttributes(user);
 
                         result = true;
                     }
@@ -159,6 +164,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             }
 
             return result;
+        }
+
+        private void SetEmailInExtendedAttributes(User user)
+        {
+            List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
+
+            attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = ""});
+            attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerified, Value = user.PrivateEmail});
+
+            _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes});
         }
 
         public bool SendValidationCode(User user)
