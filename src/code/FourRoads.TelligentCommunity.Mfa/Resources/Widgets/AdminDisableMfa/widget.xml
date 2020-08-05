@@ -4,12 +4,12 @@
     <contentScript>
       <![CDATA[
 #if(!$ns_v1_SupportPermissions.IsAdmin($core_v2_user.Accessing.Id))
-  $code_v2_widget.Hide()
+  $core_v2_widget.Hide()
 #end
 #set($user = false)
 #set($user = $core_v2_user.Current)
 #if(!$user)
-  $code_v2_widget.Hide()
+  $core_v2_widget.Hide()
 #end
 #set($isMfaEnabled = '')
 #set($isMfaEnabled = $frcommon_v1_Mfa.TwoFactorEnabled($core_v2_user.Current.Id))
