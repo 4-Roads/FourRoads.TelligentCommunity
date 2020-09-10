@@ -1,0 +1,27 @@
+$core_v2_page.SetContentType('application/json')
+
+#set($parentGroups = $core_v2_group.CurrentGroupPath)
+#set($root = $core_v2_group.Root)
+#set($user = $core_v2_user.Current)
+#set($booleanResponse = $core_v2_group.IsGroupMember($groupId, $userId))
+#set($thisGroup =$core_v2_group.Current)
+#set($thisGroupArgid = $thisGroup.id)
+#set($includeAllSubGroupsArg = $root.id)
+#set($parentGroupIdArg=$root.id)
+#set($sortByArg="SortOrder")
+#set($groupList = $core_v2_group.List("%{IncudeAllSubGroups = 'false',SortBy=$sortByArg,ParentGroupId=$parentGroupIdArg}"))
+#set($graphicsURL = $core_v2_widget.GetFileUrl('graphics.png'))
+#set($rootId=$root.id)
+#set($rootName=$root.name)
+#set($postedId = $core_v2_page.GetQueryStringValue('w_groupId'))
+
+#set ($avatar = $core_v2_ui.GetResizedImageUrl($root.AvatarUrl, 32, 32, "%{border='0',ResizeMethod = 'ZoomAndCrop'}"))
+
+{
+    "id":"$root.id",
+    "type":"root",
+    "name":"$root.name",
+    "groupType":"$root.groupType",
+    "avatar":"$avatar",
+    "relationship":"000" 
+}

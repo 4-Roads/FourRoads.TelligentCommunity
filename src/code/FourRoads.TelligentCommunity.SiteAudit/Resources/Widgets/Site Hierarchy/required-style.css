@@ -1,0 +1,112 @@
+.fourroads-site-hierarchy.content-fragment {
+    font-family: 'Muli', Helvetica, Arial, sans-serif;
+    overflow-x: scroll;
+}
+    .fourroads-site-hierarchy.content-fragment-content,
+    .fourroads-site-hierarchy.content-fragment.with-spacing {
+        padding: 0 !important;
+    }
+
+.fourroads-site-hierarchy {
+}
+
+#chart-container { 
+    text-align: left; 
+    width:100%;
+}
+
+#node{
+    background-color:blue;
+}
+
+
+#edit-panel {
+    text-align: center;
+    position: relative;
+    left: 10px;
+    width: calc(100% - 40px);
+    border-radius: 4px;
+    float: left;
+    margin-top: 10px;
+    padding: 10px;
+    color: #fff;
+}
+
+#edit-panel * { 
+    font-size: 15px; 
+}
+
+.orgchart.l2r .node {
+    width: 140px;
+    height: 140px;
+    margin:2px;
+}
+
+.orgchart .node .content {
+    height:90px; 
+}
+
+.orgchart .node .title {
+    background-color:blue;
+}
+
+.orgchart.l2r .node .title {
+    transform: rotate(-90deg) translate(-25px, -25px) rotateY(180deg);
+}
+
+.orgchart.l2r .node .content {
+    transform: rotate(-90deg) translate(-25px, -25px) rotateY(180deg);
+}
+
+.orgchart .node .title {
+    height: 36px;
+    line-height: 16px;
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+}
+
+.orgchart>table:first-child{
+    margin: 20px auto;
+}
+
+.node .title {
+    border: 1px solid rgba(217, 83, 79, 0.8);
+    border-radius: 4px 4px 0 0;
+}
+
+.node .frontend1 .title{
+    background-color:white;
+    color:black;
+}
+
+.node .frontend2 .title{
+    background-color:#ffff9e;
+    color:black;
+}
+
+.node .frontend3 .title{
+    background-color:#ffda6b ;
+}
+
+.node .frontend4 .title{
+    background-color:#ff8c00;
+}
+
+.node .frontend5 .title{
+    background-color:red;
+}
+
+.avatar{
+    float:left;
+}
+
+.orcghart .lines .downLine{
+    color:black;
+}
+
+.oc-export-btn {
+  position: relative;
+  right: 0; 
+  top: 0; 
+}

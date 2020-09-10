@@ -1,0 +1,24 @@
+﻿<scriptedContentFragments>
+    <scriptedContentFragment name="${resource:Core_WidgetName}" version="10.1.8.10498" description="${resource:Core_WidgetDescription}" instanceIdentifier="016fe0413a424077958c140bd04d5af4" theme="" isCacheable="true" varyCacheByUser="true" showHeaderByDefault="false" cssClass="fourroads-widget-list" provider="cc29f4eff6f74d54a56a9a69068fddff" >
+        <contentScript>
+            <![CDATA[$core_v2_widget.ExecuteFile('index.vm')]]>
+        </contentScript>
+        <headerScript>
+            <![CDATA[$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Core_WidgetName}'))]]>
+        </headerScript>
+        <configuration>
+            <![CDATA[
+				
+			]]>
+        </configuration>
+        <languageResources>
+            <language key="en-us">
+                <resource name="CF_Title">Widget Title</resource>
+                <resource name="Core_WidgetName">4 Roads - Widget List</resource>
+                <resource name="Core_WidgetDescription">Widgets and pages that uses it</resource>
+            </language>
+        </languageResources>
+        <files>
+        </files>
+    </scriptedContentFragment>
+</scriptedContentFragments>

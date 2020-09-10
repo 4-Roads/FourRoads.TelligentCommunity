@@ -1,0 +1,33 @@
+<style type='text/css'>
+	$core_v2_widget.ExecuteFile('required-style.css')
+</style>
+
+#set($searchQuery = "%{}")
+#set($widgetList=$frcommon_v1_pageAudit.ListWidgets($searchQuery))
+
+<h2>Widgets</h2>
+<table class='fourroads-table'>
+    <thead>
+        <tr>
+            <td>FactoryDefaultProvider</td>
+            <td>Widgets</td>
+        </tr>
+    </thead>
+    <tbody>
+        #foreach($widget in $widgetList)
+        <tr>
+            <td>
+                $widget.FactoryDefaultProviderName
+            </td>
+            <td>
+                <strong>$widget.Name</strong>
+                #if($widget.Description)
+                    <br/>
+                    <i>$widget.Description</i>
+                #end
+                
+            </td>
+        </tr>
+        #end
+    </tbody>
+</table>

@@ -1,0 +1,55 @@
+.fourroads-widget-list.content-fragment {
+    font-family: 'Muli', Helvetica, Arial, sans-serif;
+    background-color: #e6e6e6;
+    margin-top: 1rem;
+    padding: 1rem 0 !important;
+    -webkit-box-shadow: 0 8px 6px -6px #a6a6a6;
+    -moz-box-shadow: 0 8px 6px -6px #a6a6a6;
+    box-shadow: 0 8px 6px -6px #a6a6a6;
+}
+    .fourroads-widget-list .content-fragment-content,
+    .fourroads-widget-list .content-fragment.with-spacing {
+        padding: 0 5rem !important;
+    }
+
+
+.fourroads-widget-list strong {
+    font-weight: 600;
+}
+
+.fourroads-widget-list i {
+    opacity: .7;
+}
+
+.fourroads-table {
+    width: 100%;
+    background-color: white;
+}
+
+    .fourroads-table thead tr {
+        background-color: #bfbfbf;
+        font-weight: 600;
+    }
+
+    .fourroads-table tbody tr {
+        border-bottom: 1px dotted gray;
+    }
+
+    .fourroads-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .fourroads-table td {
+        padding: 1rem;
+    }
+
+    .fourroads-table ul li {
+        border-bottom: 1px solid #d9d9d9;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+        .fourroads-table ul li:last-child {
+            border-bottom: none;
+            padding-top: 0.5rem;
+        }

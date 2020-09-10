@@ -1,0 +1,160 @@
+$core_v2_page.SetContentType('application/json')
+
+#set($postedId = $core_v2_page.GetQueryStringValue('w_groupId'))
+
+#set($childList = false)
+#set($childList = $core_v2_group.List("%{ParentGroupId = $postedId , PageIndex = 0 ,PageSize = 500}"))
+
+#set($forums = false)
+##set($forums = $core_v2_forum.List("%{ GroupId = $postedId, PageIndex = 0 ,PageSize = 500}"))
+
+#set($blogs = false)
+##set($blogs = $core_v2_blog.List("%{ GroupId = $postedId, PageIndex = 0 ,PageSize = 500}"))
+
+#set($wikis = false)
+##set($wikis = $core_v2_wiki.List("%{ GroupId = $postedId, PageIndex = 0 ,PageSize = 500}"))
+
+
+#set($previousContent = false)
+
+#if($childList.Count>0 || $forums.Count > 0 || $blogs.Count > 0 || $wikis.Count > 0)
+
+[
+    #foreach($child in $childList)
+    #between
+    ,
+    #each
+    
+        #set($previousContent = true)
+        #set($activityNew = 0)
+        #set($activityMid = 0)
+        #set($activityOld = 0)
+        #set($activityTotal = 0)
+
+        #set($query = "group:$child.id AND iscontent:true AND isapplication:false")
+        #set ($searchQuery = "%{}")
+        $searchQuery.Add("Query", $query)
+        $searchQuery.Add("PageSize", 1)
+        $searchQuery.Add("PageIndex", 0)
+        #set ($searchResults = $core_v2_searchResult.List($searchQuery))
+        #set ($activityTotal = $searchResults.TotalCount)
+
+        #set($query = "group:$child.id AND iscontent:true AND isapplication:false AND date:[NOW-365DAY TO NOW]")
+        #set ($searchQuery = "%{}")
+        $searchQuery.Add("Query", $query)
+        $searchQuery.Add("PageSize", 1)
+        $searchQuery.Add("PageIndex", 0)
+        #set ($searchResults = $core_v2_searchResult.List($searchQuery))
+        #set ($activityOld = $searchResults.TotalCount)
+        
+        #if ($activityOld > 0)
+          #set($query = "group:$child.id AND iscontent:true AND isapplication:false AND date:[NOW-182DAY TO NOW]")
+          #set ($searchQuery = "%{}")
+          $searchQuery.Add("Query", $query)
+          $searchQuery.Add("PageSize", 1)
+          $searchQuery.Add("PageIndex", 0)
+          #set ($searchResults = $core_v2_searchResult.List($searchQuery))
+          #set ($activityMid = $searchResults.TotalCount)
+        #end
+        
+        #if ($activityMid > 0)
+          #set($query = "group:$child.id AND iscontent:true AND isapplication:false AND date:[NOW-30DAY TO NOW]")
+          #set ($searchQuery = "%{}")
+          $searchQuery.Add("Query", $query)
+          $searchQuery.Add("PageSize", 1)
+          $searchQuery.Add("PageIndex", 0)
+          #set ($searchResults = $core_v2_searchResult.List($searchQuery))
+          #set ($activityNew = $searchResults.TotalCount)
+        #end
+        
+        #set ($avatar = $core_v2_ui.GetResizedImageUrl($child.AvatarUrl, 32, 32, "%{border='0',ResizeMethod = 'ZoomAndCrop'}"))
+    
+        {"id":"$child.id",
+        "type":"group",
+        "name":"$child.name",
+        "activityNew":"$activityNew",
+        "activityMid":"$activityMid",
+        "activityOld":"$activityOld",
+        "activityTotal":"$activityTotal",
+        "groupType": "$child.GroupType",
+        "avatar":"$avatar",
+        "relationship": "100"}
+    #end
+    
+    #if ($previousContent && $forums && $forums.Count > 0)
+    ,
+    #set($previousContent = false)
+    #end
+
+    #foreach($app in $forums)
+    #between
+    ,
+    #each
+        #set ($ApplicationId = $app.ApplicationId)
+        $core_v2_widget.ExecuteFile('applicationUsage.vm')
+
+        {"id":"$app.id",
+        "type":"app",
+        "name":"Forum - $app.Name",
+        "activityNew":"$activityNew",
+        "activityMid":"$activityMid",
+        "activityOld":"$activityOld",
+        "activityTotal":"$activityTotal",
+        "groupType": "",
+        "avatar":"",
+        "relationship": "100"}
+    #end
+
+    #if ($previousContent && $blogs && $blogs.Count > 0)
+    ,
+    #set($previousContent = false)
+    #end
+
+    #foreach($app in $blogs)
+    #between
+    ,
+    #each
+        #set ($ApplicationId = $app.ApplicationId)
+        $core_v2_widget.ExecuteFile('applicationUsage.vm')
+
+        {"id":"$app.id",
+        "type":"app",
+        "name":"Blog - $app.Name",
+        "activityNew":"$activityNew",
+        "activityMid":"$activityMid",
+        "activityOld":"$activityOld",
+        "activityTotal":"$activityTotal",
+        "groupType": "",
+        "avatar":"",
+        "relationship": "100"}
+    #end
+
+    #if ($previousContent && $wikis && $wikis.Count > 0)
+    ,
+    #set($previousContent = false)
+    #end
+
+    #foreach($app in $wikis)
+    #between
+    ,
+    #each
+        #set ($ApplicationId = $app.ApplicationId)
+        $core_v2_widget.ExecuteFile('applicationUsage.vm')
+
+        {"id":"$app.id",
+        "type":"app",
+        "name":"Wiki - $app.Name",
+        "activityNew":"$activityNew",
+        "activityMid":"$activityMid",
+        "activityOld":"$activityOld",
+        "activityTotal":"$activityTotal",
+        "groupType": "",
+        "avatar":"",
+        "relationship": "100"}
+    #end
+    
+]
+
+
+
+#end

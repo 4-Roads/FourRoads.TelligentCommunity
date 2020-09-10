@@ -1,0 +1,98 @@
+<style type='text/css'>
+	$core_v2_widget.ExecuteFile('required-style.css')
+</style>
+
+#set($themes=$frcommon_v1_pageAudit.GetPages())
+<h2>Theme Types</h2>
+#foreach($theme in $themes)
+    <div class="accordion">$theme.ThemeTypeName #if($theme.ThemeTypeDescription != '') - $theme.ThemeTypeDescription #end</div>
+    <div class="panel">
+        <table class='fourroads-table'>
+            <thead>
+                <tr>
+                    <td>Pages</td>
+                    <td>Widgets</td>
+                </tr>
+            </thead>
+            <tbody>
+                #foreach($page in $theme.Pages)
+                    <tr>
+                        <td>
+                            #if($page.Url && $page.Url != '')
+                                <a href='$page.Url'>
+                            #end
+                            <div style='display: none'>
+                            $core_v2_utility.Describe($page)
+                            </div>
+                            #if($page.IsCustom)
+                                #if($page.CustomPageTitle)
+                                    <strong>Title:</strong> $page.CustomPageTitle<br/>
+                                #end
+                                <strong>
+                                    Page Name:
+                                </strong>
+                                #if($page.CustomPageName)
+                                    $page.CustomPageName
+                                #elseif($page.CustomPageTitle)
+                                    $page.CustomPageTitle
+                                #else
+                                    $page.Name
+                                #end
+                                #if($page.CustomPageDescription)
+                                    <br/>$
+                                    <i>page.CustomPageDescription</i>
+                                #end
+                            #else
+                                #if($page.Title)
+                                    <strong>Title:</strong> $page.Title<br/>
+                                #end
+                                <strong>Page Name:</strong> $page.Name
+                                #if($page.Description)
+                                    <br/>
+                                    <i>$page.Description</i>
+                                #end
+                            #end
+
+                            #if($page.Url && $page.Url != '')
+                                </a>
+                            #end
+                            #if($page.LastModified)
+                                <br /><br />
+                                <strong>Last Modified:</strong> $page.LastModified
+                            #end
+                        </td>
+                        <td>
+                            <ul>
+                                #foreach($widget in $page.Widgets)
+                                    #if($widget.Name && $widget.Name != '')
+                                        <li>
+                                            $widget.Name #if($widget.Description && $widget.Description != '')- <i>$widget.Description</i>#end
+                                        </li>
+                                    #end
+                                #end
+                            </ul>
+                        </td>
+                    </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+#end
+
+
+<script type="text/javascript">
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+      acc[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+        }
+      });
+    }
+</script>

@@ -101,6 +101,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.InstagramFeed", "code\FourRoads.TelligentCommunity.InstagramFeed\FourRoads.TelligentCommunity.InstagramFeed.csproj", "{F292D49A-C0C9-4811-911C-C1A2A755FE05}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.SiteAudit", "code\FourRoads.TelligentCommunity.SiteAudit\FourRoads.TelligentCommunity.SiteAudit.csproj", "{E68D9036-1C04-4A0A-959F-8B006AE27DC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -401,6 +403,18 @@ Global
 		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release|x86.ActiveCfg = Release|Any CPU
 		{F292D49A-C0C9-4811-911C-C1A2A755FE05}.Release|x86.Build.0 = Release|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Debug|x86.Build.0 = Debug|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Release Output|Any CPU.Build.0 = Release|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Release Output|x86.ActiveCfg = Release|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Release Output|x86.Build.0 = Release|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Release|x86.ActiveCfg = Release|Any CPU
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -434,6 +448,7 @@ Global
 		{185591A1-4068-47C2-95B5-C63172787744} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{3DD12B46-736E-4252-B164-109159AC44DC} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{F292D49A-C0C9-4811-911C-C1A2A755FE05} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
+		{E68D9036-1C04-4A0A-959F-8B006AE27DC0} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		VisualSVNWorkingCopyRoot = ..

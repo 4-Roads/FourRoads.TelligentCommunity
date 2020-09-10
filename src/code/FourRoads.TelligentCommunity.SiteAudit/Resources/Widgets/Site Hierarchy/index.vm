@@ -1,0 +1,119 @@
+<script type='text/javascript' src='$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl("html2canvas.min.js"))'></script>
+<script type='text/javascript' src='$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl("jspdf.min.js"))'></script>
+<script type='text/javascript' src='$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl("jquery.orgchart.js"))'></script>
+
+<style type='text/css'>
+	$core_v2_widget.ExecuteFile('jquery.orgchart.css')
+</style>
+
+<style type='text/css'>
+	$core_v2_widget.ExecuteFile('required-style.css')
+</style>
+
+<div id="chart-container">
+</div>
+
+## get a measure on the overall site activity
+#set($groupList = $core_v2_group.List("%{IncludeAllSubGroups='true',PageIndex=0,PageSize=500,ParentGroupId=$root.id}"))
+#set($max = 0)
+#set($min=0)
+#foreach($group in $groupList)
+  #set($query = "group:$group.id AND iscontent:true AND isapplication:false AND date:[NOW-365DAY TO NOW]")
+  #set ($searchQuery = "%{}")
+  $searchQuery.Add("Query", $query)
+  $searchQuery.Add("PageSize", 1)
+  $searchQuery.Add("PageIndex", 0)
+  #set ($searchResults = $core_v2_searchResult.List($searchQuery))
+  #if($searchResults.TotalCount > $max)
+    #set($max = $searchResults.TotalCount)
+  #end
+#end
+
+
+<script type="text/javascript">
+     var childrenDataUrl = '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('getSubNodes.vm'))';
+     
+     var oc = $('#chart-container').orgchart({
+    'data' : '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('getRootNode.vm'))',
+    'nodeContent': 'groupType',
+    'nodeTemplate':orgTemplate,
+    'exportButton': true,
+    'exportFilename': 'TelligentCommunity',
+    'exportFileextension': 'pdf',    
+    'id':'id',
+    'activity':'activity',
+    'direction': 't2b',
+    'pan': false,
+    'zoom': false,
+    'createNode': function($node, data) {
+        $node.amount = data.activity;
+        if (data.type == "app") {
+            $node.expanded = true;
+        } else {
+            $node.expanded = false;
+        }
+        var thisNode = $node;
+        
+        // set handler for onclick
+        thisNode.on('click',function(event){
+            getkids(data.id , thisNode);
+        });
+        // auto expand all nodes 
+        thisNode.trigger('click');
+        }
+        
+      });
+      
+      function getkids (id, node) {
+          if (! node.expanded) {
+              jQuery.telligent.evolution.get({
+                url: childrenDataUrl,
+                data:{w_groupId:id},
+                success: function(response){
+                    node.expanded = true;
+                    if (response != null) {
+                        oc.addChildren(node, response);
+                        $(".content-fragment-page.group_structure").css({'height':(($(".orgchart.l2r").width()+ 100) +'px')});
+                    }
+                }
+            });
+          }
+      }
+      
+
+
+ function orgTemplate(data) {
+     
+     
+    var max = $max;
+    var quart = (max/4);
+    var threeQuart = (max*3/4);
+    var min=1;
+    var mid = (max/2);
+    
+    var heatmapClass = '';
+      
+	if(data.activityOld < min ) {
+	    heatmapClass = 'frontend1';
+    } 
+    if(data.activityOld >=min && data.activityOld < quart) {
+	    heatmapClass = 'frontend2';
+    } 
+    if(data.activityOld >=quart && data.activityOld < mid) {
+        heatmapClass = 'frontend3';
+    }
+    if(data.activityOld  >=mid && data.activityOld < max) {
+        heatmapClass = 'frontend4';
+    }
+    if(data.activityOld  >=max) {
+        heatmapClass = 'frontend5';
+    }
+      
+      var avatar = '';
+      if (data.avatar != null && data.avatar.length > 0) {
+          avatar = '<span class="avatar"><img src="'+ data.avatar + '"/></span>';
+      }
+
+      return ' <div class="node2 ' + heatmapClass + '"><div class="title"> ' + data.name + '</div><div class="content">' + avatar + data.groupType +'<br/> 30 Days :  ' + data.activityNew + '<br/> 6 Months :  ' + data.activityMid + '<br/> Year :  ' + data.activityOld + '<br/> Total :  ' + data.activityTotal + '<br></div><i class="edge verticalEdge topEdge fa"></i><i class="edge horizontalEdge rightEdge fa"></i><i class="edge horizontalEdge leftEdge fa"></i></div>';
+	}
+</script>

@@ -1,0 +1,42 @@
+#set($previousContent = true)
+
+#set($activityNew = 0)
+#set($activityMid = 0)
+#set($activityOld = 0)
+#set($activityTotal = 0)
+
+#set($query = "applicationid:$ApplicationId AND iscontent:true AND isapplication:false")
+#set ($searchQuery = "%{}")
+$searchQuery.Add("Query", $query)
+$searchQuery.Add("PageSize", 1)
+$searchQuery.Add("PageIndex", 0)
+#set ($searchResults = $core_v2_searchResult.List($searchQuery))
+#set ($activityTotal = $searchResults.TotalCount)
+
+#set($query = "applicationid:$ApplicationId AND iscontent:true AND isapplication:false AND date:[NOW-365DAY TO NOW]")
+#set ($searchQuery = "%{}")
+$searchQuery.Add("Query", $query)
+$searchQuery.Add("PageSize", 1)
+$searchQuery.Add("PageIndex", 0)
+#set ($searchResults = $core_v2_searchResult.List($searchQuery))
+#set ($activityOld = $searchResults.TotalCount)
+
+#if ($activityOld > 0)
+  #set($query = "applicationid:$ApplicationId AND iscontent:true AND isapplication:false AND date:[NOW-182DAY TO NOW]")
+  #set ($searchQuery = "%{}")
+  $searchQuery.Add("Query", $query)
+  $searchQuery.Add("PageSize", 1)
+  $searchQuery.Add("PageIndex", 0)
+  #set ($searchResults = $core_v2_searchResult.List($searchQuery))
+  #set ($activityMid = $searchResults.TotalCount)
+#end
+
+#if ($activityMid > 0)
+  #set($query = "applicationid:$ApplicationId AND iscontent:true AND isapplication:false AND date:[NOW-30DAY TO NOW]")
+  #set ($searchQuery = "%{}")
+  $searchQuery.Add("Query", $query)
+  $searchQuery.Add("PageSize", 1)
+  $searchQuery.Add("PageIndex", 0)
+  #set ($searchResults = $core_v2_searchResult.List($searchQuery))
+  #set ($activityNew = $searchResults.TotalCount)
+#end
