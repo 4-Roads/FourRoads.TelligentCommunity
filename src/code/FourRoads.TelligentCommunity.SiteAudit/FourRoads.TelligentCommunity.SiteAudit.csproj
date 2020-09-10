@@ -108,8 +108,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\Widget List\required-style.css" />
-    <Content Include="Resources\PageLayouts\site-audit.xml" />
-    <Content Include="Resources\Widgets\Widget List\widget.xml" />
+    <EmbeddedResource Include="Resources\PageLayouts\site-audit.xml" />
+    <EmbeddedResource Include="Resources\Widgets\Widget List\widget.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
