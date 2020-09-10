@@ -1,0 +1,12 @@
+﻿<contentFragmentPage pageName="fr-site-audit" isCustom="false" layout="Content" themeType="0c647246-6735-42f9-875d-c8b991fe739b">
+    <regions>
+        <region regionName="Content">
+            <contentFragments>
+                <contentFragment type="Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::0863059a664b4212864ac35324ed6af3" showHeader="False" cssClassAddition="no-wrapper with-spacing responsive-1" isLocked="False" configuration="" />
+                <contentFragment type="Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::ec51de59cb0c4a0993a4f88630cbea3c" showHeader="False" cssClassAddition="no-wrapper with-spacing responsive-1" isLocked="False" configuration="" />
+                <contentFragment type="Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::016fe0413a424077958c140bd04d5af4" showHeader="False" cssClassAddition="no-wrapper with-spacing responsive-1" isLocked="False" configuration="" />
+            </contentFragments>
+        </region>
+    </regions>
+    <contentFragmentTabs />
+</contentFragmentPage>

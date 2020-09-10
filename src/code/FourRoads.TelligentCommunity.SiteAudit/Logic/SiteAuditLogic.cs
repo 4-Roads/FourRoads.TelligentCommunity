@@ -26,8 +26,7 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
         private readonly IContentFragmentManagementUiExtensionService _managementUiExtensionService;
 
         private static readonly string _pageName = "fr-site-audit";
-        private static readonly string _defaultPageLayout = "<contentFragmentPage pageName=\"admin-site-hierarchy\" isCustom=\"false\" layout=\"Content\" themeType=\"0c647246-6735-42f9-875d-c8b991fe739b\"><regions><region regionName = \"Content\"><contentFragments><contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::0863059a664b4212864ac35324ed6af3\" showHeader=\"False\" cssClassAddition=\"no-wrapper with-spacing responsive-1\" isLocked=\"False\" configuration=\"\" /></contentFragments></region></regions><contentFragmentTabs /></contentFragmentPage>";
-
+        
         public SiteAuditLogic(IUsers usersService,
             IThemeTypeService themeTypeService,
             IContentFragmentPageService pageService,
@@ -53,7 +52,7 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
         {
             controller.AddPage(_pageName, _pageName, new FourRoads.Common.TelligentCommunity.Routing.SiteRootRouteConstraint(), null, _pageName, new PageDefinitionOptions
             {
-                DefaultPageXml = _defaultPageLayout,
+                DefaultPageXml = LoadPageResourceXml("site-audit"),
                 Validate = (context, accessController) =>
                 {
                     if (_usersService.AccessingUser != null)
@@ -168,6 +167,31 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
 
 
             return result.OrderBy(r => r.FactoryDefaultProviderName).ToList();
+        }
+
+        private Dictionary<string, string> defaultPageLayouts = null;
+
+        private string LoadPageResourceXml(string name)
+        {
+            if (defaultPageLayouts == null)
+            {
+                defaultPageLayouts = new Dictionary<string, string>();
+
+                var namespacePath = "FourRoads.TelligentCommunity.SiteAudit.Resources.PageLayouts";
+                var resources = new EmbeddedResources();
+                resources.EnumerateResources(namespacePath, ".xml", resourceName =>
+                {
+                    // Get the page content:
+                    var pageContent = resources.GetString(resourceName);
+                    var pageName = resourceName.Replace(".xml", "").Replace(namespacePath + ".", "");
+                    defaultPageLayouts[pageName.ToLower()] = pageContent;
+                });
+
+            }
+
+            string content;
+            defaultPageLayouts.TryGetValue(name.ToLower(), out content);
+            return content;
         }
     }
 }
