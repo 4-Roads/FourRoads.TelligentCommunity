@@ -17,7 +17,7 @@
             <tbody>
                 #foreach($page in $theme.Pages)
                     <tr>
-                        <td>
+                        <td id="$page.ContentId">
                             #if($page.Url && $page.Url != '')
                                 <a href='$page.Url'>
                             #end
@@ -65,7 +65,7 @@
                             <ul>
                                 #foreach($widget in $page.Widgets)
                                     #if($widget.Name && $widget.Name != '')
-                                        <li>
+                                        <li data-instanceIdentifier="$widget.InstanceIdentifier">
                                             $widget.Name #if($widget.Description && $widget.Description != '')- <i>$widget.Description</i>#end
                                         </li>
                                     #end

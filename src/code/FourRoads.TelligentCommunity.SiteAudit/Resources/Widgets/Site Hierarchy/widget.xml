@@ -8,17 +8,25 @@
     </headerScript>
     <configuration>
         <![CDATA[
-				
+				<propertyGroup id="options" resourceName="Options">
+                    <property id="direction" resourceName="CF_Direction" defaultValue="t2b">
+					  <propertyValue value="t2b" resourceName="CF_Direction_TopToBottom" />
+					  <propertyValue value="l2r" resourceName="CF_Direction_LeftToRight" />
+					</property>
+				</propertyGroup>
 			]]>
     </configuration>
     <languageResources>
         <language key="en-us">
             <resource name="CF_Title">Widget Title</resource>
             <resource name="Core_WidgetName">4 Roads - Site Hierarchy</resource>
-                <resource name="Core_WidgetDescription">Maps out site groups and pages</resource>
-            </language>
-        </languageResources>
-        <files>
-        </files>
+            <resource name="Core_WidgetDescription">Maps out site groups and pages</resource>
+            <resource name="CF_Direction">Chart display direction</resource>
+            <resource name="CF_Direction_TopToBottom">Top to bottom</resource>
+            <resource name="CF_Direction_LeftToRight">Left to right</resource>
+        </language>
+    </languageResources>
+    <files>
+    </files>
     </scriptedContentFragment>
 </scriptedContentFragments>

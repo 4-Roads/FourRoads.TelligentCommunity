@@ -2,6 +2,8 @@
 <script type='text/javascript' src='$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl("jspdf.min.js"))'></script>
 <script type='text/javascript' src='$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl("jquery.orgchart.js"))'></script>
 
+#set($direction = $core_v2_widget.GetStringValue('direction', 't2b'))
+
 <style type='text/css'>
 	$core_v2_widget.ExecuteFile('jquery.orgchart.css')
 </style>
@@ -31,69 +33,69 @@
 
 
 <script type="text/javascript">
-     var childrenDataUrl = '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('getSubNodes.vm'))';
-     
-     var oc = $('#chart-container').orgchart({
+    var childrenDataUrl = '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('getSubNodes.vm'))';
+
+    var oc = $('#chart-container').orgchart({
     'data' : '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('getRootNode.vm'))',
     'nodeContent': 'groupType',
     'nodeTemplate':orgTemplate,
     'exportButton': true,
     'exportFilename': 'TelligentCommunity',
-    'exportFileextension': 'pdf',    
+    'exportFileextension': 'pdf',
     'id':'id',
     'activity':'activity',
-    'direction': 't2b',
+    'direction': '$direction',
     'pan': false,
     'zoom': false,
     'createNode': function($node, data) {
-        $node.amount = data.activity;
-        if (data.type == "app") {
-            $node.expanded = true;
-        } else {
-            $node.expanded = false;
-        }
-        var thisNode = $node;
-        
-        // set handler for onclick
-        thisNode.on('click',function(event){
-            getkids(data.id , thisNode);
-        });
-        // auto expand all nodes 
-        thisNode.trigger('click');
-        }
-        
-      });
-      
-      function getkids (id, node) {
-          if (! node.expanded) {
-              jQuery.telligent.evolution.get({
-                url: childrenDataUrl,
-                data:{w_groupId:id},
-                success: function(response){
-                    node.expanded = true;
-                    if (response != null) {
-                        oc.addChildren(node, response);
-                        $(".content-fragment-page.group_structure").css({'height':(($(".orgchart.l2r").width()+ 100) +'px')});
-                    }
-                }
-            });
-          }
-      }
-      
+    $node.amount = data.activity;
+    if (data.type == "app") {
+    $node.expanded = true;
+    } else {
+    $node.expanded = false;
+    }
+    var thisNode = $node;
+
+    // set handler for onclick
+    thisNode.on('click',function(event){
+    getkids(data.id , thisNode);
+    });
+    // auto expand all nodes
+    thisNode.trigger('click');
+    }
+
+    });
+
+    function getkids (id, node) {
+    if (! node.expanded) {
+    jQuery.telligent.evolution.get({
+    url: childrenDataUrl,
+    data:{w_groupId:id},
+    success: function(response){
+    node.expanded = true;
+    if (response != null) {
+    oc.addChildren(node, response);
+    $(".content-fragment-page.group_structure").css({'height':(($(".orgchart.l2r").width()+ 100) +'px')});
+    }
+    }
+    });
+    }
+    }
 
 
- function orgTemplate(data) {
-     
-     
+
+    function orgTemplate(data) {
+
+
     var max = $max;
     var quart = (max/4);
     var threeQuart = (max*3/4);
     var min=1;
     var mid = (max/2);
-    
+
     var heatmapClass = '';
-      
-	if(data.activityOld < min ) {
+
+    if(data.activityOld < min ) {
 	    heatmapClass = 'frontend1';
     } 
     if(data.activityOld >=min && data.activityOld < quart) {

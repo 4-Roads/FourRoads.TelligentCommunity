@@ -1,6 +1,5 @@
 .fourroads-site-hierarchy.content-fragment {
     font-family: 'Muli', Helvetica, Arial, sans-serif;
-    overflow-x: scroll;
 }
     .fourroads-site-hierarchy.content-fragment-content,
     .fourroads-site-hierarchy.content-fragment.with-spacing {
@@ -10,15 +9,16 @@
 .fourroads-site-hierarchy {
 }
 
-#chart-container { 
-    text-align: left; 
-    width:100%;
+#chart-container {
+    text-align: left;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: scroll;
 }
 
 #node{
     background-color:blue;
 }
-
 
 #edit-panel {
     text-align: center;
@@ -34,6 +34,15 @@
 
 #edit-panel * { 
     font-size: 15px; 
+}
+
+.orgchart {
+    overflow-x: scroll;
+}
+
+.orgchart.l2r {
+    position: relative;
+    overflow-x: hidden;
 }
 
 .orgchart.l2r .node {

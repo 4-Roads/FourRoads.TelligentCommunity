@@ -11,12 +11,13 @@
         <tr>
             <td>FactoryDefaultProvider</td>
             <td>Widgets</td>
+            <td>Pages</td>
         </tr>
     </thead>
     <tbody>
         #foreach($widget in $widgetList)
         <tr>
-            <td>
+            <td data-instanceIdentifier="$widget.InstanceIdentifier">
                 $widget.FactoryDefaultProviderName
             </td>
             <td>
@@ -25,7 +26,31 @@
                     <br/>
                     <i>$widget.Description</i>
                 #end
-                
+            </td>
+            <td>
+                <ul>
+                    #foreach($page in $widget.Pages)
+                        <li data-contentid="$page.ContentId">
+                            #if($page.Url && $page.Url != '')
+                                <a href='$page.Url'>
+                            #end
+                            #if($page.IsCustom)
+                                #if($page.CustomPageName)
+                                    $page.CustomPageName
+                                #elseif($page.CustomPageTitle)
+                                    $page.CustomPageTitle
+                                #else
+                                    $page.Name
+                                #end
+                            #else
+                                $page.Name
+                            #end
+                            #if($page.Url && $page.Url != '')
+                                </a>
+                            #end
+                        </li>
+                    #end
+                </ul>
             </td>
         </tr>
         #end

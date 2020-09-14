@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Telligent.Evolution.Components;
 
 namespace FourRoads.TelligentCommunity.SiteAudit.Models
@@ -6,6 +7,8 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Models
     public class Widget
     {
         public int Id { get; set; }
+
+        public string InstanceIdentifier { get; set; }
 
         public string Name { get; set; }
 
@@ -22,9 +25,11 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Models
 
         public string ThemeTitle { get; set; }
 
+        public List<ThemePage> Pages { get; set; }
+
         public Widget()
         {
-
+            Pages = new List<ThemePage>();
         }
 
         public Widget(ConfiguredContentFragment configuredContentFragment)
@@ -37,6 +42,12 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Models
                 RegionName = configuredContentFragment.RegionName;
                 CssClassAddition = configuredContentFragment.CssClassAddition;
                 OrderNumber = configuredContentFragment.OrderNumber;
+
+                if(configuredContentFragment.ContentFragment is Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment)
+                {
+                    var instanceIdentifier = ((Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment)configuredContentFragment.ContentFragment)?.InstanceIdentifier;
+                    InstanceIdentifier = instanceIdentifier.Replace("-", "");
+                }
             }
         }
     }

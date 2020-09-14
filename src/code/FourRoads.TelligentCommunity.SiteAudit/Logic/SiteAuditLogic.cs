@@ -136,7 +136,7 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
 
                     themePagesWidgets.Pages.Add(themePage);
                 }
-                
+
                 result.Add(themePagesWidgets);
             }
             
@@ -148,6 +148,7 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
             var fragmentList = _managementUiExtensionService.ListFragments(options);
 
             var providers = _managementUiExtensionService.ListProviders();
+            var themePageWidgets = GetPages(false);
 
             var result = new List<Widget>();
 
@@ -156,11 +157,29 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
                 var defaultProvider = providers?.FirstOrDefault(p => p.Id == fragment.FactoryDefaultProvider);
                 var widget = new Widget()
                 {
+                    InstanceIdentifier = fragment.InstanceIdentifier.ToString(),
                     Name = fragment.ProcessedName,
                     Description = fragment.ProcessedDescription,
                     FactoryDefaultProvider = fragment.FactoryDefaultProvider,
-                    FactoryDefaultProviderName = defaultProvider?.Name
+                    FactoryDefaultProviderName = defaultProvider?.Name ?? "-"
                 };
+
+                var instanceIdentifier = fragment.InstanceIdentifier.ToString().Replace("-", "");
+
+                foreach(var themePage in themePageWidgets)
+                {
+                    var matchingPages = themePage.Pages.Where(p =>
+                        p.Widgets.Any(w => !string.IsNullOrEmpty(w.InstanceIdentifier) && w.InstanceIdentifier.Equals(instanceIdentifier, StringComparison.InvariantCultureIgnoreCase))
+                    ).ToList();
+
+                    foreach(var page in matchingPages)
+                    {
+                        if (!widget.Pages.Any(w => w.Id == page.Id))
+                        {
+                            widget.Pages.Add(page);
+                        }
+                    }
+                }
 
                 result.Add(widget);
             }
