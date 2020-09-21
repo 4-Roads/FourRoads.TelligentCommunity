@@ -1,5 +1,6 @@
 ﻿using FourRoads.TelligentCommunity.SiteAudit.Interfaces;
 using FourRoads.TelligentCommunity.SiteAudit.Models;
+using SmartAssembly.StringsEncoding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,11 @@ using Telligent.Evolution.Blogs.Internal.Constants;
 using Telligent.Evolution.Blogs.Plugins;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
+using Telligent.Evolution.ScriptedContentFragments;
+using Telligent.Evolution.ScriptedContentFragments.Model;
+using Telligent.Evolution.ScriptedContentFragments.Services;
 using Telligent.Evolution.Urls.Routing;
 
 namespace FourRoads.TelligentCommunity.SiteAudit.Logic
@@ -23,6 +28,7 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
         private readonly IContentFragmentPageDataService _pageDateService;
         private readonly IContentFragmentPageSampleUrlService _sampleUrlService;
         private readonly IPageDefinitionManager _pageDefinitionManager;
+        private readonly IGroupService _groupService;
         private readonly IContentFragmentManagementUiExtensionService _managementUiExtensionService;
 
         private static readonly string _pageName = "fr-site-audit";
@@ -33,6 +39,7 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
             IContentFragmentPageDataService pageDataService,
             IContentFragmentPageSampleUrlService sampleUrlService,
             IPageDefinitionManager pageDefinitionManager,
+            IGroupService groupService,
             IContentFragmentManagementUiExtensionService managementUiExtensionService)
         {
             _usersService = usersService;
@@ -41,6 +48,7 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
             _pageDateService = pageDataService;
             _sampleUrlService = sampleUrlService;
             _pageDefinitionManager = pageDefinitionManager;
+            _groupService = groupService;
             _managementUiExtensionService = managementUiExtensionService;
         }
 
@@ -75,6 +83,14 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
 
             foreach(var theme in themes)
             {
+                var themePagesWidgets = new ThemePagesWidgets(theme);
+                var themePageDefinitions = new Dictionary<string, IPageDefinition>();
+
+                foreach (var pageDefinition in _pageDefinitionManager.GetPageDefinitions(theme.ThemeTypeId))
+                {
+                    themePageDefinitions[pageDefinition.PageName] = pageDefinition;
+                }
+
                 if (theme is RootApplicationType)
                 {
                     themeApplicationId = Telligent.Evolution.Api.Content.ContentTypes.RootApplication;
@@ -86,25 +102,50 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
                 else if (theme is GroupContainerType)
                 {
                     themeApplicationId = Telligent.Evolution.Components.ContentTypes.Group;
+                    var groupsPage = _groupService.GetGroups(new GroupQuery()
+                    {
+                        IncludeParentGroup = true,
+                        IncludeAllSubGroups = true,
+                    });
+
+                    var groups = _groupService.GetGroups(new GroupQuery()
+                    {
+                        IncludeParentGroup = true,
+                        IncludeAllSubGroups = true,
+                        PageIndex = 0,
+                        PageSize = groupsPage.TotalItems
+                    });
+
+                    foreach (var group in groups)
+                    {
+                        var groupThemeId = theme.GetThemeId(group.ApplicationId);
+                        
+                        if (groupThemeId != null)
+                        {
+                            var themeName = groupThemeId.ToString().Replace("-", "");
+                            var groupPage = _pageService.GetAll(theme.ThemeTypeId, group.ApplicationId, themeName).FirstOrDefault();
+                            if (groupPage != null)
+                            {
+                                var themePage = new ThemePage(groupPage, themePageDefinitions, group.ApplicationId);
+                                themePage.Name = group.Name;
+                                themePage.Description = group.Description;
+
+                                themePagesWidgets.Pages.Add(themePage);
+                            }
+                        }
+                    }
                 }
                 else //(theme is Telligent.Evolution.Api.Content.Core.UserContentType)
                 {
                     themeApplicationId = Telligent.Evolution.Components.ContentTypes.User;
                 }
 
-                var themePagesWidgets = new ThemePagesWidgets(theme);
                 var themeId = theme.DefaultThemeId.ToString().Replace("-", "");
-
-                var themePageDefinitions = new Dictionary<string, IPageDefinition>();
                 
-                foreach (var pageDefinition in _pageDefinitionManager.GetPageDefinitions(theme.ThemeTypeId))
-                {
-                    themePageDefinitions[pageDefinition.PageName] = pageDefinition;
-                }
-
                 if (!forceDefault)
                 {
-                    foreach (var page in _pageService.GetAll(theme.ThemeTypeId, themeApplicationId, themeId))
+                    var allPages = _pageService.GetAll(theme.ThemeTypeId, themeApplicationId, themeId);
+                    foreach (var page in allPages)
                     {
                         var themePage = new ThemePage(page, themePageDefinitions, themeApplicationId);
                         if (string.IsNullOrWhiteSpace(themePage.Url))
@@ -115,8 +156,9 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
                         themePagesWidgets.Pages.Add(themePage);
                     }
                 }
-                
-                foreach (var page in _pageService.GetAllFactoryDefault(theme.ThemeTypeId, themeId))
+
+                var factoryDefault = _pageService.GetAllFactoryDefault(theme.ThemeTypeId, themeId);
+                foreach (var page in factoryDefault)
                 {
                     var themePage = new ThemePage(page, themePageDefinitions, themeApplicationId);
                     if (string.IsNullOrWhiteSpace(themePage.Url))
@@ -126,7 +168,9 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
 
                     themePagesWidgets.Pages.Add(themePage);
                 }
-                foreach (var page in _pageService.GetAllDefault(theme.ThemeTypeId, themeId))
+
+                var allDefault = _pageService.GetAllDefault(theme.ThemeTypeId, themeId);
+                foreach (var page in allDefault)
                 {
                     var themePage = new ThemePage(page, themePageDefinitions, themeApplicationId);
                     if (string.IsNullOrWhiteSpace(themePage.Url))
