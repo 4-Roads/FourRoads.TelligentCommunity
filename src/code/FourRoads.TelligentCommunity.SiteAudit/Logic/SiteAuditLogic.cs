@@ -1,21 +1,18 @@
 ﻿using FourRoads.TelligentCommunity.SiteAudit.Interfaces;
 using FourRoads.TelligentCommunity.SiteAudit.Models;
-using SmartAssembly.StringsEncoding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Telligent.Evolution.Api.Content.Groups;
 using Telligent.Evolution.Api.Content.Root;
 using Telligent.Evolution.Api.Plugins.Administration.ContentFragmentManagement;
+using Telligent.Evolution.Blogs.Internal;
 using Telligent.Evolution.Blogs.Internal.Constants;
 using Telligent.Evolution.Blogs.Plugins;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
-using Telligent.Evolution.ScriptedContentFragments;
-using Telligent.Evolution.ScriptedContentFragments.Model;
-using Telligent.Evolution.ScriptedContentFragments.Services;
+using Telligent.Evolution.MediaGalleries.Internal;
 using Telligent.Evolution.Urls.Routing;
 
 namespace FourRoads.TelligentCommunity.SiteAudit.Logic
@@ -29,6 +26,8 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
         private readonly IContentFragmentPageSampleUrlService _sampleUrlService;
         private readonly IPageDefinitionManager _pageDefinitionManager;
         private readonly IGroupService _groupService;
+        private readonly IGalleryService _galleryService;
+        private readonly IBlogService _blogService;
         private readonly IContentFragmentManagementUiExtensionService _managementUiExtensionService;
 
         private static readonly string _pageName = "fr-site-audit";
@@ -40,6 +39,8 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
             IContentFragmentPageSampleUrlService sampleUrlService,
             IPageDefinitionManager pageDefinitionManager,
             IGroupService groupService,
+            IGalleryService galleryService,
+            IBlogService blogService,
             IContentFragmentManagementUiExtensionService managementUiExtensionService)
         {
             _usersService = usersService;
@@ -49,6 +50,8 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
             _sampleUrlService = sampleUrlService;
             _pageDefinitionManager = pageDefinitionManager;
             _groupService = groupService;
+            _galleryService = galleryService;
+            _blogService = blogService;
             _managementUiExtensionService = managementUiExtensionService;
         }
 
@@ -98,14 +101,52 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
                 else if (theme is BlogApplicationType)
                 {
                     themeApplicationId = BlogContentTypes.Blog;
+
+                    // get blogs
+                    var blogsPage = _blogService.GetBlogs(new BlogsListOptions()
+                    {
+                        IncludeSubGroups = true,
+                        PageIndex = 0,
+                        PageSize = 1
+                    });
+
+                    var blogs = _blogService.GetBlogs(new BlogsListOptions()
+                    {
+                        IncludeSubGroups = true,
+                        PageIndex = 0,
+                        PageSize = blogsPage.TotalCount
+                    });
+
+                    foreach (var blog in blogs)
+                    {
+                        var blogThemeId = theme.GetThemeId(blog.ApplicationId);
+
+                        if (blogThemeId != null)
+                        {
+                            var themeName = blogThemeId.ToString().Replace("-", "");
+                            var groupPage = _pageService.GetAll(theme.ThemeTypeId, blog.ApplicationId, themeName).FirstOrDefault();
+                            if (groupPage != null)
+                            {
+                                var themePage = new ThemePage(groupPage, themePageDefinitions, blog.ApplicationId);
+                                themePage.Name = blog.Name;
+                                themePage.Description = blog.Description;
+
+                                themePagesWidgets.Pages.Add(themePage);
+                            }
+                        }
+                    }
                 }
                 else if (theme is GroupContainerType)
                 {
                     themeApplicationId = Telligent.Evolution.Components.ContentTypes.Group;
+
+                    // get groups
                     var groupsPage = _groupService.GetGroups(new GroupQuery()
                     {
                         IncludeParentGroup = true,
                         IncludeAllSubGroups = true,
+                        PageIndex = 0,
+                        PageSize = 1
                     });
 
                     var groups = _groupService.GetGroups(new GroupQuery()
@@ -134,6 +175,42 @@ namespace FourRoads.TelligentCommunity.SiteAudit.Logic
                             }
                         }
                     }
+
+                    // get galleries
+                    var galleriesPage = _galleryService.GetGalleries(new GalleriesListOptions()
+                    {
+                        IncludeSubGroups = true,
+                        PageIndex = 0,
+                        PageSize = 1
+                    });
+
+                    var galleries = _galleryService.GetGalleries(new GalleriesListOptions()
+                    {
+                        IncludeSubGroups = true,
+                        PageIndex = 0,
+                        PageSize = galleriesPage.TotalCount
+                    });
+
+                    foreach (var gallery in galleries)
+                    {
+                        var galleryThemeId = gallery.Group?.ThemeId;
+
+                        if (galleryThemeId != null)
+                        {
+                            var themeName = galleryThemeId.ToString().Replace("-", "");
+                            var groupPage = _pageService.GetAll(theme.ThemeTypeId, gallery.ApplicationId, themeName).FirstOrDefault();
+                            if (groupPage != null)
+                            {
+                                var themePage = new ThemePage(groupPage, themePageDefinitions, gallery.ApplicationId);
+                                themePage.Name = gallery.Name;
+                                themePage.Description = gallery.Description;
+
+                                themePagesWidgets.Pages.Add(themePage);
+                            }
+                        }
+                    }
+
+                    
                 }
                 else //(theme is Telligent.Evolution.Api.Content.Core.UserContentType)
                 {
