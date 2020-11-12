@@ -11,6 +11,7 @@ using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+using IPermissions = Telligent.Evolution.Extensibility.Api.Version2.IPermissions;
 
 namespace FourRoads.TelligentCommunity.MigratorFramework
 {
@@ -287,6 +288,25 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                     {
                         Authors = string.Join(",", authors)
                     }).ThrowErrors();
+            }
+        }
+
+        public void EnsureUploadPermissions(Gallery gallery)
+        {
+            int roleId = 2; // Registered Users
+            IEnumerable<Guid> permissionIds = new List<Guid>() {
+                Guid.Parse("3115a602-82af-41ab-ae71-b56c568b6d7b"), // Create media
+                Guid.Parse("8ddbfc6f-083e-4642-8c9a-72c022a69ceb"), // Upload files
+            };
+
+            foreach (Guid permissionId in permissionIds)
+            {
+                Apis.Get<IPermissions>().Set(true, roleId, permissionId,
+                    new Telligent.Evolution.Extensibility.Api.Version2.PermissionSetOptions()
+                    {
+                        ApplicationId = gallery.ApplicationId,
+                        GroupId = gallery.Group.Id
+                    });
             }
         }
 
