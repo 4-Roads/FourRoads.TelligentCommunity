@@ -52,8 +52,8 @@
       url: '$core_v2_encoding.JavascriptEncode( $core_v2_widget.GetExecutedFileUrl("save.vm"))',
       data: {
       inlineContentName: '$core_v2_encoding.JavascriptEncode($context.InlineContentName)',
-      currentContent: $core_v2_editor.GetContentScript($contentId),
-      currentAnonymousContent: $core_v2_editor.GetContentScript($anonymousContentId)
+          currentContent: function () { return $core_v2_editor.GetContentScript($contentId) },
+          currentAnonymousContent: function () { return $core_v2_editor.GetContentScript($anonymousContentId) }
       },
       success: function (response) {
         jQuery.glowModal.close();
