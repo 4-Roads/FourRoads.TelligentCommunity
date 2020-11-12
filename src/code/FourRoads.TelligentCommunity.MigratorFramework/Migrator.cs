@@ -250,7 +250,13 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                     if (groupUser == null)
                     {
-                        groupUser = Apis.Get<IGroupUserMembers>().Create(@group.Id.Value, author.Id.Value, new GroupUserMembersCreateOptions() {GroupMembershipType = "Member"});
+                        //Bug in telligent if the user is an owner then IEffectiveGroupMembers List does not work
+                        groupUser = Apis.Get<IGroupUserMembers>().Get(@group.Id.Value, new GroupUserMembersGetOptions() { Username = author.Username });
+
+                        if (groupUser == null)
+                        {
+                            groupUser = Apis.Get<IGroupUserMembers>().Create(@group.Id.Value, author.Id.Value, new GroupUserMembersCreateOptions() { GroupMembershipType = "Member" });
+                        }
                     }
 
                     groupUser.ThrowErrors();
