@@ -85,21 +85,19 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                 _repository.List,
                                 k =>
                                 {
-                                    try
+                                    if (_userHandlers.Contains(k.ObjectType))
                                     {
-                                        if (_userHandlers.Contains(k.ObjectType))
+                                        if (_factory.GetHandler(k.ObjectType).MigratedObjectExists(k))
                                         {
-                                            if (_factory.GetHandler(k.ObjectType).MigratedObjectExists(k))
-                                            {
-                                                _existingData.Add(k.ObjectType + k.SourceKey, k);
-                                            }
+                                            _existingData.Add(k.ObjectType + k.SourceKey, k);
                                         }
                                     }
-                                    catch (Exception ex)
-                                    {
-                                        _repository.FailedItem(k.ObjectType, k.SourceKey, ex.ToString());
-                                    }
-                                });
+                                },
+                                (e,k) =>
+                                {
+                                    _repository.FailedItem(k.ObjectType, k.SourceKey, e.ToString());
+                                }
+                                );
                         }
 
                         _repository.CreateLogEntry("Starting Migration", EventLogEntryType.Information);
@@ -134,6 +132,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                             proccessingTime += end - start;
                                         }
 
+                                        Interlocked.Increment(ref _processingCounter);
+
                                         _lastKnownContext = _repository.CreateUpdate(
                                             new MigratedData()
                                             {
@@ -155,17 +155,12 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                     handler.ListObjectKeys,
                                     v =>
                                     {
-                                        try
-                                        {
-                                            Interlocked.Increment(ref _processingCounter);
-
-                                            ProcessItem(v);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            _repository.FailedItem(objectType, v, ex.ToString());
-                                            retryList.Add(v);
-                                        }
+                                        ProcessItem(v);
+                                    },
+                                    (e,k) =>
+                                    {
+                                        _repository.FailedItem(objectType, k, e.ToString());
+                                        retryList.Add(k);
                                     }
                                 );
 
@@ -195,7 +190,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             }
         }
 
-        private void EnumerateAll<T>(Func<int, int, Interfaces.IPagedList<T>> list, Action<T> func)
+        private void EnumerateAll<T>(Func<int, int, Interfaces.IPagedList<T>> list, Action<T> func, Action<Exception,T> exceptionHandler )
         {
             int pageIndex = 0;
             int pageSize = 5000;
@@ -217,7 +212,15 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                     for (int i = range.Item1; i < range.Item2; i++)
                     {
-                        func(items[i]);
+                        try
+                        {
+
+                            func(items[i]);
+                        }
+                        catch(Exception ex)
+                        {
+                            exceptionHandler(ex , items[i]);
+                        }
 
                         if (IsCanceled())
                             return;
