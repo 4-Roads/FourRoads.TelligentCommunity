@@ -56,6 +56,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.MediaGalleries">
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.Platform">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>

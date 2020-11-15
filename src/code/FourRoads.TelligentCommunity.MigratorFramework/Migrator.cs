@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using FourRoads.TelligentCommunity.MigratorFramework.Entities;
 using FourRoads.TelligentCommunity.MigratorFramework.Interfaces;
 using FourRoads.TelligentCommunity.MigratorFramework.Sql;
@@ -23,10 +25,25 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         private CancellationToken _cancel;
         private Dictionary<string, MigratedData> _existingData = new Dictionary<string, MigratedData>();
         private string[] _userHandlers;
+        private static Dictionary<string,string> _locks = new Dictionary<string, string>();
+        private static object _lock = new object();
 
         public Migrator()
         {
             _repository = new MigrationRepository();
+        }
+
+        private static int _processingCounter;
+
+        public void SafeRunAs(string userName, Action action)
+        {
+            if (!_locks.ContainsKey(userName))
+                _locks.Add(userName, userName);
+
+            lock (_locks[userName])
+            {
+                Apis.Get<IUsers>().RunAsUser(userName, action);
+            }
         }
 
         private void Start(bool updateIfExistsInDestination, bool checkForDeletions)
@@ -86,53 +103,83 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                         }
 
                         _repository.CreateLogEntry("Starting Migration", EventLogEntryType.Information);
+                        _processingCounter = 0;
 
                         foreach (var objectType in objectTypes)
                         {
+                            if (IsCanceled())
+                            {
+                                break;
+                            }
+
                             if (_userHandlers.Contains(objectType))
                             {
                                 var handler = _factory.GetHandler(objectType);
 
-                                double processingTimeTotal = 0;
-                                int counter = 0;
+                                List<string> retryList = new List<string>();
+
+                                void ProcessItem(string k)
+                                {
+                                    long start = DateTime.Now.Ticks;
+
+                                    var result = handler.MigrateObject(k, this, updateIfExistsInDestination);
+                                   
+                                    if (result != null)
+                                    {
+                                        double proccessingTime = 0;
+                                        if (_processingCounter % 100 == 0)
+                                        {
+                                            long end = DateTime.Now.Ticks;
+
+                                            proccessingTime += end - start;
+                                        }
+
+                                        _lastKnownContext = _repository.CreateUpdate(
+                                            new MigratedData()
+                                            {
+                                                ObjectType = objectType,
+                                                SourceKey = k,
+                                                ResultKey = result
+                                            },
+                                            _processingCounter,
+                                            proccessingTime);
+                                    }
+                                    else
+                                    {
+                                        _repository.FailedItem(objectType, k, "Item skipped");
+                                    }
+
+                                }
 
                                 EnumerateAll(
                                     handler.ListObjectKeys,
-
-                                    k =>
+                                    v =>
                                     {
-                                        long start = DateTime.Now.Ticks;
-                                        counter++;
-
                                         try
                                         {
-                                            var result = handler.MigrateObject(k, this, updateIfExistsInDestination);
+                                            Interlocked.Increment(ref _processingCounter);
 
-                                            if (result != null)
-                                            {
-                                                _lastKnownContext = _repository.CreateUpdate(
-                                                    new MigratedData()
-                                                    {
-                                                        ObjectType = objectType,
-                                                        SourceKey = k,
-                                                        ResultKey = result
-                                                    },
-                                                    processingTimeTotal / counter);
-                                            }
-                                            else
-                                            {
-                                                _repository.FailedItem(objectType, k, "Item skipped");
-                                            }
+                                            ProcessItem(v);
                                         }
                                         catch (Exception ex)
                                         {
-                                            _repository.FailedItem(objectType, k, ex.ToString());
+                                            _repository.FailedItem(objectType, v, ex.ToString());
+                                            retryList.Add(v);
                                         }
+                                    }
+                                );
 
-                                        long end = DateTime.Now.Ticks;
-
-                                        processingTimeTotal += end - start;
-                                    });
+                                foreach (var k in retryList)
+                                {
+                                    try
+                                    {
+                                        ProcessItem(k);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _repository.FailedItem(objectType, k, "RETRY:" + ex.ToString());
+                                    }
+                                }
                             }
                         }
 
@@ -151,7 +198,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         private void EnumerateAll<T>(Func<int, int, Interfaces.IPagedList<T>> list, Action<T> func)
         {
             int pageIndex = 0;
-            int pageSize = 500;
+            int pageSize = 5000;
             var pagedItems = list( pageSize, pageIndex);
 
             if (IsCanceled())
@@ -159,10 +206,23 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
             while (pagedItems != null)
             {
-                foreach (var item in pagedItems)
+                var items = pagedItems.ToArray();
+
+                var rangePartitioner = Partitioner.Create(0, items.Length , 500);
+
+                Parallel.ForEach(rangePartitioner , (range, loopState) =>
                 {
-                    func(item);
-                }
+                    var context = Telligent.Evolution.Components.CSContext.Create() ;
+                    context.User = Telligent.Evolution.Users.GetUser(Apis.Get<IUsers>().ServiceUserName);
+
+                    for (int i = range.Item1; i < range.Item2; i++)
+                    {
+                        func(items[i]);
+
+                        if (IsCanceled())
+                            return;
+                    }
+                });
 
                 if (HasMoreItems(pageIndex , pageSize , pagedItems.Count() , pagedItems.Total))
                 {
@@ -196,18 +256,21 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public MigratedData GetMigratedData(string objectType, string sourceKey)
         {
-            string key = objectType + sourceKey;
+            lock (_lock)
+            {
+                string key = objectType + sourceKey;
 
-            if (_existingData.ContainsKey(key))
-                 return _existingData[key];
+                if (_existingData.ContainsKey(key))
+                    return _existingData[key];
 
-            //Try and get it from the database
-            var result =_repository.GetMigratedData(objectType, sourceKey);
+                //Try and get it from the database
+                var result = _repository.GetMigratedData(objectType, sourceKey);
 
-            if (result != null)
-                _existingData.Add(key, result);
+                if (result != null)
+                    _existingData.Add(key, result);
 
-            return result;
+                return result;
+            }
         }
 
         public void CreateLogEntry(string message, EventLogEntryType information)
@@ -236,7 +299,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public void EnsureGroupMember(Group @group, User author)
         {
-            if (string.Compare(@group.GroupType ,"joinless" , StringComparison.OrdinalIgnoreCase) != 0)
+            if (string.Compare(@group.GroupType, "joinless", StringComparison.OrdinalIgnoreCase) != 0)
             {
                 if (!author.IsSystemAccount.GetValueOrDefault(false))
                 {
@@ -270,7 +333,6 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                         throw new Exception("Trying to add content to a membership based group using a system account like Former Member is not allowed");
                     }
                 }
-
             }
         }
 

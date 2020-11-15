@@ -19,8 +19,7 @@
                                 {
                                     var rowsProcessingTimeAvg = parseFloat(response.RowsProcessingTimeAvg);
                                         if (!isNaN(rowsProcessingTimeAvg)) {
-                                        response.RowsProcessingTimeAvg =
-                                            (1 / (rowsProcessingTimeAvg / 10000000) * 60).toFixed(3);
+                                        response.RowsProcessingTimeAvg =(response.ProcessedRows / (new Date(response.LastUpdated) - new Date(response.Started))*1000*60).toFixed(3);
 
                                         response["Action"] = response.State == 'Running' ? 'Cancel' : 'Reset';
 
