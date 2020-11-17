@@ -306,27 +306,30 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             {
                 if (!author.IsSystemAccount.GetValueOrDefault(false))
                 {
-                    var groupUser = Apis.Get<IEffectiveGroupMembers>().List(
-                        @group.Id.Value,
-                        new EffectiveGroupMembersListOptions()
-                        {
-                            UserNameFilter = author.Username,
-                            PageIndex = 0,
-                            PageSize = 1
-                        }).FirstOrDefault();
-
-                    if (groupUser == null)
+                    lock (_lock)
                     {
-                        //Bug in telligent if the user is an owner then IEffectiveGroupMembers List does not work
-                        groupUser = Apis.Get<IGroupUserMembers>().Get(@group.Id.Value, new GroupUserMembersGetOptions() { Username = author.Username });
+                        var groupUser = Apis.Get<IEffectiveGroupMembers>().List(
+                            @group.Id.Value,
+                            new EffectiveGroupMembersListOptions()
+                            {
+                                UserNameFilter = author.Username,
+                                PageIndex = 0,
+                                PageSize = 1
+                            }).FirstOrDefault();
 
                         if (groupUser == null)
                         {
-                            groupUser = Apis.Get<IGroupUserMembers>().Create(@group.Id.Value, author.Id.Value, new GroupUserMembersCreateOptions() { GroupMembershipType = "Member" });
-                        }
-                    }
+                            //Bug in telligent if the user is an owner then IEffectiveGroupMembers List does not work
+                            groupUser = Apis.Get<IGroupUserMembers>().Get(@group.Id.Value, new GroupUserMembersGetOptions() { Username = author.Username });
 
-                    groupUser.ThrowErrors();
+                            if (groupUser == null)
+                            {
+                                groupUser = Apis.Get<IGroupUserMembers>().Create(@group.Id.Value, author.Id.Value, new GroupUserMembersCreateOptions() { GroupMembershipType = "Member" });
+                            }
+                        }
+
+                        groupUser.ThrowErrors();
+                    }
                 }
                 else
                 {
@@ -341,18 +344,23 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public void EnsureBlogAuthor(Blog blog, User user)
         {
-            if (blog.Authors.All(a => a.Username != user.Username))
+            lock (_lock)
             {
-                List<string> authors = new List<string>(blog.Authors.Select(a => a.Username));
+                blog = Apis.Get<IBlogs>().Get(blog.ApplicationId);
 
-                authors.Add(user.Username);
+                if (blog.Authors.All(a => a.Username != user.Username))
+                {
+                    List<string> authors = new List<string>(blog.Authors.Select(a => a.Username));
 
-                Apis.Get<IBlogs>().Update(
-                    blog.Id.Value,
-                    new BlogsUpdateOptions()
-                    {
-                        Authors = string.Join(",", authors)
-                    }).ThrowErrors();
+                    authors.Add(user.Username);
+
+                    Apis.Get<IBlogs>().Update(
+                        blog.Id.Value,
+                        new BlogsUpdateOptions()
+                        {
+                            Authors = string.Join(",", authors.Distinct())
+                        }).ThrowErrors();
+                }
             }
         }
 
@@ -360,6 +368,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         {
             int roleId = 2; // Registered Users
             IEnumerable<Guid> permissionIds = new List<Guid>() {
+
                 Guid.Parse("3115a602-82af-41ab-ae71-b56c568b6d7b"), // Create media
                 Guid.Parse("8ddbfc6f-083e-4642-8c9a-72c022a69ceb"), // Upload files
             };
