@@ -181,7 +181,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                         _factory.SignalMigrationFinshing();
 
-                        _repository.CreateLogEntry("Migration Finished", EventLogEntryType.Information);
+                        _repository.CreateLogEntry($"Migration finished, processed {_processingCounter} records", EventLogEntryType.Information);
                     }
                 }
                 finally
