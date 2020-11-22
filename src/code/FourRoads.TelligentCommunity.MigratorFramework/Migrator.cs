@@ -23,10 +23,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         private IMigrationFactory _factory;
         private MigrationContext _lastKnownContext;
         private CancellationToken _cancel;
-        private Dictionary<string, MigratedData> _existingData = new Dictionary<string, MigratedData>();
+        private ConcurrentDictionary<string, MigratedData> _existingData = new ConcurrentDictionary<string, MigratedData>();
         private string[] _userHandlers;
         private static Dictionary<string,string> _locks = new Dictionary<string, string>();
         private static object _lock = new object();
+        //private static ReaderWriterLockSlim _migratorLock = new ReaderWriterLockSlim();
 
         public Migrator()
         {
@@ -89,7 +90,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                     {
                                         if (_factory.GetHandler(k.ObjectType).MigratedObjectExists(k))
                                         {
-                                            _existingData.Add(k.ObjectType + k.SourceKey, k);
+                                            _existingData.TryAdd(k.ObjectType + k.SourceKey, k);
                                         }
                                     }
                                 },
@@ -259,21 +260,44 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public MigratedData GetMigratedData(string objectType, string sourceKey)
         {
-            lock (_lock)
-            {
+           // _migratorLock.EnterUpgradeableReadLock();
+
+            //try
+            //{
                 string key = objectType + sourceKey;
 
-                if (_existingData.ContainsKey(key))
-                    return _existingData[key];
+                return _existingData.GetOrAdd(key, k =>
+                {
+                    return _repository.GetMigratedData(objectType, sourceKey);
+                });
 
-                //Try and get it from the database
-                var result = _repository.GetMigratedData(objectType, sourceKey);
 
-                if (result != null)
-                    _existingData.Add(key, result);
+               // if (_existingData.ContainsKey(key))
+               //     return _existingData[key];
 
-                return result;
-            }
+               // //Try and get it from the database
+               // var result = _repository.GetMigratedData(objectType, sourceKey);
+
+               // if (result != null)
+               // {
+               //    // _migratorLock.EnterWriteLock();
+
+               //     try
+               //     {
+               //         _existingData.TryAdd(key, result);
+               //     }
+               //     finally
+               //     {
+               ////         _migratorLock.ExitWriteLock();
+               //     }
+               // }
+
+              //return result;
+       //     }
+       //     finally
+       //     {
+       ////         _migratorLock.ExitUpgradeableReadLock();
+       //     }
         }
 
         public void CreateLogEntry(string message, EventLogEntryType information)

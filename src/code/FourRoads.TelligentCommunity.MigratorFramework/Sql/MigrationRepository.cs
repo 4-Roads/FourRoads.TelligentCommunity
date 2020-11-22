@@ -12,7 +12,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
 {
     public class MigrationRepository : IMigrationRepository
     {
-        private static System.Threading.Mutex _mutex = new System.Threading.Mutex();
+        private static object _mutex = new object();
 
         private SqlConnection GetSqlConnection()
         {
@@ -258,11 +258,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
 
         public MigrationContext CreateUpdate(MigratedData migratedData,int processedRows, double processingTimeTotal)
         {
-            if (_mutex.WaitOne(new TimeSpan(0, 0, 2)))
-            {
-                try
-                {
-                    string create = @"
+            string create = @"
                     IF (NOT EXISTS (SELECT 1 FROM fr_MigrationProcessed WHERE ObjectType = @ObjectType AND SourceKey = @SourceKey AND ResultKey = @ResultKey))
                     BEGIN
                     INSERT INTO fr_MigrationProcessed (ObjectType, SourceKey, ResultKey, Created)
@@ -282,43 +278,43 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
                     SELECT TOP 1 * FROM fr_MigrationContext;
             ";
 
-                    using (var connection = GetSqlConnection())
+            using (var connection = GetSqlConnection())
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(create, connection))
+                {
+                    bool updateStats = processingTimeTotal > 0;
+
+                    command.Parameters.Add("@ObjectType", SqlDbType.NVarChar, 20).Value = migratedData.ObjectType;
+                    command.Parameters.Add("@SourceKey", SqlDbType.NVarChar, 50).Value = migratedData.SourceKey;
+                    command.Parameters.Add("@ResultKey", SqlDbType.NVarChar, 50).Value = migratedData.ResultKey;
+                    command.Parameters.Add("@Created", SqlDbType.DateTime2).Value = DateTime.Now;
+                    command.Parameters.Add("@UpdateStats", SqlDbType.Bit).Value = updateStats;
+                    command.Parameters.Add("@ProcessedRows", SqlDbType.Int).Value = processedRows;
+                    command.Parameters.Add("@RowsProcessingTimeAvg", SqlDbType.Decimal).Value = processingTimeTotal;
+
+                    //lock (_mutex)
                     {
-                        connection.Open();
-
-                        using (var command = new SqlCommand(create, connection))
+                        using (var r = command.ExecuteReader())
                         {
-                            command.Parameters.Add("@ObjectType", SqlDbType.NVarChar, 20).Value = migratedData.ObjectType;
-                            command.Parameters.Add("@SourceKey", SqlDbType.NVarChar, 50).Value = migratedData.SourceKey;
-                            command.Parameters.Add("@ResultKey", SqlDbType.NVarChar, 50).Value = migratedData.ResultKey;
-                            command.Parameters.Add("@Created", SqlDbType.DateTime2).Value = DateTime.Now;
-                            command.Parameters.Add("@UpdateStats", SqlDbType.Bit).Value = processingTimeTotal> 0;
-                            command.Parameters.Add("@ProcessedRows", SqlDbType.Int).Value = processedRows;
-                            command.Parameters.Add("@RowsProcessingTimeAvg", SqlDbType.Decimal).Value = processingTimeTotal;
-
-                            using (var r = command.ExecuteReader())
+                            if (r.Read())
                             {
-                                if (r.Read())
+                                return new MigrationContext()
                                 {
-                                    return new MigrationContext()
-                                    {
-                                        ProcessedRows = Convert.ToInt32(r["ProcessedRows"]),
-                                        RowsProcessingTimeAvg = Convert.ToDecimal(r["RowsProcessingTimeAvg"]),
-                                        State = (MigrationState)Convert.ToInt32(r["State"]),
-                                        TotalRows = Convert.ToInt32(r["TotalRows"]),
-                                        CurrentObjectType = Convert.ToString(r["CurrentObjectType"]),
-                                        Started = Convert.ToDateTime(r["Started"]),
-                                        LastUpdated = Convert.ToDateTime(r["LastUpdated"]),
-                                    };
-                                }
+                                    ProcessedRows = Convert.ToInt32(r["ProcessedRows"]),
+                                    RowsProcessingTimeAvg = Convert.ToDecimal(r["RowsProcessingTimeAvg"]),
+                                    State = (MigrationState)Convert.ToInt32(r["State"]),
+                                    TotalRows = Convert.ToInt32(r["TotalRows"]),
+                                    CurrentObjectType = Convert.ToString(r["CurrentObjectType"]),
+                                    Started = Convert.ToDateTime(r["Started"]),
+                                    LastUpdated = Convert.ToDateTime(r["LastUpdated"]),
+                                };
                             }
                         }
                     }
                 }
-                finally
-                {
-                    _mutex.ReleaseMutex();
-                }
+
             }
             return null;
         }
@@ -357,28 +353,19 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
 
         public void SetTotalRecords(int totalProcessing)
         {
-            if (_mutex.WaitOne(new TimeSpan(0,0,2)))
+
+            string udpate = @"
+            UPDATE fr_MigrationContext SET TotalRows = @TotalRows , LastUpdated=GetDate() WHERE ID = (SELECT Top 1 Id FROM fr_MigrationContext)";
+
+            using (var connection = GetSqlConnection())
             {
-                try
+                connection.Open();
+
+                using (var command = new SqlCommand(udpate, connection))
                 {
-                    string udpate = @"
-                    UPDATE fr_MigrationContext SET TotalRows = @TotalRows , LastUpdated=GetDate() WHERE ID = (SELECT Top 1 Id FROM fr_MigrationContext)";
+                    command.Parameters.Add("@TotalRows", SqlDbType.Int).Value = totalProcessing;
 
-                    using (var connection = GetSqlConnection())
-                    {
-                        connection.Open();
-
-                        using (var command = new SqlCommand(udpate, connection))
-                        {
-                            command.Parameters.Add("@TotalRows", SqlDbType.Int).Value = totalProcessing;
-
-                            command.ExecuteNonQuery();
-                        }
-                    }
-                }
-                finally
-                {
-                    _mutex.ReleaseMutex();
+                    command.ExecuteNonQuery();
                 }
             }
         }
@@ -428,27 +415,20 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
 
         public void SetState(MigrationState state)
         {
-            if (_mutex.WaitOne(new TimeSpan(0,0,2)))
+            lock(_mutex)
             {
-                try
-                {
-                    string create = @" UPDATE fr_MigrationContext SET State = @State, LastUpdated=GetDate() WHERE ID = (SELECT Top 1 Id FROM fr_MigrationContext)";
+                string create = @" UPDATE fr_MigrationContext SET State = @State, LastUpdated=GetDate() WHERE ID = (SELECT Top 1 Id FROM fr_MigrationContext)";
 
-                    using (var connection = GetSqlConnection())
+                using (var connection = GetSqlConnection())
+                {
+                    connection.Open();
+
+                    using (var command = new SqlCommand(create, connection))
                     {
-                        connection.Open();
+                        command.Parameters.Add("@State", SqlDbType.Int).Value = (int)state;
 
-                        using (var command = new SqlCommand(create, connection))
-                        {
-                            command.Parameters.Add("@State", SqlDbType.Int).Value = (int)state;
-
-                            command.ExecuteNonQuery();
-                        }
+                        command.ExecuteNonQuery();
                     }
-                }
-                finally
-                {
-                    _mutex.ReleaseMutex();
                 }
             }
         }
