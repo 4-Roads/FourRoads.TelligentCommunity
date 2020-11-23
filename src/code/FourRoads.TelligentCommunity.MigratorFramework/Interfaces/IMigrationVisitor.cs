@@ -15,5 +15,6 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Interfaces
         void EnsureBlogAuthor(Blog blog ,User user);
         void SafeRunAs(string userName, Action action);
         void EnsureUploadPermissions(Gallery gallery);
+
     }
 }
