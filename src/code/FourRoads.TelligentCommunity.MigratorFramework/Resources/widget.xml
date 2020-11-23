@@ -36,7 +36,7 @@
    <script type="text/html" id="$processingTemplate">
     <div>
       <div>Currently processing <%: response.CurrentObjectType %></div>
-      <div><%: response.ProcessedRows %> rows processed out of a total <%: response.TotalRows %> processing <%: response.RowsProcessingTimeAvg %> per min</div>
+      <div><%: response.ProcessedRows %> rows processed out of a total <%: response.TotalRows %>, processing <%: response.RowsProcessingTimeAvg %> per min. Time elapsed: <%: response.ElapsedTime %></div>
       <a href="javascript:void(0)" class="button" style="color:white" id="$actionLink"><%: response.Action %></a>
       <a href="javascript:void(0)" id="$downloadRewriteMap">Download Rewrite Map</a>
     </div>
@@ -45,7 +45,7 @@
    <script type="text/html" id="$startTemplate">
     <form>
       #foreach($objectType in $context.ObjectHandlers)
-        <div><input name="ObjectHandlers" class="object-handlers" type="checkbox" value="$objectType" checked/>&nbsp;<span>$objectType</span></div>
+        <div><input name="ObjectHandlers" class="object-handlers" type="checkbox" value="$objectType" id="$objectType" />&nbsp;<label for="$objectType">$objectType</label></div>
       #end
     </form>
     <div>

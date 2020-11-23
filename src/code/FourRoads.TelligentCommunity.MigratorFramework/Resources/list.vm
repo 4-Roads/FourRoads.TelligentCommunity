@@ -10,7 +10,7 @@
   #each
   <li class="content-item">
     <div class="content abbreviated">
-      <span style="width:100px;display:inline-block">$core_v2_language.FormatDate($log.Created)</span>
+      <span style="width:100px;display:inline-block">$core_v2_language.FormatDateAndTime($log.Created)</span>
       <span style="display:inline-block">$log.Message</span>
     </div>
   </li>
