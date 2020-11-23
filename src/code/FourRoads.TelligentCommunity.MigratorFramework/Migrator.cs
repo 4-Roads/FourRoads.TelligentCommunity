@@ -27,7 +27,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         private string[] _userHandlers;
         private static Dictionary<string,string> _locks = new Dictionary<string, string>();
         private static object _lock = new object();
-        //private static ReaderWriterLockSlim _migratorLock = new ReaderWriterLockSlim();
+        public const string IGNORE_RESULT = "ignore";
 
         public Migrator()
         {
@@ -123,7 +123,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                                     var result = handler.MigrateObject(k, this, updateIfExistsInDestination);
                                    
-                                    if (result != null)
+                                    if (result != IGNORE_RESULT)
                                     {
                                         double proccessingTime = 0;
                                         if (_processingCounter % 100 == 0)
@@ -145,11 +145,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                             _processingCounter,
                                             proccessingTime);
                                     }
-                                    else
-                                    {
-                                        _repository.FailedItem(objectType, k, "Item skipped");
-                                    }
-
+  
                                 }
 
                                 EnumerateAll(
@@ -394,6 +390,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             IEnumerable<Guid> permissionIds = new List<Guid>() {
                 Apis.Get<IMediaPermissions>().CreatePost, // Create media
                 Apis.Get<IMediaPermissions>().AttachFileLocal, // Upload files
+                Apis.Get<IMediaPermissions>().OverrideValidation, // Upload files
             };
 
             foreach (Guid permissionId in permissionIds)
