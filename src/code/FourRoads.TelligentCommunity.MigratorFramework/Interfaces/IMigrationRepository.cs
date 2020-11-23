@@ -10,7 +10,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Interfaces
     public interface IMigrationRepository
     {
         IPagedList<MigratedData> List(int pageSize, int pageIndex);
-        MigrationContext CreateUpdate(MigratedData migratedData, int processedRows, double processingTimeTotal);
+        void CreateUpdate(MigratedData migratedData);
+        void SetCurrentObjectType(string objectType);
+        MigrationContext SetProcessingMetrics(int processedRows, double processingTimeTotal);
         void Install(Version lastInstalledVersion);
         void SetTotalRecords(int totalProcessing);
         void CreateUrlRedirect(string source, string destination);

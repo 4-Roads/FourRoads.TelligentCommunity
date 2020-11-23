@@ -256,26 +256,80 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
             return results;
         }
 
-        public MigrationContext CreateUpdate(MigratedData migratedData,int processedRows, double processingTimeTotal)
+        public void SetCurrentObjectType(string objectType)
+        {
+            string update = @"
+                UPDATE fr_MigrationContext 
+                        SET CurrentObjectType = @ObjectType
+                        WHERE ID = (SELECT Top 1 Id FROM fr_MigrationContext);
+            ";
+
+            using (var connection = GetSqlConnection())
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(update, connection))
+                {
+                    command.Parameters.Add("@ObjectType", SqlDbType.NVarChar, 20).Value = objectType;
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public MigrationContext SetProcessingMetrics(int processedRows, double processingTimeTotal)
+        {
+            string update = @"
+            
+                UPDATE fr_MigrationContext 
+                        SET ProcessedRows = @ProcessedRows, 
+                                RowsProcessingTimeAvg=@RowsProcessingTimeAvg ,
+                                LastUpdated=GetDate()
+                                WHERE ID = (SELECT Top 1 Id FROM fr_MigrationContext);
+
+                SELECT TOP 1 * FROM fr_MigrationContext;
+            ";
+
+            using (var connection = GetSqlConnection())
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(update, connection))
+                {
+                    command.Parameters.Add("@Created", SqlDbType.DateTime2).Value = DateTime.Now;
+                    command.Parameters.Add("@ProcessedRows", SqlDbType.Int).Value = processedRows;
+                    command.Parameters.Add("@RowsProcessingTimeAvg", SqlDbType.Decimal).Value = processingTimeTotal;
+
+                    using (var r = command.ExecuteReader())
+                    {
+                        if (r.Read())
+                        {
+                            return new MigrationContext()
+                            {
+                                ProcessedRows = Convert.ToInt32(r["ProcessedRows"]),
+                                RowsProcessingTimeAvg = Convert.ToDecimal(r["RowsProcessingTimeAvg"]),
+                                State = (MigrationState)Convert.ToInt32(r["State"]),
+                                TotalRows = Convert.ToInt32(r["TotalRows"]),
+                                CurrentObjectType = Convert.ToString(r["CurrentObjectType"]),
+                                Started = Convert.ToDateTime(r["Started"]),
+                                LastUpdated = Convert.ToDateTime(r["LastUpdated"]),
+                            };
+                        }
+                    }
+                }
+
+            }
+            return null;
+        }
+
+        public void CreateUpdate(MigratedData migratedData)
         {
             string create = @"
                     IF (NOT EXISTS (SELECT 1 FROM fr_MigrationProcessed WHERE ObjectType = @ObjectType AND SourceKey = @SourceKey AND ResultKey = @ResultKey))
                     BEGIN
-                    INSERT INTO fr_MigrationProcessed (ObjectType, SourceKey, ResultKey, Created)
-                            VALUES (@ObjectType,@SourceKey,@ResultKey,@Created);
+                        INSERT INTO fr_MigrationProcessed (ObjectType, SourceKey, ResultKey, Created)
+                                VALUES (@ObjectType,@SourceKey,@ResultKey,@Created);
                     END
-
-                    IF(@UpdateStats = 1)
-                    BEGIN   
-                        UPDATE fr_MigrationContext 
-                                SET ProcessedRows = @ProcessedRows, 
-                                        RowsProcessingTimeAvg=@RowsProcessingTimeAvg ,
-                                        CurrentObjectType=@ObjectType,
-                                        LastUpdated=GetDate()
-                                        WHERE ID = (SELECT Top 1 Id FROM fr_MigrationContext);
-                    END
-
-                    SELECT TOP 1 * FROM fr_MigrationContext;
             ";
 
             using (var connection = GetSqlConnection())
@@ -284,39 +338,15 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
 
                 using (var command = new SqlCommand(create, connection))
                 {
-                    bool updateStats = processingTimeTotal > 0;
-
                     command.Parameters.Add("@ObjectType", SqlDbType.NVarChar, 20).Value = migratedData.ObjectType;
                     command.Parameters.Add("@SourceKey", SqlDbType.NVarChar, 50).Value = migratedData.SourceKey;
                     command.Parameters.Add("@ResultKey", SqlDbType.NVarChar, 50).Value = migratedData.ResultKey;
                     command.Parameters.Add("@Created", SqlDbType.DateTime2).Value = DateTime.Now;
-                    command.Parameters.Add("@UpdateStats", SqlDbType.Bit).Value = updateStats;
-                    command.Parameters.Add("@ProcessedRows", SqlDbType.Int).Value = processedRows;
-                    command.Parameters.Add("@RowsProcessingTimeAvg", SqlDbType.Decimal).Value = processingTimeTotal;
 
-                    //lock (_mutex)
-                    {
-                        using (var r = command.ExecuteReader())
-                        {
-                            if (r.Read())
-                            {
-                                return new MigrationContext()
-                                {
-                                    ProcessedRows = Convert.ToInt32(r["ProcessedRows"]),
-                                    RowsProcessingTimeAvg = Convert.ToDecimal(r["RowsProcessingTimeAvg"]),
-                                    State = (MigrationState)Convert.ToInt32(r["State"]),
-                                    TotalRows = Convert.ToInt32(r["TotalRows"]),
-                                    CurrentObjectType = Convert.ToString(r["CurrentObjectType"]),
-                                    Started = Convert.ToDateTime(r["Started"]),
-                                    LastUpdated = Convert.ToDateTime(r["LastUpdated"]),
-                                };
-                            }
-                        }
-                    }
+                    command.ExecuteNonQuery();
+
                 }
-
             }
-            return null;
         }
 
         public MigratedData GetMigratedData(string objectType, string sourceKey)

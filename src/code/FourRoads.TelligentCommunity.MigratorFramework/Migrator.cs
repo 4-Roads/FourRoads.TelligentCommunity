@@ -111,41 +111,35 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                 break;
                             }
 
+                            _repository.SetCurrentObjectType(objectType);
+
                             if (_userHandlers.Contains(objectType))
                             {
                                 var handler = _factory.GetHandler(objectType);
-
-                                List<string> retryList = new List<string>();
 
                                 void ProcessItem(string k)
                                 {
                                     long start = DateTime.Now.Ticks;
 
                                     var result = handler.MigrateObject(k, this, updateIfExistsInDestination);
-                                   
+
                                     if (result != IGNORE_RESULT)
                                     {
-                                        double proccessingTime = 0;
-                                        if (_processingCounter % 100 == 0)
-                                        {
-                                            long end = DateTime.Now.Ticks;
-
-                                            proccessingTime += end - start;
-                                        }
-
                                         Interlocked.Increment(ref _processingCounter);
 
-                                        _lastKnownContext = _repository.CreateUpdate(
+                                        _repository.CreateUpdate(
                                             new MigratedData()
                                             {
                                                 ObjectType = objectType,
                                                 SourceKey = k,
                                                 ResultKey = result
-                                            },
-                                            _processingCounter,
-                                            proccessingTime);
+                                            });
                                     }
-  
+
+                                    if (Interlocked.Increment(ref _processingCounter) % 100 == 0)
+                                    {
+                                        _lastKnownContext = _repository.SetProcessingMetrics(_processingCounter, DateTime.Now.Ticks - start);
+                                    }
                                 }
 
                                 EnumerateAll(
@@ -157,21 +151,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                     (e,k) =>
                                     {
                                         _repository.FailedItem(objectType, k, e.ToString());
-                                        retryList.Add(k);
                                     }
                                 );
 
-                                foreach (var k in retryList)
-                                {
-                                    try
-                                    {
-                                        ProcessItem(k);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        _repository.FailedItem(objectType, k, "RETRY:" + ex.ToString());
-                                    }
-                                }
                             }
                         }
 
