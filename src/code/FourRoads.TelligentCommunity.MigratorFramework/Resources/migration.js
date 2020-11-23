@@ -6,6 +6,41 @@
                 var processingTemplate = j.telligent.evolution.template.compile(options.processingTemplate);
                 var startTemplate = j.telligent.evolution.template.compile(options.startTemplate);
 
+                function pad(number) {
+                    return ('0' + number).slice(-2);
+                }
+
+                function getClock(ms) {
+                    hours = Math.floor(ms / 3600000), // 1 Hour = 3600000 Milliseconds
+                        minutes = Math.floor((ms % 3600000) / 60000), // 1 Minutes = 60000 Milliseconds
+                        seconds = Math.floor(((ms % 360000) % 60000) / 1000); // 1 Second = 1000 Milliseconds
+
+                    return {
+                        hours: hours,
+                        minutes: minutes,
+                        seconds: seconds,
+                        clock: pad(hours) + ":" + pad(minutes) + ":" + pad(seconds)
+                    };
+                }
+
+                function getDate(sqlDate) {
+                    //sqlDate in SQL DATETIME format ("yyyy-mm-ddThh:mm:ss")
+                    var sqlDateArr1 = sqlDate.split("-");
+                    //format of sqlDateArr1[] = ['yyyy','mm','dd hh:mm:ss']
+                    var sYear = sqlDateArr1[0];
+                    var sMonth = (Number(sqlDateArr1[1]) - 1).toString();
+                    var sqlDateArr2 = sqlDateArr1[2].split("T");
+                    //format of sqlDateArr2[] = ['dd', 'hh:mm:ss']
+                    var sDay = sqlDateArr2[0];
+                    var sqlDateArr3 = sqlDateArr2[1].split(":");
+                    //format of sqlDateArr3[] = ['hh','mm','ss']
+                    var sHour = sqlDateArr3[0];
+                    var sMinute = sqlDateArr3[1];
+                    var sSecond = sqlDateArr3[2];
+
+                    return new Date(sYear, sMonth, sDay, sHour, sMinute, sSecond);
+                }
+
                 function updateStatus() {
 
                     j.telligent.evolution.post({
@@ -19,7 +54,9 @@
                                 {
                                     var rowsProcessingTimeAvg = parseFloat(response.RowsProcessingTimeAvg);
                                         if (!isNaN(rowsProcessingTimeAvg)) {
-                                        response.RowsProcessingTimeAvg =(response.ProcessedRows / (new Date(response.LastUpdated) - new Date(response.Started))*1000*60).toFixed(3);
+                                        response.RowsProcessingTimeAvg =
+                                            (1 / (rowsProcessingTimeAvg / 10000000) * 60).toFixed(3);
+                                        response.ElapsedTime = getClock(Math.abs(getDate(response.LastUpdated) - getDate(response.Started))).clock;
 
                                         response["Action"] = response.State == 'Running' ? 'Cancel' : 'Reset';
 
