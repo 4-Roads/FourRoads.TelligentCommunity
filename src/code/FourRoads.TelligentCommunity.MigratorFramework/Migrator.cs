@@ -125,8 +125,6 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                                     if (result != IGNORE_RESULT)
                                     {
-                                        Interlocked.Increment(ref _processingCounter);
-
                                         _repository.CreateUpdate(
                                             new MigratedData()
                                             {
@@ -244,38 +242,20 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             //{
                 string key = objectType + sourceKey;
 
-                return _existingData.GetOrAdd(key, k =>
+                return _existingData.AddOrUpdate(key, k =>
                 {
                     return _repository.GetMigratedData(objectType, sourceKey);
+                },
+                (k,v)=>
+                {
+                    if (v == null)
+                    {
+                        return _repository.GetMigratedData(objectType, sourceKey);
+                    }
+                    return v;
                 });
 
 
-               // if (_existingData.ContainsKey(key))
-               //     return _existingData[key];
-
-               // //Try and get it from the database
-               // var result = _repository.GetMigratedData(objectType, sourceKey);
-
-               // if (result != null)
-               // {
-               //    // _migratorLock.EnterWriteLock();
-
-               //     try
-               //     {
-               //         _existingData.TryAdd(key, result);
-               //     }
-               //     finally
-               //     {
-               ////         _migratorLock.ExitWriteLock();
-               //     }
-               // }
-
-              //return result;
-       //     }
-       //     finally
-       //     {
-       ////         _migratorLock.ExitUpgradeableReadLock();
-       //     }
         }
 
         public void CreateLogEntry(string message, EventLogEntryType information)
