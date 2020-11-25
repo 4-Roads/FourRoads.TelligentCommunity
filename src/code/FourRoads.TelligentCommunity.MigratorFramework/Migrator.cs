@@ -25,9 +25,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         private CancellationToken _cancel;
         private ConcurrentDictionary<string, MigratedData> _existingData = new ConcurrentDictionary<string, MigratedData>();
         private string[] _userHandlers;
-        private static Dictionary<string,string> _locks = new Dictionary<string, string>();
-        private static object _lock = new object();
         public const string IGNORE_RESULT = "ignore";
+        private ConcurrentDictionary<int, object> _groupLock = new ConcurrentDictionary<int, object>();
+        private ConcurrentDictionary<int, object> _blogLock = new ConcurrentDictionary<int, object>();
+        private ConcurrentDictionary<int, object> _mediaLock = new ConcurrentDictionary<int, object>();
+        private List<Tuple<string, string>> _retryList;
 
         public Migrator()
         {
@@ -35,17 +37,6 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         }
 
         private static int _processingCounter;
-
-        public void SafeRunAs(string userName, Action action)
-        {
-            if (!_locks.ContainsKey(userName))
-                _locks.Add(userName, userName);
-
-            lock (_locks[userName])
-            {
-                Apis.Get<IUsers>().RunAsUser(userName, action);
-            }
-        }
 
         private void Start(bool updateIfExistsInDestination, bool checkForDeletions)
         {
@@ -103,7 +94,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                         _repository.CreateLogEntry("Starting Migration", EventLogEntryType.Information);
                         _processingCounter = 0;
-
+                        _retryList = new List<Tuple<string, string>>();
                         foreach (var objectType in objectTypes)
                         {
                             if (IsCanceled())
@@ -115,20 +106,18 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                             if (_userHandlers.Contains(objectType))
                             {
-                                var handler = _factory.GetHandler(objectType);
-
-                                void ProcessItem(string k)
+                                void ProcessItem(IMigrationObjectHandler migrationHandler, string k, string objType)
                                 {
                                     long start = DateTime.Now.Ticks;
 
-                                    var result = handler.MigrateObject(k, this, updateIfExistsInDestination);
+                                    var result = migrationHandler.MigrateObject(k, this, updateIfExistsInDestination);
 
                                     if (result != IGNORE_RESULT)
                                     {
                                         _repository.CreateUpdate(
                                             new MigratedData()
                                             {
-                                                ObjectType = objectType,
+                                                ObjectType = objType,
                                                 SourceKey = k,
                                                 ResultKey = result
                                             });
@@ -140,17 +129,57 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                     }
                                 }
 
+                                var handler = _factory.GetHandler(objectType);
+
                                 EnumerateAll(
                                     handler.ListObjectKeys,
                                     v =>
                                     {
-                                        ProcessItem(v);
+                                        ProcessItem(handler , v, objectType);
                                     },
                                     (e,k) =>
                                     {
                                         _repository.FailedItem(objectType, k, e.ToString());
                                     }
                                 );
+
+
+                                //if the retry list is greater than 1000 then there are serious other errors
+                                if (_retryList.Count < 1000)
+                                {
+                                    _repository.CreateLogEntry($"Retrying {_retryList.Count} records", EventLogEntryType.Information);
+
+                                    var workingList = new List<Tuple<string,string>>(_retryList);
+                                    _retryList.Clear();
+
+                                    //do these single threaded
+                                    foreach (var item in workingList)
+                                    {
+                                        try
+                                        {
+                                            ProcessItem(_factory.GetHandler(item.Item1) , item.Item2, item.Item1);
+                                        }
+                                        catch(Exception ex)
+                                        {
+                                            _repository.FailedItem(item.Item1, item.Item2, ex.ToString());
+                                        }
+
+                                        if (IsCanceled())
+                                        {
+                                            break;
+                                        }
+                                    }
+
+                                    _repository.CreateLogEntry($"Finished Retrying", EventLogEntryType.Information);
+                                    foreach (var item in _retryList)
+                                    {
+                                        _repository.CreateLogEntry($"Second Retry of: {item.Item1}:{item.Item2} failed", EventLogEntryType.Information);
+                                    }
+                                }
+                                else
+                                {
+                                    _repository.CreateLogEntry($"Too many items to retry aborting, rety loop", EventLogEntryType.Information);
+                                }
 
                             }
                         }
@@ -165,6 +194,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                     _repository.SetState(MigrationState.Finished);
                 }
             }
+        }
+
+        public void ScheduleRetry(string objectType, string sourceKey)
+        {
+            _retryList.Add(new Tuple<string, string>(objectType, sourceKey));
         }
 
         private void EnumerateAll<T>(Func<int, int, Interfaces.IPagedList<T>> list, Action<T> func, Action<Exception,T> exceptionHandler )
@@ -236,26 +270,20 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public MigratedData GetMigratedData(string objectType, string sourceKey)
         {
-           // _migratorLock.EnterUpgradeableReadLock();
+            string key = objectType + sourceKey;
 
-            //try
-            //{
-                string key = objectType + sourceKey;
-
-                return _existingData.AddOrUpdate(key, k =>
+            return _existingData.AddOrUpdate(key, k =>
+            {
+                return _repository.GetMigratedData(objectType, sourceKey);
+            },
+            (k,v)=>
+            {
+                if (v == null)
                 {
                     return _repository.GetMigratedData(objectType, sourceKey);
-                },
-                (k,v)=>
-                {
-                    if (v == null)
-                    {
-                        return _repository.GetMigratedData(objectType, sourceKey);
-                    }
-                    return v;
-                });
-
-
+                }
+                return v;
+            });
         }
 
         public void CreateLogEntry(string message, EventLogEntryType information)
@@ -288,7 +316,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             {
                 if (!author.IsSystemAccount.GetValueOrDefault(false))
                 {
-                    lock (_lock)
+                    var key = _groupLock.GetOrAdd(@group.Id.Value, new object());
+                    lock (key)
                     {
                         var groupUser = Apis.Get<IEffectiveGroupMembers>().List(
                             @group.Id.Value,
@@ -326,7 +355,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public void EnsureBlogAuthor(Blog blog, User user)
         {
-            lock (_lock)
+            var key = _blogLock.GetOrAdd(blog.Id.Value, new object());
+            lock (key)
             {
                 blog = Apis.Get<IBlogs>().Get(blog.ApplicationId);
 
@@ -355,14 +385,18 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 Apis.Get<IMediaPermissions>().OverrideValidation, // Upload files
             };
 
-            foreach (Guid permissionId in permissionIds)
+            var key = _mediaLock.GetOrAdd(gallery.Id.Value, new object());
+            lock (key)
             {
-                Apis.Get<IPermissions>().Set(true, roleId, permissionId,
-                    new Telligent.Evolution.Extensibility.Api.Version2.PermissionSetOptions()
-                    {
-                        ApplicationId = gallery.ApplicationId,
-                        GroupId = gallery.Group.Id
-                    });
+                foreach (Guid permissionId in permissionIds)
+                {
+                    Apis.Get<IPermissions>().Set(true, roleId, permissionId,
+                        new Telligent.Evolution.Extensibility.Api.Version2.PermissionSetOptions()
+                        {
+                            ApplicationId = gallery.ApplicationId,
+                            GroupId = gallery.Group.Id
+                        });
+                }
             }
         }
 
