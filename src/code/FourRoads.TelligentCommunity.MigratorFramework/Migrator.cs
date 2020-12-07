@@ -206,6 +206,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             int pageIndex = 0;
             int pageSize = 5000;
             var pagedItems = list( pageSize, pageIndex);
+            var threads = new ConcurrentBag<int>();
+            int maxThreads = 0;
 
             if (IsCanceled())
                 return;
@@ -220,7 +222,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 {
                     var context = Telligent.Evolution.Components.CSContext.Create() ;
                     context.User = Telligent.Evolution.Users.GetUser(Apis.Get<IUsers>().ServiceUserName);
-
+                    var currentThreadId = Thread.CurrentThread.ManagedThreadId;
+                    threads.Add(currentThreadId);
+                    maxThreads = Math.Max(maxThreads, threads.Count);
                     for (int i = range.Item1; i < range.Item2; i++)
                     {
                         try
@@ -234,8 +238,12 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                         }
 
                         if (IsCanceled())
+                        {
+                            threads.TryTake(out currentThreadId);
                             return;
+                        }
                     }
+                    threads.TryTake(out currentThreadId);
                 });
 
                 if (HasMoreItems(pageIndex , pageSize , pagedItems.Count() , pagedItems.Total))
@@ -251,6 +259,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 if (IsCanceled())
                     return;
             }
+            _repository.CreateLogEntry($"Spawned {maxThreads} threads", EventLogEntryType.Information);
         }
 
         private bool IsCanceled()
