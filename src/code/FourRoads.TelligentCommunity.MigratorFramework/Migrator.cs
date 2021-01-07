@@ -19,7 +19,7 @@ using PermissionSetOptions = Telligent.Evolution.Extensibility.Api.Version2.Perm
 
 namespace FourRoads.TelligentCommunity.MigratorFramework
 {
-    public class Migrator : IMigrationVisitor , IEvolutionJob
+    public class Migrator : IMigrationVisitor, IEvolutionJob
     {
         private readonly IMigrationRepository _repository;
         private IMigrationFactory _factory;
@@ -31,6 +31,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         private ConcurrentDictionary<int, object> _groupLock = new ConcurrentDictionary<int, object>();
         private ConcurrentDictionary<int, object> _blogLock = new ConcurrentDictionary<int, object>();
         private ConcurrentDictionary<int, object> _mediaLock = new ConcurrentDictionary<int, object>();
+        private ConcurrentDictionary<Guid, object> _challengeLock = new ConcurrentDictionary<Guid, object>();
         private List<Tuple<string, string>> _retryList;
 
         public Migrator()
@@ -40,7 +41,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         private static int _processingCounter;
 
-        private void Start(bool updateIfExistsInDestination, bool checkForDeletions)
+        private void Start(bool updateIfExistsInDestination, bool checkForDeletions, int maxThreads)
         {
             using (var formerMember = new FormerMember(_repository))
             {
@@ -87,10 +88,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                         }
                                     }
                                 },
-                                (e,k) =>
+                                (e, k) =>
                                 {
                                     _repository.FailedItem(k.ObjectType, k.SourceKey, e.ToString());
-                                }
+                                },
+                                maxThreads
                                 );
                         }
 
@@ -137,12 +139,13 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                     handler.ListObjectKeys,
                                     v =>
                                     {
-                                        ProcessItem(handler , v, objectType);
+                                        ProcessItem(handler, v, objectType);
                                     },
-                                    (e,k) =>
+                                    (e, k) =>
                                     {
                                         _repository.FailedItem(objectType, k, e.ToString());
-                                    }
+                                    },
+                                    maxThreads
                                 );
 
 
@@ -151,7 +154,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                 {
                                     _repository.CreateLogEntry($"Retrying {_retryList.Count} records", EventLogEntryType.Information);
 
-                                    var workingList = new List<Tuple<string,string>>(_retryList);
+                                    var workingList = new List<Tuple<string, string>>(_retryList);
                                     _retryList.Clear();
 
                                     //do these single threaded
@@ -159,9 +162,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                     {
                                         try
                                         {
-                                            ProcessItem(_factory.GetHandler(item.Item1) , item.Item2, item.Item1);
+                                            ProcessItem(_factory.GetHandler(item.Item1), item.Item2, item.Item1);
                                         }
-                                        catch(Exception ex)
+                                        catch (Exception ex)
                                         {
                                             _repository.FailedItem(item.Item1, item.Item2, ex.ToString());
                                         }
@@ -180,7 +183,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                 }
                                 else
                                 {
-                                    _repository.CreateLogEntry($"Too many items to retry aborting, rety loop", EventLogEntryType.Information);
+                                    _repository.CreateLogEntry($"<span style=\"red\">{_retryList.Count} items failed! Too many to retry, aborting. Re-run migration.</span>", EventLogEntryType.Warning);
                                 }
 
                             }
@@ -203,11 +206,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             _retryList.Add(new Tuple<string, string>(objectType, sourceKey));
         }
 
-        private void EnumerateAll<T>(Func<int, int, Interfaces.IPagedList<T>> list, Action<T> func, Action<Exception,T> exceptionHandler )
+        private void EnumerateAll<T>(Func<int, int, Interfaces.IPagedList<T>> list, Action<T> func, Action<Exception, T> exceptionHandler, int allowedThreads)
         {
             int pageIndex = 0;
             int pageSize = 5000;
-            var pagedItems = list( pageSize, pageIndex);
+            var pagedItems = list(pageSize, pageIndex);
             var threads = new ConcurrentBag<int>();
             int maxThreads = 0;
 
@@ -218,37 +221,40 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             {
                 var items = pagedItems.ToArray();
 
-                var rangePartitioner = Partitioner.Create(0, items.Length , 500);
-
-                Parallel.ForEach(rangePartitioner , (range, loopState) =>
+                if (items.Length > 0)
                 {
-                    var context = Telligent.Evolution.Components.CSContext.Create() ;
-                    context.User = Telligent.Evolution.Users.GetUser(Apis.Get<IUsers>().ServiceUserName);
-                    var currentThreadId = Thread.CurrentThread.ManagedThreadId;
-                    threads.Add(currentThreadId);
-                    maxThreads = Math.Max(maxThreads, threads.Count);
-                    for (int i = range.Item1; i < range.Item2; i++)
-                    {
-                        try
-                        {
+                    var rangePartitioner = Partitioner.Create(0, items.Length, 500);
 
-                            func(items[i]);
-                        }
-                        catch(Exception ex)
-                        {
-                            exceptionHandler(ex , items[i]);
-                        }
+                    Parallel.ForEach(rangePartitioner, new ParallelOptions { MaxDegreeOfParallelism = allowedThreads }, (range, loopState) =>
+                   {
+                       var context = Telligent.Evolution.Components.CSContext.Create();
+                       context.User = Telligent.Evolution.Users.GetUser(Apis.Get<IUsers>().ServiceUserName);
+                       var currentThreadId = Thread.CurrentThread.ManagedThreadId;
+                       threads.Add(currentThreadId);
+                       maxThreads = Math.Max(maxThreads, threads.Count);
+                       for (int i = range.Item1; i < range.Item2; i++)
+                       {
+                           try
+                           {
 
-                        if (IsCanceled())
-                        {
-                            threads.TryTake(out currentThreadId);
-                            return;
-                        }
-                    }
-                    threads.TryTake(out currentThreadId);
-                });
+                               func(items[i]);
+                           }
+                           catch (Exception ex)
+                           {
+                               exceptionHandler(ex, items[i]);
+                           }
 
-                if (HasMoreItems(pageIndex , pageSize , pagedItems.Count() , pagedItems.Total))
+                           if (IsCanceled())
+                           {
+                               threads.TryTake(out currentThreadId);
+                               return;
+                           }
+                       }
+                       threads.TryTake(out currentThreadId);
+                   });
+                }
+
+                if (HasMoreItems(pageIndex, pageSize, pagedItems.Count(), pagedItems.Total))
                 {
                     pageIndex += 1;
                     pagedItems = list(pageSize, pageIndex);
@@ -269,14 +275,14 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             return _cancel.IsCancellationRequested || _lastKnownContext?.State == MigrationState.Cancelling;
         }
 
-        private bool HasMoreItems(int pageSize , int pageIndex , int currentNumber ,int total)
+        private bool HasMoreItems(int pageSize, int pageIndex, int currentNumber, int total)
         {
             return pageIndex * pageSize + currentNumber < total;
         }
 
         public void AddUrlRedirect(string source, string destination)
         {
-            _repository.CreateUrlRedirect(source , destination);
+            _repository.CreateUrlRedirect(source, destination);
         }
 
         public MigratedData GetMigratedData(string objectType, string sourceKey)
@@ -287,7 +293,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             {
                 return _repository.GetMigratedData(objectType, sourceKey);
             },
-            (k,v)=>
+            (k, v) =>
             {
                 if (v == null)
                 {
@@ -299,7 +305,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public void CreateLogEntry(string message, EventLogEntryType information)
         {
-            _repository.CreateLogEntry(message , information);
+            _repository.CreateLogEntry(message, information);
         }
 
         public User GetUserOrFormerMember(int? userId)
@@ -437,11 +443,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             var migrator = PluginManager.GetSingleton<IMigratorProvider>();
 
             _factory = migrator.GetFactory();
-            _cancel =jobData.CancellationToken;
+            _cancel = jobData.CancellationToken;
 
-            _userHandlers= (jobData.Data["objectHandlers"]).Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            _userHandlers = (jobData.Data["objectHandlers"]).Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-            Start(bool.Parse((string) jobData.Data["updateIfExistsInDestination"]), bool.Parse((string)jobData.Data["checkForDeletions"]));
+            Start(bool.Parse((string)jobData.Data["updateIfExistsInDestination"]), bool.Parse((string)jobData.Data["checkForDeletions"]), int.Parse((string)jobData.Data["maxThreads"]));
         }
     }
 }

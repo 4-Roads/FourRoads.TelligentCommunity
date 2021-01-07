@@ -145,6 +145,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 {
                     { "updateIfExistsInDestination", _configuration.GetBool("updateIfExistsInDestination").ToString() }
                    ,{ "checkForDeletions", _configuration.GetBool("checkForDeletions").ToString()}
+                   ,{ "maxThreads", _configuration.GetInt("maxThreads").ToString()}
                    ,{"objectHandlers" , httpContext.Request.Form["objectHandlers[]"]}
                 });
 
@@ -280,13 +281,19 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             {
                 PropertyGroup group = new PropertyGroup() { LabelText = "Options" };
                 Property property = new Property() { DataType = "bool", LabelText = "Update Existing Migrated Content", Id = "updateIfExistsInDestination" , DefaultValue = "True"};
+                int maxThreads = Environment.ProcessorCount * 2;
 
                 group.Properties.Add(property);
-
                 property = new Property() { DataType = "bool", LabelText = "Check for Deletions", Id = "checkForDeletions", DefaultValue = "True" };
+                group.Properties.Add(property);
+                property = new Property() { DataType = "int", DefaultValue = maxThreads.ToString(), Id = "maxThreads", LabelText = "Max threads" };
+
+                for (int counter = 1; counter <= maxThreads; counter++)
+                {
+                    property.SelectableValues.Add(new PropertyValue { LabelText = $"{counter}", Value = $"{counter}", OrderNumber = counter });
+                }
 
                 group.Properties.Add(property);
-
 
                 return new[] { group };
 
