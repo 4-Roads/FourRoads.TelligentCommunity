@@ -12,22 +12,17 @@ using FourRoads.TelligentCommunity.MigratorFramework.Entities;
 using FourRoads.TelligentCommunity.MigratorFramework.Interfaces;
 using FourRoads.TelligentCommunity.MigratorFramework.Sql;
 using Newtonsoft.Json;
-using Telligent.Common;
-using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
-using Telligent.Evolution.Extensibility.Administration.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Rest.Infrastructure;
-using Telligent.Jobs;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 
 namespace FourRoads.TelligentCommunity.MigratorFramework
 {
-    public class MigratorFrameworkCore : Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin, IInstallablePlugin, IAdministrationPanel, IPluginGroup, IScriptablePlugin, IHttpCallback
+    public class MigratorFrameworkCore : IMigratorFramework
     {
         private Guid _panelId = new Guid("{405CFC9D-3522-456D-994B-6DC4100319F7}");
         private Guid _userInterfacePanel = new Guid("{1C60E86A-1850-411B-AF62-E6222E16273F}");
@@ -47,7 +42,10 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         public string Name => "4 Roads Migration Framework";
         public string Description => "Provides the boilerplate architecture to support migration plugins (IMigratorProvider)";
- 
+
+        public bool UpdateExisting => _configuration.GetBool("updateIfExistsInDestination") ?? false;
+
+
         public void Install(Version lastInstalledVersion)
         {
             //Create the SQL data 
@@ -281,8 +279,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             get
             {
                 PropertyGroup group = new PropertyGroup() { LabelText = "Options" };
-
-                Property property = new Property() { DataType = "bool", LabelText = "Updated Existing Migrated Content", Id = "updateIfExistsInDestination" , DefaultValue = "True"};
+                Property property = new Property() { DataType = "bool", LabelText = "Update Existing Migrated Content", Id = "updateIfExistsInDestination" , DefaultValue = "True"};
 
                 group.Properties.Add(property);
 

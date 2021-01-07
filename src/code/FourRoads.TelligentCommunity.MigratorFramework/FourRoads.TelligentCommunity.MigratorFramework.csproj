@@ -56,6 +56,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Blogs.dll</HintPath>
     </Reference>
+    <Reference Include="Telligent.Evolution.Ideation">
+      <HintPath>..\..\..\..\..\Dev\SolarWinds\src\lib\Telligent.Evolution.Ideation.dll</HintPath>
+    </Reference>
     <Reference Include="Telligent.Evolution.MediaGalleries">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.MediaGalleries.dll</HintPath>
     </Reference>
@@ -78,6 +81,7 @@
     <Compile Include="Interfaces\IMigrationFactory.cs" />
     <Compile Include="Interfaces\IMigrationObjectHandler.cs" />
     <Compile Include="Interfaces\IMigrationRepository.cs" />
+    <Compile Include="Interfaces\IMigratorFramework.cs" />
     <Compile Include="Interfaces\IMigratorProvider.cs" />
     <Compile Include="Interfaces\IPagedList.cs" />
     <Compile Include="Interfaces\IMigrationVisitor.cs" />

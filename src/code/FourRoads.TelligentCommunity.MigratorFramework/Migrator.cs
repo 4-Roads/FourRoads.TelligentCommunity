@@ -11,9 +11,11 @@ using FourRoads.TelligentCommunity.MigratorFramework.Sql;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Ideation.Api;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using IPermissions = Telligent.Evolution.Extensibility.Api.Version2.IPermissions;
+using PermissionSetOptions = Telligent.Evolution.Extensibility.Api.Version2.PermissionSetOptions;
 
 namespace FourRoads.TelligentCommunity.MigratorFramework
 {
@@ -393,18 +395,39 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 Apis.Get<IMediaPermissions>().AttachFileLocal, // Upload files
                 Apis.Get<IMediaPermissions>().OverrideValidation, // Upload files
             };
-
+            PermissionSetOptions options = new PermissionSetOptions()
+            {
+                ApplicationId = gallery.ApplicationId,
+                GroupId = gallery.Group.Id
+            };
             var key = _mediaLock.GetOrAdd(gallery.Id.Value, new object());
+
+            SetRolePermissions(key, roleId, permissionIds, options);
+        }
+
+        public void EnsureIdeationPermissions(Challenge challenge)
+        {
+            int roleId = Apis.Get<IRoles>().Find("Registered Users").FirstOrDefault().Id.Value; // Registered Users
+            IEnumerable<Guid> permissionIds = new List<Guid>() {
+                Apis.Get<IIdeaPermissions>().ManageIdeaStatus, // Manage idea status
+            };
+            PermissionSetOptions options = new PermissionSetOptions()
+            {
+                ApplicationId = challenge.ApplicationId,
+                GroupId = challenge.Group.Id
+            };
+            var key = _challengeLock.GetOrAdd(challenge.Id, new object());
+
+            SetRolePermissions(key, roleId, permissionIds, options);
+        }
+
+        private void SetRolePermissions(object key, int roleId, IEnumerable<Guid> permissionIds, PermissionSetOptions options)
+        {
             lock (key)
             {
                 foreach (Guid permissionId in permissionIds)
                 {
-                    Apis.Get<IPermissions>().Set(true, roleId, permissionId,
-                        new Telligent.Evolution.Extensibility.Api.Version2.PermissionSetOptions()
-                        {
-                            ApplicationId = gallery.ApplicationId,
-                            GroupId = gallery.Group.Id
-                        });
+                    Apis.Get<IPermissions>().Set(true, roleId, permissionId, options);
                 }
             }
         }
