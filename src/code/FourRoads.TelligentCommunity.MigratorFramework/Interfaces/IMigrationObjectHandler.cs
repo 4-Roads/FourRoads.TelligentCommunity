@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using System;
 using FourRoads.TelligentCommunity.MigratorFramework.Entities;
 
 namespace FourRoads.TelligentCommunity.MigratorFramework.Interfaces
@@ -12,5 +12,15 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Interfaces
         bool MigratedObjectExists(MigratedData data);
 
         string ObjectType { get; }
+
+        /// <summary>
+        /// Runs before a migration starts
+        /// </summary>
+        void PreMigration(IMigrationVisitor visitor);
+
+        /// <summary>
+        /// Runs after a migration ends
+        /// </summary>
+        void PostMigration(IMigrationVisitor visitor);
     }
 }

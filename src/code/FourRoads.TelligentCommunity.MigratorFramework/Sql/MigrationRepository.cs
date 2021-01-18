@@ -36,7 +36,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
                                 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
                                 ) ON [PRIMARY]
 
-                                CREATE NONCLUSTERED INDEX [ObjectType_SourceKey]
+                                CREATE NONCLUSTERED INDEX [idx_ObjectType_SourceKey]
                                     ON [dbo].[fr_MigrationProcessed] ([ObjectType],[SourceKey])
 
                                 END";

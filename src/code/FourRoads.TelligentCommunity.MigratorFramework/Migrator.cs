@@ -60,6 +60,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                         _repository.CreateLogEntry("Attempting to calculate the number of items", EventLogEntryType.Information);
 
                         int totalProcessing = 0;
+                        long start = 0;
+
                         foreach (var objectType in objectTypes)
                         {
                             if (_userHandlers.Contains(objectType))
@@ -112,18 +114,33 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                             {
                                 void ProcessItem(IMigrationObjectHandler migrationHandler, string k, string objType)
                                 {
-                                    long start = DateTime.Now.Ticks;
+                                    start = DateTime.Now.Ticks;
 
                                     var result = migrationHandler.MigrateObject(k, this, updateIfExistsInDestination);
 
                                     if (result != IGNORE_RESULT)
                                     {
+                                        // Account for messages that have been migrated to alternative applications
+                                        string migratedKey = result;
+                                        string migratedType = objType;
+
+                                        if (result.IndexOf(":") >= 0)
+                                        {
+                                            var parts = result.Split(':');
+
+                                            if(parts.Length == 2)
+                                            {
+                                                migratedKey = parts[1];
+                                                migratedType = parts[0];
+                                            }
+                                        }
+
                                         _repository.CreateUpdate(
                                             new MigratedData()
                                             {
-                                                ObjectType = objType,
+                                                ObjectType = migratedType,
                                                 SourceKey = k,
-                                                ResultKey = result
+                                                ResultKey = migratedKey
                                             });
                                     }
 
@@ -135,6 +152,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                                 var handler = _factory.GetHandler(objectType);
 
+                                handler.PreMigration(this);
                                 EnumerateAll(
                                     handler.ListObjectKeys,
                                     v =>
@@ -186,11 +204,16 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                     _repository.CreateLogEntry($"<span style=\"red\">{_retryList.Count} items failed! Too many to retry, aborting. Re-run migration.</span>", EventLogEntryType.Warning);
                                 }
 
+                                handler.PostMigration(this);
                             }
                         }
 
-                        _factory.SignalMigrationFinshing();
+                        if (start > 0)
+                        {
+                            _lastKnownContext = _repository.SetProcessingMetrics(_processingCounter, DateTime.Now.Ticks - start);
+                        }
 
+                        _factory.SignalMigrationFinshing();
                         _repository.CreateLogEntry($"Migration finished, processed {_processingCounter} records", EventLogEntryType.Information);
                     }
                 }
