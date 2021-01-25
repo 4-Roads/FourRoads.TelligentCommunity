@@ -234,11 +234,17 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
             int pageIndex = 0;
             int pageSize = 5000;
             var pagedItems = list(pageSize, pageIndex);
+            int totalItems = pagedItems.Total;
             var threads = new ConcurrentBag<int>();
-            int maxThreads = 0;
+            int maxThreads = 0, processed = 0, failed = 0;
+            object key = new object();
 
             if (IsCanceled())
+            {
+                ShowSummary(processed, failed, maxThreads);
+
                 return;
+            }
 
             while (pagedItems != null)
             {
@@ -255,32 +261,47 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                        var currentThreadId = Thread.CurrentThread.ManagedThreadId;
                        threads.Add(currentThreadId);
                        maxThreads = Math.Max(maxThreads, threads.Count);
+
                        for (int i = range.Item1; i < range.Item2; i++)
                        {
                            try
                            {
-
                                func(items[i]);
+
+                               lock (key)
+                               {
+                                   processed++;
+                               }
                            }
                            catch (Exception ex)
                            {
+                               lock (key)
+                               {
+                                   failed++;
+                               }
+                               
                                exceptionHandler(ex, items[i]);
                            }
 
                            if (IsCanceled())
                            {
                                threads.TryTake(out currentThreadId);
+                               ShowSummary(processed, failed, maxThreads);
+
                                return;
                            }
                        }
                        threads.TryTake(out currentThreadId);
                    });
                 }
-
-                if (HasMoreItems(pageIndex, pageSize, pagedItems.Count(), pagedItems.Total))
+                
+                if (pagedItems.Count() > 0 && processed < totalItems)
                 {
-                    pageIndex += 1;
-                    pagedItems = list(pageSize, pageIndex);
+                    if (HasMoreItems(pageIndex, pageSize, pagedItems.Count(), totalItems))
+                    {
+                        pageIndex += 1;
+                        pagedItems = list(pageSize, pageIndex);
+                    }
                 }
                 else
                 {
@@ -288,9 +309,19 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 }
 
                 if (IsCanceled())
+                {
+                    ShowSummary(processed, failed, maxThreads);
+
                     return;
+                }
             }
-            _repository.CreateLogEntry($"Spawned {maxThreads} threads", EventLogEntryType.Information);
+
+            ShowSummary(processed, failed, maxThreads);
+        }
+
+        private void ShowSummary(int processed, int failed, int threads)
+        {
+            _repository.CreateLogEntry($"{processed} migrated, {failed} failed, {threads} threads spawned", EventLogEntryType.Information);
         }
 
         private bool IsCanceled()

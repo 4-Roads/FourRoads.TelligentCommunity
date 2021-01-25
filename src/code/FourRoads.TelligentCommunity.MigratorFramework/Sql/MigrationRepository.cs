@@ -344,7 +344,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Sql
                     command.Parameters.Add("@ObjectType", SqlDbType.NVarChar, 20).Value = migratedData.ObjectType;
                     command.Parameters.Add("@SourceKey", SqlDbType.NVarChar, 50).Value = migratedData.SourceKey;
                     command.Parameters.Add("@ResultKey", SqlDbType.NVarChar, 50).Value = migratedData.ResultKey;
-                    command.Parameters.Add("@Created", SqlDbType.DateTime2).Value = DateTime.Now;
+                    command.Parameters.Add("@Created", SqlDbType.DateTime2).Value = DateTime.UtcNow;
 
                     command.ExecuteNonQuery();
 
