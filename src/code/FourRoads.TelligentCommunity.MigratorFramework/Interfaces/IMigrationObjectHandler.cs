@@ -7,7 +7,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework.Interfaces
     {
         IPagedList<string> ListObjectKeys(int pageSize, int pageIndex);
 
-        string MigrateObject(string key, IMigrationVisitor migrationVisitor, bool updateIfExistsInDestination);
+        string MigrateObject(string key, IMigrationVisitor migrationVisitor, bool updateIfExistsInDestination, int cutoffDays);
 
         bool MigratedObjectExists(MigratedData data);
 

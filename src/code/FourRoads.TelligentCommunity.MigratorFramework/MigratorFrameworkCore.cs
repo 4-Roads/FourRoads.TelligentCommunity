@@ -145,6 +145,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                 {
                     { "updateIfExistsInDestination", _configuration.GetBool("updateIfExistsInDestination").ToString() }
                    ,{ "checkForDeletions", _configuration.GetBool("checkForDeletions").ToString()}
+                   ,{ "cutoffDays", _configuration.GetInt("cutoffDays").ToString()}
                    ,{ "maxThreads", _configuration.GetInt("maxThreads").ToString()}
                    ,{"objectHandlers" , httpContext.Request.Form["objectHandlers[]"]}
                 });
@@ -293,6 +294,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                     property.SelectableValues.Add(new PropertyValue { LabelText = $"{counter}", Value = $"{counter}", OrderNumber = counter });
                 }
 
+                group.Properties.Add(property);
+
+                property = new Property() { DataType = "int", DefaultValue = "0", Id = "cutoffDays", LabelText = "Cutoff days" };
                 group.Properties.Add(property);
 
                 return new[] { group };
