@@ -41,7 +41,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         private static int _processingCounter;
 
-        private void Start(bool updateIfExistsInDestination, bool checkForDeletions, int maxThreads)
+        private void Start(bool updateIfExistsInDestination, bool checkForDeletions, int cutoffDays, int maxThreads)
         {
             using (var formerMember = new FormerMember(_repository))
             {
@@ -116,7 +116,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                 {
                                     start = DateTime.Now.Ticks;
 
-                                    var result = migrationHandler.MigrateObject(k, this, updateIfExistsInDestination);
+                                    var result = migrationHandler.MigrateObject(k, this, updateIfExistsInDestination , cutoffDays);
 
                                     if (result != IGNORE_RESULT)
                                     {
@@ -470,7 +470,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
             _userHandlers = (jobData.Data["objectHandlers"]).Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-            Start(bool.Parse((string)jobData.Data["updateIfExistsInDestination"]), bool.Parse((string)jobData.Data["checkForDeletions"]), int.Parse((string)jobData.Data["maxThreads"]));
+            Start(bool.Parse((string)jobData.Data["updateIfExistsInDestination"]), bool.Parse((string)jobData.Data["checkForDeletions"]),int.Parse((string)jobData.Data["cutoffDays"]), int.Parse((string)jobData.Data["maxThreads"]));
         }
     }
 }
