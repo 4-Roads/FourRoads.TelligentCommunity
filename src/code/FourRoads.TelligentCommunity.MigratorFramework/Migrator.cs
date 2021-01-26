@@ -40,6 +40,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         }
 
         private static int _processingCounter;
+        private static int _processingAdded;
+        private static int _processingUpdated;
 
         private void Start(bool updateIfExistsInDestination, bool checkForDeletions, int cutoffDays, int maxThreads)
         {
@@ -108,6 +110,9 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                 break;
                             }
 
+                            _processingAdded = 0;
+                            _processingUpdated = 0;
+
                             _repository.SetCurrentObjectType(objectType);
 
                             if (_userHandlers.Contains(objectType))
@@ -118,30 +123,24 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                                     var result = migrationHandler.MigrateObject(k, this, updateIfExistsInDestination , cutoffDays);
 
-                                    if (result != IGNORE_RESULT)
+                                    if (result.State != MigratedObjectState.Ignored && !string.IsNullOrWhiteSpace(result.Key))
                                     {
-                                        // Account for messages that have been migrated to alternative applications
-                                        string migratedKey = result;
-                                        string migratedType = objType;
-
-                                        if (result.IndexOf(":") >= 0)
-                                        {
-                                            var parts = result.Split(':');
-
-                                            if(parts.Length == 2)
-                                            {
-                                                migratedKey = parts[1];
-                                                migratedType = parts[0];
-                                            }
-                                        }
-
                                         _repository.CreateUpdate(
                                             new MigratedData()
                                             {
-                                                ObjectType = migratedType,
+                                                ObjectType = result.ObjectType,
                                                 SourceKey = k,
-                                                ResultKey = migratedKey
+                                                ResultKey = result.Key
                                             });
+                                    }
+
+                                    if (result.State == MigratedObjectState.Added)
+                                    {
+                                        Interlocked.Increment(ref _processingAdded);
+                                    }
+                                    else if (result.State == MigratedObjectState.Updated)
+                                    {
+                                        Interlocked.Increment(ref _processingUpdated);
                                     }
 
                                     if (Interlocked.Increment(ref _processingCounter) % 100 == 0)
@@ -205,6 +204,10 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                 }
 
                                 handler.PostMigration(this);
+
+                                _repository.CreateLogEntry($"Migration completed for {objectType} added  {_processingAdded} records", EventLogEntryType.Information);
+                                _repository.CreateLogEntry($"Migration completed for {objectType} updated {_processingUpdated} records", EventLogEntryType.Information);
+
                             }
                         }
 
@@ -321,7 +324,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
         private void ShowSummary(int processed, int failed, int threads)
         {
-            _repository.CreateLogEntry($"{processed} migrated, {failed} failed, {threads} threads spawned", EventLogEntryType.Information);
+            _repository.CreateLogEntry($"{processed} processed, {failed} failed, {threads} threads spawned", EventLogEntryType.Information);
         }
 
         private bool IsCanceled()

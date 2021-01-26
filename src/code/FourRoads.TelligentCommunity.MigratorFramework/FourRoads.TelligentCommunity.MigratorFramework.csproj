@@ -74,8 +74,10 @@
     <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Entities\MigratedObject.cs" />
     <Compile Include="Entities\MigrationContext.cs" />
     <Compile Include="Entities\MigrationLog.cs" />
+    <Compile Include="Entities\MigratedObjectState.cs" />
     <Compile Include="Entities\PagedList.cs" />
     <Compile Include="FormerMember.cs" />
     <Compile Include="Interfaces\IMigrationFactory.cs" />
