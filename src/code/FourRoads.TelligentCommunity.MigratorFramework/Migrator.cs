@@ -42,6 +42,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
         private static int _processingCounter;
         private static int _processingAdded;
         private static int _processingUpdated;
+        private static int _processingIgnored;
+        private static int _processingContentType;
 
         private void Start(bool updateIfExistsInDestination, bool checkForDeletions, int cutoffDays, int maxThreads)
         {
@@ -110,8 +112,11 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                 break;
                             }
 
+                            // reset values for content type
                             _processingAdded = 0;
                             _processingUpdated = 0;
+                            _processingIgnored = 0;
+                            _processingContentType = 0;
 
                             _repository.SetCurrentObjectType(objectType);
 
@@ -134,6 +139,8 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                             });
                                     }
 
+                                    Interlocked.Increment(ref _processingContentType);
+
                                     if (result.State == MigratedObjectState.Added)
                                     {
                                         Interlocked.Increment(ref _processingAdded);
@@ -141,6 +148,10 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
                                     else if (result.State == MigratedObjectState.Updated)
                                     {
                                         Interlocked.Increment(ref _processingUpdated);
+                                    }
+                                    else if (result.State == MigratedObjectState.Ignored)
+                                    {
+                                        Interlocked.Increment(ref _processingIgnored);
                                     }
 
                                     if (Interlocked.Increment(ref _processingCounter) % 100 == 0)
@@ -205,9 +216,7 @@ namespace FourRoads.TelligentCommunity.MigratorFramework
 
                                 handler.PostMigration(this);
 
-                                _repository.CreateLogEntry($"Migration completed for {objectType} added  {_processingAdded} records", EventLogEntryType.Information);
-                                _repository.CreateLogEntry($"Migration completed for {objectType} updated {_processingUpdated} records", EventLogEntryType.Information);
-
+                                _repository.CreateLogEntry($"Migration completed for {objectType} processed {_processingContentType} added {_processingAdded} updated {_processingUpdated} ignored {_processingIgnored} records", EventLogEntryType.Information);
                             }
                         }
 
