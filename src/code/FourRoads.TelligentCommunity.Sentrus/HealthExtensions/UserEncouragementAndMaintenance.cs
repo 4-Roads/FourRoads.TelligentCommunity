@@ -1,22 +1,22 @@
-﻿using System.IO;
-using System.Text;
-    using System;
-    using System.Collections.Generic;
+﻿using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Tokenizers;
-using  FourRoads.TelligentCommunity.Sentrus.Controls;
-    using  FourRoads.TelligentCommunity.Sentrus.Interfaces;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Extensibility.Api.Entities.Version1;
-    using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.Extensibility;
-    using Telligent.Evolution.Extensibility.Version1;
-    using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
-    using Telligent.Evolution.Extensibility.Email.Version1;
-    using System.Linq;
-using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using FourRoads.TelligentCommunity.Sentrus.Controls;
 using FourRoads.TelligentCommunity.Sentrus.Entities;
-    using Telligent.Evolution.Extensibility.Templating.Version1;
+using FourRoads.TelligentCommunity.Sentrus.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Telligent.DynamicConfiguration.Components;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Entities.Version1;
+using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Email.Version1;
+using Telligent.Evolution.Extensibility.Templating.Version1;
+using Telligent.Evolution.Extensibility.Version1;
+using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 
 namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 {
@@ -32,7 +32,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             }
         }
 
-        public List<ContentRecommendation> ContentRecommendations { get; set; }
+        public List<Content> Contents { get; set; }
     }
 
     internal static class EmailTargetExtension
@@ -81,24 +81,27 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
         public void TestSettings()
         {
             int outofDateMonths = Configuration.GetInt("accountDeleteAge");
+            var contentType = Enum.Parse(typeof(EmailContentType), Configuration.GetString("contentType"));
 
             StringBuilder emailAccountList = new StringBuilder();
 
-            foreach (User user in  UserHealth.GetInactiveUsers(Configuration.GetInt("accountAge")))
+            foreach (User inactiveUser in  UserHealth.GetInactiveUsers(Configuration.GetInt("accountAge")))
             {
-                var lastLoginData = UserHealth.GetLastLoginDetails(user.ContentId);
+                var lastLoginData = UserHealth.GetLastLoginDetails(inactiveUser.ContentId);
 
                 int waringCount = lastLoginData.EmailCountSent;
                 DateTime lastSent = lastLoginData.FirstEmailSentAt ?? DateTime.Now;
 
                 if (waringCount == 0 || DateTime.Now > lastSent.AddMonths(outofDateMonths*waringCount))
                 {
-                    emailAccountList.AppendLine(user.PrivateEmail);
+                    emailAccountList.AppendLine(inactiveUser.PrivateEmail);
                 }
             }
 
             //Send a sample email
-            UserAccountEncouragement(Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = Apis.Get<IUrl>().ParsePageContext(System.Web.HttpContext.Current.Request.Url.ToString()).UserId }), emailAccountList.ToString());
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = Apis.Get<IUrl>().ParsePageContext(System.Web.HttpContext.Current.Request.Url.ToString()).UserId });
+            var additionalData = emailAccountList.ToString();
+            UserAccountEncouragement(user, (EmailContentType)contentType, additionalData);
         }
 
 
@@ -111,6 +114,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
                 {
                     //User that have been warned and the warn date is 1 month old should be deleted
                     int outofDateMonths = Configuration.GetInt("accountDeleteAge");
+                    var contentType = Enum.Parse(typeof(EmailContentType), Configuration.GetString("contentType"));
                     int maxCount = 10000;
 
                     foreach (User user in  UserHealth.GetInactiveUsers(Configuration.GetInt("accountAge")))
@@ -126,7 +130,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
                         if (waringCount == 0 || DateTime.Now > lastSent.AddMonths(outofDateMonths*waringCount))
                         {
-                            UserAccountEncouragement(user);
+                            UserAccountEncouragement(user, (EmailContentType)contentType);
 
                             lastLoginData.EmailCountSent = ++waringCount;
                             lastLoginData.FirstEmailSentAt = lastSent;
@@ -175,7 +179,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             }
         }
 
-        private void UserAccountEncouragement(User user , string additionalData = null)
+        private void UserAccountEncouragement(User user , EmailContentType emailContentType, string additionalData = null)
         {
             if (!user.EnableEmail.GetValueOrDefault(true))
                 return;
@@ -184,12 +188,38 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
             Apis.Get<IUsers>().RunAsUser(user.Username, () =>
             {
-                emailDigestContainer.ContentRecommendations = Apis.Get<IContentRecommendations>().List(new ContentRecommendationsListOptions()
+                var blogPostsContentTypeId = Apis.Get<IBlogPosts>().ContentTypeId;
+                var forumThreadContentTypeId = Apis.Get<IForumThreads>().ContentTypeId;
+                var mediaContentTypeId = Apis.Get<IMedia>().ContentTypeId;
+                var wikiContentTypeId = Apis.Get<IWikiPages>().ContentTypeId;
+                var forumRepliesContentTypeId = Apis.Get<IForumReplies>().ContentTypeId;
+
+                if (emailContentType == EmailContentType.Recent)
                 {
-                    PageSize = 25,
-                    PageIndex = 0,
-                    ContentTypeIds = new Guid[] { Apis.Get<IBlogPosts>().ContentTypeId, Apis.Get<IForumThreads>().ContentTypeId, Apis.Get<IMedia>().ContentTypeId, Apis.Get<IWikiPages>().ContentTypeId, Apis.Get<IForumReplies>().ContentTypeId }
-                }).ToList();
+                    var options = new SearchResultsListOptions()
+                    {
+                        Query = $"contenttypeid:{blogPostsContentTypeId} OR {forumThreadContentTypeId} OR {mediaContentTypeId} OR {wikiContentTypeId} OR {forumRepliesContentTypeId}",
+                        PageSize = 25,
+                        PageIndex = 0,
+                        Sort = "date desc"
+                    };
+
+                    var searchResult = Apis.Get<ISearchResults>().List(options);
+                    emailDigestContainer.Contents = searchResult?.Select(c => c.Content).ToList();
+                }
+                else
+                {
+                    var options = new ContentRecommendationsListOptions()
+                    {
+                        PageSize = 25,
+                        PageIndex = 0,
+                        ContentTypeIds = new Guid[] { blogPostsContentTypeId, forumThreadContentTypeId, mediaContentTypeId, wikiContentTypeId, forumRepliesContentTypeId }
+                    };
+
+                    var contentRecommendations = Apis.Get<IContentRecommendations>().List(options);
+
+                    emailDigestContainer.Contents = contentRecommendations?.Select(c => c.Content).ToList();
+                }
             });
 
             TemplateContext templateContext = new TemplateContext(new Dictionary<Guid, object>()
@@ -280,6 +310,14 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
             group.Properties.Add(accountDeleteAge);
 
+            Property contentType = new Property("contentType", "Content Type", PropertyType.String, 1,
+                EmailContentType.Recommended.ToString());
+            contentType.SelectableValues.Add(new PropertyValue(EmailContentType.Recent.ToString(),
+                "Most recent", 0));
+            contentType.SelectableValues.Add(new PropertyValue(EmailContentType.Recommended.ToString(), "Recommended", 1));
+
+            group.Properties.Add(contentType);
+
             Property testButton = new Property("testButton", "Test Settings", PropertyType.Custom, 5, "")
             {
                 ControlType = typeof(TestSettingButton)
@@ -367,10 +405,10 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
                     {
                         List<TemplateContext> list = new List<TemplateContext>();
 
-                        foreach (ContentRecommendation contentRecommendation in tc.Get<EmailHealthEncouragementContainer>(EmailHealthEncouragementContainer.DateTypeId).ContentRecommendations)
+                        foreach (Content content in tc.Get<EmailHealthEncouragementContainer>(EmailHealthEncouragementContainer.DateTypeId).Contents)
                         {
                             TemplateContext templateContext = new TemplateContext();
-                            templateContext.AddItem(Telligent.Evolution.Api.Content.ContentTypes.GenericContent, (object)contentRecommendation.Content);
+                            templateContext.AddItem(Telligent.Evolution.Api.Content.ContentTypes.GenericContent, (object)content);
                             list.Add(templateContext);
                         }
                         return list;
@@ -387,8 +425,8 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
                 Translation trn = new Translation("en-us");
 
-                trn.Set("ContentRecommendations", "Recommended Content");
-                trn.Set("ContentRecommendations_Description", "A list of content that is recommended for this user");
+                trn.Set("ContentRecommendations", "Recent/Recommended Content");
+                trn.Set("ContentRecommendations_Description", "A list of most recent or recommended content for this user");
 
                 return new[] { trn };
             }
@@ -423,7 +461,7 @@ ${token:82944be4-1557-4780-b61c-db5eb5ab5d89:max-count=f690b73b-e95e-4699-b40b-0
 &lt;p&gt;&amp;nbsp;&lt;/p&gt;</source>
 			<fragments>
 				<fragment id=""6c3dbc96-96b4-49b4-84ca-28c366f77f85"" tokenName=""Current User"" fragmentName=""sub-template"">${token:43d3b489-d151-4d30-96de-f1978a29c450}</fragment>
-				<fragment id=""f690b73b-e95e-4699-b40b-0a3069479b2f"" tokenName=""Recommended Content"" fragmentName=""max-count"">3</fragment>
+				<fragment id=""f690b73b-e95e-4699-b40b-0a3069479b2f"" tokenName=""Recent/Recommended Content"" fragmentName=""max-count"">3</fragment>
 				<fragment id=""4e669117-2d5f-4ba0-a675-149509995a59"" tokenName=""Content - Url"" fragmentName=""internal-template"">&lt;span style=""color: #0087c3; font-size: 14pt; text-decoration: none; font-family: Arial, Helvetica, sans-serif;""&gt;${token:4a432584-f740-4042-b7fb-e9b5807a1a2f}&lt;/span&gt;</fragment>
 				<fragment id=""6d7a7642-3ab8-4b4e-b4df-1b96c53bae17"" tokenName=""User - Avatar Url"" fragmentName=""tag-attributes"">width=70&amp;height=70</fragment>
 				<fragment id=""722e2550-5994-4e17-8885-737bdd0b3462"" tokenName=""User - Profile Url"" fragmentName=""internal-template"">${token:9d4aad1b-7f2a-4651-ac68-f47a51262dec:tag-attributes=6d7a7642-3ab8-4b4e-b4df-1b96c53bae17&amp;title-template=}</fragment>
@@ -453,7 +491,7 @@ ${token:82944be4-1557-4780-b61c-db5eb5ab5d89:max-count=f690b73b-e95e-4699-b40b-0
 				<fragment id=""9256aef2-f2ac-4c0c-b2f7-8d0717c698bd"" tokenName=""Content - Reply Count"" fragmentName=""true-template"">Replies</fragment>
 				<fragment id=""f0cca3d2-a19f-47d2-afae-dbebc6629c3c"" tokenName=""Content - Reply Count"" fragmentName=""false-template"">Reply</fragment>
 				<fragment id=""55c804b0-be57-47c8-9767-38fa5de4cd59"" tokenName=""Content - Reply Count"" fragmentName=""true-template"">${token:6387cae6-4240-4bab-95c6-e844c1765f8d}&amp;nbsp;${token:6387cae6-4240-4bab-95c6-e844c1765f8d:comparison-type=fabe339d-939e-493a-8162-3a5d9aeec403&amp;comparison-value=17315bbf-248a-4094-a103-398efa5de3aa&amp;true-template=9256aef2-f2ac-4c0c-b2f7-8d0717c698bd&amp;false-template=f0cca3d2-a19f-47d2-afae-dbebc6629c3c}</fragment>
-				<fragment id=""8d593add-432b-4cdb-8df9-e037c8fca7e2"" tokenName=""Recommended Content"" fragmentName=""item-template"">&lt;p&gt;${token:01a29c5b-7e53-4b9b-9a04-784cc459bee6:tag-attributes=&amp;title-template=&amp;internal-template=4e669117-2d5f-4ba0-a675-149509995a59}&lt;/p&gt;
+				<fragment id=""8d593add-432b-4cdb-8df9-e037c8fca7e2"" tokenName=""Recent/Recommended Content"" fragmentName=""item-template"">&lt;p&gt;${token:01a29c5b-7e53-4b9b-9a04-784cc459bee6:tag-attributes=&amp;title-template=&amp;internal-template=4e669117-2d5f-4ba0-a675-149509995a59}&lt;/p&gt;
 					&lt;p&gt;${token:b2cfd83f-353b-4b4e-9ce8-b5be613e7562:sub-template=55fa1f78-a30c-419a-a343-f92cf9634711}&lt;/p&gt;
 					&lt;p style=""font-size: 10pt; font-family: Arial, Helvetica, sans-serif;""&gt;${token:96e7a55c-5f24-4e96-a8b6-2f36b376b6cf:max-characters=f8a1ed28-cdf5-4917-aece-f0ad2030f07e&amp;after-truncation-template=af80fc3c-0333-4fb5-93f0-c8f425f4f36b}&lt;/p&gt;
 					&lt;p&gt;&lt;span style=""color: #7f7f7f; font-size: 8pt;""&gt;${token:d8c52075-604b-4b19-b96a-7251d7e8493f:comparison-type=071944d7-4f12-4c06-b4cd-26637a9241e0&amp;comparison-value=144f9fc9-e937-43aa-bc22-189ab8667854&amp;true-template=7672aa10-8f8e-402e-800e-2d980cc64c0c&amp;false-template=}&amp;nbsp;${token:6387cae6-4240-4bab-95c6-e844c1765f8d:comparison-type=1ac310af-5f37-4b07-8c7b-f45cfcb9d8f0&amp;comparison-value=a1e5801d-c424-4c6c-8bd9-e5bc7a57d35d&amp;true-template=55c804b0-be57-47c8-9767-38fa5de4cd59&amp;false-template=}&lt;/span&gt;&lt;/p&gt;
