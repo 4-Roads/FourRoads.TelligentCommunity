@@ -53,7 +53,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _cache = cache;
         }
 
-        public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider, ISocketMessage sockentMessager , DateTime emailValilationCutoffDate)
+        public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider, ISocketMessage sockentMessager, DateTime emailValilationCutoffDate)
         {
             _enableEmailVerification = enableEmailVerification;
             _emailProvider = emailProvider;
@@ -142,7 +142,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             var result = false;
             _usersService.RunAsUser(user.Username, () =>
             {
-                if (!EmailChanged(user)) {
+                if (!EmailChanged(user))
+                {
                     result = true;
                 }
                 else
@@ -170,24 +171,24 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         {
             List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
 
-            attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = ""});
-            attributes.Add(new ExtendedAttribute() {Key = _eakey_emailVerified, Value = user.PrivateEmail});
+            attributes.Add(new ExtendedAttribute() { Key = _eakey_emailVerifyCode, Value = "" });
+            attributes.Add(new ExtendedAttribute() { Key = _eakey_emailVerified, Value = user.PrivateEmail });
 
-            _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes});
+            _usersService.Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = attributes });
         }
 
         public bool SendValidationCode(User user)
         {
             string code = MfaCryptoExtension.RandomAlphanumeric(6);
-;
+            ;
             //Send an emial
             _emailProvider.SendEmail(user, code);
 
             //Send a validation code, store it in the users profile extended attributes
-            List<ExtendedAttribute> attributes = new List<ExtendedAttribute> {new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = code}};
+            List<ExtendedAttribute> attributes = new List<ExtendedAttribute> { new ExtendedAttribute() { Key = _eakey_emailVerifyCode, Value = code } };
 
-            return _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes}).HasErrors();
-                
+            return _usersService.Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = attributes }).HasErrors();
+
         }
         private bool EmailNotSent(User user)
         {
@@ -201,7 +202,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private void ForceRedirect(string page)
         {
-// user is logged in but has not completed the second auth stage
+            // user is logged in but has not completed the second auth stage
             var request = HttpContext.Current.Request;
 
             if (request.Path.StartsWith("/socket.ashx"))
@@ -223,7 +224,14 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 // this should only happen when in the second auth stage 
                 // for blocked callbacks so a bit brutal
                 response.Clear();
-                response.End();
+                if (HttpContext.Current.ApplicationInstance == null)
+                {
+                    response.End();
+                }
+                else
+                {
+                    HttpContext.Current.ApplicationInstance.CompleteRequest();
+                }
             }
 
             // is it a suitable time to redirect the user to the second auth page
@@ -237,7 +245,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 IsPageRequest(request))
             {
                 //redirect to 2 factor page
-                response.Redirect(page, true);
+                bool force = HttpContext.Current.ApplicationInstance == null;
+                response.Redirect(page, force);
+                if (!force)
+                {
+                    HttpContext.Current.ApplicationInstance.CompleteRequest();
+                }
             }
         }
 
@@ -422,7 +435,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         {
 
             return GetAccountSecureKey(user, true);
-         
+
         }
 
         private bool IsOldVersionUser(User user)
@@ -440,7 +453,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                         var mfaVersionEA = user.ExtendedAttributes.Get(_eakey_mfaVersion);
                         var mfaEnabled = user.ExtendedAttributes.Get(_eakey_mfaEnabled);
                         //if user has no version stored and had mfa enabled, then it's old version user
-                        result = (mfaVersionEA == null || string.IsNullOrEmpty(mfaVersionEA.Value.Trim())) 
+                        result = (mfaVersionEA == null || string.IsNullOrEmpty(mfaVersionEA.Value.Trim()))
                                  && mfaEnabled != null && mfaEnabled.Value == "True";
 
                     });
@@ -489,11 +502,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 Validate = (context, accessController) =>
                 {
                     var user = _usersService.Get(new UsersGetOptions { Id = context.UserId });
-                    if (_usersService.AnonymousUserName == user.Username && 
+                    if (_usersService.AnonymousUserName == user.Username &&
                         !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["code"]) &&
                         !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["userName"]))
                     {
-                        var userValidation = _usersService.Get(new UsersGetOptions() {Username = HttpContext.Current.Request.QueryString["userName"]});
+                        var userValidation = _usersService.Get(new UsersGetOptions() { Username = HttpContext.Current.Request.QueryString["userName"] });
 
                         if (userValidation != null && !userValidation.HasErrors())
                         {
@@ -501,7 +514,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                             {
                                 accessController.Redirect(Apis.Get<ICoreUrls>().Home(false));
                             }
-                            
+
                         }
                     }
 
