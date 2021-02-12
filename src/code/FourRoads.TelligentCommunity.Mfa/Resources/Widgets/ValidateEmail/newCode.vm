@@ -1,0 +1,8 @@
+$core_v2_page.SetContentType('application/json')
+#if ($core_v2_page.IsPost && $core_v2_user.IsRegistered($core_v2_user.Accessing.Id))
+		#if($frcommon_v1_Mfa.SendOneTimeEmailVerificationCode($core_v2_user.Accessing.Id))
+			{"result":"true"}
+		#else
+			{"result":"false"}
+		#end
+#end

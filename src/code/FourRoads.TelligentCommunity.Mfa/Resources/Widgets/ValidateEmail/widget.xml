@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:ValEmail_Name}" version="10.0.0.4689" description="${resource:ValEmail_Description}" instanceIdentifier="a8b6e56eac3246169d1727c84c17fd66" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="varify-email" provider="3bd55b782e624b77b6e730f6bce17de2">
+    <contentScript>
+          <![CDATA[
+           #if(!$core_v2_user.IsRegistered($core_v2_user.Accessing.Id))
+              $core_v2_widget.Hide()
+           #end
+    
+#set($validateInput = $core_v2_widget.UniqueId('validateInput'))
+#set($submit = $core_v2_widget.UniqueId('submit'))
+#set($newCode = $core_v2_widget.UniqueId('newCode'))
+#set($code = $core_v2_page.GetQueryStringValue("code"))
+#set($userName = $core_v2_page.GetQueryStringValue("username"))
+
+ <div class="form">
+   <fieldset> 
+      <h3 class="warning">$core_v2_language.GetResource('Heading')</h3>
+      <p class="content">$core_v2_language.GetResource('SubText')</p>
+      <ul class="field-list">
+        <li class="field-item display-name">
+          <label for="$core_v2_encoding.HtmlAttributeEncode($displayNameId)">$core_v2_language.GetResource('EnterCode')</label>
+          <span class="field-item-input"><input autocomplete="off" type="text" size="30" maxlength="254"  id="$core_v2_encoding.HtmlAttributeEncode($validateInput)" name="$core_v2_encoding.HtmlAttributeEncode($validateInput)" value="$!code" /></span>
+          <span class="field-item-validation" style="display: none;">$core_v2_language.GetResource('InvalidCode')</span>
+        </li>
+        <li class="field-item">
+            <a class="button" id="$submit" href="javascript:void(0)">$core_v2_language.GetResource('Submit')</a>
+            <a class="button" id="$newCode" href="javascript:void(0)">$core_v2_language.GetResource('NewCode')</a>
+        </li>
+      </ul> 
+   </fieldset>   
+  </div>
+
+#registerEndOfPageHtml('fourroads.widgets.validateEmail')
+  <script type="text/javascript" src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl('ui.js'))"></script>
+#end
+
+#set($returnUrl = $!core_v2_page.GetQueryStringValue("returnUrl"))
+
+#if (!$returnUrl)
+  #set($returnUrl = $core_v2_urls.Home())
+#end
+
+#registerEndOfPageHtml()
+  <script type="text/javascript">
+      jQuery(function(){
+          jQuery.fourroads.widgets.validateEmail.register({
+            code: '$!core_v2_encoding.JavascriptEncode($!code)',
+            userName: '$!core_v2_encoding.JavascriptEncode($!userName)',
+            selectors : {
+                validateInput: '#$core_v2_encoding.JavascriptEncode($validateInput)',
+                submit: '#$core_v2_encoding.JavascriptEncode($submit)',
+                newCode: '#$core_v2_encoding.JavascriptEncode($newCode)'
+            },
+            urls : {
+                validate: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('validate.vm'))',
+                newCode: '$core_v2_encoding.JavascriptEncode($core_v2_widget.GetExecutedFileUrl('newCode.vm'))',
+                returnUrl: '$!core_v2_encoding.JavascriptEncode($returnUrl)'
+            },
+            resources : {
+               requiredField: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('Required'))',
+               invalidCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('InvalidCode'))',
+               requestNewCode: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource('RequestNewCode'))'
+            }
+          });
+      });
+  </script>
+#end
+
+			]]></contentScript>
+    <headerScript><![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:ValEmail_Header}'))
+			]]></headerScript>
+    <configuration><![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="ValEmail_Name" dataType="string" defaultValue="${resource:ValEmail_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Platform" />
+</propertyGroup>
+]]></configuration>
+    <languageResources><language key="en-us">
+  <resource name="ValEmail_Name">4 Roads - Email Validation</resource>
+  <resource name="ValEmail_Header">Email Validation</resource>
+  <resource name="ValEmail_Description">Adds support for Email Validation.</resource>
+      <resource name="SubText">We haven't seen this email before so we need to validate that you are the owner.  You should have received a code that will allow then allow you access to this community</resource>
+  <resource name="Options">Options</resource>
+  <resource name="SaveButton">Submit</resource>
+  <resource name="Submit">Submit Code</resource>
+      <resource name="NewCode">Request New Code</resource>
+  <resource name="EnterCode">Enter Code</resource>
+  <resource name="Heading">Email Validation</resource>
+  <resource name="Required">This value is mandatory</resource>
+  <resource name="InvalidCode">Invalid code entered, please try again</resource>
+      <resource name="RequestNewCode">A new code has been requested, any existing requests are now invalid</resource>
+    </language></languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>
