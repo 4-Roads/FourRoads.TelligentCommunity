@@ -79,7 +79,8 @@ namespace FourRoads.TelligentCommunity.ForumLastPost.Logic
         {
             string key = CreateCacheKey(appicationId, contentId, userId);
 
-            LastReadPostInfo? lastReadPost = _cacheService.Get(key, CacheScope.Process) as LastReadPostInfo?;
+            LastReadPostInfo? lastReadPost;
+            _cacheService.TryGet(key, CacheScope.Process, out lastReadPost);
 
             if (lastReadPost == null || lastReadPost.Value.ContentId.GetValueOrDefault(Guid.Empty) == Guid.Empty)
             {

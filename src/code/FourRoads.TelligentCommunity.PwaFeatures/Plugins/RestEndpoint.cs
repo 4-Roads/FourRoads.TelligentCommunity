@@ -8,6 +8,7 @@ using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Rest.Infrastructure.Version1;
 using Telligent.Evolution.Extensibility.Rest.Version2;
+using Telligent.Evolution.Platform.Logging;
 using Telligent.Evolution.Rest.Extensions;
 using Telligent.Evolution.Rest.Infrastructure.Version2;
 using Telligent.Registration.Products;
@@ -119,7 +120,7 @@ namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
             }
             catch (Exception ex)
             {
-                resp.Errors = new[] { ex.ToUserRenderableMessage() };
+                resp.Errors = new[] { ex.UserRenderableMessage() };
             }
             return resp;
 

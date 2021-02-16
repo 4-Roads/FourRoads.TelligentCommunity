@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Telligent.Evolution.Extensibility.UI.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Components
 {

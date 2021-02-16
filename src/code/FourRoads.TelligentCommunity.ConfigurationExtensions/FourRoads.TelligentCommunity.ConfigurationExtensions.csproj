@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.ConfigurationExtensions</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.ConfigurationExtensions</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -113,7 +113,7 @@
     <Compile Include="Jobs\DefaultSubscriptionUpdateJob.cs" />
     <Compile Include="EmbeddedResources.cs" />
     <Compile Include="ConfigurationExtensionsExtension.cs" />
-    <Compile Include="FactoryDefaultWidgetProviderInstaller.cs" />
+    <Compile Include="DefaultWidgetInstaller.cs" />
     <Compile Include="Enumerations\ForumEnumerate.cs" />
     <Compile Include="Enumerations\GenericEnumerate.cs" />
     <Compile Include="Enumerations\GroupEnumerate.cs" />
@@ -175,6 +175,10 @@
     <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
       <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
       <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FourRoads.TelligentCommunity.Installer\FourRoads.TelligentCommunity.Installer.csproj">
+      <Project>{DA832372-7D04-4A24-93BD-A0992DA52608}</Project>
+      <Name>FourRoads.TelligentCommunity.Installer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

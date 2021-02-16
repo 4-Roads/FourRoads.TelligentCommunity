@@ -1,7 +1,7 @@
 ﻿namespace FourRoads.TelligentCommunity.Sentrus.Interfaces
 {
-    using Telligent.DynamicConfiguration.Components;
-    using Telligent.Evolution.Extensibility.Version1;
+    using Telligent.Evolution.Extensibility.Configuration.Version1;
+    using Telligent.Evolution.Extensibility.Version2;
 
     public interface IHealthExtension : IConfigurablePlugin
     {

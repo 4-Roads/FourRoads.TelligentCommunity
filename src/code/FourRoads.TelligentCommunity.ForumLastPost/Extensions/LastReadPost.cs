@@ -1,7 +1,7 @@
-﻿using System;
+﻿using FourRoads.TelligentCommunity.Installer.Components.Utility;
+using System;
 using System.Collections.Generic;
 using DryIoc;
-using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.ForumLastPost.DataProvider;
@@ -18,7 +18,7 @@ using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 
 namespace FourRoads.TelligentCommunity.ForumLastPost.Extensions
 {
-    public class LastReadForumSqlInstaller : SqlScriptsInstaller
+    public class LastReadForumSqlInstaller : Installer.SqlScriptsInstaller
     {
         protected override string ProjectName
         {

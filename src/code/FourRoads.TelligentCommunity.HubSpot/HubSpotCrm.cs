@@ -4,6 +4,7 @@ using FourRoads.TelligentCommunity.HubSpot.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -12,15 +13,15 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.DynamicConfiguration.Controls;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Formatting = Newtonsoft.Json.Formatting;
-using TelligentProperty = Telligent.DynamicConfiguration.Components.Property;
 
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using TelligentConfiguration = Telligent.Evolution.Extensibility.Configuration.Version1;
 
 /*
 
@@ -144,43 +145,102 @@ namespace FourRoads.TelligentCommunity.HubSpot
             }
         }
 
-        public PropertyGroup[] ConfigurationOptions
+        public TelligentConfiguration.PropertyGroup[] ConfigurationOptions
         {
             get
             {
-                var pg = new PropertyGroup("Options", "Options", 0);
+                var pg = new TelligentConfiguration.PropertyGroup() {Id="Options", LabelText = "Options"};
 
-                var authbtn = new TelligentProperty("oAuthCode", "Authorize oAuth Code", PropertyType.Custom, 0, string.Empty);
-                authbtn.ControlType = typeof(AuthorizeButton);
-                pg.Properties.Add(authbtn);
+                //todo replace this with a template control 
+                //var authbtn = new TelligentProperty("oAuthCode", "Authorize oAuth Code", PropertyType.Custom, 0, string.Empty);
+                //authbtn.ControlType = typeof(AuthorizeButton);
+                //pg.Properties.Add(authbtn);
 
-                pg.Properties.Add(new TelligentProperty("ClientId", "Client Id", PropertyType.String, 0, string.Empty));
-                pg.Properties.Add(new TelligentProperty("ClientSecret", "Client Secret", PropertyType.String, 0, string.Empty));
+                pg.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "ClientId",
+                    LabelText = "Client Id",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                });
 
-                var testControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
-                testControl.ControlType = typeof(TestControl);
-                pg.Properties.Add(testControl);
+                pg.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "ClientSecret",
+                    LabelText = "Client Secret",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                });
 
-                var pg3 = new PropertyGroup("ProfileConfig", "Profile Configuration", 0);
-                var profile = new TelligentProperty("ProfileConfig", "Profile Config", PropertyType.String, 0, string.Empty);
-                profile.ControlType = typeof(MultilineStringControl);
-                pg3.Properties.Add(profile);
+                //todo replace this with a template control 
+                //var testControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
+                //testControl.ControlType = typeof(TestControl);
+                //pg.Properties.Add(testControl);
 
-                var pg2 = new PropertyGroup("Running", "Running Values", 0);
 
-                AddPrivateProp("AccessToken", "Access Token", pg2);
-                AddPrivateProp("RefreshToken", "Refresh Token", pg2);
-                pg2.Properties.Add(new TelligentProperty("Expires", "Expires", PropertyType.DateTime, 0, DateTime.Now.ToString()));
+                var pg3 = new TelligentConfiguration.PropertyGroup() {Id="ProfileConfig", LabelText = "Profile Configuration"};
 
-                return new PropertyGroup[] { pg, pg3, pg2 };
+                pg3.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "ProfileConfig",
+                    LabelText = "Profile Config",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "",
+                    Options = new NameValueCollection
+                    {
+                        { "rows", "10" },
+                        { "columns", "80" },
+                        { "syntax", "xml" }
+                    }});
+
+                var pg2 = new TelligentConfiguration.PropertyGroup(){Id="Running", LabelText="Running Values"};
+
+                pg2.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "AccessToken",
+                    LabelText = "Access Token",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "",
+                    Options = new NameValueCollection
+                    {
+                        { "obscure", "true" },
+                    }
+                });
+
+                pg2.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "RefreshToken",
+                    LabelText = "Refresh Token",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "",
+                    Options = new NameValueCollection
+                    {
+                        { "obscure", "true" },
+                    }
+                });
+
+                pg2.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "Expires",
+                    LabelText = "Expires",
+                    DataType = "datetime",
+                    Template = "datetime",
+                    OrderNumber = 0,
+                    DefaultValue = DateTime.Now.ToString()
+                });
+
+                return new [] { pg, pg3, pg2 };
             }
-        }
-
-        private void AddPrivateProp(string propName, string title, PropertyGroup pg)
-        {
-            var prop = new Telligent.DynamicConfiguration.Components.Property(propName, title, PropertyType.String, 0, string.Empty);
-            prop.ControlType = typeof(PasswordPropertyControl);
-            pg.Properties.Add(prop);
         }
 
         public void Update(IPluginConfiguration configuration)
@@ -189,7 +249,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             _accessToken = _configuration.GetString("AccessToken");
             _refreshToken = _configuration.GetString("RefreshToken");
-            _expires = _configuration.GetDateTime("Expires");
+            _expires = _configuration.GetDateTime("Expires").HasValue ? _configuration.GetDateTime("Expires").Value : DateTime.Now;
 
             Mappings = null;
         }

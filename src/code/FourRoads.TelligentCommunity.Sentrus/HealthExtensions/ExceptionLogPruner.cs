@@ -1,8 +1,10 @@
-﻿namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
+﻿using Telligent.Evolution.Extensibility.Configuration.Version1;
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+
+namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 {
     using Interfaces;
-    using Telligent.DynamicConfiguration.Components;
-    using Telligent.Evolution.Extensibility.Version1;
 
     public class ExceptionLogPruner : TruncateTableHealthExtensionBase, IHealthExtension
     {
@@ -69,7 +71,7 @@
 
         protected override PropertyGroup GetRootGroup()
         {
-            return new PropertyGroup("exceptions", "Exceptions", 0);
+            return new PropertyGroup() {Id="exceptions", LabelText = "Exceptions"};
         }
     }
 }

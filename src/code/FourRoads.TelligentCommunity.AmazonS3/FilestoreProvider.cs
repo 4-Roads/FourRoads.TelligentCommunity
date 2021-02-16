@@ -306,7 +306,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             return exists;
         }
 
-        public int GetContentLength(string path, string fileName)
+        public long GetContentLength(string path, string fileName)
         {
             string fileKey = MakeKey(path, fileName);
 
@@ -314,7 +314,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             var metaData = metaDataAsync.Result;
 
-            return Convert.ToInt32(metaData.ContentLength);
+            return Convert.ToInt64(metaData.ContentLength);
         }
 
         public IEnumerable<ICentralizedFile> GetFiles(PathSearchOption searchOption)

@@ -1,6 +1,9 @@
 using FourRoads.TelligentCommunity.RenderingHelper;
-using Telligent.DynamicConfiguration.Components;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 
 namespace FourRoads.TelligentCommunity.MicroData
 {
@@ -35,7 +38,7 @@ namespace FourRoads.TelligentCommunity.MicroData
             get
             {
                 PropertyGroup[] groupArray = new PropertyGroup[1];
-                PropertyGroup optionsGroup = new PropertyGroup("options", "Options", 0);
+                PropertyGroup optionsGroup = new PropertyGroup() {Id="options", LabelText = "Options"};
                 groupArray[0] = optionsGroup;
 
                 Property markupConfiguration = new Property("markupConfiguration", "", PropertyType.Custom, 0,

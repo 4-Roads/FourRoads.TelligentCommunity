@@ -80,8 +80,9 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Viewers
         }
         string cacheKey = url.ToString();
         var cacheService = TelligentServices.Get<ICacheService>();
-        object cachedObj = cacheService.Get(cacheKey, CacheScope.All);
-        if (cachedObj !=null)
+
+        object cachedObj;
+        if (cacheService.TryGet(cacheKey, CacheScope.All, out cachedObj))
         {
           return cachedObj.ToString();
         }

@@ -112,12 +112,14 @@ namespace FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss
             get { return Apis.Get<IApplicationTypes>().List().Where(c => Telligent.Evolution.Extensibility.Version1.PluginManager.Get<IWebContextualApplicationType>().Any(a => a.ApplicationTypeId == c.Id.GetValueOrDefault(Guid.Empty))).Select(c => c.Id.Value).ToArray(); }
         }
 
-        protected  string BaseResourcePath {
-            get { return "FourRoads.TelligentCommunity.MetaData.Resources."; }
-        }
-        protected EmbeddedResourcesBase EmbeddedResources {
-            get { return new EmbeddedResources();}
-        }
+        //todo - kb - remove ? 
+
+        //protected  string BaseResourcePath {
+        //    get { return "FourRoads.TelligentCommunity.MetaData.Resources."; }
+        //}
+        //protected EmbeddedResourcesBase EmbeddedResources {
+        //    get { return new EmbeddedResources();}
+        //}
 
         public class PanelContext : IContextualScriptedContentFragmentExtension
         {

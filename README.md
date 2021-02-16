@@ -1,9 +1,11 @@
 # Telligent Community Extensions
 #### Compatibility
-This version is the development branch for Telligent 11.1
+This version is the development branch for Telligent 12
 
 #### Dependencies
 The Telligent Community Extensions require that you have installed and are running Telligent Community.  As such, this library has dependencies on assemblies that for licensing reasons are not made available as part of this solution.  You will need to obtain these assemblies from the \Web\bin folder under the installation directory and copy all the dlls to the \src\lib\Telligent folder before compiling.  If you would like to develop please add your Telligent web project to the folder  \src\code\TelligentCommunity
+
+.Net Framework 4.7.2
 
 #### Where is the documentation?
 Each of the plugins contains a description of operation, however  documentation needs to be expanded on. If you have the time to contribute please do.

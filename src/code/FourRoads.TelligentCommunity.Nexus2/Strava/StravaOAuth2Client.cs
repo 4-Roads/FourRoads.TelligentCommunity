@@ -5,14 +5,16 @@ using System.Web;
 using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.Nexus2.Common;
 using Newtonsoft.Json.Linq;
-using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
-using Telligent.Evolution.Controls.PropertyRules;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Authentication.Version1;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+
+using IRequiredConfigurationPlugin = Telligent.Evolution.Extensibility.Version2.IRequiredConfigurationPlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
 
 namespace FourRoads.TelligentCommunity.Nexus2.Strava
 {
@@ -196,20 +198,49 @@ namespace FourRoads.TelligentCommunity.Nexus2.Strava
             {
                 var propertyGroupArray = new PropertyGroup[]
                 {
-                    new PropertyGroup("options", "Options", 0)
+                    new PropertyGroup() {Id="options", LabelText = "Options"}
                 };
 
-                var property1 = new Property("ConsumerKey", "Client ID", PropertyType.String, 0, "");
-                property1.Rules.Add(new PropertyRule(typeof (TrimStringRule), false));
-                propertyGroupArray[0].Properties.Add(property1);
+                propertyGroupArray[0].Properties.Add(new Property
+                {
+                    Id = "ConsumerKey",
+                    LabelText = "Client Id",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                });
 
-                var property2 = new Property("ConsumerSecret", "Consumer Secret", PropertyType.String, 0, "");
-                property2.Rules.Add(new PropertyRule(typeof (TrimStringRule), false));
+                propertyGroupArray[0].Properties.Add(new Property
+                {
+                    Id = "ConsumerSecret",
+                    LabelText = "Consumer Secret",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                });
 
-                propertyGroupArray[0].Properties.Add(property2);
-                propertyGroupArray[0].Properties.Add(new Property("AuthorizeBaseUrl", "Authorize Base URL", PropertyType.String, 0, "https://www.strava.com/oauth/authorize"));
-                propertyGroupArray[0].Properties.Add(new Property("AccessTokenUrl", "Access Token Base URL", PropertyType.String, 0, "https://www.strava.com/oauth/token"));
-            
+                propertyGroupArray[0].Properties.Add(new Property
+                {
+                    Id = "AuthorizeBaseUrl",
+                    LabelText = "Authorize Base URL",
+                    DataType = "url",
+                    Template = "url",
+                    OrderNumber = 0,
+                    DefaultValue = "https://www.strava.com/oauth/authorize"
+                });
+
+                propertyGroupArray[0].Properties.Add(new Property
+                {
+                    Id = "AccessTokenUrl",
+                    LabelText = "Access Token Base URL",
+                    DataType = "url",
+                    Template = "url",
+                    OrderNumber = 0,
+                    DefaultValue = "https://www.strava.com/oauth/token"
+                });
+
                 return propertyGroupArray;
             }
         }

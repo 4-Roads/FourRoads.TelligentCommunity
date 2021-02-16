@@ -1,5 +1,5 @@
+using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
 using System.Runtime.CompilerServices;
-using FourRoads.Common.TelligentCommunity.Components.Interfaces;
 
 namespace FourRoads.TelligentCommunity.PwaFeatures.Resources
 {

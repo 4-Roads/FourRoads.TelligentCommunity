@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -125,10 +126,10 @@ namespace FourRoads.TelligentCommunity.GroupDataExport
 
                 using (var fs = file.OpenReadStream())
                 {
-                    byte[] buffer = new byte[file.ContentLength];
-                    fs.Read(buffer, 0, file.ContentLength);
-
-                    response.Write(buffer);
+                    using (StreamReader reader = new StreamReader(fs, Encoding.UTF8))
+                    {
+                        response.Write(reader.ReadToEnd());
+                    }
 
                     response.End();
                 }

@@ -11,7 +11,7 @@ using FourRoads.TelligentCommunity.PowerBI.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
-using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Extensibility.Version2;
 
 namespace FourRoads.TelligentCommunity.PowerBI
 {

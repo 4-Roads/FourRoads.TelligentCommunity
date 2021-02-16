@@ -1,22 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.IO;
-using System.Linq;
-using System.Net;
+using System.Collections.Specialized;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Api.Plugins.Administration;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Content.Version1;
-using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Evolution.Urls.Routing;
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using TelligentConfiguration = Telligent.Evolution.Extensibility.Configuration.Version1;
 
 namespace FourRoads.TelligentCommunity.StopForumSpam
 {
@@ -48,13 +41,13 @@ namespace FourRoads.TelligentCommunity.StopForumSpam
 
                             postData.Add(new KeyValuePair<string, string>("json", "{''}"));
 
-                            if (_configuration.GetBool("useIP"))
+                            if (_configuration.GetBool("useIP").HasValue && _configuration.GetBool("useIP").Value)
                                 postData.Add(new KeyValuePair<string, string>("ip", CSContext.Current.UserHostAddress));
 
-                            if (_configuration.GetBool("useEmail"))
+                            if (_configuration.GetBool("useEmail").HasValue && _configuration.GetBool("useEmail").Value)
                                 postData.Add(new KeyValuePair<string, string>("email", moderatedUser.PrivateEmail));
 
-                            if (_configuration.GetBool("useUserName"))
+                            if (_configuration.GetBool("useUserName").HasValue && _configuration.GetBool("useUserName").Value)
                                 postData.Add(new KeyValuePair<string, string>("username", moderatedUser.Username));
 
                             HttpClient client = new HttpClient();
@@ -126,19 +119,67 @@ namespace FourRoads.TelligentCommunity.StopForumSpam
             _configuration = configuration;
         }
 
-        public PropertyGroup[] ConfigurationOptions
+        public TelligentConfiguration.PropertyGroup[] ConfigurationOptions
         {
             get
             {
-                PropertyGroup[] groupArray = new PropertyGroup[1];
-                PropertyGroup optionsGroup = new PropertyGroup("options", "Options", 0);
+                TelligentConfiguration.PropertyGroup[] groupArray = new TelligentConfiguration.PropertyGroup[1];
+                TelligentConfiguration.PropertyGroup optionsGroup = new TelligentConfiguration.PropertyGroup() {Id="options", LabelText = "Options"};
                 groupArray[0] = optionsGroup;
 
-                optionsGroup.Properties.Add(new Property("useIP", "Send IP for Testing", PropertyType.Bool, 1, bool.TrueString));
-                optionsGroup.Properties.Add(new Property("useEmail", "Send Email for Testing", PropertyType.Bool, 1, bool.TrueString));
-                optionsGroup.Properties.Add(new Property("useUserName", "Send UserName for Testing", PropertyType.Bool, 1, bool.TrueString));
-                optionsGroup.Properties.Add(new Property("threashold", "Score Threashold, above this threshold users are automatically banned", PropertyType.Int, 1,"50"));
-                optionsGroup.Properties.Add(new Property("apiUrl", "API Url", PropertyType.String, 1, "http://api.stopforumspam.org/api"));
+                optionsGroup.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "useIP",
+                    LabelText = "Send IP for Testing",
+                    DataType = "bool",
+                    Template = "bool",
+                    OrderNumber = 0,
+                    DefaultValue = bool.TrueString
+                });
+
+                optionsGroup.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "useEmail",
+                    LabelText = "Send Email for Testing",
+                    DataType = "bool",
+                    Template = "bool",
+                    OrderNumber = 0,
+                    DefaultValue = bool.TrueString
+                });
+
+                optionsGroup.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "useUserName",
+                    LabelText = "Send UserName for Testing",
+                    DataType = "bool",
+                    Template = "bool",
+                    OrderNumber = 0,
+                    DefaultValue = bool.TrueString
+                });
+
+                optionsGroup.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "threashold",
+                    LabelText = "Score Threashold, above this threshold users are automatically banned",
+                    DataType = "int",
+                    Template = "int",
+                    DefaultValue = "50",
+                    Options = new NameValueCollection
+                    {
+                        { "presentationDivisor", "1" },
+                        { "inputType", "number" },
+                    }
+                });
+
+                optionsGroup.Properties.Add(new TelligentConfiguration.Property
+                {
+                    Id = "apiUrl",
+                    LabelText = "API Url",
+                    DataType = "url",
+                    Template = "url",
+                    OrderNumber = 0,
+                    DefaultValue = "http://api.stopforumspam.org/api"
+                });
 
                 return groupArray;
             }

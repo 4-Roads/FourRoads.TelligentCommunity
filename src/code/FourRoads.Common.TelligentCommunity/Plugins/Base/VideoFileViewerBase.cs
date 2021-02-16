@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Web;
-using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
+using System.Collections.Specialized;
+
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 {
     public abstract class VideoFileViewerBase : IPlugin, Telligent.Evolution.Extensibility.UI.Version1.IFileViewer, IConfigurablePlugin
     {
-        private int _odering = 100;
+        private int _ordering = 100;
 
         public abstract string SupportedUrlPattern { get; }
 
@@ -26,7 +30,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         {
             get
             {
-                return this._odering;
+                return this._ordering;
             }
         }
 
@@ -39,14 +43,24 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
         {
             get
             {
-                PropertyGroup propertyGroupArray = new PropertyGroup("options", "Options", 0);
+                PropertyGroup propertyGroupArray = new PropertyGroup() {Id="options", LabelText = "Options"};
 
-                propertyGroupArray.Properties.Add(new Property("orderNumber", "Order Number", PropertyType.Int, 0, "100")
+                propertyGroupArray.Properties.Add(new Property
                 {
-                    DescriptionText = "Sets the priority when multiple file viewers can display the same file or URL (lower number takes priority)."
+                    Id = "orderNumber",
+                    LabelText = "Order Number",
+                    DescriptionText = "Sets the priority when multiple file viewers can display the same file or URL (lower number takes priority)",
+                    DataType = "int",
+                    Template = "int",
+                    DefaultValue = "100",
+                    Options = new NameValueCollection
+                    {
+                        { "presentationDivisor", "1" },
+                        { "inputType", "number" },
+                    }
                 });
 
-                return new PropertyGroup[] { propertyGroupArray };
+                return new [] { propertyGroupArray };
             }
         }
 
@@ -98,7 +112,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
 
         public void Update(IPluginConfiguration configuration)
         {
-            this._odering = configuration.GetInt("orderNumber");
+            this._ordering = configuration.GetInt("orderNumber").HasValue ? configuration.GetInt("orderNumber").Value : 100;
         }
 
     }

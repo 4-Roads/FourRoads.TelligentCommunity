@@ -6,6 +6,7 @@ using FourRoads.TelligentCommunity.Sentrus.Entities;
 using FourRoads.TelligentCommunity.Sentrus.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,12 @@ using Telligent.Evolution.Extensibility.Email.Version1;
 using Telligent.Evolution.Extensibility.Templating.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
+
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using Property = Telligent.Evolution.Extensibility.Configuration.Version1.Property;
+using PropertyGroup = Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup;
+using PropertyValue = Telligent.Evolution.Extensibility.Configuration.Version1.PropertyValue;
 
 namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 {
@@ -47,6 +54,9 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
     {
         private IUserHealth _userHealth;
         private static object _lock = new object();
+
+        private const int DefaultAccountAge = 24;
+        private const int DefaultAccountDeleteAge = 1;
 
         protected override string HealthName
         {
@@ -80,12 +90,12 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
         public void TestSettings()
         {
-            int outofDateMonths = Configuration.GetInt("accountDeleteAge");
+            int outofDateMonths = Configuration.GetInt("accountDeleteAge").HasValue ? Configuration.GetInt("accountDeleteAge").Value : DefaultAccountDeleteAge;
             var contentType = Enum.Parse(typeof(EmailContentType), Configuration.GetString("contentType"));
 
             StringBuilder emailAccountList = new StringBuilder();
 
-            foreach (User inactiveUser in  UserHealth.GetInactiveUsers(Configuration.GetInt("accountAge")))
+            foreach (User inactiveUser in  UserHealth.GetInactiveUsers(Configuration.GetInt("accountAge").HasValue ? Configuration.GetInt("accountAge").Value : DefaultAccountAge))
             {
                 var lastLoginData = UserHealth.GetLastLoginDetails(inactiveUser.ContentId);
 
@@ -113,11 +123,11 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
                 lock (_lock)
                 {
                     //User that have been warned and the warn date is 1 month old should be deleted
-                    int outofDateMonths = Configuration.GetInt("accountDeleteAge");
+                    int outofDateMonths = Configuration.GetInt("accountDeleteAge").HasValue ? Configuration.GetInt("accountDeleteAge").Value : DefaultAccountDeleteAge;
                     var contentType = Enum.Parse(typeof(EmailContentType), Configuration.GetString("contentType"));
                     int maxCount = 10000;
 
-                    foreach (User user in  UserHealth.GetInactiveUsers(Configuration.GetInt("accountAge")))
+                    foreach (User user in  UserHealth.GetInactiveUsers(Configuration.GetInt("accountAge").HasValue ? Configuration.GetInt("accountAge").Value : DefaultAccountAge))
                     {
                         maxCount--;
                         if (maxCount <= 0)
@@ -266,14 +276,14 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
         {
             get
             {
-                PropertyGroup deleteUsersGroup = new PropertyGroup("deleteUsers", "User Maintenance", 1);
+                PropertyGroup deleteUsersGroup = new PropertyGroup() {Id ="deleteUsers", LabelText =  "User Maintenance"};
 
-                Property accountAge = new Property("userMaintenance", "Disengaged Users", PropertyType.Custom, 1, "")
-                {
-                    ControlType = typeof (InactiveUserManagement)
-                };
-
-                deleteUsersGroup.Properties.Add(accountAge);
+                //todo - replace with template
+                //Property accountAge = new Property("userMaintenance", "Disengaged Users", PropertyType.Custom, 1, "")
+                //{
+                //    ControlType = typeof (InactiveUserManagement)
+                //};
+                //deleteUsersGroup.Properties.Add(accountAge);
 
                 return new[] {GetConfiguration(), deleteUsersGroup};
             }
@@ -288,36 +298,75 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
         public int InactivityPeriod
         {
-            get { return Configuration.GetInt("accountAge"); }
+            get { return Configuration.GetInt("accountAge").HasValue ? Configuration.GetInt("accountAge").Value : DefaultAccountAge; }
         }
 
         protected override PropertyGroup GetRootGroup()
         {
-            PropertyGroup group = new PropertyGroup("autouserCleanup", "User Encouragement", 0);
-            group.DescriptionText = "Sends an email to try and encourage users to renengage with the site.";
-
-            Property accountAge = new Property("accountAge", "Inactivity Period (months)", PropertyType.Int, 3, "24")
+            PropertyGroup group = new PropertyGroup()
             {
-                DescriptionText = "A period after which users start recieving encouragement to re-engage the site"
-
-            };
-            group.Properties.Add(accountAge);
-
-            Property accountDeleteAge = new Property("accountDeleteAge", "Encouragement Period (months)", PropertyType.Int, 4, "1")
-            {
-                DescriptionText = "A period after which the user is then emailed to re-engage with content updates"
+                Id = "autouserCleanup",
+                LabelText = "User Encouragement",
+                DescriptionText = "Sends an email to try and encourage users to reengage with the site."
             };
 
-            group.Properties.Add(accountDeleteAge);
+            group.Properties.Add(new Property
+            {
+                Id = "accountAge",
+                LabelText = "Inactivity Period (months)",
+                DescriptionText = "A period after which users start receiving encouragement to re-engage the site",
+                DataType = "int",
+                Template = "int",
+                DefaultValue = DefaultAccountAge.ToString(),
+                Options = new NameValueCollection
+                {
+                    { "presentationDivisor", "1" },
+                    { "inputType", "number" },
+                }
+            });
 
-            Property contentType = new Property("contentType", "Content Type", PropertyType.String, 1,
-                EmailContentType.Recommended.ToString());
-            contentType.SelectableValues.Add(new PropertyValue(EmailContentType.Recent.ToString(),
-                "Most recent", 0));
-            contentType.SelectableValues.Add(new PropertyValue(EmailContentType.Recommended.ToString(), "Recommended", 1));
+            group.Properties.Add(new Property
+            {
+                Id = "accountDeleteAge",
+                LabelText = "Encouragement Period (months)",
+                DescriptionText = "A period after which the user is then emailed to re-engage with content updates",
+                DataType = "int",
+                Template = "int",
+                DefaultValue = DefaultAccountDeleteAge.ToString(),
+                Options = new NameValueCollection
+                {
+                    { "presentationDivisor", "1" },
+                    { "inputType", "number" },
+                }
+            });
+
+
+            Property contentType = new Property()
+            {
+                Id = "contentType",
+                LabelText = "Content Type",
+                DataType = "string" ,
+                Template = "string",
+                DefaultValue = EmailContentType.Recommended.ToString()
+            };
+
+            contentType.SelectableValues.Add(new PropertyValue()
+            {
+                Value = EmailContentType.Recent.ToString(),
+                LabelText = "Most recent",
+                OrderNumber = 0
+            });
+
+            contentType.SelectableValues.Add(new PropertyValue()
+            {
+                Value = EmailContentType.Recommended.ToString(),
+                LabelText = "Recommended",
+                OrderNumber = 1
+            });
 
             group.Properties.Add(contentType);
 
+            
             Property testButton = new Property("testButton", "Test Settings", PropertyType.Custom, 5, "")
             {
                 ControlType = typeof(TestSettingButton)

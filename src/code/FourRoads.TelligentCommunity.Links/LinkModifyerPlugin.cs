@@ -1,7 +1,9 @@
-﻿using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Extensibility.Api.Version1;
+﻿using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
-using Telligent.Evolution.Extensibility.Version1;
+
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
 
 namespace FourRoads.TelligentCommunity.Links
 {
@@ -38,9 +40,9 @@ namespace FourRoads.TelligentCommunity.Links
         {
             _configuration = configuration;
 
-            _ensureLocalLinksMatchUriScheme = _configuration.GetBool("ensureLocalLinksMatchUriScheme");
-            _makeExternalUrlsTragetBlank = _configuration.GetBool("makeExternalUrlsTragetBlank");
-            _ensureLocalLinksLowercase = _configuration.GetBool("ensureLocalLinksLowercase");
+            _ensureLocalLinksMatchUriScheme = _configuration.GetBool("ensureLocalLinksMatchUriScheme").HasValue ? _configuration.GetBool("ensureLocalLinksMatchUriScheme").Value : true;
+            _makeExternalUrlsTragetBlank = _configuration.GetBool("makeExternalUrlsTragetBlank").HasValue ? _configuration.GetBool("makeExternalUrlsTragetBlank").Value : true;
+            _ensureLocalLinksLowercase = _configuration.GetBool("ensureLocalLinksLowercase").HasValue ? _configuration.GetBool("ensureLocalLinksLowercase").Value : false;
         }
 
         private IPluginConfiguration Configuration
@@ -53,20 +55,42 @@ namespace FourRoads.TelligentCommunity.Links
             get
             {
                 PropertyGroup[] groupArray = new PropertyGroup[1];
-                PropertyGroup optionsGroup = new PropertyGroup("options", "Options", 0);
+                PropertyGroup optionsGroup = new PropertyGroup
+                {
+                        Id ="options",
+                        LabelText = "Options"
+                };
                 groupArray[0] = optionsGroup;
 
-                Property schemeMatch = new Property("ensureLocalLinksMatchUriScheme", "Match URI Scheme", PropertyType.Bool, 0, "true") {DescriptionText = "This will check each local link to match the URI scheme of the site, ie if the site is being access through HTTPS then any absolute links that are in the content will be changed to match"};
+                optionsGroup.Properties.Add(new Property {
+                    Id="ensureLocalLinksMatchUriScheme",
+                    LabelText = "Match URI Scheme",
+                    DescriptionText = "This will check each local link to match the URI scheme of the site, ie if the site is being access through HTTPS then any absolute links that are in the content will be changed to match",
+                    DataType = "bool" ,
+                    Template = "bool",
+                    OrderNumber = 0,
+                    DefaultValue = "true"
+                });
 
-                optionsGroup.Properties.Add(schemeMatch);
+                optionsGroup.Properties.Add(new Property {
+                    Id="makeExternalUrlsTragetBlank",
+                    LabelText = "Target Blank",
+                    DescriptionText = "This will check each offsite anchor link and if enabled make every link target '_blank'",
+                    DataType = "bool",
+                    Template = "bool",
+                    OrderNumber = 1,
+                    DefaultValue = "true"
+                });
 
-                Property externalNewWindow = new Property("makeExternalUrlsTragetBlank", "Target Blank", PropertyType.Bool, 1, "true") { DescriptionText = "This will check each offsite anchor link and if enabled make every link traget '_blank'" };
-
-                optionsGroup.Properties.Add(externalNewWindow);
-
-                Property lowercaseUrls = new Property("ensureLocalLinksLowercase", "Lowercase", PropertyType.Bool, 2, "false") { DescriptionText = "This will check each local link and make the link lowercase" };
-
-                optionsGroup.Properties.Add(lowercaseUrls);
+                optionsGroup.Properties.Add(new Property {
+                    Id="ensureLocalLinksLowercase",
+                    LabelText = "Lowercase",
+                    DescriptionText = "This will check each local link and make the link lowercase",
+                    DataType = "bool", 
+                    Template = "bool", 
+                    OrderNumber = 2,
+                    DefaultValue = "false"
+                });
 
                 return groupArray;
             }

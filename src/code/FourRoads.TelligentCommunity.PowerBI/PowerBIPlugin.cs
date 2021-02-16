@@ -1,15 +1,15 @@
-﻿using FourRoads.Common.TelligentCommunity.Controls;
-using FourRoads.TelligentCommunity.PowerBI.Analytics.Language.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using TelligentProperty = Telligent.DynamicConfiguration.Components.Property;
+
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
+using System.Collections.Specialized;
 
 namespace FourRoads.TelligentCommunity.PowerBI
 {
@@ -45,8 +45,8 @@ namespace FourRoads.TelligentCommunity.PowerBI
 
                 string fieldList = _configuration.GetCustom("fields") ?? string.Empty;
 
-                //Convert the string to  a list
-                string[] fieldFilter = fieldList.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                //Convert the querystring to a list from format Name=STRING&Name=STRING
+                string[] fieldFilter = fieldList.Split('&').Select(c => Uri.UnescapeDataString(c.Split('=')[1])).ToArray();
 
                 _fields.AddRange(Helpers.UserProfile.GetUserProfileFields().Where(k => fieldFilter.Contains(k.Name) || fieldFilter.Length == 0).Select(f => f.Name));
 
@@ -144,68 +144,189 @@ namespace FourRoads.TelligentCommunity.PowerBI
             }
         }
 
+
         public PropertyGroup[] ConfigurationOptions
         {
             get
             {
-                PropertyGroup optionsGroup = new PropertyGroup("PowerBI", "PowerBI", 0);
+                PropertyGroup optionsGroup = new PropertyGroup() {Id="PowerBI", LabelText = "PowerBI"};
 
-                optionsGroup.Properties.Add(new Property("userName", "Power BI User Name", PropertyType.String, 0, ""));
-                AddPrivateProp("password", "Power BI User Password", optionsGroup);
-
-                optionsGroup.Properties.Add(new Property("clientId", "App Client Id", PropertyType.String, 0, ""));
-                optionsGroup.Properties.Add(new Property("groupName", "Group Name (optional)", PropertyType.String, 0, ""));
-                optionsGroup.Properties.Add(new Property("datasetName", "Dataset Name", PropertyType.String, 0, "Community"));
-                optionsGroup.Properties.Add(new Property("tableName", "Table Name", PropertyType.String, 0, "Posts"));
-
-                PropertyGroup urlsGroup = new PropertyGroup("URLS", "Urls", 0);
-
-                urlsGroup.Properties.Add(new Property("authorityUrl", "Azure AD authority Url", PropertyType.Url, 0, "https://login.windows.net/common/oauth2/authorize/"));
-                urlsGroup.Properties.Add(new Property("resourceUrl", "Azure AD resource Url", PropertyType.Url, 0, "https://analysis.windows.net/powerbi/api"));
-                urlsGroup.Properties.Add(new Property("apiUrl", "API Url", PropertyType.Url, 0, "https://api.powerbi.com/"));
-
-                PropertyGroup azureGroup = new PropertyGroup("AzureAnalytics", "Azure Analytics", 0);
-
-                azureGroup.Properties.Add(new Property("azureRegion", "Azure Analytics Region", PropertyType.String, 0, "Westeurope"));
-                AddPrivateProp("azureTextAnalyticsAPI", "Text Analytics API Key", azureGroup);
-
-                var azureTestControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
-                azureTestControl.ControlType = typeof(AzureTestControl);
-                azureGroup.Properties.Add(azureTestControl);
-                
-                PropertyGroup watsonGroup = new PropertyGroup("WatsonAnalytics", "Watson Analytics", 0);
-
-                watsonGroup.Properties.Add(new Property("watsonLanguageUrl", "NLP Url", PropertyType.Url, 0,
-                    "https://gateway-fra.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2018-03-16"));
-                AddPrivateProp("watsonTextAnalyticsAPI", "NLP API Key", watsonGroup);
-
-                var watsonTestControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
-                watsonTestControl.ControlType = typeof(WatsonTestControl);
-                watsonGroup.Properties.Add(watsonTestControl);
-
-                PropertyGroup userprofileGroup = new PropertyGroup("UserProfileFields", "User Profile Fields", 0);
-
-                Property availableFields = new Property("fields", "Fields", PropertyType.Custom, 0, "");
-
-                availableFields.ControlType = typeof(CheckboxListControl);
-                foreach (var field in Helpers.UserProfile.GetUserProfileFields())
+                optionsGroup.Properties.Add(new Property
                 {
-                    availableFields.SelectableValues.Add(new PropertyValue(field.Name, field.Title, 0) { });
-                }
+                    Id = "userName",
+                    LabelText = "Power BI User Name",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                });
 
-                userprofileGroup.Properties.Add(availableFields);
+                optionsGroup.Properties.Add(new Property
+                {
+                    Id = "password",
+                    LabelText = "Power BI User Password",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "",
+                    Options = new NameValueCollection
+                    {
+                        { "obscure", "true" }
+                    }
+                });
+
+                optionsGroup.Properties.Add(new Property
+                {
+                    Id = "clientId",
+                    LabelText = "App Client Id",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                });
+
+                optionsGroup.Properties.Add(new Property
+                {
+                    Id = "groupName",
+                    LabelText = "Group Name (optional)",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                });
+
+                optionsGroup.Properties.Add(new Property
+                {
+                    Id = "datasetName",
+                    LabelText = "Dataset Name",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "Community"
+                });
+
+                optionsGroup.Properties.Add(new Property
+                {
+                    Id = "tableName",
+                    LabelText = "Table Name",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "Posts"
+                });
+
+                PropertyGroup urlsGroup = new PropertyGroup() {Id="URLS", LabelText="Urls"};
+
+                urlsGroup.Properties.Add(new Property
+                {
+                    Id = "authorityUrl",
+                    LabelText = "Azure AD authority Url",
+                    DataType = "url",
+                    Template = "url",
+                    OrderNumber = 0,
+                    DefaultValue = "https://login.windows.net/common/oauth2/authorize/"
+                });
+
+                urlsGroup.Properties.Add(new Property
+                {
+                    Id = "resourceUrl",
+                    LabelText = "Azure AD resource Url",
+                    DataType = "url",
+                    Template = "url",
+                    OrderNumber = 0,
+                    DefaultValue = "https://analysis.windows.net/powerbi/api"
+                });
+
+                urlsGroup.Properties.Add(new Property
+                {
+                    Id = "apiUrl",
+                    LabelText = "API Url",
+                    DataType = "url",
+                    Template = "url",
+                    OrderNumber = 0,
+                    DefaultValue = "https://api.powerbi.com/"
+                });
+
+                PropertyGroup azureGroup = new PropertyGroup() {Id="AzureAnalytics", LabelText = "Azure Analytics"};
+
+                azureGroup.Properties.Add(new Property
+                {
+                    Id = "azureRegion",
+                    LabelText = "Azure Analytics Region",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "Westeurope"
+                });
+
+                azureGroup.Properties.Add(new Property
+                {
+                    Id = "azureTextAnalyticsAPI",
+                    LabelText = "Text Analytics API Key",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "",
+                    Options = new NameValueCollection
+                    {
+                        { "obscure", "true" }
+                    }
+                });
+
+                //todo - rewrite as template
+                //var azureTestControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
+                //azureTestControl.ControlType = typeof(AzureTestControl);
+                //azureGroup.Properties.Add(azureTestControl);
+                
+                PropertyGroup watsonGroup = new PropertyGroup() {Id="WatsonAnalytics", LabelText = "Watson Analytics"};
+
+                watsonGroup.Properties.Add(new Property
+                {
+                    Id = "watsonLanguageUrl",
+                    LabelText = "NLP Url",
+                    DataType = "url",
+                    Template = "url",
+                    OrderNumber = 0,
+                    DefaultValue = "https://gateway-fra.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2018-03-16"
+                });
+
+                watsonGroup.Properties.Add(new Property
+                {
+                    Id = "watsonTextAnalyticsAPI",
+                    LabelText = "NLP API Key",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "",
+                    Options = new NameValueCollection
+                    {
+                        { "obscure", "true" }
+                    }
+                });
+
+                //todo - rewrite as template
+                //var watsonTestControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
+                //watsonTestControl.ControlType = typeof(WatsonTestControl);
+                //watsonGroup.Properties.Add(watsonTestControl);
+
+                PropertyGroup userprofileGroup = new PropertyGroup() {Id="UserProfileFields", LabelText = "User Profile Fields"};
+
+                //Stored as a querystring in the format Name=STRING&Name=STRING
+                userprofileGroup.Properties.Add(new Property
+                {
+                    Id = "fields",
+                    LabelText = "Fields",
+                    DataType = "custom",
+                    Template = "core_v2_userProfileFields",
+                    Options = new NameValueCollection
+                    {
+                        { "singleSelect", "false" }
+                    }
+                });
 
                 return new PropertyGroup[] { optionsGroup, urlsGroup, azureGroup, watsonGroup, userprofileGroup };
             }
         }
-
-        private void AddPrivateProp(string propName, string title, PropertyGroup pg)
-        {
-            var prop = new Telligent.DynamicConfiguration.Components.Property(propName, title, PropertyType.String, 0, string.Empty);
-            prop.ControlType = typeof(PasswordPropertyControl);
-            pg.Properties.Add(prop);
-        }
-
 
     }
 }

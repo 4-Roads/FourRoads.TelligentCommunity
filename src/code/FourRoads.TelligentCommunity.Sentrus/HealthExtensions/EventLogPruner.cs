@@ -1,7 +1,7 @@
 ﻿namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 {
     using Interfaces;
-    using Telligent.DynamicConfiguration.Components;
+    using Telligent.Evolution.Extensibility.Configuration.Version1;
     using Telligent.Evolution.Extensibility.Version1;
 
     public class EventLogPruner : TruncateTableHealthExtensionBase, IHealthExtension
@@ -65,13 +65,13 @@
             return sqlStatementRows;
         }
 
-        public override void InternalUpdate(IPluginConfiguration configuration)
+        public override void InternalUpdate(Telligent.Evolution.Extensibility.Version2.IPluginConfiguration configuration)
         {
         }
 
         protected override PropertyGroup GetRootGroup()
         {
-            return new PropertyGroup("events", "Event Log", 0);
+            return new PropertyGroup() {Id = "events", LabelText =  "Event Log"};
         }
     }
 }

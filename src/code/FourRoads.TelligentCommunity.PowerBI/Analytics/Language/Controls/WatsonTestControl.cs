@@ -7,7 +7,9 @@ using TelligentProperty = Telligent.DynamicConfiguration.Components.Property;
 
 namespace FourRoads.TelligentCommunity.PowerBI.Analytics.Language.Controls
 {
-    public class WatsonTestControl : WebControl, IPropertyControl, INamingContainer
+    //todo replace this with a template control
+
+    public class WatsonTestControl : WebControl, INamingContainer //, IPropertyControl
     {
         protected Button TestButton;
         protected TextBox TestContent;
@@ -91,7 +93,7 @@ namespace FourRoads.TelligentCommunity.PowerBI.Analytics.Language.Controls
         public TelligentProperty ConfigurationProperty
         { get; set; }
 
-        public event ConfigurationPropertyChanged ConfigurationValueChanged;
+        //public event ConfigurationPropertyChanged ConfigurationValueChanged;
 
         public Control Control => this;
 

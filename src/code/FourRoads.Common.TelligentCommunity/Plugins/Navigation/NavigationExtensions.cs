@@ -1,11 +1,11 @@
 ﻿using System;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
-using Telligent.Evolution.Controls;
 using Telligent.Evolution.Extensibility.Version1;
 using System.Web;
 using Telligent.Evolution.Extensibility;
+
+using Telligent.Evolution.Extensibility.UI.Version3;
+using TelligentConfiguration = Telligent.Evolution.Extensibility.Configuration.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
 {
@@ -19,29 +19,18 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
 
         public string NavigationTypeName => "Logon";
 
-        public PropertyGroup[] GetConfigurationProperties()
+        public TelligentConfiguration.PropertyGroup[] GetConfigurationProperties()
         {
-            return new PropertyGroup[ 0 ];
+            return new TelligentConfiguration.PropertyGroup[ 0 ];
         }
 
-        public ICustomNavigationItem GetNavigationItem(Guid id, ICustomNavigationItemConfiguration configuration)
+        CustomNavigationItem ICustomNavigationPlugin.GetNavigationItem(Guid id, ICustomNavigationItemConfiguration configuration)
         {
-            return new CustomNavigationItem(id,
-                        () => _translatablePluginController.GetLanguageResourceValue("Logon"),
-                        () => Apis.Get<ICoreUrls>().LogIn(new CoreUrlLoginOptions { ReturnToCurrentUrl = true}), i => Apis.Get<IUsers>().AccessingUser.Username == Apis.Get<IUsers>().AnonymousUserName,
-                        () =>
-                        {
-                            if (Apis.Get<IUrl>().CurrentContext != null &&
-                                !string.IsNullOrWhiteSpace(Apis.Get<IUrl>().CurrentContext.PageName))
-                                return Apis.Get<IUrl>().CurrentContext.PageName == "common-login";
-                            return false;
-                        })
-            {
-                Plugin = this,
-                Children = new ICustomNavigationItem[ 0 ],
-                Configuration = configuration,
-                CssClass = "login"
-            };
+            return new CustomNavigationItem() {
+                DefaultLabel = () => _translatablePluginController.GetLanguageResourceValue("Logon"),
+                Url = Apis.Get<ICoreUrls>().LogIn(new CoreUrlLoginOptions { ReturnToCurrentUrl = true}),
+                CssClass = "login",
+                };
         }
 
         public void Initialize()
@@ -53,6 +42,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
         {
             _translatablePluginController = controller;
         }
+
 
         public Translation[] DefaultTranslations
         {
@@ -80,21 +70,17 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Navigation
 
         public string NavigationTypeName => "Register";
 
-        public PropertyGroup[] GetConfigurationProperties()
+        public TelligentConfiguration.PropertyGroup[] GetConfigurationProperties()
         {
-            return new PropertyGroup[ 0 ];
+            return new TelligentConfiguration.PropertyGroup[ 0 ];
         }
 
-        public ICustomNavigationItem GetNavigationItem(Guid id, ICustomNavigationItemConfiguration configuration)
+        CustomNavigationItem ICustomNavigationPlugin.GetNavigationItem(Guid id, ICustomNavigationItemConfiguration configuration)
         {
-            return new CustomNavigationItem(id,
-                        () => _translatablePluginController.GetLanguageResourceValue("Register"),
-                        () => Apis.Get<ICoreUrls>().Register(HttpContext.Current.Request.Url.LocalPath), i => Apis.Get<IUsers>().AccessingUser.Username == Apis.Get<IUsers>().AnonymousUserName,
-                        () => Apis.Get<IUrl>().CurrentContext.PageName == "user-createuser")
+            return new CustomNavigationItem()
             {
-                Plugin = this,
-                Children = new ICustomNavigationItem[ 0 ],
-                Configuration = configuration,
+                DefaultLabel = () => _translatablePluginController.GetLanguageResourceValue("Register"),
+                Url = Apis.Get<ICoreUrls>().Register(HttpContext.Current.Request.Url.LocalPath),
                 CssClass = "register"
             };
         }

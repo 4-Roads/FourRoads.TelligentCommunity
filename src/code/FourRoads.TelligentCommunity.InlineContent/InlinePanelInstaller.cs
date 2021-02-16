@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using FourRoads.Common.TelligentCommunity.Components;
-using FourRoads.Common.TelligentCommunity.Components.Interfaces;
-using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments;
+using FourRoads.TelligentCommunity.Installer;
+using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
+using FourRoads.TelligentCommunity.Installer.Components.Utility;
 
 namespace FourRoads.TelligentCommunity.InlineContent
 {
@@ -14,7 +14,7 @@ namespace FourRoads.TelligentCommunity.InlineContent
         protected string InternalGetPath([CallerFilePath] string path = null) => path;
     }
 
-    public class InlinePanelInstaller : FactoryDefaultWidgetProviderInstallerV3<InlineContentPanel>
+    public class InlinePanelInstaller : FactoryDefaultWidgetProviderInstaller<InlineContentPanel>
     {
         public override Guid ScriptedContentFragmentFactoryDefaultIdentifier => InlineContentPanel._scriptedFragmentGuid;
         protected override string ProjectName => "Inline Content Panel";

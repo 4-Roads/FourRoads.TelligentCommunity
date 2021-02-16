@@ -4,6 +4,7 @@ using System.Linq;
 using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.Logic;
 using FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss;
@@ -81,7 +82,8 @@ namespace FourRoads.TelligentCommunity.MetaData
                 Type[] priorityPlugins =
                 {
                     typeof (DependencyInjectionPlugin),
-                    typeof (FactoryDefaultWidgetProviderInstaller)
+                    typeof(InstallerCore),
+                    typeof (DefaultWidgetInstaller)
                 };
 
                 _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);

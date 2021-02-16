@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.Common.TelligentCommunity</RootNamespace>
     <AssemblyName>FourRoads.Common.TelligentCommunity</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -105,20 +105,17 @@
     <Compile Include="Controls\ApiSafeBlogLookup.cs" />
     <Compile Include="Controls\ApiSafeUserLookup.cs" />
     <Compile Include="Controls\MultiSelectRepeater.cs" />
-    <Compile Include="Controls\PasswordPropertyControl.cs" />
-    <Compile Include="Controls\PluginButtonPropertyControl.cs" />
+    <Compile Include="Controls\TriggerActionPropertyTemplate.cs" />
+    <Compile Include="Controls\UserLookupPropertyTemplate.cs" />
+    <Compile Include="Controls\ProfileFieldLookupPropertyTemplate.cs" />
     <Compile Include="Diagnostics.cs" />
     <Compile Include="DryIoc\AsyncExecutionFlowScopeContext.cs" />
     <Compile Include="DryIoc\Container.cs" />
     <Compile Include="DryIoc\FastExpressionCompiler.cs" />
     <Compile Include="DryIoc\ImTools.cs" />
     <Compile Include="Plugins\Base\CFSFilestoreInstaller.cs" />
-    <Compile Include="Plugins\Base\FactoryDefaultThemeInstallerV2.cs" />
-    <Compile Include="Plugins\Base\FactoryDefaultWidgetProviderInstallerv2.cs" />
     <Compile Include="Plugins\Base\PluginBase.cs" />
     <Compile Include="Plugins\Base\PluginGroupLoader.cs" />
-    <Compile Include="Plugins\Base\SqlScriptsInstaller.cs" />
-    <Compile Include="Plugins\Base\ThemeVersionHelper.cs" />
     <Compile Include="Plugins\Base\VideoFileViewerBase.cs" />
     <Compile Include="Plugins\Extensions\ContentExtension.cs" />
     <Compile Include="Plugins\Interfaces\IBindingsLoader.cs" />

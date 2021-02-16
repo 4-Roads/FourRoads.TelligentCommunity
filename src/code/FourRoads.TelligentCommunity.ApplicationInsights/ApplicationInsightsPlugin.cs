@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.Sentrus.Interfaces;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 
 namespace FourRoads.TelligentCommunity.ApplicationInsights
 {
@@ -25,13 +25,12 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
             {
                 TelemetryClient = null;
 
-                bool enabled = _configuration.GetBool("Enabled");
+                bool enabled = _configuration.GetBool("Enabled").HasValue ? _configuration.GetBool("Enabled").Value : false;
 
                 TelemetryConfiguration.Active.DisableTelemetry = !enabled;
 
                 if (enabled)
                 {
-                    //var config = TelemetryConfiguration.CreateFromConfiguration(_configuration.GetString("Configuration"));
                     TelemetryConfiguration.Active.InstrumentationKey = _configuration.GetString("InstrumentationKey");
 
                     TelemetryClient = new TelemetryClient(new TelemetryConfiguration(TelemetryConfiguration.Active.InstrumentationKey));
@@ -45,7 +44,9 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
 
                     if (filter != null)
                     {
-                        filter.ExludeSynthetic = _configuration.GetBool("excludeSynthetic");
+                        filter.ExludeSynthetic = _configuration.GetBool("excludeSynthetic").HasValue
+                            ? _configuration.GetBool("excludeSynthetic").Value
+                            : true;
 
                         string ignore  =_configuration.GetString("ignorePathsRegex");
 
@@ -104,23 +105,42 @@ namespace FourRoads.TelligentCommunity.ApplicationInsights
             get
             {
                 PropertyGroup[] groupArray = new PropertyGroup[1];
-                PropertyGroup optionsGroup = new PropertyGroup("Options", "Options", 0);
+                PropertyGroup optionsGroup = new PropertyGroup() {Id="Options", LabelText = "Options"};
                 groupArray[0] = optionsGroup;
 
-                optionsGroup.Properties.Add(new Property("InstrumentationKey", "Instrumentation Key", PropertyType.String, 1, ""));
-                optionsGroup.Properties.Add(new Property("excludeSynthetic", "Exclude Synthetic Requests", PropertyType.Bool, 2, Boolean.TrueString));
-                optionsGroup.Properties.Add(new Property("ignorePathsRegex", "Ignore Path Regex", PropertyType.String, 1, "socket\\.ashx|/utility/error-notfound\\.aspx"));
+                optionsGroup.Properties.Add(new Property
+                {
+                    Id = "InstrumentationKey",
+                    LabelText = "Instrumentation Key",
+                    DataType = "string",
+                    Template = "string",
+                    DefaultValue =  ""
+                });
+
+                optionsGroup.Properties.Add(new Property {
+                        Id ="excludeSynthetic",
+                        LabelText = "Exclude Synthetic Requests",
+                        DataType = "bool", 
+                        Template = "bool", 
+                        DefaultValue = Boolean.TrueString
+                });
+
+                optionsGroup.Properties.Add(new Property {
+                    Id="ignorePathsRegex",
+                    LabelText = "Ignore Path Regex",
+                    DataType = "string",
+                    Template = "string",
+                    DefaultValue = "socket\\.ashx|/utility/error-notfound\\.aspx"
+                });
                 
-
-                //var configuration = new Property("Configuration", "ApplicationInsights.Config", PropertyType.String, 1, new EmbededResources().GetString("FourRoads.TelligentCommunity.ApplicationInsights.ApplicationInsights.config"));
-
-                //configuration.ControlType = typeof(MultilineStringControl);
-                //configuration.Attributes["rows"] = "150";
-                //configuration.Attributes["cols"] = "100";
-
-                //optionsGroup.Properties.Add(configuration);
-
-                optionsGroup.Properties.Add(new Property("Enabled", "Enabled", PropertyType.Bool, 0, "True"));
+                optionsGroup.Properties.Add(new Property()
+                {
+                    Id="Enabled",
+                    LabelText = "Enabled",
+                    DataType = "bool" ,
+                    Template = "bool",
+                    DefaultValue = Boolean.FalseString
+                });
 
                 return groupArray;
             }

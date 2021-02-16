@@ -4,6 +4,7 @@ using System.Text;
 using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
@@ -127,7 +128,8 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
 
                 Type[] priorityPlugins =
                 {
-                    typeof (FactoryDefaultWidgetProviderInstaller)
+                    typeof (InstallerCore),
+                    typeof (DefaultWidgetInstaller)
                 };
 
                 _pluginGroupLoader.Initialize(new PluginGroupLoaderTypeVisitor(), priorityPlugins);
@@ -137,11 +139,6 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
         }
 
         #endregion
-
-        public void Update(IPluginConfiguration configuration)
-        {
-    
-        }
-
+        
     }
 }

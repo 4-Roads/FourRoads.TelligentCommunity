@@ -5,7 +5,7 @@
 	<include buildfile="common\build.targets.xml" />
 
 	<!-- NAnt properties -->
-	<property name="nant.settings.targetframework" value="net-4.6" />
+	<property name="nant.settings.targetframework" value="net-4.7.2" />
 	<property name="nant.settings.currentframework" value="net-4.5" />
 	
 	<target name="all"

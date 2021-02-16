@@ -1,9 +1,11 @@
-﻿using System.Web.UI.WebControls;
-using Telligent.DynamicConfiguration.Components;
-using Telligent.Evolution.Extensibility.Api.Version1;
+﻿using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
 
 namespace FourRoads.TelligentCommunity.GroupDataExport
 {
@@ -47,11 +49,12 @@ namespace FourRoads.TelligentCommunity.GroupDataExport
             get { return FILESTORE_KEY; }
         }
 
-        public Telligent.DynamicConfiguration.Components.PropertyGroup[] ConfigurationOptions
+        public PropertyGroup[] ConfigurationOptions
         {
             get {
 
-                PropertyGroup exportGroup = new PropertyGroup("ExportForm", "Export Form", 1);
+                PropertyGroup exportGroup = new PropertyGroup {Id="ExportForm", LabelText = "Export Form" };
+
 
                 if (PluginManager.IsEnabled(this))
                 {

@@ -6,6 +6,7 @@ using System.Web;
 using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 using FourRoads.TelligentCommunity.Mfa.DataProvider;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Logic;
@@ -44,8 +45,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
 
         public IEnumerable<Type> Plugins => new[]
         {
+            typeof (InstallerCore),
             typeof (MfaSqlScriptsInstaller),
-            typeof (FactoryDefaultWidgetProviderInstaller),
+            typeof (DefaultWidgetInstaller),
             typeof (MfaAuthenticatorExtension),
             typeof (VerifyEmailPlugin),
             typeof (VerifyEmailTokens),

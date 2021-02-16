@@ -1,8 +1,8 @@
-﻿using FourRoads.Common.TelligentCommunity.Components;
+﻿using FourRoads.TelligentCommunity.Installer.Components.Utility;
 
 namespace FourRoads.TelligentCommunity.Sentrus.Resources
 {
-    public class SqlScriptsInstaller : FourRoads.Common.TelligentCommunity.Plugins.Base.SqlScriptsInstaller
+    public class SqlScriptsInstaller : Installer.SqlScriptsInstaller
     {
         protected override string ProjectName
         {

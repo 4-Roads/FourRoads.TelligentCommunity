@@ -10,9 +10,9 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Controls
 {
-    public class ApiSafeBlogLookup : TextBox, IPropertyControl
-    {
-        protected override void OnPreRender(EventArgs e)
+    // todo - rewrite as lookup property or use the ootb one
+    public class ApiSafeBlogLookup : TextBox//, IPropertyControl
+    { protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);
 
@@ -130,7 +130,7 @@ namespace FourRoads.Common.TelligentCommunity.Controls
 
         public Property ConfigurationProperty { get; set; }
         public ConfigurationDataBase ConfigurationData { get; set; }
-        public event ConfigurationPropertyChanged ConfigurationValueChanged;
+        //public event ConfigurationPropertyChanged ConfigurationValueChanged;
         public Control Control => this;
     }
 }

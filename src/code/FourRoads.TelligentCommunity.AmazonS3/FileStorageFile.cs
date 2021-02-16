@@ -10,7 +10,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
     [Serializable]
     public class FileStorageFile : ICentralizedFile, ICacheable, IDisposable
     {
-        private int? _contentLength = null;
+        private long? _contentLength = null;
         private static string[] _tags = new string[0];
         private object _fileAccessLock = new object();
 
@@ -40,7 +40,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
         #region ICentralizedFile Members
 
-        public int ContentLength
+        public long ContentLength
         {
             get
             {

@@ -4,9 +4,9 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity111.Mfa")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity120.Mfa")]
 [assembly: AssemblyDescription("Integration with MFA")]
-[assembly: AssemblyProduct("FourRoads.TelligentCommunity111.Mfa")]
+[assembly: AssemblyProduct("FourRoads.TelligentCommunity120.Mfa")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

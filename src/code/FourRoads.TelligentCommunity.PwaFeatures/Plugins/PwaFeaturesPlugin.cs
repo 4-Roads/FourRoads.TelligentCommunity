@@ -8,6 +8,7 @@ using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 using FourRoads.TelligentCommunity.PwaFeatures.DataProvider;
 using FourRoads.TelligentCommunity.PwaFeatures.Extensions;
 using FourRoads.TelligentCommunity.PwaFeatures.Resources;
@@ -254,7 +255,8 @@ namespace FourRoads.TelligentCommunity.PwaFeatures.Plugins
 
         public IEnumerable<Type> Plugins  => new[]
         {
-            typeof (WidgetInstaller),
+            typeof(InstallerCore),
+            typeof(DefaultWidgetInstaller),
             typeof(CustomUrlsPanelInstaller),
             typeof(PwaSqlScriptsInstaller),
             typeof(RestEndpoint)

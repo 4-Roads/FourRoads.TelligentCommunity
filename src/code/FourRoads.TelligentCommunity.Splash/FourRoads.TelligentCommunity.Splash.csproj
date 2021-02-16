@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FourRoads.TelligentCommunity.Splash</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.Splash</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -92,7 +92,7 @@
     <Compile Include="Logic\SplashLogic.cs" />
     <Compile Include="Plugins\Filestore.cs" />
     <Compile Include="Resources\EmbeddedResources.cs" />
-    <Compile Include="Plugins\FactoryDefaultWidgetProviderInstaller.cs" />
+    <Compile Include="Plugins\DefaultWidgetInstaller.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions\SplashExtension.cs" />
     <Compile Include="Plugins\ScriptedFragment.cs" />
@@ -119,9 +119,9 @@
       <Project>{20bc9498-6e57-4f6e-bb23-38bfef110161}</Project>
       <Name>FourRoads.TelligentCommunity.RenderingHelper</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FourRoads.TelligentCommunity.WidgetInstaller\FourRoads.TelligentCommunity.WidgetInstaller.csproj">
+    <ProjectReference Include="..\FourRoads.TelligentCommunity.Installer\FourRoads.TelligentCommunity.Installer.csproj">
       <Project>{DA832372-7D04-4A24-93BD-A0992DA52608}</Project>
-      <Name>FourRoads.TelligentCommunity.WidgetInstaller</Name>
+      <Name>FourRoads.TelligentCommunity.Installer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

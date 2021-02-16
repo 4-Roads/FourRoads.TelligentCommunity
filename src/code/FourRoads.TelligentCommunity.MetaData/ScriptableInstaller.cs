@@ -1,13 +1,13 @@
 ﻿using System;
-using FourRoads.Common.TelligentCommunity.Components;
-using FourRoads.Common.TelligentCommunity.Components.Interfaces;
-using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using FourRoads.TelligentCommunity.Installer;
+using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
+using FourRoads.TelligentCommunity.Installer.Components.Utility;
 using FourRoads.TelligentCommunity.MetaData.Interfaces;
 using FourRoads.TelligentCommunity.MetaData.ScriptedFragmentss;
 
 namespace FourRoads.TelligentCommunity.MetaData
 {
-    public class ScriptableInstaller : FactoryDefaultWidgetProviderInstallerV3<AdministrationPanel>, IApplicationPlugin
+    public class ScriptableInstaller : FactoryDefaultWidgetProviderInstaller<AdministrationPanel>, IApplicationPlugin
     {
         public override Guid ScriptedContentFragmentFactoryDefaultIdentifier => AdministrationPanel._scriptedFragmentGuid;
         protected override string ProjectName => "Meta Data Scripted Panel";

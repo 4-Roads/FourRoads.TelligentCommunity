@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using FourRoads.Common.TelligentCommunity.Components;
-using FourRoads.Common.TelligentCommunity.Components.Interfaces;
-using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using FourRoads.TelligentCommunity.Installer;
+using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
+using FourRoads.TelligentCommunity.Installer.Components.Utility;
 using FourRoads.TelligentCommunity.Mfa.Resources;
 using Telligent.Evolution.Extensibility.UI.Version1;
 
@@ -15,7 +15,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
         protected string InternalGetPath([CallerFilePath] string path = null) => path;
     }
 
-    public class FactoryDefaultWidgetProviderInstaller : FactoryDefaultWidgetProviderInstallerV3<FactoryDefaultWidgetProviderInstaller>, IScriptedContentFragmentFactoryDefaultProvider
+    public class DefaultWidgetInstaller : FactoryDefaultWidgetProviderInstaller<DefaultWidgetInstaller>, IScriptedContentFragmentFactoryDefaultProvider
     {
         public override Guid ScriptedContentFragmentFactoryDefaultIdentifier { get; } = new Guid("{3BD55B78-2E62-4B77-B6E7-30F6BCE17DE2}");
 

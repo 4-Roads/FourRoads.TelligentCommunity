@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>FourRoads.TelligentCommunity.PwaFeatures</RootNamespace>
     <AssemblyName>FourRoads.TelligentCommunity.PwaFeatures</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -158,7 +158,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\CustomUrlsPanelInstaller.cs" />
     <Compile Include="Resources\PwaSqlScriptsInstaller.cs" />
-    <Compile Include="Resources\WidgetInstaller.cs" />
+    <Compile Include="Resources\DefaultWidgetInstaller.cs" />
     <Compile Include="Resources\CommunityCallerPath.cs" />
     <Compile Include="Resources\EmbeddedResources.cs" />
     <Compile Include="Extensions\CustomUrlsPanelContext.cs" />
@@ -198,6 +198,10 @@
     <ProjectReference Include="..\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj">
       <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
       <Name>FourRoads.Common.TelligentCommunity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FourRoads.TelligentCommunity.Installer\FourRoads.TelligentCommunity.Installer.csproj">
+      <Project>{DA832372-7D04-4A24-93BD-A0992DA52608}</Project>
+      <Name>FourRoads.TelligentCommunity.Installer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

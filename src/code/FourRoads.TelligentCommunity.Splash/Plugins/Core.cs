@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+using FourRoads.TelligentCommunity.Installer;
 using FourRoads.TelligentCommunity.RenderingHelper;
 using FourRoads.TelligentCommunity.Splash.Interfaces;
 using FourRoads.TelligentCommunity.Splash.Logic;
-using Telligent.DynamicConfiguration.Components;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+
+using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+
 
 namespace FourRoads.TelligentCommunity.Splash.Plugins
 {
@@ -44,8 +49,8 @@ namespace FourRoads.TelligentCommunity.Splash.Plugins
         {
             _splashConfig = new SplashConfigurationDetails()
             {
-                RemoveFooter = configuration.GetBool("removeFooter"),
-                RemoveHeader = configuration.GetBool("removeHeader"),
+                RemoveFooter = configuration.GetBool("removeFooter").HasValue ? configuration.GetBool("removeFooter").Value : true,
+                RemoveHeader = configuration.GetBool("removeHeader").HasValue ? configuration.GetBool("removeHeader").Value : true,
                 Password = configuration.GetString("password"),
             };
         }
@@ -54,11 +59,36 @@ namespace FourRoads.TelligentCommunity.Splash.Plugins
         {
             get
             {
-                var group = new PropertyGroup("options", "Options", 0);
+                var group = new PropertyGroup() {Id = "options", LabelText = "Options"};
 
-                group.Properties.Add(new Property("password", "Password", PropertyType.String, 1, string.Empty));
-                group.Properties.Add(new Property("removeHeader", "Remove Header", PropertyType.Bool, 2, bool.TrueString));
-                group.Properties.Add(new Property("removeFooter", "Remove Footer", PropertyType.Bool, 3, bool.TrueString));
+                group.Properties.Add(new Property
+                {
+                    Id = "password",
+                    LabelText = "Password",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                });
+
+                group.Properties.Add(new Property
+                {
+                    Id = "removeHeader",
+                    LabelText = "Remove Header",
+                    DataType = "bool",
+                    Template = "bool",
+                    OrderNumber = 0,
+                    DefaultValue = bool.TrueString
+                });
+                group.Properties.Add(new Property
+                {
+                    Id = "removeFooter",
+                    LabelText = "Remove Footer",
+                    DataType = "bool",
+                    Template = "bool",
+                    OrderNumber = 0,
+                    DefaultValue = bool.TrueString
+                });
 
                 return new[] {group};
             }
@@ -77,7 +107,7 @@ namespace FourRoads.TelligentCommunity.Splash.Plugins
 
                 plugins.AddRange( new[]
                 {
-                    typeof (FactoryDefaultWidgetProviderInstaller),
+                    typeof (FactoryDefaultWidgetProviderInstaller<>),
                     typeof (ScriptedFragment),
                     typeof (Filestore)
                 });

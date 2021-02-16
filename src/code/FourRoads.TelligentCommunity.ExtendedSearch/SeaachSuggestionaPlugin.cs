@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Telligent.Evolution.Extensibility.UI.Version1;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.ExtendedSearch
@@ -14,6 +14,6 @@ namespace FourRoads.TelligentCommunity.ExtendedSearch
 
         string IPlugin.Name => "4 Roads - Search Suggestion Extensions";
         string IPlugin.Description => "Extends the SOLR search to support suggested query results";
-        public IEnumerable<Type> Plugins => new[] {typeof(SearchExtensionSCriptedFragementExtenstion), typeof(FactoryDefaultWidgetProviderInstaller) };
+        public IEnumerable<Type> Plugins => new[] {typeof(SearchExtensionSCriptedFragementExtenstion), typeof(InstallerCore), typeof(DefaultWidgetInstaller) };
     }
 }

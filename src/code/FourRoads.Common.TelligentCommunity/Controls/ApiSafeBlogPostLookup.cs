@@ -10,7 +10,8 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 
 namespace FourRoads.Common.TelligentCommunity.Controls
 {
-    public class ApiSafeBlogPostLookup : TextBox, IPropertyControl
+    // todo - reqwite as lookup property or use the ootb one
+    public class ApiSafeBlogPostLookup : TextBox//, IPropertyControl
     {
         protected override void OnPreRender(EventArgs e)
         {
@@ -130,7 +131,7 @@ namespace FourRoads.Common.TelligentCommunity.Controls
 
         public Property ConfigurationProperty { get; set; }
         public ConfigurationDataBase ConfigurationData { get; set; }
-        public event ConfigurationPropertyChanged ConfigurationValueChanged;
+        //public event ConfigurationPropertyChanged ConfigurationValueChanged;
         public Control Control => this;
     }
 }

@@ -184,7 +184,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
         {
             get
             {
-                return GetBoolValue("dynamicName", false);
+                return GetBoolValue("dynamicName", false).Value;
             }
         }
 
@@ -237,7 +237,7 @@ namespace FourRoads.TelligentCommunity.InlineContent.ScriptedContentFragments
             GroupContext = 2
         }
 
-        public override Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup[] GetPropertyGroups()
+        public override PropertyGroup[] GetPropertyGroups()
         {
             if (HttpContext.Current == null || HttpContext.Current.Request.CurrentExecutionFilePath.EndsWith(".ashx"))
                 return new PropertyGroup[0];

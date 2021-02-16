@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity111.HubSpot")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity120.HubSpot")]
 [assembly: AssemblyDescription("Integration with HubSpot")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.HubSpot")]
 

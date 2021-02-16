@@ -24,8 +24,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.ContentDiscuss", "code\FourRoads.TelligentCommunity.ContentDiscuss\FourRoads.TelligentCommunity.ContentDiscuss.csproj", "{60055B3C-D84A-4BE7-A8E6-1988381602B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.UserDataExport", "code\FourRoads.TelligentCommunity.UserDataExport\FourRoads.TelligentCommunity.UserDataExport.csproj", "{C55C887C-8C15-4097-B203-9AAB25718F62}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.ConfigurationExtensions", "code\FourRoads.TelligentCommunity.ConfigurationExtensions\FourRoads.TelligentCommunity.ConfigurationExtensions.csproj", "{571BC785-5F45-40B9-949C-E33A882CEAE1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.GroupMentionActivity", "code\FourRoads.TelligentCommunity.GroupMentionActivity\FourRoads.TelligentCommunity.GroupMentionActivity.csproj", "{5CA9A695-520F-488B-837E-E9E3580C5C34}"
@@ -36,13 +34,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Administration plugins", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Links", "code\FourRoads.TelligentCommunity.Links\FourRoads.TelligentCommunity.Links.csproj", "{30C53022-D89D-4EEE-AE85-B5C8E366FCD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Rules", "code\FourRoads.TelligentCommunity.Rules\FourRoads.TelligentCommunity.Rules.csproj", "{2090D715-FFD1-4548-96A4-A978D4A48A92}"
-EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "TelligentCommunity", "http://localhost:49506", "{95361670-3B1C-4F0E-A102-E732621D6B5E}"
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.7"
-		ProjectReferences = "{8ead72ec-98cb-49b0-9870-1de3eef883f3}|FourRoads.Common.TelligentCommunity.dll;{185591a1-4068-47c2-95b5-c63172787744}|FourRoads.TelligentCommunity.AmazonS3.dll;{2234d44a-7c66-4241-8c54-dcc1d0e602e1}|FourRoads.TelligentCommunity.ApplicationInsights.dll;{571bc785-5f45-40b9-949c-e33a882ceae1}|FourRoads.TelligentCommunity.ConfigurationExtensions.dll;{60055b3c-d84a-4be7-a8e6-1988381602b9}|FourRoads.TelligentCommunity.ContentDiscuss.dll;{3dd12b46-736e-4252-b164-109159ac44dc}|FourRoads.TelligentCommunity.ExtendedSearch.dll;{81984bf5-8490-4261-a442-1842b17c125f}|FourRoads.TelligentCommunity.ForumLastPost.dll;{47c01be9-fd0e-42b1-bcaa-8c04fae54d21}|FourRoads.TelligentCommunity.GroupDataExport.dll;{20bc9498-6e57-4f6e-bb23-38bfef110161}|FourRoads.TelligentCommunity.RenderingHelper.dll;{5ca9a695-520f-488b-837e-e9e3580c5c34}|FourRoads.TelligentCommunity.GroupMentionActivity.dll;{5bb7919e-9f1a-4dcd-8ec7-210f160f1fc1}|FourRoads.TelligentCommunity.HubSpot.dll;{652dc523-cc2e-43a7-89b5-4c84b3a7ebd9}|FourRoads.TelligentCommunity.InlineContent.dll;{30c53022-d89d-4eee-ae85-b5c8e366fcd9}|FourRoads.TelligentCommunity.Links.dll;{adfc1b7b-81a5-4ed5-9115-12a2a608c546}|FourRoads.TelligentCommunity.MetaData.dll;{f078fc10-c243-4b84-b2e0-5e3fa71b980c}|FourRoads.TelligentCommunity.MicroData.dll;{b35e5ed4-32f7-4ca4-8a4f-04201abb011e}|FourRoads.TelligentCommunity.Nexus2.dll;{9dfa3db2-cd6e-471d-b3b6-ffe5ef3e4a05}|FourRoads.TelligentCommunity.PowerBI.dll;{2090d715-ffd1-4548-96a4-a978d4a48a92}|FourRoads.TelligentCommunity.Rules.dll;{1780110F-EF88-4134-8C8F-94E5C411B29D}|FourRoads.TelligentCommunity.Rules.ThreadViews.dll;{b2927439-ef5e-4895-a46a-8b5167a326ba}|FourRoads.TelligentCommunity.Splash.dll;{bb9216ec-8e37-48d4-8b2a-74be9f864e7a}|FourRoads.TelligentCommunity.StopForumSpam.dll;{c55c887c-8c15-4097-b203-9aab25718f62}|FourRoads.TelligentCommunity.UserDataExport.dll;{0a2f40db-f1e8-4b90-805e-d2cb64f07db5}|FourRoads.TelligentCommunity.SocialProfileControls.dll;{f5149201-4128-493a-b04e-c9a71b6e162d}|FourRoads.TelligentCommunity.Sentrus.dll;{593474f4-05ee-4e6a-b75c-51073feeca04}|FourRoads.TelligentCommunity.PwaFeatures.dll;{dc3b68dd-e38d-4e76-a646-86f5697386d3}|FourRoads.TelligentCommunity.MigratorFramework.dll;{104b1f22-5cf1-4364-8c89-62ca11b032fe}|FourRoads.TelligentCommunity.Mfa.dll;"
+		ProjectReferences = "{8ead72ec-98cb-49b0-9870-1de3eef883f3}|FourRoads.Common.TelligentCommunity.dll;{185591a1-4068-47c2-95b5-c63172787744}|FourRoads.TelligentCommunity.AmazonS3.dll;{2234d44a-7c66-4241-8c54-dcc1d0e602e1}|FourRoads.TelligentCommunity.ApplicationInsights.dll;{571bc785-5f45-40b9-949c-e33a882ceae1}|FourRoads.TelligentCommunity.ConfigurationExtensions.dll;{60055b3c-d84a-4be7-a8e6-1988381602b9}|FourRoads.TelligentCommunity.ContentDiscuss.dll;{3dd12b46-736e-4252-b164-109159ac44dc}|FourRoads.TelligentCommunity.ExtendedSearch.dll;{81984bf5-8490-4261-a442-1842b17c125f}|FourRoads.TelligentCommunity.ForumLastPost.dll;{47c01be9-fd0e-42b1-bcaa-8c04fae54d21}|FourRoads.TelligentCommunity.GroupDataExport.dll;{20bc9498-6e57-4f6e-bb23-38bfef110161}|FourRoads.TelligentCommunity.RenderingHelper.dll;{5ca9a695-520f-488b-837e-e9e3580c5c34}|FourRoads.TelligentCommunity.GroupMentionActivity.dll;{5bb7919e-9f1a-4dcd-8ec7-210f160f1fc1}|FourRoads.TelligentCommunity.HubSpot.dll;{652dc523-cc2e-43a7-89b5-4c84b3a7ebd9}|FourRoads.TelligentCommunity.InlineContent.dll;{30c53022-d89d-4eee-ae85-b5c8e366fcd9}|FourRoads.TelligentCommunity.Links.dll;{adfc1b7b-81a5-4ed5-9115-12a2a608c546}|FourRoads.TelligentCommunity.MetaData.dll;{f078fc10-c243-4b84-b2e0-5e3fa71b980c}|FourRoads.TelligentCommunity.MicroData.dll;{b35e5ed4-32f7-4ca4-8a4f-04201abb011e}|FourRoads.TelligentCommunity.Nexus2.dll;{9dfa3db2-cd6e-471d-b3b6-ffe5ef3e4a05}|FourRoads.TelligentCommunity.PowerBI.dll;{b2927439-ef5e-4895-a46a-8b5167a326ba}|FourRoads.TelligentCommunity.Splash.dll;{bb9216ec-8e37-48d4-8b2a-74be9f864e7a}|FourRoads.TelligentCommunity.StopForumSpam.dll;{0a2f40db-f1e8-4b90-805e-d2cb64f07db5}|FourRoads.TelligentCommunity.SocialProfileControls.dll;{f5149201-4128-493a-b04e-c9a71b6e162d}|FourRoads.TelligentCommunity.Sentrus.dll;{593474f4-05ee-4e6a-b75c-51073feeca04}|FourRoads.TelligentCommunity.PwaFeatures.dll;{dc3b68dd-e38d-4e76-a646-86f5697386d3}|FourRoads.TelligentCommunity.MigratorFramework.dll;{104b1f22-5cf1-4364-8c89-62ca11b032fe}|FourRoads.TelligentCommunity.Mfa.dll;{DA832372-7D04-4A24-93BD-A0992DA52608}|FourRoads.TelligentCommunity.Installer.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_49506"
 		Debug.AspNetCompiler.PhysicalPath = "code\TelligentCommunity\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_49506\"
@@ -61,7 +57,6 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "TelligentCommunity", "http:
 		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
-		{1780110F-EF88-4134-8C8F-94E5C411B29D} = {1780110F-EF88-4134-8C8F-94E5C411B29D}
 		{47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21} = {47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21}
 	EndProjectSection
 EndProject
@@ -78,8 +73,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.Common.TelligentCommunity", "code\FourRoads.Common.TelligentCommunity\FourRoads.Common.TelligentCommunity.csproj", "{8EAD72EC-98CB-49B0-9870-1DE3EEF883F3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.HubSpot", "code\FourRoads.TelligentCommunity.HubSpot\FourRoads.TelligentCommunity.HubSpot.csproj", "{5BB7919E-9F1A-4DCD-8EC7-210F160F1FC1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Rules.ThreadViews", "code\FourRoads.TelligentCommunity.Rules.ThreadViews\FourRoads.TelligentCommunity.Rules.ThreadViews.csproj", "{1780110F-EF88-4134-8C8F-94E5C411B29D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.ApplicationInsights", "code\FourRoads.TelligentCommunity.ApplicationInsights\FourRoads.TelligentCommunity.ApplicationInsights.csproj", "{2234D44A-7C66-4241-8C54-DCC1D0E602E1}"
 EndProject
@@ -98,6 +91,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.MigratorFramework", "code\FourRoads.TelligentCommunity.MigratorFramework\FourRoads.TelligentCommunity.MigratorFramework.csproj", "{DC3B68DD-E38D-4E76-A646-86F5697386D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Mfa", "code\FourRoads.TelligentCommunity.Mfa\FourRoads.TelligentCommunity.Mfa.csproj", "{104B1F22-5CF1-4364-8C89-62CA11B032FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourRoads.TelligentCommunity.Installer", "code\FourRoads.TelligentCommunity.Installer\FourRoads.TelligentCommunity.Installer.csproj", "{DA832372-7D04-4A24-93BD-A0992DA52608}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -171,15 +166,6 @@ Global
 		{60055B3C-D84A-4BE7-A8E6-1988381602B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60055B3C-D84A-4BE7-A8E6-1988381602B9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{60055B3C-D84A-4BE7-A8E6-1988381602B9}.Release|x86.ActiveCfg = Release|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Release Output|Any CPU.Build.0 = Release|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Release Output|x86.ActiveCfg = Release|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C55C887C-8C15-4097-B203-9AAB25718F62}.Release|x86.ActiveCfg = Release|Any CPU
 		{571BC785-5F45-40B9-949C-E33A882CEAE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{571BC785-5F45-40B9-949C-E33A882CEAE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{571BC785-5F45-40B9-949C-E33A882CEAE1}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -207,15 +193,6 @@ Global
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9}.Release|x86.ActiveCfg = Release|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Release Output|Any CPU.Build.0 = Release|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Release Output|x86.ActiveCfg = Release|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2090D715-FFD1-4548-96A4-A978D4A48A92}.Release|x86.ActiveCfg = Release|Any CPU
 		{95361670-3B1C-4F0E-A102-E732621D6B5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{95361670-3B1C-4F0E-A102-E732621D6B5E}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{95361670-3B1C-4F0E-A102-E732621D6B5E}.Release Output|Any CPU.ActiveCfg = Debug|Any CPU
@@ -271,18 +248,6 @@ Global
 		{5BB7919E-9F1A-4DCD-8EC7-210F160F1FC1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5BB7919E-9F1A-4DCD-8EC7-210F160F1FC1}.Release|x86.ActiveCfg = Release|Any CPU
 		{5BB7919E-9F1A-4DCD-8EC7-210F160F1FC1}.Release|x86.Build.0 = Release|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Debug|x86.Build.0 = Debug|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Release Output|Any CPU.Build.0 = Release|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Release Output|x86.ActiveCfg = Release|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Release Output|x86.Build.0 = Release|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Release|x86.ActiveCfg = Release|Any CPU
-		{1780110F-EF88-4134-8C8F-94E5C411B29D}.Release|x86.Build.0 = Release|Any CPU
 		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2234D44A-7C66-4241-8C54-DCC1D0E602E1}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -391,6 +356,18 @@ Global
 		{104B1F22-5CF1-4364-8C89-62CA11B032FE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{104B1F22-5CF1-4364-8C89-62CA11B032FE}.Release|x86.ActiveCfg = Release|Any CPU
 		{104B1F22-5CF1-4364-8C89-62CA11B032FE}.Release|x86.Build.0 = Release|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Debug|x86.Build.0 = Debug|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Release Output|Any CPU.ActiveCfg = Release|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Release Output|Any CPU.Build.0 = Release|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Release Output|x86.ActiveCfg = Release|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Release Output|x86.Build.0 = Release|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Release|x86.ActiveCfg = Release|Any CPU
+		{DA832372-7D04-4A24-93BD-A0992DA52608}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -403,17 +380,14 @@ Global
 		{0A2F40DB-F1E8-4B90-805E-D2CB64F07DB5} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{F5149201-4128-493A-B04E-C9A71B6E162D} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{60055B3C-D84A-4BE7-A8E6-1988381602B9} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
-		{C55C887C-8C15-4097-B203-9AAB25718F62} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{571BC785-5F45-40B9-949C-E33A882CEAE1} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{5CA9A695-520F-488B-837E-E9E3580C5C34} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{30C53022-D89D-4EEE-AE85-B5C8E366FCD9} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
-		{2090D715-FFD1-4548-96A4-A978D4A48A92} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{B2927439-EF5E-4895-A46A-8B5167A326BA} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{B35E5ED4-32F7-4CA4-8A4F-04201ABB011E} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{ADFC1B7B-81A5-4ED5-9115-12A2A608C546} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{8EAD72EC-98CB-49B0-9870-1DE3EEF883F3} = {DB514636-79B7-4717-B485-5B535A3111A5}
 		{5BB7919E-9F1A-4DCD-8EC7-210F160F1FC1} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
-		{1780110F-EF88-4134-8C8F-94E5C411B29D} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{2234D44A-7C66-4241-8C54-DCC1D0E602E1} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{47C01BE9-FD0E-42B1-BCAA-8C04FAE54D21} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 		{BB9216EC-8E37-48D4-8B2A-74BE9F864E7A} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
@@ -423,9 +397,10 @@ Global
 		{593474F4-05EE-4E6A-B75C-51073FEECA04} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
 		{DC3B68DD-E38D-4E76-A646-86F5697386D3} = {056047F9-8792-43BF-A2A7-F66A82F66098}
 		{104B1F22-5CF1-4364-8C89-62CA11B032FE} = {3735ED34-C87C-4D88-A055-8F8A2F5E000A}
+		{DA832372-7D04-4A24-93BD-A0992DA52608} = {5286FE7A-78EF-4AB5-B3EB-474C88218A37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {3A9DD161-2AAF-4401-A077-06C1133BA207}
 		VisualSVNWorkingCopyRoot = ..
+		SolutionGuid = {3A9DD161-2AAF-4401-A077-06C1133BA207}
 	EndGlobalSection
 EndGlobal

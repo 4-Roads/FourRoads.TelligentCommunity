@@ -1,10 +1,11 @@
 ﻿namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 {
     using System;
+    using System.Collections.Specialized;
     using System.Configuration;
     using System.Data.SqlClient;
     using System.Data.SqlTypes;
-    using Telligent.DynamicConfiguration.Components;
+    using Telligent.Evolution.Extensibility.Configuration.Version1;
 
     public abstract class TruncateTableHealthExtensionBase : HealthExtensionBase
     {
@@ -23,16 +24,19 @@
 
             string sqlCommand;
 
+
             if (Configuration.GetString("PurgeRecordsType") == PurgeRecords.AfterAgeInDays.ToString())
             {
+                var days = Configuration.GetInt("PurgeRecordsCount").HasValue ? Configuration.GetInt("PurgeRecordsCount").Value : 180;
                 sqlCommand = string.Format(GetAgeSqlStatement(),
                     new SqlDateTime(
-                        DateTime.Now.Subtract(new TimeSpan(Configuration.GetInt("PurgeRecordsCount"), 0, 0, 0))).Value
+                        DateTime.Now.Subtract(new TimeSpan(days, 0, 0, 0))).Value
                         .ToString("s"));
             }
             else
             {
-                sqlCommand = string.Format(GetRowsSqlStatement(), Configuration.GetInt("PurgeRecordsCount"));
+                var rows = Configuration.GetInt("PurgeRecordsCount").HasValue ? Configuration.GetInt("PurgeRecordsCount").Value : 10000;
+                sqlCommand = string.Format(GetRowsSqlStatement(), rows);
             }
 
             using (
@@ -52,15 +56,41 @@
         {
             PropertyGroup group = base.GetConfiguration();
 
-            Property truncationType = new Property("PurgeRecordsType", "Purge Records", PropertyType.String, 1,
-                PurgeRecords.AfterAgeInDays.ToString());
-            truncationType.SelectableValues.Add(new PropertyValue(PurgeRecords.AfterAgeInDays.ToString(),
-                "Older Than Days", 0));
-            truncationType.SelectableValues.Add(new PropertyValue(PurgeRecords.AtCount.ToString(), "Database Rows", 1));
+            Property truncationType = new Property
+            {
+                Id = "PurgeRecordsType",
+                LabelText = "Purge Records",
+                DataType = "String",
+                Template = "String",
+                DefaultValue = PurgeRecords.AfterAgeInDays.ToString()
+            };
+
+            truncationType.SelectableValues.Add(new PropertyValue {
+                Value = PurgeRecords.AfterAgeInDays.ToString(),
+                LabelText = "Older Than Days",
+                OrderNumber = 0
+            });
+            
+            truncationType.SelectableValues.Add(new PropertyValue {
+                Value = PurgeRecords.AtCount.ToString(),
+                LabelText = "Database Rows",
+                OrderNumber = 1
+            });
             group.Properties.Add(truncationType);
 
-            Property count = new Property("PurgeRecordsCount", "", PropertyType.Int, 2, "10000");
-            group.Properties.Add(count);
+            group.Properties.Add(new Property
+            {
+                Id = "PurgeRecordsCount",
+                LabelText = "Purge Records Count",
+                DataType = "int",
+                Template = "int",
+                DefaultValue = "10000",
+                Options = new NameValueCollection
+                {
+                    { "presentationDivisor", "1" },
+                    { "inputType", "number" },
+                }
+            });
 
             return group;
         }

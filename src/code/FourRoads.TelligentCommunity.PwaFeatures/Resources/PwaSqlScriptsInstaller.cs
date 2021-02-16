@@ -1,8 +1,9 @@
-﻿using FourRoads.Common.TelligentCommunity.Components;
+﻿using FourRoads.TelligentCommunity.Installer;
+using FourRoads.TelligentCommunity.Installer.Components.Utility;
 
 namespace FourRoads.TelligentCommunity.PwaFeatures.Resources
 {
-    public class PwaSqlScriptsInstaller : FourRoads.Common.TelligentCommunity.Plugins.Base.SqlScriptsInstaller
+    public class PwaSqlScriptsInstaller : Installer.SqlScriptsInstaller
     {
         protected override string ProjectName => "PWA";
 

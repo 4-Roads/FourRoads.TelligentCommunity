@@ -1,7 +1,10 @@
-﻿namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
+﻿using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
+using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
+
+namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 {
     using Interfaces;
-    using Telligent.DynamicConfiguration.Components;
+    using Telligent.Evolution.Extensibility.Configuration.Version1;
     using Telligent.Evolution.Extensibility.Version1;
 
     public abstract class HealthExtensionBase : IConfigurablePlugin
@@ -35,7 +38,7 @@
 
         public bool IsEnabled
         {
-            get { return Configuration.GetBool("Enabled"); }
+            get { return Configuration.GetBool("Enabled").HasValue ? Configuration.GetBool("Enabled").Value : true; }
         }
 
         public abstract void InternalExecute();
@@ -46,7 +49,15 @@
         {
             PropertyGroup group = GetRootGroup();
 
-            group.Properties.Add(new Property("Enabled", "Enabled", PropertyType.Bool, 0, true.ToString()));
+            group.Properties.Add(new Property
+            {
+                Id = "Enabled",
+                LabelText = "Enabled",
+                DataType = "bool",
+                Template = "bool",
+                OrderNumber = 0,
+                DefaultValue = bool.TrueString
+            });
 
             return group;
         }
