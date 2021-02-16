@@ -1,5 +1,6 @@
 ﻿#set($errorMessage = "Something went wrong")
-#if(!$ns_v1_SupportPermissions.IsAdmin($core_v2_user.Accessing.Id))
+#set($isAdmin = $core_v2_roleUsers.IsUserInRoles($core_v2_user.Accessing.Username, $core_v2_utility.MakeList("Administrators")))
+#if(!$isAdmin)
 	$core_v2_page.SendJsonError($errorMessage)
 #end
 #set($user = false)
