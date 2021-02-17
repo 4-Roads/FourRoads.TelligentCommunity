@@ -3,7 +3,8 @@
   <scriptedContentFragment name="${resource:Mfa_Name}" version="10.0.0.4689" description="${resource:Mfa_Description}" instanceIdentifier="8495afe3dB4c4ab2837e839ba8cf7399" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="admin-disable-mfa" provider="3bd55b782e624b77b6e730f6bce17de2">
     <contentScript>
       <![CDATA[
-#if(!$ns_v1_SupportPermissions.IsAdmin($core_v2_user.Accessing.Id))
+#set($isAdmin = $core_v2_roleUsers.IsUserInRoles($core_v2_user.Accessing.Username, $core_v2_utility.MakeList("Administrators")))
+#if(!$isAdmin)
   $core_v2_widget.Hide()
 #end
 #set($user = false)
