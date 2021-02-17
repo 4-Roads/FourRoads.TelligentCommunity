@@ -71,7 +71,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
     <configuration>
       <![CDATA[
 <propertyGroup id="options" resourceName="Options">
-	<property id="fragmentHeader" resourceName="ForumSubscriptionDefaults_Name" dataType="string" defaultValue="${resource:ForumSubscriptionDefaults_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+	<property id="fragmentHeader" resourceName="ForumSubscriptionDefaults_Name" dataType="string" defaultValue="${resource:ForumSubscriptionDefaults_Header}" template="core_v2_tokenizedString" />
 </propertyGroup>
 ]]>
     </configuration>

@@ -57,9 +57,10 @@
     <headerScript><![CDATA[
 $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Mfa_Header}'))
 			]]></headerScript>
-    <configuration><![CDATA[
+    <configuration>
+  <![CDATA[
 <propertyGroup id="options" resourceName="Options">
-	<property id="fragmentHeader" resourceName="Mfa_Name" dataType="string" defaultValue="${resource:Mfa_Header}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Platform" />
+	<property id="fragmentHeader" resourceName="Mfa_Name" dataType="string" defaultValue="${resource:Mfa_Header}" template="core_v2_tokenizedString" />
 </propertyGroup>
 ]]></configuration>
     <languageResources><language key="en-us">

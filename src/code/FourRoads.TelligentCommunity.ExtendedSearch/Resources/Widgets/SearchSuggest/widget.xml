@@ -22,9 +22,10 @@
 		<headerScript><![CDATA[
 $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Core_SearchSuggestList_Name}'))
 	]]></headerScript>
-		<configuration><![CDATA[
+		<configuration>
+  <![CDATA[
 <propertyGroup id="options" resourceName="Options">
-	<property id="fragmentHeader" resourceName="CF_Title" dataType="string" defaultValue="${resource:Core_SearchSuggestList_Name}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Platform" />
+	<property id="fragmentHeader" resourceName="CF_Title" dataType="string" defaultValue="${resource:Core_SearchSuggestList_Name}" template="core_v2_tokenizedString" />
 </propertyGroup>
 	]]></configuration>
 		<languageResources><language key="en-us">

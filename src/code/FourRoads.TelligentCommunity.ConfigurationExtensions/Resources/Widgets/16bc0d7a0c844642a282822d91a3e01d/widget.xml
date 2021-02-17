@@ -150,7 +150,7 @@
 </headerScript><configuration>
 <![CDATA[
   <propertyGroup id="options" resourceName="Options">
-      <property id="fragmentHeader" resourceName="Title" dataType="string" defaultValue="${resource:UserNotifications_Name}" controlType="Telligent.Evolution.Controls.ContentFragmentTokenStringControl, Telligent.Evolution.Controls" />
+      <property id="fragmentHeader" resourceName="Title" dataType="string" defaultValue="${resource:UserNotifications_Name}" template="core_v2_tokenizedString" />
   </propertyGroup>
 ]]>
 </configuration>
