@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -54,13 +55,17 @@ namespace FourRoads.TelligentCommunity.VidYardViewer
 
             if (match.Groups.Count == 2)
             {
+                var code = Path.GetFileNameWithoutExtension(match.Groups[1].Value);
+                
                 retval.AppendLine($@"<img
-                    style=""width: {maxWidth}px; height:{maxHeight}px; margin: auto; display: block;""
+                    style=""width:100%;max-width: {maxWidth}px;max-height:{maxHeight}px; margin: auto; display: block;""
                     class=""vidyard-player-embed""
                     src=""{url}""
-                    data-uuid=""{match.Groups[1].Value}""
+                    data-uuid=""{code}""
                     data-v=""4""
                     data-type=""inline""
+                    data-width=""{maxWidth}""
+                    data-width=""{maxHeight}""
                 />");
 
                 retval.AppendLine(
