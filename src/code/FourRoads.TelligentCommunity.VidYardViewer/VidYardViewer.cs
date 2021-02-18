@@ -52,7 +52,7 @@ namespace FourRoads.TelligentCommunity.VidYardViewer
 
             var match = UrlPatterMatch.Match(url.ToString());
 
-            if (match.Groups.Count != 2)
+            if (match.Groups.Count == 2)
             {
                 retval.AppendLine($@"<img
                     style=""width: {maxWidth}px; height:{maxHeight}px; margin: auto; display: block;""
