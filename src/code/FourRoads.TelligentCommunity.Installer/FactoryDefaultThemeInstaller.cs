@@ -324,7 +324,7 @@ namespace FourRoads.TelligentCommunity.Installer
                     }
                     catch (Exception pe)
                     {
-                        Apis.Get<IEventLog>().Write(pe.ToString(), new EventLogEntryWriteOptions() { });
+                        Apis.Get<IEventLog>().Write(pe.ToString(), new EventLogEntryWriteOptions() { Category = "4 Roads", EventType = "Error" });
                     }
                 });
         }
@@ -372,7 +372,18 @@ namespace FourRoads.TelligentCommunity.Installer
 
                             ms.Seek(0, SeekOrigin.Begin);
 
-                            _fileStore.AddUpdateFile(CentralizedFileStorage.MakePath(Path.Combine("d", Path.GetDirectoryName(themeMomento.ThemeDefinitionFile.FileNamePath)).Split('\\')), themeMomento.ThemeDefinitionFile.FileName, ms);
+                            try
+                            {
+                                _fileStore.AddUpdateFile(
+                                    CentralizedFileStorage.MakePath(Path.Combine("d",
+                                            Path.GetDirectoryName(themeMomento.ThemeDefinitionFile.FileNamePath))
+                                        .Split('\\')), themeMomento.ThemeDefinitionFile.FileName, ms);
+                            }
+                            catch (Exception e)
+                            {
+                                Apis.Get<IEventLog>().Write($"Error updating file {themeMomento.ThemeDefinitionFile.FileName} - {e.ToString()}",
+                                    new EventLogEntryWriteOptions() { Category = "4 Roads", EventType = "Error" });
+                            }
                         }
                     }
                 }
@@ -385,7 +396,16 @@ namespace FourRoads.TelligentCommunity.Installer
                         {
                             using (var stream = File.OpenRead(_fullPath))
                             {
-                                _fileStore.AddUpdateFile(CentralizedFileStorage.MakePath(Path.Combine("fd", Path.GetDirectoryName(file.FileNamePath)).Split('\\')), file.FileName, stream);
+                                try
+                                {
+                                    _fileStore.AddUpdateFile(CentralizedFileStorage.MakePath(Path.Combine("fd", Path.GetDirectoryName(file.FileNamePath)).Split('\\')), file.FileName, stream);
+                                }
+                                catch (Exception e)
+                                {
+                                    Apis.Get<IEventLog>().Write($"Error updating file {file.FileName} - {e.ToString()}",
+                                        new EventLogEntryWriteOptions() { Category = "4 Roads", EventType = "Error" });
+                                }
+
                             }
                         }
                     }
@@ -412,7 +432,16 @@ namespace FourRoads.TelligentCommunity.Installer
                 {
                     var resourceFile = file.Resources.GetStream(file.ResourceName);
 
-                    _fileStore.AddUpdateFile(CentralizedFileStorage.MakePath(Path.Combine("fd", Path.GetDirectoryName(file.FileNamePath)).Split('\\')), file.FileName, resourceFile);
+                    try
+                    {
+                        _fileStore.AddUpdateFile(
+                            CentralizedFileStorage.MakePath(Path.Combine("fd", Path.GetDirectoryName(file.FileNamePath))
+                                .Split('\\')), file.FileName, resourceFile);
+                    }
+                    catch (Exception e)
+                    {
+                        Apis.Get<IEventLog>().Write($"Error updating file {file.FileName} - {e.ToString()}", new EventLogEntryWriteOptions() { Category = "4 Roads", EventType = "Error" });
+                    }
                 }
             }
 
@@ -421,7 +450,14 @@ namespace FourRoads.TelligentCommunity.Installer
             {
                 themeMomento.ThemeDefinitionDocument.Save(ms);
                 ms.Seek(0, SeekOrigin.Begin);
-                _fileStore.AddUpdateFile(CentralizedFileStorage.MakePath(Path.Combine("d", Path.GetDirectoryName(themeMomento.ThemeDefinitionFile.FileNamePath)).Split('\\')), themeMomento.ThemeDefinitionFile.FileName, ms);
+                try
+                {
+                    _fileStore.AddUpdateFile(CentralizedFileStorage.MakePath(Path.Combine("d", Path.GetDirectoryName(themeMomento.ThemeDefinitionFile.FileNamePath)).Split('\\')), themeMomento.ThemeDefinitionFile.FileName, ms);
+                }
+                catch (Exception e)
+                {
+                    Apis.Get<IEventLog>().Write($"Error updating file {themeMomento.ThemeDefinitionFile.FileName} - {e.ToString()}", new EventLogEntryWriteOptions() { Category = "4 Roads", EventType = "Error" });
+                }
             }
         }
     }
