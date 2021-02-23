@@ -64,8 +64,8 @@
     <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="TestControl.cs" />
-    <Compile Include="AuthorizeButton.cs" />
+    <Compile Include="Controls\AuthorizePropertyTemplate.cs" />
+    <Compile Include="Controls\TriggerActionPropertyTemplate.cs" />
     <Compile Include="HubSpotCrm.cs" />
     <Compile Include="Models\Contact.cs" />
     <Compile Include="Models\ContactGroup.cs" />
