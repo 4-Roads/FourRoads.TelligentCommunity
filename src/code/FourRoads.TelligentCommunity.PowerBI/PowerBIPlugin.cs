@@ -1,25 +1,30 @@
-﻿using System;
+﻿using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.PowerBI.Analytics.Language;
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
+using System.Web;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
+using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
-using Telligent.Evolution.Extensibility.Configuration.Version1;
-using System.Collections.Specialized;
 
 namespace FourRoads.TelligentCommunity.PowerBI
 {
-    public class PowerBIPlugin : IConfigurablePlugin, ISingletonPlugin, IPluginGroup
+    public class PowerBIPlugin : IConfigurablePlugin, ISingletonPlugin, IPluginGroup, IHttpCallback
     {
         private IPluginConfiguration _configuration;
         private Client _client;
         private static object _lockObj = new object();
         private List<string> _fields = new List<string>();
         private static int _maxdocs = 10000;
+        private IHttpCallbackController _callbackController;
 
         public string Name
         {
@@ -144,12 +149,34 @@ namespace FourRoads.TelligentCommunity.PowerBI
             }
         }
 
+        public void ProcessRequest(HttpContextBase httpContext)
+        {
+            if (httpContext.Request.QueryString["azuretest"] != null && httpContext.Request.QueryString["azuretest"].ToString(CultureInfo.InvariantCulture) == "true")
+            {
+                DoAzureTest(httpContext);
+            }
+            else if (httpContext.Request.QueryString["watsontest"] != null && httpContext.Request.QueryString["watsontest"].ToString(CultureInfo.InvariantCulture) == "true")
+            {
+                DoWatsonTest(httpContext);
+            }
+            else
+            {
+                ReturnMessage(httpContext, "Unsupported action.", false);
+                httpContext.Response.StatusCode = 404;
+                return;
+            }
+        }
+
+        public void SetController(IHttpCallbackController controller)
+        {
+            this._callbackController = controller;
+        }
 
         public PropertyGroup[] ConfigurationOptions
         {
             get
             {
-                PropertyGroup optionsGroup = new PropertyGroup() {Id="PowerBI", LabelText = "PowerBI"};
+                PropertyGroup optionsGroup = new PropertyGroup() { Id = "PowerBI", LabelText = "PowerBI" };
 
                 optionsGroup.Properties.Add(new Property
                 {
@@ -215,7 +242,7 @@ namespace FourRoads.TelligentCommunity.PowerBI
                     DefaultValue = "Posts"
                 });
 
-                PropertyGroup urlsGroup = new PropertyGroup() {Id="URLS", LabelText="Urls"};
+                PropertyGroup urlsGroup = new PropertyGroup() { Id = "URLS", LabelText = "Urls" };
 
                 urlsGroup.Properties.Add(new Property
                 {
@@ -247,7 +274,7 @@ namespace FourRoads.TelligentCommunity.PowerBI
                     DefaultValue = "https://api.powerbi.com/"
                 });
 
-                PropertyGroup azureGroup = new PropertyGroup() {Id="AzureAnalytics", LabelText = "Azure Analytics"};
+                PropertyGroup azureGroup = new PropertyGroup() { Id = "AzureAnalytics", LabelText = "Azure Analytics" };
 
                 azureGroup.Properties.Add(new Property
                 {
@@ -273,12 +300,38 @@ namespace FourRoads.TelligentCommunity.PowerBI
                     }
                 });
 
-                //todo - rewrite as template
-                //var azureTestControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
-                //azureTestControl.ControlType = typeof(AzureTestControl);
-                //azureGroup.Properties.Add(azureTestControl);
-                
-                PropertyGroup watsonGroup = new PropertyGroup() {Id="WatsonAnalytics", LabelText = "Watson Analytics"};
+                azureGroup.Properties.Add(new Property
+                {
+                    Id = "azureTestContent",
+                    LabelText = "Test content",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "I still have a dream. It is a dream deeply rooted in the American dream. I have a dream that one day this nation will rise up and live out the true meaning of its creed: \"We hold these truths to be self-evident, that all men are created equal.\""
+                });
+
+                var azureTestControl = new Property
+                {
+                    Id = "azureTestControl",
+                    LabelText = "Test Integration",
+                    DataType = "custom",
+                    Template = "powerBI_azureTest",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                };
+
+                if (_callbackController != null)
+                {
+                    azureTestControl.Options.Add("callback", _callbackController.GetUrl());
+                }
+
+                azureTestControl.Options.Add("resturl", "");
+                azureTestControl.Options.Add("data", "azuretest:true");
+                azureTestControl.Options.Add("label", "Click to test Azure NLP API");
+
+                azureGroup.Properties.Add(azureTestControl);
+
+                PropertyGroup watsonGroup = new PropertyGroup() { Id = "WatsonAnalytics", LabelText = "Watson Analytics" };
 
                 watsonGroup.Properties.Add(new Property
                 {
@@ -304,12 +357,38 @@ namespace FourRoads.TelligentCommunity.PowerBI
                     }
                 });
 
-                //todo - rewrite as template
-                //var watsonTestControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
-                //watsonTestControl.ControlType = typeof(WatsonTestControl);
-                //watsonGroup.Properties.Add(watsonTestControl);
+                watsonGroup.Properties.Add(new Property
+                {
+                    Id = "watsonTestContent",
+                    LabelText = "Test content",
+                    DataType = "string",
+                    Template = "string",
+                    OrderNumber = 0,
+                    DefaultValue = "I still have a dream. It is a dream deeply rooted in the American dream. I have a dream that one day this nation will rise up and live out the true meaning of its creed: \"We hold these truths to be self-evident, that all men are created equal.\""
+                });
 
-                PropertyGroup userprofileGroup = new PropertyGroup() {Id="UserProfileFields", LabelText = "User Profile Fields"};
+                var watsonTestControl = new Property
+                {
+                    Id = "watsonTestControl",
+                    LabelText = "Test Integration",
+                    DataType = "custom",
+                    Template = "powerBI_watsonTest",
+                    OrderNumber = 0,
+                    DefaultValue = ""
+                };
+
+                if (_callbackController != null)
+                {
+                    watsonTestControl.Options.Add("callback", _callbackController.GetUrl());
+                }
+
+                watsonTestControl.Options.Add("resturl", "");
+                watsonTestControl.Options.Add("data", "watsontest:true");
+                watsonTestControl.Options.Add("label", "Click to test Watson NLP API");
+
+                watsonGroup.Properties.Add(watsonTestControl);
+
+                PropertyGroup userprofileGroup = new PropertyGroup() { Id = "UserProfileFields", LabelText = "User Profile Fields" };
 
                 //Stored as a querystring in the format Name=STRING&Name=STRING
                 userprofileGroup.Properties.Add(new Property
@@ -328,5 +407,87 @@ namespace FourRoads.TelligentCommunity.PowerBI
             }
         }
 
+        private void DoAzureTest(HttpContextBase httpContext)
+        {
+            try
+            {
+                var azureRegion = _configuration.GetString("azureRegion");
+                var azuretextAnalyticsAPI = _configuration.GetString("azureTextAnalyticsAPI");
+
+                if (!string.IsNullOrWhiteSpace(azureRegion) && !string.IsNullOrWhiteSpace(azuretextAnalyticsAPI))
+                {
+                    var azureLanguage = new AzureLanguage(azureRegion, azuretextAnalyticsAPI);
+                    var testContent = _configuration.GetString("azureTestContent");
+                    var keywords = azureLanguage.KeyPhrases(testContent);
+                    if (keywords != null && keywords.Count > 0)
+                    {
+                        ReturnMessage(httpContext, $"Found {keywords.Count} keywords - [{String.Join(",", keywords)}].", true);
+                    }
+                    else
+                    {
+                        ReturnMessage(httpContext, "Failed to locate any keywords.", false);
+                    }
+                }
+                else
+                {
+                    ReturnMessage(httpContext, "Please check that the interface is correctly configured.", false);
+                }
+            }
+            catch (Exception ex)
+            {
+                ReturnMessage(httpContext, $"Error testing azure nlp - {ex.Message}.", false);
+                new TCException("Error testing azure nlp", ex).Log();
+            }
+        }
+
+        private void DoWatsonTest(HttpContextBase httpContext)
+        {
+            try
+            {
+                var watsonLanguageUrl = _configuration.GetString("watsonLanguageUrl");
+                var watsontextAnalyticsAPI = _configuration.GetString("watsonTextAnalyticsAPI");
+
+                if (!string.IsNullOrWhiteSpace(watsontextAnalyticsAPI) && !string.IsNullOrWhiteSpace(watsonLanguageUrl))
+                {
+                    var watsonLanguage = new WatsonLanguage(watsontextAnalyticsAPI, watsonLanguageUrl);
+                    var testContent = _configuration.GetString("watsonTestContent");
+                    var keywords = watsonLanguage.KeyPhrases(testContent);
+                    if (keywords != null && keywords.Count > 0)
+                    {
+                        ReturnMessage(httpContext, $"Found {keywords.Count} keywords - [{String.Join(", ", keywords)}].", true);
+                    }
+                    else
+                    {
+                        ReturnMessage(httpContext, "Failed to locate any keywords.", false);
+                    }
+                }
+                else
+                {
+                    ReturnMessage(httpContext, "Please check that the interface is correctly configured.", false);
+                }
+            }
+            catch (Exception ex)
+            {
+                ReturnMessage(httpContext, $"Error testing watson nlp - {ex.Message}.", false);
+                new TCException("Error testing watson nlp", ex).Log();
+            }
+        }
+
+        private void ReturnMessage(HttpContextBase httpContext, string message, bool succesful)
+        {
+            if (httpContext != null && !string.IsNullOrWhiteSpace(message))
+            {
+                httpContext.Response.ContentType = "text/javascript";
+                if (succesful)
+                {
+                    // return an ale
+                    httpContext.Response.Write($"alert('{ Apis.Get<IHtml>().EnsureEncoded(message)}');");
+                }
+                else
+                {
+                    httpContext.Response.Write($"$.telligent.evolution.notifications.show('{ Apis.Get<IHtml>().EnsureEncoded(message)}', {{ type: 'error' }});");
+                }                
+            }
+        }
     }
 }
