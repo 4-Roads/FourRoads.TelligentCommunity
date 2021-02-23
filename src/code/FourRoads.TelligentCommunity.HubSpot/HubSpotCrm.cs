@@ -14,14 +14,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Extensibility.UI.Version1;
 using Formatting = Newtonsoft.Json.Formatting;
-
+using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
-using TelligentConfiguration = Telligent.Evolution.Extensibility.Configuration.Version1;
+using System.Web;
 
 /*
 
@@ -68,13 +70,14 @@ using TelligentConfiguration = Telligent.Evolution.Extensibility.Configuration.V
 
 namespace FourRoads.TelligentCommunity.HubSpot
 {
-    public class HubspotCrm : IConfigurablePlugin, ISingletonPlugin, ICrmPlugin, IPluginGroup
+    public class HubspotCrm : IConfigurablePlugin, ISingletonPlugin, ICrmPlugin, IPluginGroup, IHttpCallback
     {
         IPluginConfiguration _configuration;
         string _accessToken;
         string _refreshToken;
         DateTime _expires = DateTime.Now;
         Dictionary<string, string> _mappings;
+        private IHttpCallbackController _callbackController;
         
         private const string HubSpotBaseUrl = "https://api.hubapi.com/";
 
@@ -145,18 +148,25 @@ namespace FourRoads.TelligentCommunity.HubSpot
             }
         }
 
-        public TelligentConfiguration.PropertyGroup[] ConfigurationOptions
+        public PropertyGroup[] ConfigurationOptions
         {
             get
             {
-                var pg = new TelligentConfiguration.PropertyGroup() {Id="Options", LabelText = "Options"};
+                var pg = new PropertyGroup() {Id="Options", LabelText = "Options"};
 
-                //todo replace this with a template control 
-                //var authbtn = new TelligentProperty("oAuthCode", "Authorize oAuth Code", PropertyType.Custom, 0, string.Empty);
-                //authbtn.ControlType = typeof(AuthorizeButton);
-                //pg.Properties.Add(authbtn);
-
-                pg.Properties.Add(new TelligentConfiguration.Property
+                var authbtn = new Telligent.Evolution.Extensibility.Configuration.Version1.Property()
+                {
+                    Id = "AuthBtn",
+                    LabelText = "Auth Code",
+                    DataType = "custom",
+                    Template = "hubspot_authorize",
+                    DefaultValue = ""
+                };
+                authbtn.Options.Add("outerButtonLabel", "Press this button once you have obtained your authorization code");
+                authbtn.Options.Add("innerButtonLabel", "Authorize oAuth Code");
+                pg.Properties.Add(authbtn);
+               
+                pg.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
                     Id = "ClientId",
                     LabelText = "Client Id",
@@ -166,7 +176,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     DefaultValue = ""
                 });
 
-                pg.Properties.Add(new TelligentConfiguration.Property
+                pg.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
                     Id = "ClientSecret",
                     LabelText = "Client Secret",
@@ -176,15 +186,29 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     DefaultValue = ""
                 });
 
-                //todo replace this with a template control 
-                //var testControl = new TelligentProperty("Test", "Test Integration", PropertyType.Custom, 0, string.Empty);
-                //testControl.ControlType = typeof(TestControl);
-                //pg.Properties.Add(testControl);
+                var testControl = new Telligent.Evolution.Extensibility.Configuration.Version1.Property()
+                {
+                    Id = "widgetRefresh",
+                    LabelText = "Click to test hubspot API integration",
+                    DescriptionResourceName = "Request a background job to refresh the custom widgets",
+                    DataType = "custom",
+                    Template = "hubspot_triggerAction",
+                    DefaultValue = ""
+                };
+                if (_callbackController != null)
+                {
+                    testControl.Options.Add("callback", _callbackController.GetUrl());
+                }
+                testControl.Options.Add("resturl", "");
+                testControl.Options.Add("data", "refresh:true");
+                testControl.Options.Add("buttonLabel", "Test Integration");
+                testControl.Options.Add("actionSuccessMessage", "Successfully read contact property groups");
+                testControl.Options.Add("actionFailureMessage", "Failed to read contact property groups");
+                pg.Properties.Add(testControl);
 
+                var pg3 = new PropertyGroup() {Id="ProfileConfig", LabelText = "Profile Configuration"};
 
-                var pg3 = new TelligentConfiguration.PropertyGroup() {Id="ProfileConfig", LabelText = "Profile Configuration"};
-
-                pg3.Properties.Add(new TelligentConfiguration.Property
+                pg3.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
                     Id = "ProfileConfig",
                     LabelText = "Profile Config",
@@ -199,9 +223,9 @@ namespace FourRoads.TelligentCommunity.HubSpot
                         { "syntax", "xml" }
                     }});
 
-                var pg2 = new TelligentConfiguration.PropertyGroup(){Id="Running", LabelText="Running Values"};
+                var pg2 = new PropertyGroup(){Id="Running", LabelText="Running Values"};
 
-                pg2.Properties.Add(new TelligentConfiguration.Property
+                pg2.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
                     Id = "AccessToken",
                     LabelText = "Access Token",
@@ -215,7 +239,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     }
                 });
 
-                pg2.Properties.Add(new TelligentConfiguration.Property
+                pg2.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
                     Id = "RefreshToken",
                     LabelText = "Refresh Token",
@@ -229,7 +253,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     }
                 });
 
-                pg2.Properties.Add(new TelligentConfiguration.Property
+                pg2.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
                     Id = "Expires",
                     LabelText = "Expires",
@@ -402,9 +426,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
             else
             {
                 Apis.Get<IEventLog>().Write("Hubspot API Issue: auth code blank, you need to link your account", new EventLogEntryWriteOptions());
+                throw new ArgumentException("Hubspot API Issue: auth code blank, you need to link your account");
             }
-
-            return false;
         }
 
         public void SynchronizeUser(User u)
@@ -633,6 +656,27 @@ namespace FourRoads.TelligentCommunity.HubSpot
             });
 
             return response;
+        }
+
+        public void ProcessRequest(HttpContextBase httpContext)
+        {
+            var listContacts = GetContactPropertyGroups();
+
+            if (listContacts != null && listContacts.Any())
+            {
+                Apis.Get<IEventLog>().Write($"Hubspot API: Found {listContacts.Count} contact property groups",
+                        new EventLogEntryWriteOptions());
+            }
+            else
+            {
+                Apis.Get<IEventLog>().Write("Hubspot API: Failed to read contact property groups",
+                        new EventLogEntryWriteOptions());
+            }
+        }
+
+        public void SetController(IHttpCallbackController controller)
+        {
+            this._callbackController = controller;
         }
 
         public IEnumerable<Type> Plugins => new Type[] { typeof(PingJob) };
