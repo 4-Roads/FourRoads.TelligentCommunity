@@ -35,7 +35,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Controls
             }
         }
 
-        public string Name => "4 Roads - Sentrus - Inactive User Management Template";
+        public string Name => "Inactive User Management Template";
 
         public string Description => "Provides and interface for managing inactive users.";
 

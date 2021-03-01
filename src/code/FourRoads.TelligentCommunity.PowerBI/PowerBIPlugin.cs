@@ -1,5 +1,6 @@
 ﻿using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.TelligentCommunity.PowerBI.Analytics.Language;
+using FourRoads.TelligentCommunity.PowerBI.Analytics.Language.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -139,7 +140,12 @@ namespace FourRoads.TelligentCommunity.PowerBI
             }
         }
 
-        public IEnumerable<Type> Plugins => new Type[] { typeof(PowerBIUserJob) };
+        public IEnumerable<Type> Plugins => new Type[] 
+        { 
+            typeof(PowerBIUserJob),
+            typeof(AzureTestPropertyTemplate),
+            typeof(WatsonTestPropertyTemplate)
+        };
 
         public void Update(IPluginConfiguration configuration)
         {

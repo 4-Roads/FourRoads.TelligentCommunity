@@ -41,7 +41,7 @@ namespace FourRoads.TelligentCommunity.PowerBI.Analytics.Language.Controls
             }
         }
 
-        public string Name => "4 Roads - Power BI - Watson Test Property Template";
+        public string Name => "Watson Test Property Template";
 
         public string Description => "Allows an action to be triggered via a button";
 

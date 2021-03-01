@@ -7,6 +7,7 @@ using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.Sentrus.Logic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.Sentrus.Jobs;
+using FourRoads.TelligentCommunity.Sentrus.Controls;
 
 namespace FourRoads.TelligentCommunity.Sentrus
 {
@@ -65,6 +66,8 @@ namespace FourRoads.TelligentCommunity.Sentrus
                 {
                     typeof(DependencyInjectionPlugin),
                     typeof(HealthJob),
+                    typeof(InactiveUserManagementPropertyTemplate),
+                    typeof(TestSettingsPropertyTemplate),
                     typeof(Resources.SqlScriptsInstaller)
                 };
 

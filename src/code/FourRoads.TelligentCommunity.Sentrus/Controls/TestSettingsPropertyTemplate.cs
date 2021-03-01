@@ -39,7 +39,7 @@ namespace FourRoads.TelligentCommunity.Sentrus.Controls
             }
         }
 
-        public string Name => "4 Roads - Sentrus - Test Button Property Template";
+        public string Name => "Test Button Property Template";
 
         public string Description => "Allows an action to be triggered via a button";
 
