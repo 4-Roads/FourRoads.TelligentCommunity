@@ -61,7 +61,6 @@
                 Id = "PurgeRecordsType",
                 LabelText = "Purge Records",
                 DataType = "String",
-                Template = "String",
                 DefaultValue = PurgeRecords.AfterAgeInDays.ToString()
             };
 

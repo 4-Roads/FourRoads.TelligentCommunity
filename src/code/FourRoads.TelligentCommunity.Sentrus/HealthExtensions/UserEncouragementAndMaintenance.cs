@@ -1,29 +1,28 @@
 ﻿using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Components.Tokenizers;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
-using FourRoads.TelligentCommunity.Sentrus.Controls;
 using FourRoads.TelligentCommunity.Sentrus.Entities;
 using FourRoads.TelligentCommunity.Sentrus.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Telligent.DynamicConfiguration.Components;
+using System.Web;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Email.Version1;
 using Telligent.Evolution.Extensibility.Templating.Version1;
+using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
-
-using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using Property = Telligent.Evolution.Extensibility.Configuration.Version1.Property;
 using PropertyGroup = Telligent.Evolution.Extensibility.Configuration.Version1.PropertyGroup;
 using PropertyValue = Telligent.Evolution.Extensibility.Configuration.Version1.PropertyValue;
+using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
 
 namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 {
@@ -50,9 +49,30 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
         }
     }
 
-    public class UserEncouragementAndMaintenance : HealthExtensionBase, IHealthExtension, IUserEncouragementAndMaintenance , IPluginGroup
+    internal static class StringBuilderExtension
+    {
+        public static StringBuilder AppendToQuery(this StringBuilder query, string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                if (query.Length > 0)
+                {
+                    query.Append($" OR {value}");
+                }
+                else if(query.Length == 0)
+                {
+                    query.Append($"contenttypeid:{value}");
+                }
+            }
+            return query;
+        }
+    }
+
+    public class UserEncouragementAndMaintenance : HealthExtensionBase, IHealthExtension, IUserEncouragementAndMaintenance , IPluginGroup, IHttpCallback
     {
         private IUserHealth _userHealth;
+        private IHttpCallbackController _callbackController;
+
         private static object _lock = new object();
 
         private const int DefaultAccountAge = 24;
@@ -87,8 +107,26 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             }
         }
 
+        public void SetController(IHttpCallbackController controller)
+        {
+            this._callbackController = controller;
+        }
 
-        public void TestSettings()
+        public void ProcessRequest(HttpContextBase httpContext)
+        {
+            if (httpContext.Request.QueryString["testsettings"] != null && httpContext.Request.QueryString["testsettings"].ToString(CultureInfo.InvariantCulture) == "true")
+            {
+                TestSettings(httpContext);
+            }
+            else
+            {
+                ReturnMessage(httpContext, "Unsupported action.", false);
+                httpContext.Response.StatusCode = 404;
+                return;
+            }
+        }
+
+        private void TestSettings(HttpContextBase httpContext)
         {
             int outofDateMonths = Configuration.GetInt("accountDeleteAge").HasValue ? Configuration.GetInt("accountDeleteAge").Value : DefaultAccountDeleteAge;
             var contentType = Enum.Parse(typeof(EmailContentType), Configuration.GetString("contentType"));
@@ -109,11 +147,11 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             }
 
             //Send a sample email
-            var user = Apis.Get<IUsers>().Get(new UsersGetOptions() { Id = Apis.Get<IUrl>().ParsePageContext(System.Web.HttpContext.Current.Request.Url.ToString()).UserId });
             var additionalData = emailAccountList.ToString();
-            UserAccountEncouragement(user, (EmailContentType)contentType, additionalData);
-        }
+            UserAccountEncouragement(Apis.Get<IUsers>().AccessingUser, (EmailContentType)contentType, additionalData);
 
+            ReturnMessage(httpContext, "Email successfully sent.", true);
+        }
 
         public override void InternalExecute()
         {
@@ -151,7 +189,6 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
                 }
             }
         }
-
 
         void Events_AfterIdentify(UserAfterIdentifyEventArgs e)
         {
@@ -198,32 +235,64 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
             Apis.Get<IUsers>().RunAsUser(user.Username, () =>
             {
-                var blogPostsContentTypeId = Apis.Get<IBlogPosts>().ContentTypeId;
-                var forumThreadContentTypeId = Apis.Get<IForumThreads>().ContentTypeId;
-                var mediaContentTypeId = Apis.Get<IMedia>().ContentTypeId;
-                var wikiContentTypeId = Apis.Get<IWikiPages>().ContentTypeId;
-                var forumRepliesContentTypeId = Apis.Get<IForumReplies>().ContentTypeId;
+                var blogPostsContentTypeId = Apis.Get<IBlogPosts>()?.ContentTypeId;
+                var forumThreadContentTypeId = Apis.Get<IForumThreads>()?.ContentTypeId;
+                var mediaContentTypeId = Apis.Get<IMedia>()?.ContentTypeId;
+                var wikiContentTypeId = Apis.Get<IWikiPages>()?.ContentTypeId;
+                var forumRepliesContentTypeId = Apis.Get<IForumReplies>()?.ContentTypeId;
 
                 if (emailContentType == EmailContentType.Recent)
                 {
-                    var options = new SearchResultsListOptions()
-                    {
-                        Query = $"contenttypeid:{blogPostsContentTypeId} OR {forumThreadContentTypeId} OR {mediaContentTypeId} OR {wikiContentTypeId} OR {forumRepliesContentTypeId}",
-                        PageSize = 25,
-                        PageIndex = 0,
-                        Sort = "date desc"
-                    };
+                    var query = new StringBuilder();
 
-                    var searchResult = Apis.Get<ISearchResults>().List(options);
-                    emailDigestContainer.Contents = searchResult?.Select(c => c.Content).ToList();
+                    query.AppendToQuery(blogPostsContentTypeId.ToString());
+                    query.AppendToQuery(forumThreadContentTypeId.ToString());
+                    query.AppendToQuery(mediaContentTypeId.ToString());
+                    query.AppendToQuery(wikiContentTypeId.ToString());
+                    query.AppendToQuery(forumRepliesContentTypeId.ToString());
+
+                    if (query.Length > 0)
+                    {
+                        var options = new SearchResultsListOptions()
+                        {
+                            Query = query.ToString(),
+                            PageSize = 25,
+                            PageIndex = 0,
+                            Sort = "date desc"
+                        };
+
+                        var searchResult = Apis.Get<ISearchResults>().List(options);
+                        emailDigestContainer.Contents = searchResult?.Select(c => c.Content).ToList();
+                    }
                 }
                 else
                 {
+                    var contentTypeIds = new List<Guid>();
+                    if(blogPostsContentTypeId.HasValue)
+                    {
+                        contentTypeIds.Add(blogPostsContentTypeId.Value);
+                    }
+                    if (forumThreadContentTypeId.HasValue)
+                    {
+                        contentTypeIds.Add(forumThreadContentTypeId.Value);
+                    }
+                    if (mediaContentTypeId.HasValue)
+                    {
+                        contentTypeIds.Add(mediaContentTypeId.Value);
+                    }
+                    if (wikiContentTypeId.HasValue)
+                    {
+                        contentTypeIds.Add(wikiContentTypeId.Value);
+                    }
+                    if (forumRepliesContentTypeId.HasValue)
+                    {
+                        contentTypeIds.Add(forumRepliesContentTypeId.Value);
+                    }
                     var options = new ContentRecommendationsListOptions()
                     {
                         PageSize = 25,
                         PageIndex = 0,
-                        ContentTypeIds = new Guid[] { blogPostsContentTypeId, forumThreadContentTypeId, mediaContentTypeId, wikiContentTypeId, forumRepliesContentTypeId }
+                        ContentTypeIds = contentTypeIds.ToArray()
                     };
 
                     var contentRecommendations = Apis.Get<IContentRecommendations>().List(options);
@@ -278,12 +347,64 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             {
                 PropertyGroup deleteUsersGroup = new PropertyGroup() {Id ="deleteUsers", LabelText =  "User Maintenance"};
 
-                //todo - replace with template
-                //Property accountAge = new Property("userMaintenance", "Disengaged Users", PropertyType.Custom, 1, "")
-                //{
-                //    ControlType = typeof (InactiveUserManagement)
-                //};
-                //deleteUsersGroup.Properties.Add(accountAge);
+                deleteUsersGroup.Properties.Add(new Property
+                {
+                    Id = "maxUsers",
+                    LabelText = "Inactive users to display (max: 100)",
+                    DescriptionText = "Make sure to save and refresh to update the list below.",
+                    DataType = "int",
+                    Template = "int",
+                    Options = new NameValueCollection
+                    {
+                        { "presentationDivisor", "1" },
+                        { "inputType", "range" },
+                        { "min", "10" },
+                        { "max", "100" },
+                        { "step", "" },
+                        { "rangeTicks", "0" },
+                        { "rangeLabel", "True" }
+                    }
+                });
+
+                deleteUsersGroup.Properties.Add(new Property
+                {
+                    Id = "userToAssignTo",
+                    LabelText = "Assign Deleted User To:",
+                    DescriptionText = "Make sure to save selection prior to deleting users",
+                    DataType = "custom",
+                    Template = "core_v2_userLookup",
+                    OrderNumber = 0,
+                    Options = new NameValueCollection
+                    {
+                        { "enableCurrent", "true" },
+                        { "maxSelections", "1" },
+                        { "format", "csv" }
+                    }
+                });
+
+                deleteUsersGroup.Properties.Add(new Property
+                {
+                    Id = "showHiddenUsers",
+                    LabelText = "Show Hidden Users",
+                    DescriptionText = "Make sure to save and refresh to update the list below.",
+                    DataType = "bool",
+                    Template = "bool",
+                    OrderNumber = 1,
+                    DefaultValue = ""
+                });
+
+                var userMaintenance = new Property
+                {
+                    Id = "inactiveManagement",
+                    LabelText = "Disengaged Users",
+                    DescriptionText = "Showing users with oldest login dates first.",
+                    DataType = "custom",
+                    Template = "sentrus_inactiveUserManagement",
+                    OrderNumber = 2,
+                    DefaultValue = ""
+                };
+
+                deleteUsersGroup.Properties.Add(userMaintenance);
 
                 return new[] {GetConfiguration(), deleteUsersGroup};
             }
@@ -291,14 +412,26 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
         public override void InternalUpdate(IPluginConfiguration configuration)
         {
-
-
-
         }
 
         public int InactivityPeriod
         {
             get { return Configuration.GetInt("accountAge").HasValue ? Configuration.GetInt("accountAge").Value : DefaultAccountAge; }
+        }
+
+        public int MaxRows
+        {
+            get { return Configuration.GetInt("maxUsers").HasValue ? Configuration.GetInt("maxUsers").Value : 100; }
+        }
+
+        public bool ShowHiddenUsers
+        {
+            get { return Configuration.GetBool("showHiddenUsers").HasValue ? Configuration.GetBool("showHiddenUsers").Value : false; }
+        }
+
+        public string AssignUserTo
+        {
+            get { return Configuration.GetCustom("userToAssignTo");  }
         }
 
         protected override PropertyGroup GetRootGroup()
@@ -340,13 +473,12 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
                 }
             });
 
-
             Property contentType = new Property()
             {
                 Id = "contentType",
                 LabelText = "Content Type",
                 DataType = "string" ,
-                Template = "string",
+                OrderNumber = 0,
                 DefaultValue = EmailContentType.Recommended.ToString()
             };
 
@@ -366,14 +498,26 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
             group.Properties.Add(contentType);
 
-            
-            Property testButton = new Property("testButton", "Test Settings", PropertyType.Custom, 5, "")
+            var testButton = new Property
             {
-                ControlType = typeof(TestSettingButton)
+                Id = "testButton",
+                LabelText = "Test Settings",
+                DataType = "custom",
+                Template = "sentrus_testButton",
+                OrderNumber = 0,
+                DefaultValue = ""
             };
 
-            group.Properties.Add(testButton);
+            if (_callbackController != null)
+            {
+                testButton.Options.Add("callback", _callbackController.GetUrl());
+            }
 
+            testButton.Options.Add("resturl", "");
+            testButton.Options.Add("data", "testsettings:true");
+            testButton.Options.Add("label", "Test Currently Saved Settings");
+
+            group.Properties.Add(testButton);
 
             return group;
         }
@@ -382,6 +526,16 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
 
         public IEnumerable<Type> Plugins {
             get { return new[] {typeof (UserEncouragementEmailTemplate)}; }
+        }
+
+        private void ReturnMessage(HttpContextBase httpContext, string message, bool succesful)
+        {
+            if (httpContext != null && !string.IsNullOrWhiteSpace(message))
+            {
+                var messageType = (succesful) ? "success" : "error";
+                httpContext.Response.ContentType = "text/javascript";
+                httpContext.Response.Write($"$.telligent.evolution.notifications.show('{ Apis.Get<IHtml>().EnsureEncoded(message)}', {{ type: '{messageType}' }});");
+            }
         }
     }
 

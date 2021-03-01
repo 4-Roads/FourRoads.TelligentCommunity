@@ -69,9 +69,9 @@ BEGIN
 	SET NOCOUNT ON;
 
 	IF @excludeIgnored is null OR @excludeIgnored = 0
-		SELECT MembershipId  FROM dbo.fr_User_LastLogin WHERE @LastLogonDate > LastLogonDate
+		SELECT MembershipId  FROM dbo.fr_User_LastLogin WHERE @LastLogonDate > LastLogonDate ORDER BY LastLogonDate
 	ELSE
-		SELECT MembershipId  FROM dbo.fr_User_LastLogin WHERE @LastLogonDate > LastLogonDate AND IgnoredUser = 0
+		SELECT MembershipId  FROM dbo.fr_User_LastLogin WHERE @LastLogonDate > LastLogonDate AND IgnoredUser = 0 ORDER BY LastLogonDate
 END
 GO
 

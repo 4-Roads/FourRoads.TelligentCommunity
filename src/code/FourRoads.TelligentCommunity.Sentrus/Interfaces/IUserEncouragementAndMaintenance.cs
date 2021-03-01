@@ -5,6 +5,8 @@
     public interface IUserEncouragementAndMaintenance : ISingletonPlugin
     {
         int InactivityPeriod { get; }
-        void TestSettings();
+        int MaxRows { get; }
+        bool ShowHiddenUsers { get; }
+        string AssignUserTo { get; }
     }
 }
