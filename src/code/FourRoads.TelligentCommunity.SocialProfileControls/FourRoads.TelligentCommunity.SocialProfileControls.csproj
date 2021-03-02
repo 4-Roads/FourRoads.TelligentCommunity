@@ -73,7 +73,12 @@
     <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Controls\InstagramProfileControlPropertyTemplate.cs" />
+    <Compile Include="Controls\TwitterProfileControlPropertyTemplate.cs" />
+    <Compile Include="Controls\FacebookProfileControlPropertyTemplate.cs" />
+    <Compile Include="Controls\SocialProfileFieldControlPropertyTemplate.cs" />
     <Compile Include="FacebookProfileControl.cs" />
+    <Compile Include="IProfileControlPlugin.cs" />
     <Compile Include="IProfilePlugin.cs" />
     <Compile Include="SocialProfileControlPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

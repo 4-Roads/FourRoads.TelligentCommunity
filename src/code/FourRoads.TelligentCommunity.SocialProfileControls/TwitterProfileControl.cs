@@ -8,10 +8,11 @@ using System;
 using Telligent.Common;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Version1;
+using FourRoads.TelligentCommunity.SocialProfileControls.Controls;
 
 namespace FourRoads.TelligentCommunity.SocialProfileControls
 {
-    public class TwitterProfileControl : TextProfileControl, ITranslatablePlugin
+    public class TwitterProfileControl : TextProfileControl
     {
         public override string Name
         {
@@ -20,17 +21,7 @@ namespace FourRoads.TelligentCommunity.SocialProfileControls
 
         public override string Description
         {
-            get { return "This plugin extends Zimbra Community to include additional profile field to support twitter"; }
-        }
-
-        protected override string ValidationError
-        {
-            get { return TranslationController.GetLanguageResourceValue("profile_twitter_validation_error"); }
-        }
-
-        protected override string ValidationRegEx
-        {
-            get { return string.Empty; }
+            get { return "This plugin extends Telligent Community to include additional profile field to support twitter"; }
         }
 
         public override string FieldName
@@ -38,56 +29,9 @@ namespace FourRoads.TelligentCommunity.SocialProfileControls
             get { return "Twitter"; }
         }
 
-        protected override string SetPropertyValue(string value)
+        public override string Template
         {
-            if (!value.StartsWith("http" , StringComparison.OrdinalIgnoreCase))
-            {
-                value = "https://twitter.com/" + value;
-            }
-
-            return value;
-        }
-
-        protected override string GetPropertyValue(string value)
-        {
-            return value;
-        }
-
-        protected override string GetValueScript()
-        {
-            return @"   if (val.toLowerCase().indexOf('http') == 0){{ return val; }}else{{  return 'https://twitter.com/' + val.replace('\@' , ''); }}";
-        }
-
-        private ITranslatablePluginController _tranlationController;
-
-        public void SetController(ITranslatablePluginController controller)
-        {
-            _tranlationController = controller;
-        }
-
-        public Translation[] DefaultTranslations
-        {
-            get
-            {
-                Translation[] defaultTranslation = new[] { new Translation("en-us") };
-
-                defaultTranslation[0].Set("profile_twitter_validation_error", "The twitter user name appears to be invalid");
-
-                return defaultTranslation;
-            }
-        }
-
-        protected ITranslatablePluginController TranslationController
-        {
-            get
-            {
-                if (_tranlationController == null)
-                {
-                    _tranlationController = new TranslatablePluginController(this, Services.Get<ITranslatablePluginService>());
-                }
-                
-                return _tranlationController;
-            }
+            get { return TwitterProfileControlPropertyTemplate.GetTemplateName(); }
         }
     }
 }

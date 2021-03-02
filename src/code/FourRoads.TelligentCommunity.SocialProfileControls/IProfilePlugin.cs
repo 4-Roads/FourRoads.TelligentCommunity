@@ -6,5 +6,6 @@ namespace FourRoads.TelligentCommunity.SocialProfileControls
     {
         string FieldName { get; }
         string FieldType { get; }
+        string Template { get;}
     }
 }
