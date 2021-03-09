@@ -1,6 +1,4 @@
 using System;
-using Telligent.Evolution.Extensibility;
-using Telligent.Evolution.Extensibility.Api.Version1;
 
 
 namespace FourRoads.TelligentCommunity.MicroData

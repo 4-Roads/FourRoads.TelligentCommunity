@@ -1,4 +1,8 @@
+using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.RenderingHelper;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
@@ -20,6 +24,19 @@ namespace FourRoads.TelligentCommunity.MicroData
             }
         }
 
+        public override IEnumerable<Type> Plugins
+        {
+            get
+            {
+                return new[]
+                           {
+                            typeof (RenderingObserverPlugin),
+                            typeof (MicroDataGrid),
+                            typeof (DependencyInjectionPlugin)
+                           };
+            }
+        }
+
         public override string Name
         {
             get { return "4 Roads - MicroData Extensions"; }
@@ -28,7 +45,7 @@ namespace FourRoads.TelligentCommunity.MicroData
         public void Update(IPluginConfiguration configuration)
         {
             _microDataProcessor =
-                new MicroDataProcessor(MicroDataSerializer.Deserialize(configuration.GetCustom("markupConfiguration")));
+                new MicroDataProcessor(JsonConvert.DeserializeObject<MicroDataEntry[]>(configuration.GetCustom("markupConfiguration")));
 
             Initialize();
         }
@@ -41,10 +58,18 @@ namespace FourRoads.TelligentCommunity.MicroData
                 PropertyGroup optionsGroup = new PropertyGroup() {Id="options", LabelText = "Options"};
                 groupArray[0] = optionsGroup;
 
-                Property markupConfiguration = new Property("markupConfiguration", "", PropertyType.Custom, 0,
-                    MicroDataSerializer.Serialize(MicroDataDefaultData.Entries))
-                {ControlType = typeof (MicroDataGrid)};
+                var defaultValue = JsonConvert.SerializeObject(MicroDataDefaultData.Entries);
 
+                var markupConfiguration = new Property
+                {
+                    Id = "markupConfiguration",
+                    LabelText = "",
+                    DescriptionText = "",
+                    DataType = "custom",
+                    Template = "microdata_grid",
+                    OrderNumber = 1,
+                    DefaultValue = defaultValue
+                };
 
                 optionsGroup.Properties.Add(markupConfiguration);
 
