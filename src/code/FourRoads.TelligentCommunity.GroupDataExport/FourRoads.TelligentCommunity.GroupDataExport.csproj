@@ -94,7 +94,7 @@
     </Compile>
     <Compile Include="Csv.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GroupExportControl.cs" />
+    <Compile Include="GroupExportPropertyTemplate.cs" />
     <Compile Include="GroupExportJob.cs" />
     <Compile Include="GroupExportPlugin.cs" />
   </ItemGroup>

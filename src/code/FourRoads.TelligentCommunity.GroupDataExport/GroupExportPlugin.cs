@@ -6,16 +6,29 @@ using Telligent.Evolution.Extensibility.Version1;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using Telligent.Evolution.Extensibility.Configuration.Version1;
+using System.Collections.Generic;
+using System;
 
 namespace FourRoads.TelligentCommunity.GroupDataExport
 {
-    public class GroupExportPlugin : IConfigurablePlugin , ISecuredCentralizedFileStore
+    public class GroupExportPlugin : IConfigurablePlugin , ISecuredCentralizedFileStore, IPluginGroup
     {
         public const string FILESTORE_KEY = "group.secure.data";
 
         public string Description
         {
             get { return "Enables group details to be exported from Telligent"; }
+        }
+
+        public IEnumerable<Type> Plugins
+        {
+            get
+            {
+                return new[]
+                {
+                    typeof (GroupExportPropertyTemplate),
+                };
+            }
         }
 
         public void Initialize()
@@ -55,12 +68,17 @@ namespace FourRoads.TelligentCommunity.GroupDataExport
 
                 PropertyGroup exportGroup = new PropertyGroup {Id="ExportForm", LabelText = "Export Form" };
 
-
                 if (PluginManager.IsEnabled(this))
                 {
-                    Property exportControl = new Property("exportButton", "Export Settings", PropertyType.Custom, 1, "")
+                    var exportControl = new Property
                     {
-                        ControlType = typeof(GroupExportControl)
+                        Id = "exportButton",
+                        LabelText = "Export Settings",
+                        DescriptionText = "",
+                        DataType = "custom",
+                        Template = "groupExport_template",
+                        OrderNumber = 1,
+                        DefaultValue = ""
                     };
 
                     exportGroup.Properties.Add(exportControl);
@@ -73,8 +91,6 @@ namespace FourRoads.TelligentCommunity.GroupDataExport
 
         public void Update(IPluginConfiguration configuration)
         {
-  
         }
-
     }
 }
