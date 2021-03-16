@@ -28,7 +28,7 @@ namespace FourRoads.TelligentCommunity.MicroData
 
         public string Name => "MicroData Grid Template";
 
-        public string Description => "Provides and interface for managing schema.org micro data elements.";
+        public string Description => "Provides an interface for managing schema.org micro data elements.";
 
         public void Initialize()
         {

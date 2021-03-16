@@ -101,9 +101,9 @@
     <Compile Include="Components\TCPagedQuery.cs" />
     <Compile Include="Components\Tokenizers\TokenizedTemplateEnumerableToken.cs" />
     <Compile Include="Components\Utility\EmbeddedResourcesBase.cs" />
-    <Compile Include="Controls\ApiSafeBlogPostLookup.cs" />
-    <Compile Include="Controls\ApiSafeBlogLookup.cs" />
-    <Compile Include="Controls\ApiSafeUserLookup.cs" />
+    <Compile Include="Controls\ApiSafeBlogPostLookupPropertyTemplate.cs" />
+    <Compile Include="Controls\ApiSafeBlogLookupPropertyTemplate.cs" />
+    <Compile Include="Controls\ApiSafeUserLookupPropertyTemplate.cs" />
     <Compile Include="Controls\MultiSelectRepeater.cs" />
     <Compile Include="Controls\TriggerActionPropertyTemplate.cs" />
     <Compile Include="Controls\UserLookupPropertyTemplate.cs" />
