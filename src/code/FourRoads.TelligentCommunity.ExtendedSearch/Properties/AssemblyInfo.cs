@@ -6,5 +6,5 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.ExtendedSearch")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Extends the SOLR search to support suggested query results")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.ExtendedSearch")]

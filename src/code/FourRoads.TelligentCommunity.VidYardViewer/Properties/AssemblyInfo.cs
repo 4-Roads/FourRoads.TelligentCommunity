@@ -6,5 +6,5 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.VidYardViewer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Provides the ability to embed Vidyard player")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.VidYardViewer")]
