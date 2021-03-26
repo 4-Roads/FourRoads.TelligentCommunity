@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity.PwaFeatures")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.PwaFeatures")]
-
+[assembly: AssemblyDescription("Extends Telligent to Support PWA features")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
