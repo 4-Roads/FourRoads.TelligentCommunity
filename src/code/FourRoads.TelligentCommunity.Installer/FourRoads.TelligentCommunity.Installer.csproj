@@ -42,22 +42,22 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Telligent.Common">
-      <HintPath>..\..\lib\Telligent.Common.dll</HintPath>
+      <HintPath>..\..\..\..\FourRoads.TelligentCommunity\src\lib\Telligent\Telligent.Common.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.DynamicConfiguration">
-      <HintPath>..\..\lib\Telligent.DynamicConfiguration.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.DynamicConfiguration.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Controls">
-      <HintPath>..\..\lib\Telligent.Evolution.Controls.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Controls.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Core">
-      <HintPath>..\..\lib\Telligent.Evolution.Core.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Core.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Evolution.Platform">
-      <HintPath>..\..\lib\Telligent.Evolution.Platform.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.Jobs">
-      <HintPath>..\..\lib\Telligent.Jobs.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Jobs.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
