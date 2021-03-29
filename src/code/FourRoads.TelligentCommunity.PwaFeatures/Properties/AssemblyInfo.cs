@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity.PwaFeatures")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity111.PwaFeatures")]
 [assembly: AssemblyProduct("FourRoads.TelligentCommunity.PwaFeatures")]
 [assembly: AssemblyDescription("Extends Telligent to Support PWA features")]
 
