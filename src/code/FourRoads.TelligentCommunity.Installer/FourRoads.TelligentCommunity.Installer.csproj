@@ -42,7 +42,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Telligent.Common">
-      <HintPath>..\..\..\..\FourRoads.TelligentCommunity\src\lib\Telligent\Telligent.Common.dll</HintPath>
+      <HintPath>..\..\lib\Telligent\Telligent.Common.dll</HintPath>
     </Reference>
     <Reference Include="Telligent.DynamicConfiguration">
       <HintPath>..\..\lib\Telligent\Telligent.DynamicConfiguration.dll</HintPath>
