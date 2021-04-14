@@ -9,16 +9,19 @@ namespace FourRoads.TelligentCommunity.Mfa.Interfaces
     public interface IMfaLogic
     {
 
-        void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider , ISocketMessage sockentMessage, DateTime emailValilationCutoffDate);
+        void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider , ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret);
         void RegisterUrls(IUrlController controller);
-
-        bool TwoFactorEnabled(User user);
+        bool IsTwoFactorEnabled(User user);
+        bool IsImpersonator();
+        
         void EnableTwoFactor(User user, bool enabled);
         bool ValidateTwoFactorCode(User user, string code);
         bool ValidateEmailCode(User user, string code);
         bool SendValidationCode(User user);
         string GetAccountSecureKey(User user);
         string GetAccountSecureKey(User user, bool useCache);
+
+        void FilterRequest(IHttpRequest httpRequest);
 
         List<OneTimeCode> GenerateCodes(User user);
         OneTimeCodesStatus GetCodesStatus(User user);

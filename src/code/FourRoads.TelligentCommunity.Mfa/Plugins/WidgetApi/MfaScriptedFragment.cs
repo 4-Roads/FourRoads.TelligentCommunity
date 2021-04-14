@@ -41,12 +41,10 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
         [Documentation("Returns MFA status for user associated with UserId. Only users in Administrators role can access this method, otherwise InvalidOperationException exception will be thrown")]
         public bool TwoFactorEnabled(int userId)
         {
-            if (IsValidAccessingUser(userId))
-            {
-                var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
-                return Injector.Get<IMfaLogic>().TwoFactorEnabled(user);
-            }
-            return false;
+            if (!IsValidAccessingUser(userId)) return false;
+            
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
+            return Injector.Get<IMfaLogic>().IsTwoFactorEnabled(user);
         }
 
         public void EnableTwoFactor(bool enabled)
@@ -58,36 +56,26 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
         [Documentation("Turns on/off MFA status for user associated with UserId. Only users in Administrators role can access this method, otherwise InvalidOperationException exception will be thrown")]
         public void EnableTwoFactor(int userId, bool enabled)
         {
-            if (IsValidAccessingUser(userId))
-            {
-                var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
-                Injector.Get<IMfaLogic>().EnableTwoFactor(user, enabled);
-            }
+            if (!IsValidAccessingUser(userId)) return;
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
+            Injector.Get<IMfaLogic>().EnableTwoFactor(user, enabled);
         }
 
         public bool Validate(string code)
         {
             var userService = Apis.Get<IUsers>();
-
             var user = userService.AccessingUser;
 
-            if (user.Username != userService.AnonymousUserName)
-            {
-                return Injector.Get<IMfaLogic>().ValidateTwoFactorCode(user, code.Replace(" ", string.Empty));
-            }
-
-            return false;
+            return user.Username != userService.AnonymousUserName 
+                   && Injector.Get<IMfaLogic>().ValidateTwoFactorCode(user, code.Replace(" ", string.Empty));
         }
 
         public List<OneTimeCode> GenerateCodes(int userId)
         {
-            if (IsValidAccessingUser(userId) && TwoFactorEnabled(userId))
-            {
-                var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
-                return Injector.Get<IMfaLogic>().GenerateCodes(user);
-            }
-            //return empty list
-            return new List<OneTimeCode>();
+            if (!IsValidAccessingUser(userId) || !TwoFactorEnabled(userId)) return new List<OneTimeCode>();
+
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
+            return Injector.Get<IMfaLogic>().GenerateCodes(user);
         }
 
         /// <summary>
@@ -95,7 +83,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        private bool IsValidAccessingUser(int userId)
+        private static bool IsValidAccessingUser(int userId)
         {
             var accessingUser = Apis.Get<IUsers>().AccessingUser;
             if (accessingUser.Id == userId)
@@ -103,7 +91,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
                 //user is generating codes for him/herself
                 return true;
             }
-            //see if the accessinf user is admin
+            //see if the accessing user is admin
             if (!Apis.Get<IRoleUsers>().IsUserInRoles(accessingUser.Username, new string[] { _adminRoleName }))
             {
                 throw new InvalidOperationException(_nonAdminAccessingException);
@@ -113,15 +101,13 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
 
         public OneTimeCodesStatus GetOneTimeCodesStatus(int userId)
         {
-            if (IsValidAccessingUser(userId))
-            {
-                var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
-                return Injector.Get<IMfaLogic>().GetCodesStatus(user);
-            }
-            return null;
+            if (!IsValidAccessingUser(userId)) return null;
+            
+            var user = Apis.Get<IUsers>().Get(new UsersGetOptions { Id = userId });
+            return Injector.Get<IMfaLogic>().GetCodesStatus(user);
         }
 
-        public bool ValdaiteEmailVerificationCode(string code)
+        public bool ValidateEmailVerificationCode(string code)
         {
             var user = Apis.Get<IUsers>().AccessingUser;
 

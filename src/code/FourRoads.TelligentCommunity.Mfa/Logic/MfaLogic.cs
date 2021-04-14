@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web;
 using System.Web.Security;
+using FourRoads.Common.Extensions;
 using FourRoads.Common.Interfaces;
 using FourRoads.Common.TelligentCommunity.Routing;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Model;
 using Google.Authenticator;
+using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -26,15 +31,23 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private readonly ICache _cache;
         private readonly NamedItemLockSpin<int> _namedLocks = new NamedItemLockSpin<int>(10);
         private IVerifyEmailProvider _emailProvider;
-        private ISocketMessage _sockentMessager;
+        private ISocketMessage _socketMessenger;
         private bool _enableEmailVerification;
+        private string _jwtSecret;
 
         //{295391e2b78d4b7e8056868ae4fe8fb3}
-        private static readonly string _defaultMfaPageLayout = $"<contentFragmentPage pageName=\"{_mfaPageName}\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::295391e2b78d4b7e8056868ae4fe8fb3\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
-        private static readonly string _defaultVerifyEmailPageLayout = $"<contentFragmentPage pageName=\"{_pageVerifyEmailName}\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::a8b6e56eac3246169d1727c84c17fd66\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
+        private static readonly string _defaultMfaPageLayout =
+            $"<contentFragmentPage pageName=\"{_mfaPageName}\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::295391e2b78d4b7e8056868ae4fe8fb3\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
+
+        private static readonly string _defaultVerifyEmailPageLayout =
+            $"<contentFragmentPage pageName=\"{_pageVerifyEmailName}\" isCustom=\"false\" layout=\"Content\">\r\n      <regions>\r\n        <region regionName=\"Content\">\r\n          <contentFragments>\r\n            <contentFragment type=\"Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::a8b6e56eac3246169d1727c84c17fd66\" showHeader=\"False\" cssClassAddition=\"no-wrapper responsive-1\" isLocked=\"False\" configuration=\"\" />\r\n          </contentFragments>\r\n        </region>\r\n      </regions>\r\n    </contentFragmentPage>";
+
         //this is version flag to distinguish major changes in MFA logic, so we can tell users if they should regenerate their keys
         private static readonly int _mfaLogicVersion = 2;
+        private static readonly int _mfaLogicMinorVersion = 1;
+
         private static readonly int _oneTimeCodesToGenerate = 10;
+
         //Plaintext length of the code with any spaces removed
         private static readonly int _oneTimeCodeLength = 8;
         private static readonly string _eakey_mfaEnabled = "__mfaEnabled";
@@ -43,6 +56,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private static readonly string _eakey_emailVerified = "___emailVerified";
         private static readonly string _eakey_emailVerifyCode = "_eakey_emailVerifyCode";
         private DateTime _emailValilationCutoffDate;
+        private string _oldVersionsCookieName = "Impersonator";
 
 
         public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
@@ -53,15 +67,15 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _cache = cache;
         }
 
-        public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider, ISocketMessage sockentMessager, DateTime emailValilationCutoffDate)
+        public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider,
+            ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret)
         {
             _enableEmailVerification = enableEmailVerification;
             _emailProvider = emailProvider;
-            _sockentMessager = sockentMessager;
-            _emailValilationCutoffDate = emailValilationCutoffDate;
-
-            _usersService.Events.AfterIdentify += EventsAfterIdentify;
+            _socketMessenger = socketMessenger;
+            _emailValilationCutoffDate = emailValidationCutoffDate;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
+            _jwtSecret = jwtSecret;
         }
 
         /// <summary>
@@ -72,25 +86,27 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         {
             //user has authenticated
             //is 2 factor enabled for user?
-            var user = _usersService.Get(new UsersGetOptions() { Username = userAfterAuthenticateEventArgs.Username });
-            if (TwoFactorEnabled(user))
+            var user = _usersService.Get(new UsersGetOptions() {Username = userAfterAuthenticateEventArgs.Username});
+            if (IsImpersonator()) return;
+
+            if (IsTwoFactorEnabled(user))
             {
                 var request = HttpContext.Current.Request;
-                if (request.Url.Host.ToLower() == "localhost" && request.Url.LocalPath.ToLower() == "/controlpanel/localaccess.aspx")
+                if (request.IsLocal && request.Url.LocalPath.ToLower() == "/controlpanel/localaccess.aspx")
                 {
-                    //bypass mfa for emergency local access
-                    SetTwoFactorState(user, true);
+                    // Bypass mfa for emergency local access
+                    SetTwoFactorState(user, TwoFactorState.Passed);
                 }
                 else
                 {
-                    //Yes set flag to false
-                    SetTwoFactorState(user, false);
+                    // Set state "NotPassed" so the requests are
+                    // redirected to the /mfa page to allow user enter MFA code
+                    SetTwoFactorState(user, TwoFactorState.NotPassed);
                 }
             }
             else
             {
-                //no set flag to true
-                SetTwoFactorState(user, true);
+                SetTwoFactorState(user, TwoFactorState.NotEnabled);
             }
         }
 
@@ -98,42 +114,38 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         /// Intercept requests and trap when a user has logged in 
         /// but still needs to perform the second auth stage. 
         /// At this point the user is technically authenticated with telligent 
-        /// so we also need to supress any callbacks etc whilst the second stage 
+        /// so we also need to suppress any callbacks etc whilst the second stage 
         /// auth is being performed.
         /// </summary>
-        /// <param name="e"></param>
-        private void EventsAfterIdentify(UserAfterIdentifyEventArgs e)
+        public void FilterRequest(IHttpRequest request)
         {
+            if (IsImpersonator(request.HttpContext.Request)) return;
+
             var user = _usersService.AccessingUser;
-            if (user.Username != _usersService.AnonymousUserName)
+            if (user.Username == _usersService.AnonymousUserName) return;
+
+            if(GetTwoFactorState(user) == false)
             {
-                //Make safe for not running in webcontext
-                if (HttpContext.Current != null)
-                {
-                    if (TwoFactorEnabled(user) && TwoFactorState(user) == false)
-                    {
-                        ForceRedirect("/mfa" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
-                    }
+                ForceRedirect(request, "/mfa" + "?ReturnUrl=" +
+                                       _urlService.Encode(request.HttpContext.Request.RawUrl));
+            }
 
-                    if (_enableEmailVerification && EmailChanged(user))
-                    {
-                        //Never validated and also joined before cutoff date so assumed a valid user
-                        if (user.JoinDate < _emailValilationCutoffDate && string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value))
-                        {
-                            SetEmailInExtendedAttributes(user);
-                        }
-                        else
-                        {
-                            ForceRedirect("/verifyemail" + "?ReturnUrl=" + _urlService.Encode(HttpContext.Current.Request.RawUrl));
+            if (!_enableEmailVerification || !EmailChanged(user)) return;
 
-                            if (EmailNotSent(user))
-                            {
-                                SendValidationCode(user);
-                            }
-                        }
-                    }
+            //Never validated and also joined before cutoff date so assumed a valid user
+            if (user.JoinDate < _emailValilationCutoffDate &&
+                string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value))
+            {
+                SetEmailInExtendedAttributes(user);
+                return;
+            }
 
-                }
+            ForceRedirect(request, "/verifyemail" + "?ReturnUrl=" +
+                                   _urlService.Encode(request.HttpContext.Request.RawUrl));
+
+            if (EmailNotSent(user))
+            {
+                SendValidationCode(user);
             }
         }
 
@@ -149,10 +161,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 else
                 {
                     //Read the users profile, if matches then clear the user profile and set _eakey_emailVerified to current email
-                    if (String.CompareOrdinal(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value, code) == 0)
+                    if (string.CompareOrdinal(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value, code) == 0)
                     {
                         SetEmailInExtendedAttributes(user);
-
                         result = true;
                     }
                 }
@@ -161,7 +172,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             if (result)
             {
                 //Now send a socket message bus response so the current page refreshes
-                _sockentMessager.NotifyCodeAccepted(user);
+                _socketMessenger.NotifyCodeAccepted(user);
             }
 
             return result;
@@ -169,27 +180,34 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private void SetEmailInExtendedAttributes(User user)
         {
-            List<ExtendedAttribute> attributes = new List<ExtendedAttribute>();
+            var attributes = new List<ExtendedAttribute>
+            {
+                new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = string.Empty},
+                new ExtendedAttribute() {Key = _eakey_emailVerified, Value = user.PrivateEmail}
+            };
 
-            attributes.Add(new ExtendedAttribute() { Key = _eakey_emailVerifyCode, Value = "" });
-            attributes.Add(new ExtendedAttribute() { Key = _eakey_emailVerified, Value = user.PrivateEmail });
-
-            _usersService.Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = attributes });
+            _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes});
         }
 
         public bool SendValidationCode(User user)
         {
-            string code = MfaCryptoExtension.RandomAlphanumeric(6);
-            ;
-            //Send an emial
+            var code = MfaCryptoExtension.RandomAlphanumeric(6);
+            //Send an email
             _emailProvider.SendEmail(user, code);
 
             //Send a validation code, store it in the users profile extended attributes
-            List<ExtendedAttribute> attributes = new List<ExtendedAttribute> { new ExtendedAttribute() { Key = _eakey_emailVerifyCode, Value = code } };
+            var attributes = new List<ExtendedAttribute>
+            {
+                new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = code}
+            };
 
-            return _usersService.Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = attributes }).HasErrors();
-
+            return _usersService.Update(new UsersUpdateOptions()
+                {
+                    Id = user.Id, ExtendedAttributes = attributes
+                })
+                .HasErrors();
         }
+
         private bool EmailNotSent(User user)
         {
             return string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value);
@@ -197,20 +215,21 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private bool EmailChanged(User user)
         {
-            return (string.Compare(user.PrivateEmail, user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value, StringComparison.OrdinalIgnoreCase) != 0);
+            return (string.Compare(user.PrivateEmail, user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value,
+                StringComparison.OrdinalIgnoreCase) != 0);
         }
 
-        private void ForceRedirect(string page)
+        private void ForceRedirect(IHttpRequest httpRequest, string page)
         {
             // user is logged in but has not completed the second auth stage
-            var request = HttpContext.Current.Request;
+            var request = httpRequest.HttpContext.Request;
 
             if (request.Path.StartsWith("/socket.ashx"))
             {
                 return;
             }
 
-            var response = HttpContext.Current.Response;
+            var response = httpRequest.HttpContext.Response;
 
             // suppress any callbacks re search, notifications, header links etc
             if (IsOauthRequest(request) == false &&
@@ -224,13 +243,13 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 // this should only happen when in the second auth stage 
                 // for blocked callbacks so a bit brutal
                 response.Clear();
-                if (HttpContext.Current.ApplicationInstance == null)
+                if (httpRequest.HttpContext.ApplicationInstance == null)
                 {
                     response.End();
                 }
                 else
                 {
-                    HttpContext.Current.ApplicationInstance.CompleteRequest();
+                    httpRequest.HttpContext.ApplicationInstance.CompleteRequest();
                 }
             }
 
@@ -240,21 +259,22 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 request.Url.LocalPath != "/logout" &&
                 request.Url.LocalPath != "/mfa" &&
                 request.Url.LocalPath != "/verifyemail" &&
-                string.Compare(HttpContext.Current.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) == 0 &&
+                string.Compare(httpRequest.HttpContext.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) ==
+                0 &&
                 //Is this a main page and not a callback etc 
                 IsPageRequest(request))
             {
                 //redirect to 2 factor page
-                bool force = HttpContext.Current.ApplicationInstance == null;
+                bool force = httpRequest.HttpContext.ApplicationInstance == null;
                 response.Redirect(page, force);
                 if (!force)
                 {
-                    HttpContext.Current.ApplicationInstance.CompleteRequest();
+                    httpRequest.HttpContext.ApplicationInstance.CompleteRequest();
                 }
             }
         }
 
-        private static bool IsPageRequest(HttpRequest request)
+        private static bool IsPageRequest(HttpRequestBase request)
         {
             return (request.CurrentExecutionFilePathExtension == ".aspx" ||
                     request.CurrentExecutionFilePathExtension == ".htm" ||
@@ -262,7 +282,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                     request.CurrentExecutionFilePathExtension == string.Empty);
         }
 
-        private bool IsOauthRequest(HttpRequest request)
+        private bool IsOauthRequest(HttpRequestBase request)
         {
             // path is authorize url
             if (request.Path == "/api.ashx/v2/oauth/authorize") return true;
@@ -272,49 +292,77 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
             // or allow/deny page
             var result = (request.Path == "/utility/scripted-file.ashx"
-                    && request.QueryString["client_id"] != null
-                    && (request.QueryString["redirect_uri"] != null
-                        || request.QueryString["response_type"] != null)
-                        || request.QueryString["client_secret"] != null
-                        || request.QueryString["code"] != null
-                        || request.QueryString["grant_type"] != null
-                        || request.QueryString["username"] != null
-                    );
+                          && request.QueryString["client_id"] != null
+                          && (request.QueryString["redirect_uri"] != null
+                              || request.QueryString["response_type"] != null)
+                          || request.QueryString["client_secret"] != null
+                          || request.QueryString["code"] != null
+                          || request.QueryString["grant_type"] != null
+                          || request.QueryString["username"] != null
+                );
 
             return result;
         }
 
-        private string GetSessionID(HttpContext context)
+        private string GetAuthCookieName()
         {
-            var cookie = context.Request.Cookies[FormsAuthentication.FormsCookieName];
-
-            if (cookie != null)
-                return cookie.Value.Substring(0, 10); //Chances of collission with 10 chars is small
-
-            return string.Empty;
+            return FormsAuthentication.FormsCookieName;
         }
 
-        private void SetTwoFactorState(User user, bool passed)
+        private string GetMfaCookieName()
         {
-            using (var sync = _namedLocks.Enter(user.Id.GetValueOrDefault(0)))
-            {
-                string cacheKey = GetCacheKey(user);
+            return $"{GetAuthCookieName()}Mfa{_mfaLogicVersion}{_mfaLogicMinorVersion}";
+        }
 
+        private string GetSessionId(HttpContext context)
+        {
+            var cookie = context.Request.Cookies[GetMfaCookieName()];
+
+            return cookie != null ? cookie.Value : string.Empty;
+        }
+
+        private enum TwoFactorState
+        {
+            NotEnabled,
+            Passed,
+            NotPassed
+        }
+        
+        private void SetTwoFactorState(User user, TwoFactorState passed)
+        {
+            if (!user.Id.HasValue) return;
+
+            using (_namedLocks.Enter(user.Id.GetValueOrDefault(0)))
+            {
+                var cacheKey = GetCacheKey(user);
                 _cache.Remove(cacheKey);
 
-                _mfaDataProvider.SetUserState(user.Id.Value, GetSessionID(HttpContext.Current), passed);
+                var authCookie = HttpContext.Current.Request.Cookies[GetAuthCookieName()];
+                var authCookieValue = "no-auth-cookie-yet";
+                if (authCookie != null)
+                {
+                    authCookieValue = authCookie.Value;
+                }
+                var authHash = $"{authCookieValue}{_jwtSecret}".MD5Hash();
+                var payload = new Dictionary<string, object>
+                {
+                    {nameof(PayLoad.userId), user.Id.Value},
+                    {nameof(PayLoad.state), passed},
+                    {nameof(PayLoad.hash), authHash}
+                };
+                var mfaCookieName = GetMfaCookieName();
+                var token = CreateJoseJwtToken(payload);
+
+                HttpContext.Current.Response.Cookies.Add(new HttpCookie(mfaCookieName)
+                {
+                    Value = token
+                });
             }
         }
 
-        public bool TwoFactorEnabled(User user)
+        public bool IsTwoFactorEnabled(User user)
         {
-            if (IsImpersonator())
-            {
-                return false;
-            }
-
-            bool require2F = false;
-
+            var require2F = false;
             //ensure we have access to user.ExtendedAttributes
             _usersService.RunAsUser(_usersService.ServiceUserName, () =>
             {
@@ -329,15 +377,36 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             return require2F;
         }
 
-        private bool IsImpersonator()
+        public bool IsImpersonator()
         {
-            var context = HttpContext.Current;
-            if (context == null)
+            return IsImpersonator(HttpContext.Current.Request);
+        }
+
+        private bool IsImpersonator(HttpRequest request)
+        {
+            if (HasImpersonatorFlag(request.Cookies[CookieUtility.UserCookieName])) return true;
+            //fallback to "Impersonator" cookie name
+            return HasImpersonatorFlag(request.Cookies[_oldVersionsCookieName]);
+        }
+
+        private bool IsImpersonator(HttpRequestBase request)
+        {
+            if (HasImpersonatorFlag(request.Cookies[CookieUtility.UserCookieName])) return true;
+            //fallback to "Impersonator" cookie name
+            return HasImpersonatorFlag(request.Cookies[_oldVersionsCookieName]);
+        }
+        private bool HasImpersonatorFlag(HttpCookie httpCookie)
+        {
+            if (httpCookie == null || string.IsNullOrWhiteSpace(httpCookie.Value)) return false;
+            try
+            {
+                FormsAuthenticationTicket ticket = FormsAuthentication.Decrypt(httpCookie.Value);
+                return ticket != null && ticket.UserData.Contains("impersonating=");
+            }
+            catch
             {
                 return false;
             }
-            HttpCookie httpCookie = context.Request.Cookies["Impersonator"];
-            return (httpCookie != null && !string.IsNullOrEmpty(httpCookie.Value));
         }
 
         public void EnableTwoFactor(User user, bool enabled)
@@ -345,25 +414,30 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             //ensure we have access to user.ExtendedAttributes
             _usersService.RunAsUser(_usersService.ServiceUserName, () =>
             {
-                UsersUpdateOptions updateOptions = new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = user.ExtendedAttributes };
+                UsersUpdateOptions updateOptions = new UsersUpdateOptions()
+                    {Id = user.Id, ExtendedAttributes = user.ExtendedAttributes};
                 if (enabled == false)
                 {
                     //old codes should be deleted
                     _mfaDataProvider.ClearCodes(user.Id.Value);
                     _mfaDataProvider.ClearUserKey(user.Id.Value);
                     //remove version number
-#if !SIMULATE_OLDMFA_KEY_VERSION 
-                    updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaVersion, Value = string.Empty });
+#if !SIMULATE_OLDMFA_KEY_VERSION
+                    updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
+                        {Key = _eakey_mfaVersion, Value = string.Empty});
 #endif
                 }
                 else
                 {
 #if !SIMULATE_OLDMFA_KEY_VERSION
                     //store plugin version in EA
-                    updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture) });
+                    updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
+                        {Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture)});
 #endif
                 }
-                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaEnabled, Value = enabled.ToString() });
+
+                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
+                    {Key = _eakey_mfaEnabled, Value = enabled.ToString()});
                 _usersService.Update(updateOptions);
                 _cache.Remove(GetUserKeyCacheKey(user));
             });
@@ -377,20 +451,17 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             {
                 if (ValidateOneTimeCode(user, code))
                 {
-                    SetTwoFactorState(user, true);
+                    SetTwoFactorState(user, TwoFactorState.Passed);
                     return true;
                 }
             }
 
-            TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
-            if (tfa.ValidateTwoFactorPIN(GetAccountSecureKey(user), code))
-            {
-                SetTwoFactorState(user, true);
+            var tfa = new TwoFactorAuthenticator();
+            
+            if (!tfa.ValidateTwoFactorPIN(GetAccountSecureKey(user), code)) return false;
 
-                return true;
-            }
-
-            return false;
+            SetTwoFactorState(user, TwoFactorState.Passed);
+            return true;
         }
 
         private bool ValidateOneTimeCode(User user, string code)
@@ -425,17 +496,19 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                         userKey = Guid.NewGuid();
                         _mfaDataProvider.SetUserKey(user.Id.Value, userKey);
                     }
+
                     key = userKey.ToString().ToUpperInvariant();
                 }
+
                 _cache.Insert(GetUserKeyCacheKey(user), key);
             }
+
             return key;
         }
+
         public string GetAccountSecureKey(User user)
         {
-
             return GetAccountSecureKey(user, true);
-
         }
 
         private bool IsOldVersionUser(User user)
@@ -450,83 +523,124 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 {
                     _usersService.RunAsUser(_usersService.ServiceUserName, () =>
                     {
-                        var mfaVersionEA = user.ExtendedAttributes.Get(_eakey_mfaVersion);
+                        var extendedAttribute = user.ExtendedAttributes.Get(_eakey_mfaVersion);
                         var mfaEnabled = user.ExtendedAttributes.Get(_eakey_mfaEnabled);
                         //if user has no version stored and had mfa enabled, then it's old version user
-                        result = (mfaVersionEA == null || string.IsNullOrEmpty(mfaVersionEA.Value.Trim()))
+                        result = (extendedAttribute == null || string.IsNullOrEmpty(extendedAttribute.Value.Trim()))
                                  && mfaEnabled != null && mfaEnabled.Value == "True";
-
                     });
                 }
             }
             catch (Exception ex)
             {
-                new Common.TelligentCommunity.Components.TCException($"Could not get user MFA version via EA '{_eakey_mfaVersion}'", ex).Log();
+                new Common.TelligentCommunity.Components.TCException(
+                    $"Could not get user MFA version via EA '{_eakey_mfaVersion}'", ex).Log();
             }
+
             return result;
 #endif
         }
 
-        private bool TwoFactorState(User user)
+        private string CreateJoseJwtToken(Dictionary<string, object> payload)
         {
-            string cacheKey = GetCacheKey(user);
+            string token = Jose.JWT.Encode(payload, _jwtSecret, Jose.JweAlgorithm.PBES2_HS256_A128KW,
+                Jose.JweEncryption.A256CBC_HS512);
+            return token;
+        }
 
+        private bool GetTwoFactorState(User user)
+        {
+            var cacheKey = GetCacheKey(user);
             var valid = _cache.Get<bool?>(cacheKey);
 
-            if (!valid.HasValue)
-            {
-                using (var sync = _namedLocks.Enter(user.Id.GetValueOrDefault(0)))
-                {
-                    valid = _mfaDataProvider.GetUserState(user.Id.Value, GetSessionID(HttpContext.Current));
+            if (valid.HasValue) return valid.Value;
 
-                    _cache.Insert(cacheKey, valid);
-                }
+            using (_namedLocks.Enter(user.Id.GetValueOrDefault(0)))
+            {
+                valid = GetUserState(user.Id, GetSessionId(HttpContext.Current));
+                _cache.Insert(cacheKey, valid);
             }
 
-            return valid.Value;
+            return valid != null && valid.Value;
+        }
+
+        private bool? GetUserState(int? userId, string sessionToken)
+        {
+            if (!userId.HasValue || string.IsNullOrWhiteSpace(sessionToken)) return false;
+
+            return ValidateJwtToken(userId.Value, sessionToken);
+        }
+
+        private bool? ValidateJwtToken(int userId, string sessionToken)
+        {
+            PayLoad payload;
+            try
+            {
+                payload = Jose.JWT.Decode<PayLoad>(sessionToken, _jwtSecret, Jose.JweAlgorithm.PBES2_HS256_A128KW,
+                    Jose.JweEncryption.A256CBC_HS512);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            var authHash = string.Empty;
+            var authCookie = HttpContext.Current.Request.Cookies[GetAuthCookieName()];
+            if (authCookie != null)
+            {
+                authHash = $"{authCookie.Value}{_jwtSecret}".MD5Hash();
+            }
+
+            if (payload.state == TwoFactorState.NotEnabled) return true;
+
+            return payload.userId == userId 
+                   && payload.state == TwoFactorState.Passed 
+                   && authHash.Equals(payload.hash);
         }
 
         public void RegisterUrls(IUrlController controller)
         {
-            controller.AddPage(_mfaPageName, _mfaPageName, new SiteRootRouteConstraint(), null, _mfaPageName, new PageDefinitionOptions
-            {
-                DefaultPageXml = _defaultMfaPageLayout,
-                HasApplicationContext = false,
-                Validate = ValidateNonAnonymous
-            });
-
-            controller.AddPage(_pageVerifyEmailName, _pageVerifyEmailName, new SiteRootRouteConstraint(), null, _pageVerifyEmailName, new PageDefinitionOptions
-            {
-                DefaultPageXml = _defaultVerifyEmailPageLayout,
-                HasApplicationContext = false,
-                Validate = (context, accessController) =>
+            controller.AddPage(_mfaPageName, _mfaPageName, new SiteRootRouteConstraint(), null, _mfaPageName,
+                new PageDefinitionOptions
                 {
-                    var user = _usersService.Get(new UsersGetOptions { Id = context.UserId });
-                    if (_usersService.AnonymousUserName == user.Username &&
-                        !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["code"]) &&
-                        !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["userName"]))
+                    DefaultPageXml = _defaultMfaPageLayout,
+                    HasApplicationContext = false,
+                    Validate = ValidateNonAnonymous
+                });
+
+            controller.AddPage(_pageVerifyEmailName, _pageVerifyEmailName, new SiteRootRouteConstraint(), null,
+                _pageVerifyEmailName, new PageDefinitionOptions
+                {
+                    DefaultPageXml = _defaultVerifyEmailPageLayout,
+                    HasApplicationContext = false,
+                    Validate = (context, accessController) =>
                     {
-                        var userValidation = _usersService.Get(new UsersGetOptions() { Username = HttpContext.Current.Request.QueryString["userName"] });
-
-                        if (userValidation != null && !userValidation.HasErrors())
+                        var user = _usersService.Get(new UsersGetOptions {Id = context.UserId});
+                        if (_usersService.AnonymousUserName == user.Username &&
+                            !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["code"]) &&
+                            !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["userName"]))
                         {
-                            if (ValidateEmailCode(userValidation, HttpContext.Current.Request.QueryString["code"]))
+                            var userValidation = _usersService.Get(new UsersGetOptions()
+                                {Username = HttpContext.Current.Request.QueryString["userName"]});
+
+                            if (userValidation != null && !userValidation.HasErrors())
                             {
-                                accessController.Redirect(Apis.Get<ICoreUrls>().Home(false));
+                                if (ValidateEmailCode(userValidation, HttpContext.Current.Request.QueryString["code"]))
+                                {
+                                    accessController.Redirect(Apis.Get<ICoreUrls>().Home(false));
+                                }
                             }
-
                         }
-                    }
 
-                    ValidateNonAnonymous(context, accessController);
-                }
-            });
+                        ValidateNonAnonymous(context, accessController);
+                    }
+                });
         }
 
 
         private void ValidateNonAnonymous(PageContext context, IUrlAccessController accessController)
         {
-            var user = _usersService.Get(new UsersGetOptions { Id = context.UserId });
+            var user = _usersService.Get(new UsersGetOptions {Id = context.UserId});
             if (_usersService.AnonymousUserName == user.Username)
             {
                 accessController.Redirect(Apis.Get<ICoreUrls>().LogIn());
@@ -539,12 +653,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _mfaDataProvider.ClearCodes(user.Id.Value);
 
             var codes = new List<OneTimeCode>(_oneTimeCodesToGenerate);
-            var generatedOnUtc = DateTime.UtcNow;
 
             for (int i = 0; i < _oneTimeCodesToGenerate; i++)
             {
                 //generatig the code in form of XXXX XXXX with zero-padding
-                string plainTextCode = $"{MfaCryptoExtension.RandomInteger(0, 9999):D4} {MfaCryptoExtension.RandomInteger(0, 9999):D4}";
+                string plainTextCode =
+                    $"{MfaCryptoExtension.RandomInteger(0, 9999):D4} {MfaCryptoExtension.RandomInteger(0, 9999):D4}";
                 string encryptedCode = plainTextCode.Hash(GetAccountSecureKey(user), user.Id.Value);
                 //we store just the hash value of the code, but...
                 OneTimeCode code = _mfaDataProvider.CreateCode(user.Id.Value, encryptedCode);
@@ -553,12 +667,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
                 codes.Add(code);
             }
+
             // add note about time when codes were generated
             _usersService.RunAsUser(_usersService.ServiceUserName, () =>
             {
-                UsersUpdateOptions updateOptions = new UsersUpdateOptions() { Id = user.Id.Value, ExtendedAttributes = user.ExtendedAttributes };
-                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_codesGeneratedOnUtc, Value = DateTime.UtcNow.ToString("O") });
-                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute() { Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture) });
+                UsersUpdateOptions updateOptions = new UsersUpdateOptions()
+                    {Id = user.Id.Value, ExtendedAttributes = user.ExtendedAttributes};
+                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
+                    {Key = _eakey_codesGeneratedOnUtc, Value = DateTime.UtcNow.ToString("O")});
+                updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
+                    {Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture)});
                 _usersService.Update(updateOptions);
             });
             return codes;
@@ -586,12 +704,24 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                     {
                         result.CodesGeneratedOn = generatedOnUtc;
                     }
+
                     result.CodesLeft = _mfaDataProvider.CountCodesLeft(user.Id.Value);
                 }
-
             });
             return result;
         }
 
+        private struct PayLoad
+        {
+            //props set in JWT decoder
+            //prop names match claims
+            // ReSharper disable InconsistentNaming
+#pragma warning disable 648,649
+            public int userId;
+            public TwoFactorState state;
+            public string hash;
+#pragma warning restore 648,649
+            // ReSharper restore InconsistentNaming
+        }
     }
 }

@@ -1,7 +1,7 @@
 $core_v2_page.SetContentType('application/json')
 #if ($core_v2_page.IsPost && $core_v2_user.IsRegistered($core_v2_user.Accessing.Id))
 		#set($validationCode = $core_v2_page.GetFormValue('validationCode'))
-		#if($frcommon_v1_Mfa.ValdaiteEmailVerificationCode($validationCode))
+		#if($frcommon_v1_Mfa.ValidateEmailVerificationCode($validationCode))
 			{"result":"true"}
 		#else
 			{"result":"false"}
