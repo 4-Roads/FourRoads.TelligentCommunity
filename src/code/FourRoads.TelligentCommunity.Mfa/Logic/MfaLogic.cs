@@ -386,15 +386,21 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         {
             if (HasImpersonatorFlag(request.Cookies[CookieUtility.UserCookieName])) return true;
             //fallback to "Impersonator" cookie name
-            return HasImpersonatorFlag(request.Cookies[_oldVersionsCookieName]);
+            return HasOldImpersonatorFlag(request.Cookies[_oldVersionsCookieName]);
         }
 
         private bool IsImpersonator(HttpRequestBase request)
         {
             if (HasImpersonatorFlag(request.Cookies[CookieUtility.UserCookieName])) return true;
             //fallback to "Impersonator" cookie name
-            return HasImpersonatorFlag(request.Cookies[_oldVersionsCookieName]);
+            return HasOldImpersonatorFlag(request.Cookies[_oldVersionsCookieName]);
         }
+        
+        private bool HasOldImpersonatorFlag(HttpCookie httpCookie)
+        {
+            return (httpCookie != null && !string.IsNullOrEmpty(httpCookie.Value));
+        }
+
         private bool HasImpersonatorFlag(HttpCookie httpCookie)
         {
             if (httpCookie == null || string.IsNullOrWhiteSpace(httpCookie.Value)) return false;
