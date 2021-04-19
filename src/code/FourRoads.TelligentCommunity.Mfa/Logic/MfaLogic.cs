@@ -125,6 +125,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             var user = _usersService.AccessingUser;
             if (user.Username == _usersService.AnonymousUserName) return;
 
+            if (!(request.HttpContext.Request.Url is null) && request.HttpContext.Request.Url.LocalPath.StartsWith("/logout"))
+            {
+                RemoveTwoFactorState(request);
+                return;
+            }
+            
             if(GetTwoFactorState(user) == false)
             {
                 ForceRedirect(request, "/mfa" + "?ReturnUrl=" +
@@ -329,36 +335,50 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             NotPassed
         }
         
+        private void RemoveTwoFactorState(IHttpRequest request)
+        {
+            HttpContext.Current.Response.Cookies.Add(new HttpCookie(GetMfaCookieName())
+            {
+                Expires = DateTime.UtcNow.AddDays(-7)
+            });
+        }
+
         private void SetTwoFactorState(User user, TwoFactorState passed)
         {
             if (!user.Id.HasValue) return;
-
             using (_namedLocks.Enter(user.Id.GetValueOrDefault(0)))
             {
-                var cacheKey = GetCacheKey(user);
-                _cache.Remove(cacheKey);
-
-                var authCookie = HttpContext.Current.Request.Cookies[GetAuthCookieName()];
-                var authCookieValue = "no-auth-cookie-yet";
-                if (authCookie != null)
-                {
-                    authCookieValue = authCookie.Value;
-                }
-                var authHash = $"{authCookieValue}{_jwtSecret}".MD5Hash();
-                var payload = new Dictionary<string, object>
-                {
-                    {nameof(PayLoad.userId), user.Id.Value},
-                    {nameof(PayLoad.state), passed},
-                    {nameof(PayLoad.hash), authHash}
-                };
-                var mfaCookieName = GetMfaCookieName();
-                var token = CreateJoseJwtToken(payload);
-
-                HttpContext.Current.Response.Cookies.Add(new HttpCookie(mfaCookieName)
-                {
-                    Value = token
-                });
+                SetTwoFactorStateLocked(user, passed);
             }
+        }
+
+        private void SetTwoFactorStateLocked(User user, TwoFactorState passed)
+        {
+            var cacheKey = GetCacheKey(user);
+            _cache.Remove(cacheKey);
+
+            var authCookie = HttpContext.Current.Request.Cookies[GetAuthCookieName()];
+            var authCookieValue = "no-auth-cookie-yet";
+            if (authCookie != null)
+            {
+                authCookieValue = authCookie.Value;
+            }
+
+            var authHash = $"{authCookieValue}{_jwtSecret}".MD5Hash();
+            var payload = new Dictionary<string, object>
+            {
+                {nameof(PayLoad.userId), user.Id.Value},
+                {nameof(PayLoad.state), passed},
+                {nameof(PayLoad.hash), authHash}
+            };
+            var mfaCookieName = GetMfaCookieName();
+            var token = CreateJoseJwtToken(payload);
+
+            HttpContext.Current.Response.Cookies.Add(new HttpCookie(mfaCookieName)
+            {
+                Value = token,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
         }
 
         public bool IsTwoFactorEnabled(User user)
@@ -595,18 +615,30 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
             using (_namedLocks.Enter(user.Id.GetValueOrDefault(0)))
             {
-                valid = GetUserState(user.Id, GetSessionId(HttpContext.Current));
+                valid = GetUserState(user, GetSessionId(HttpContext.Current));
                 _cache.Insert(cacheKey, valid);
             }
 
             return valid != null && valid.Value;
         }
 
-        private bool? GetUserState(int? userId, string sessionToken)
+        private bool? GetUserState(User user, string sessionToken)
         {
-            if (!userId.HasValue || string.IsNullOrWhiteSpace(sessionToken)) return false;
+            if (user?.Id == null) return false;
 
-            return ValidateJwtToken(userId.Value, sessionToken);
+            if (!string.IsNullOrWhiteSpace(sessionToken)) return ValidateJwtToken(user.Id.Value, sessionToken);
+            
+            /////////////////////////////
+            // Edge Case: no mfa cookie
+            /////////////////////////////
+            // check if user has mfa enabled
+            if (IsTwoFactorEnabled(user))
+            {
+                //returning false to redirect to mfa
+                return false;
+            }
+            SetTwoFactorStateLocked(user, TwoFactorState.NotEnabled);
+            return true;
         }
 
         private bool? ValidateJwtToken(int userId, string sessionToken)

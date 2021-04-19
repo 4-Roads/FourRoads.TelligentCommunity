@@ -74,7 +74,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
             typeof(VerifyEmailPlugin),
             typeof(VerifyEmailTokens),
             typeof(EmailVerifiedSocketMessage),
-            typeof(PasswordPropertyTemplate),
+            // typeof(PasswordPropertyTemplate),
             typeof(DatePropertyTemplate)
         };
 
