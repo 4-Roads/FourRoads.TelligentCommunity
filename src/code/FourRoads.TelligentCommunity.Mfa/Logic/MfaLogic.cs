@@ -93,22 +93,21 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             if (IsTwoFactorEnabled(user))
             {
                 var request = HttpContext.Current.Request;
-                if (request.IsLocal && request.Url.LocalPath.ToLower() == "/controlpanel/localaccess.aspx")
+                if (request.IsLocal && request.Url.LocalPath.ToLower().EndsWith("/controlpanel/localaccess.aspx"))
                 {
                     // Bypass mfa for emergency local access
                     SetTwoFactorState(user, TwoFactorState.Passed);
+                    return;
                 }
-                else
-                {
-                    // Set state "NotPassed" so the requests are
-                    // redirected to the /mfa page to allow user enter MFA code
-                    SetTwoFactorState(user, TwoFactorState.NotPassed);
-                }
+
+                // Set state "NotPassed" so the requests are
+                // redirected to the /mfa page to allow user enter MFA code
+                SetTwoFactorState(user, TwoFactorState.NotPassed);
+                return;
             }
-            else
-            {
-                SetTwoFactorState(user, TwoFactorState.NotEnabled);
-            }
+
+            //mfa not enabled
+            SetTwoFactorState(user, TwoFactorState.NotEnabled);
         }
 
         /// <summary>
@@ -125,13 +124,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             var user = _usersService.AccessingUser;
             if (user.Username == _usersService.AnonymousUserName) return;
 
-            if (!(request.HttpContext.Request.Url is null) && request.HttpContext.Request.Url.LocalPath.StartsWith("/logout"))
+            if (!(request.HttpContext.Request.Url is null) &&
+                request.HttpContext.Request.Url.LocalPath.StartsWith("/logout"))
             {
                 RemoveTwoFactorState(request);
                 return;
             }
-            
-            if(GetTwoFactorState(user) == false)
+
+            // if (IsAuthenticateRequestViaLocalAccess(request.HttpContext.Request)) return;
+
+            if (GetTwoFactorState(user) == false)
             {
                 ForceRedirect(request, "/mfa" + "?ReturnUrl=" +
                                        _urlService.Encode(request.HttpContext.Request.RawUrl));
@@ -334,7 +336,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             Passed,
             NotPassed
         }
-        
+
         private void RemoveTwoFactorState(IHttpRequest request)
         {
             HttpContext.Current.Response.Cookies.Add(new HttpCookie(GetMfaCookieName())
@@ -379,6 +381,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 Value = token,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
+            _cache.Insert(cacheKey, passed != TwoFactorState.NotPassed);
         }
 
         public bool IsTwoFactorEnabled(User user)
@@ -405,18 +408,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private bool IsImpersonator(HttpRequest request)
         {
-            var result = false;
-            var cookie = request.Cookies[_cookieName];
-            if (cookie != null)
-            {
-                result = HasImpersonatorFlag(cookie);
-            }
-            else
-            {
-                cookie = request.Cookies[_v111_4_CookieName];
-                result = HasOldImpersonatorFlag(cookie);
-            }
-            return result;
+            return IsImpersonator(new HttpRequestWrapper(request));
         }
 
         private bool IsImpersonator(HttpRequestBase request)
@@ -432,9 +424,10 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 cookie = request.Cookies[_v111_4_CookieName];
                 result = HasOldImpersonatorFlag(cookie);
             }
+
             return result;
         }
-        
+
         /// <summary>
         /// uses the old way of storing impersonator flag.
         /// Versions 11.1.4 and below.
@@ -515,7 +508,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             }
 
             var tfa = new TwoFactorAuthenticator();
-            
+
             if (!tfa.ValidateTwoFactorPIN(GetAccountSecureKey(user), code)) return false;
 
             SetTwoFactorState(user, TwoFactorState.Passed);
@@ -627,7 +620,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             if (user?.Id == null) return false;
 
             if (!string.IsNullOrWhiteSpace(sessionToken)) return ValidateJwtToken(user.Id.Value, sessionToken);
-            
+
             /////////////////////////////
             // Edge Case: no mfa cookie
             /////////////////////////////
@@ -637,6 +630,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 //returning false to redirect to mfa
                 return false;
             }
+
             SetTwoFactorStateLocked(user, TwoFactorState.NotEnabled);
             return true;
         }
@@ -663,8 +657,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
             if (payload.state == TwoFactorState.NotEnabled) return true;
 
-            return payload.userId == userId 
-                   && payload.state == TwoFactorState.Passed 
+            return payload.userId == userId
+                   && payload.state == TwoFactorState.Passed
                    && authHash.Equals(payload.hash);
         }
 
