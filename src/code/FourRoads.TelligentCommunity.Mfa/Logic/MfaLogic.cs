@@ -56,7 +56,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private static readonly string _eakey_emailVerified = "___emailVerified";
         private static readonly string _eakey_emailVerifyCode = "_eakey_emailVerifyCode";
         private DateTime _emailValilationCutoffDate;
-        private string _oldVersionsCookieName = "Impersonator";
+        private string _v111_4_CookieName = "Impersonator";
+        private string _cookieName = "te.u";
 
 
         public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
@@ -384,23 +385,54 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private bool IsImpersonator(HttpRequest request)
         {
-            if (HasImpersonatorFlag(request.Cookies[CookieUtility.UserCookieName])) return true;
-            //fallback to "Impersonator" cookie name
-            return HasOldImpersonatorFlag(request.Cookies[_oldVersionsCookieName]);
+            var result = false;
+            var cookie = request.Cookies[_cookieName];
+            if (cookie != null)
+            {
+                result = HasImpersonatorFlag(cookie);
+            }
+            else
+            {
+                cookie = request.Cookies[_v111_4_CookieName];
+                result = HasOldImpersonatorFlag(cookie);
+            }
+            return result;
         }
 
         private bool IsImpersonator(HttpRequestBase request)
         {
-            if (HasImpersonatorFlag(request.Cookies[CookieUtility.UserCookieName])) return true;
-            //fallback to "Impersonator" cookie name
-            return HasOldImpersonatorFlag(request.Cookies[_oldVersionsCookieName]);
+            var result = false;
+            var cookie = request.Cookies[_cookieName];
+            if (cookie != null)
+            {
+                result = HasImpersonatorFlag(cookie);
+            }
+            else
+            {
+                cookie = request.Cookies[_v111_4_CookieName];
+                result = HasOldImpersonatorFlag(cookie);
+            }
+            return result;
         }
         
+        /// <summary>
+        /// uses the old way of storing impersonator flag.
+        /// Versions 11.1.4 and below.
+        /// </summary>
+        /// <param name="httpCookie"></param>
+        /// <returns></returns>
         private bool HasOldImpersonatorFlag(HttpCookie httpCookie)
         {
+            //just checking for existence of the cookie
             return (httpCookie != null && !string.IsNullOrEmpty(httpCookie.Value));
         }
 
+        /// <summary>
+        /// uses the new way of storing impersonator cookie, which now gets encrypted
+        /// Versions 11.1.6 and up
+        /// </summary>
+        /// <param name="httpCookie"></param>
+        /// <returns></returns>
         private bool HasImpersonatorFlag(HttpCookie httpCookie)
         {
             if (httpCookie == null || string.IsNullOrWhiteSpace(httpCookie.Value)) return false;
