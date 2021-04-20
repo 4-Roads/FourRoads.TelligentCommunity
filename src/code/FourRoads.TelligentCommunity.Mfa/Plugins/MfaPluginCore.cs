@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -68,13 +69,13 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
 
         public IEnumerable<Type> Plugins => new[]
         {
+            typeof(DependencyInjectionPlugin),
             typeof(MfaSqlScriptsInstaller),
             typeof(FactoryDefaultWidgetProviderInstaller),
             typeof(MfaAuthenticatorExtension),
             typeof(VerifyEmailPlugin),
             typeof(VerifyEmailTokens),
             typeof(EmailVerifiedSocketMessage),
-            // typeof(PasswordPropertyTemplate),
             typeof(DatePropertyTemplate)
         };
 

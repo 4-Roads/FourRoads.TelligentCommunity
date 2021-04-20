@@ -7,8 +7,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
 {
     public class EmailVerifiedSocketMessage :  ISocket, ISocketMessage
     {
-        private IScriptedContentFragmentController _controller;
-        private ISocketMessageBus _smb;
         private ISocketController _sockets;
 
         public void SetController(ISocketController controller)

@@ -56,7 +56,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 {
                     // Only include one instance of common bindings
                     Type type = typeof(IBindingsLoader);
-                    var containingAssembly = type.Assembly.GetName().FullName;
+                    var containingAssembly = type.Assembly.GetName().Name;
 
                     var assemblyArray = AppDomain.CurrentDomain.GetAssemblies();
                     
@@ -69,7 +69,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         
                         foreach (var reference in refs)
                         {
-                            if (reference.FullName == containingAssembly)
+                            if (reference.Name == containingAssembly)
                             {
                                 return true;
                             }
