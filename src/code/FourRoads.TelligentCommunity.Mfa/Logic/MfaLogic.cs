@@ -263,6 +263,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 !request.Path.StartsWith("/tinymce") &&
                 request.Url.LocalPath != "/logout" &&
                 request.Url.LocalPath != "/mfa" &&
+                request.Url.LocalPath != "/user/changepassword" &&
                 request.Url.LocalPath != "/verifyemail" &&
                 string.Compare(httpRequest.HttpContext.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) ==
                 0 &&
