@@ -8,7 +8,7 @@
 #set($twoFactorEnabled = $frcommon_v1_Mfa.TwoFactorEnabled())
 
 #if ($twoFactorEnabled)
-   <form class="form">
+   <form class="form" onsubmit="return false;">
  <fieldset> 
     <h3 class="warning">$core_v2_language.GetResource('Heading')</h3>
     <ul class="field-list">

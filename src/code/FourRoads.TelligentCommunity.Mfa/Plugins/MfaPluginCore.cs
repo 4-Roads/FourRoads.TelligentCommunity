@@ -48,7 +48,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
         public string Description => "Plugin for adding MFA using the google authenticator";
         public void FilterRequest(IHttpRequest request)
         {
-            if (!PluginManager.IsEnabled((IPlugin) this) || request?.HttpContext == null) return;
+            if (request?.HttpContext == null) 
+                return;
+            
             try
             {
                 if (!(request.HttpContext.Request.Url is null))
@@ -87,10 +89,25 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
 
         private string GetJwtSecret()
         {
-            var config = (MachineKeySection) WebConfigurationManager.GetSection("system.web/machineKey");
-            if (!config.DecryptionKey.Contains("AutoGenerate") && !config.DecryptionKey.Contains("IsolateApps"))
+            try
             {
-                return config.DecryptionKey;
+                var config = (MachineKeySection) WebConfigurationManager.GetSection("system.web/machineKey");
+                
+                if (config != null && !config.DecryptionKey.Contains("AutoGenerate"))
+                {
+                    return config.DecryptionKey;
+                }
+                
+                byte[] autoGenKeyV4 = (byte[]) Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\ASP.NET\\4.0.30319.0\\", "AutoGenKeyV4", new byte[]{});
+
+                if (autoGenKeyV4 != null)
+                {
+                    return Convert.ToBase64String(autoGenKeyV4);
+                }
+            }
+            catch (Exception ex)
+            {
+                Apis.Get<IExceptions>().Log(ex);
             }
 #if VERBOSE_MACHINE_KEY_FALLBACK_WARNING
             Apis.Get<IEventLog>().Write("MFA Plugin requires machineKey with decryption key specified. Using fallback method until fixed.",
@@ -100,11 +117,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
                     EventType = nameof(EventType.Warning)
                 });
 #endif
+            
             //if no machineKey defined in web.config, fallback to hash value of a string
             //consisting of serviceUser membership Id and site home page url
-            var serviceUser = Apis.Get<IUsers>()
-                .Get(new UsersGetOptions {Username = Apis.Get<IUsers>().ServiceUserName});
-            var siteUrl = Apis.Get<ICoreUrls>().Home(false);
+            var serviceUser = Apis.Get<IUsers>().Get(new UsersGetOptions {Username = Apis.Get<IUsers>().ServiceUserName});
+            var siteUrl =  Apis.Get<IUrl>().Absolute(Apis.Get<ICoreUrls>().Home(false));
 
             return $"{siteUrl}{serviceUser.ContentId:N}".MD5Hash();
         }

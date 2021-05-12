@@ -9,6 +9,7 @@ using FourRoads.Common.TelligentCommunity.Routing;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Model;
 using Google.Authenticator;
+using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -93,17 +94,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 {
                     // Bypass mfa for emergency local access
                     SetTwoFactorState(user, TwoFactorState.Passed);
-                    return;
                 }
-
-                // Set state "NotPassed" so the requests are
-                // redirected to the /mfa page to allow user enter MFA code
-                SetTwoFactorState(user, TwoFactorState.NotPassed);
-                return;
             }
-
-            //mfa not enabled
-            SetTwoFactorState(user, TwoFactorState.NotEnabled);
         }
 
         /// <summary>
@@ -115,27 +107,29 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         /// </summary>
         public void FilterRequest(IHttpRequest request)
         {
-            if (IsImpersonator(request.HttpContext.Request)) return;
+            if (IsImpersonator(request.HttpContext.Request)) 
+                return;
 
             var user = _usersService.AccessingUser;
-            if (user.Username == _usersService.AnonymousUserName) return;
+            
+            if (user.Username == _usersService.AnonymousUserName) 
+                return;
 
+            
             if (!(request.HttpContext.Request.Url is null) &&
                 request.HttpContext.Request.Url.LocalPath.StartsWith("/logout"))
             {
                 RemoveTwoFactorState(request);
                 return;
             }
-
-            // if (IsAuthenticateRequestViaLocalAccess(request.HttpContext.Request)) return;
-
-            if (GetTwoFactorState(user) == false)
+            
+            if (GetTwoFactorState(user , GetJwt(request.HttpContext) ) == false)
             {
-                ForceRedirect(request, "/mfa" + "?ReturnUrl=" +
-                                       _urlService.Encode(request.HttpContext.Request.RawUrl));
+                ForceRedirect(request, "/mfa" + "?ReturnUrl=" +  _urlService.Encode(request.HttpContext.Request.RawUrl));
             }
 
-            if (!_enableEmailVerification || !EmailChanged(user)) return;
+            if (!_enableEmailVerification || !EmailChanged(user)) 
+                return;
 
             //Never validated and also joined before cutoff date so assumed a valid user
             if (user.JoinDate < _emailValilationCutoffDate &&
@@ -145,8 +139,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 return;
             }
 
-            ForceRedirect(request, "/verifyemail" + "?ReturnUrl=" +
-                                   _urlService.Encode(request.HttpContext.Request.RawUrl));
+            ForceRedirect(request, "/verifyemail" + "?ReturnUrl=" + _urlService.Encode(request.HttpContext.Request.RawUrl));
 
             if (EmailNotSent(user))
             {
@@ -183,6 +176,14 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             return result;
         }
 
+        private void RemoveTwoFactorState(IHttpRequest request)
+        {
+            HttpContext.Current.Response.Cookies.Add(new HttpCookie(GetMfaCookieName())
+            {
+                Expires = DateTime.UtcNow.AddDays(-7)
+            });
+        }
+        
         private void SetEmailInExtendedAttributes(User user)
         {
             var attributes = new List<ExtendedAttribute>
@@ -240,7 +241,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             if (IsOauthRequest(request) == false &&
                 (request.Path.StartsWith("/api.ashx") ||
                  request.Path.StartsWith("/oauth") ||
-                 (request.Url.LocalPath == "/utility/scripted-file.ashx" &&
+                 (request.Url?.LocalPath == "/utility/scripted-file.ashx" &&
                   request.QueryString["_cf"] != null &&
                   request.QueryString["_cf"] != "logout.vm" &&
                   request.QueryString["_cf"] != "validate.vm" && request.QueryString["_cf"] != "newCode.vm")))
@@ -248,23 +249,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 // this should only happen when in the second auth stage 
                 // for blocked callbacks so a bit brutal
                 response.Clear();
-                if (httpRequest.HttpContext.ApplicationInstance == null)
-                {
-                    response.End();
-                }
-                else
-                {
-                    httpRequest.HttpContext.ApplicationInstance.CompleteRequest();
-                }
+                httpRequest.HttpContext.ApplicationInstance.CompleteRequest();
             }
 
             // is it a suitable time to redirect the user to the second auth page
             if (response.ContentType == "text/html" &&
                 !request.Path.StartsWith("/tinymce") &&
-                request.Url.LocalPath != "/logout" &&
-                request.Url.LocalPath != "/mfa" &&
-                request.Url.LocalPath != "/user/changepassword" &&
-                request.Url.LocalPath != "/verifyemail" &&
+                request.Url?.LocalPath != "/logout" &&
+                request.Url?.LocalPath != "/mfa" &&
+                request.Url?.LocalPath != "/user/changepassword" &&
+                request.Url?.LocalPath != "/verifyemail" &&
                 string.Compare(httpRequest.HttpContext.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) ==
                 0 &&
                 //Is this a main page and not a callback etc 
@@ -320,7 +314,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             return $"{GetAuthCookieName()}Mfa{_mfaLogicVersion}{_mfaLogicMinorVersion}";
         }
 
-        private string GetSessionId(HttpContext context)
+        private string GetJwt(HttpContextBase context)
         {
             var cookie = context.Request.Cookies[GetMfaCookieName()];
 
@@ -334,41 +328,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             NotPassed
         }
 
-        private void RemoveTwoFactorState(IHttpRequest request)
-        {
-            HttpContext.Current.Response.Cookies.Add(new HttpCookie(GetMfaCookieName())
-            {
-                Expires = DateTime.UtcNow.AddDays(-7)
-            });
-        }
-
         private void SetTwoFactorState(User user, TwoFactorState passed)
         {
-            if (!user.Id.HasValue) return;
-            using (_namedLocks.Enter(user.Id.GetValueOrDefault(0)))
-            {
-                SetTwoFactorStateLocked(user, passed);
-            }
-        }
-
-        private void SetTwoFactorStateLocked(User user, TwoFactorState passed)
-        {
-            var cacheKey = GetCacheKey(user);
-            _cache.Remove(cacheKey);
-
-            var authCookie = HttpContext.Current.Request.Cookies[GetAuthCookieName()];
-            var authCookieValue = "no-auth-cookie-yet";
-            if (authCookie != null)
-            {
-                authCookieValue = authCookie.Value;
-            }
-
-            var authHash = $"{authCookieValue}{_jwtSecret}".MD5Hash();
             var payload = new Dictionary<string, object>
             {
                 {nameof(PayLoad.userId), user.Id.Value},
                 {nameof(PayLoad.state), passed},
-                {nameof(PayLoad.hash), authHash}
             };
             var mfaCookieName = GetMfaCookieName();
             var token = CreateJoseJwtToken(payload);
@@ -376,9 +341,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             HttpContext.Current.Response.Cookies.Add(new HttpCookie(mfaCookieName)
             {
                 Value = token,
-                Expires = DateTime.UtcNow.AddDays(7)
+                HttpOnly = true,
+                Secure = true
             });
-            _cache.Insert(cacheKey, passed != TwoFactorState.NotPassed);
         }
 
         public bool IsTwoFactorEnabled(User user)
@@ -487,7 +452,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
                     {Key = _eakey_mfaEnabled, Value = enabled.ToString()});
                 _usersService.Update(updateOptions);
-                _cache.Remove(GetUserKeyCacheKey(user));
             });
         }
 
@@ -517,46 +481,27 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             return _mfaDataProvider.RedeemCode(user.Id.Value, code.Hash(GetAccountSecureKey(user), user.Id.Value));
         }
 
-        private string GetCacheKey(User user)
+        public string GetAccountSecureKey(User user)
         {
-            return $"MFA:CACHE:{user.Id}";
-        }
+            string key;
 
-        private string GetUserKeyCacheKey(User user)
-        {
-            return $"MFA:KEY:{user.Id}";
-        }
-
-        public string GetAccountSecureKey(User user, bool useCache)
-        {
-            var key = useCache ? _cache.Get<string>(GetUserKeyCacheKey(user)) : null;
-            if (string.IsNullOrWhiteSpace(key))
+            if (IsOldVersionUser(user))
             {
-                if (IsOldVersionUser(user))
+                key = user.ContentId.ToString();
+            }
+            else
+            {
+                Guid userKey = _mfaDataProvider.GetUserKey(user.Id.Value);
+                if (userKey == Guid.Empty)
                 {
-                    key = user.ContentId.ToString();
-                }
-                else
-                {
-                    Guid userKey = _mfaDataProvider.GetUserKey(user.Id.Value);
-                    if (userKey == Guid.Empty)
-                    {
-                        userKey = Guid.NewGuid();
-                        _mfaDataProvider.SetUserKey(user.Id.Value, userKey);
-                    }
-
-                    key = userKey.ToString().ToUpperInvariant();
+                    userKey = Guid.NewGuid();
+                    _mfaDataProvider.SetUserKey(user.Id.Value, userKey);
                 }
 
-                _cache.Insert(GetUserKeyCacheKey(user), key);
+                key = userKey.ToString().ToUpperInvariant();
             }
 
             return key;
-        }
-
-        public string GetAccountSecureKey(User user)
-        {
-            return GetAccountSecureKey(user, true);
         }
 
         private bool IsOldVersionUser(User user)
@@ -591,45 +536,13 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private string CreateJoseJwtToken(Dictionary<string, object> payload)
         {
-            string token = Jose.JWT.Encode(payload, _jwtSecret, Jose.JweAlgorithm.PBES2_HS256_A128KW,
-                Jose.JweEncryption.A256CBC_HS512);
+            string token = Jose.JWT.Encode(payload, _jwtSecret, Jose.JweAlgorithm.PBES2_HS256_A128KW, Jose.JweEncryption.A256CBC_HS512);
             return token;
         }
 
-        private bool GetTwoFactorState(User user)
+        private bool GetTwoFactorState(User user , string token)
         {
-            var cacheKey = GetCacheKey(user);
-            var valid = _cache.Get<bool?>(cacheKey);
-
-            if (valid.HasValue) return valid.Value;
-
-            using (_namedLocks.Enter(user.Id.GetValueOrDefault(0)))
-            {
-                valid = GetUserState(user, GetSessionId(HttpContext.Current));
-                _cache.Insert(cacheKey, valid);
-            }
-
-            return valid != null && valid.Value;
-        }
-
-        private bool? GetUserState(User user, string sessionToken)
-        {
-            if (user?.Id == null) return false;
-
-            if (!string.IsNullOrWhiteSpace(sessionToken)) return ValidateJwtToken(user.Id.Value, sessionToken);
-
-            /////////////////////////////
-            // Edge Case: no mfa cookie
-            /////////////////////////////
-            // check if user has mfa enabled
-            if (IsTwoFactorEnabled(user))
-            {
-                //returning false to redirect to mfa
-                return false;
-            }
-
-            SetTwoFactorStateLocked(user, TwoFactorState.NotEnabled);
-            return true;
+            return ValidateJwtToken(user.Id.Value, token) ?? false;
         }
 
         private bool? ValidateJwtToken(int userId, string sessionToken)
@@ -637,26 +550,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             PayLoad payload;
             try
             {
-                payload = Jose.JWT.Decode<PayLoad>(sessionToken, _jwtSecret, Jose.JweAlgorithm.PBES2_HS256_A128KW,
-                    Jose.JweEncryption.A256CBC_HS512);
+                payload = Jose.JWT.Decode<PayLoad>(sessionToken, _jwtSecret, Jose.JweAlgorithm.PBES2_HS256_A128KW, Jose.JweEncryption.A256CBC_HS512);
             }
             catch (Exception)
             {
                 return false;
             }
 
-            var authHash = string.Empty;
-            var authCookie = HttpContext.Current.Request.Cookies[GetAuthCookieName()];
-            if (authCookie != null)
-            {
-                authHash = $"{authCookie.Value}{_jwtSecret}".MD5Hash();
-            }
-
             if (payload.state == TwoFactorState.NotEnabled) return true;
 
-            return payload.userId == userId
-                   && payload.state == TwoFactorState.Passed
-                   && authHash.Equals(payload.hash);
+            return payload.userId == userId && payload.state == TwoFactorState.Passed;
         }
 
         public void RegisterUrls(IUrlController controller)
@@ -718,8 +621,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             for (int i = 0; i < _oneTimeCodesToGenerate; i++)
             {
                 //generatig the code in form of XXXX XXXX with zero-padding
-                string plainTextCode =
-                    $"{MfaCryptoExtension.RandomInteger(0, 9999):D4} {MfaCryptoExtension.RandomInteger(0, 9999):D4}";
+                string plainTextCode = $"{MfaCryptoExtension.RandomInteger(0, 9999):D4} {MfaCryptoExtension.RandomInteger(0, 9999):D4}";
                 string encryptedCode = plainTextCode.Hash(GetAccountSecureKey(user), user.Id.Value);
                 //we store just the hash value of the code, but...
                 OneTimeCode code = _mfaDataProvider.CreateCode(user.Id.Value, encryptedCode);
@@ -780,7 +682,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 #pragma warning disable 648,649
             public int userId;
             public TwoFactorState state;
-            public string hash;
 #pragma warning restore 648,649
             // ReSharper restore InconsistentNaming
         }

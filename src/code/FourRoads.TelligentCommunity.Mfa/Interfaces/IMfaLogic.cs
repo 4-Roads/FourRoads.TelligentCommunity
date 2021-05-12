@@ -12,14 +12,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Interfaces
         void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider , ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret);
         void RegisterUrls(IUrlController controller);
         bool IsTwoFactorEnabled(User user);
-        bool IsImpersonator();
-        
+
         void EnableTwoFactor(User user, bool enabled);
         bool ValidateTwoFactorCode(User user, string code);
         bool ValidateEmailCode(User user, string code);
         bool SendValidationCode(User user);
         string GetAccountSecureKey(User user);
-        string GetAccountSecureKey(User user, bool useCache);
 
         void FilterRequest(IHttpRequest httpRequest);
 

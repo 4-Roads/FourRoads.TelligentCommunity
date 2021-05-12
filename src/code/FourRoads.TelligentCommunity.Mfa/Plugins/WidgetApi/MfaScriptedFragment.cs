@@ -23,7 +23,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
             {
                 TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
 
-                var secretKey = Injector.Get<IMfaLogic>().GetAccountSecureKey(user, false);
+                var secretKey = Injector.Get<IMfaLogic>().GetAccountSecureKey(user);
                 var setupInfo = tfa.GenerateSetupCode(groupsService.GetRootGroup().Name, user.PrivateEmail, secretKey, 300, 300);
 
                 return new SetupInfo() { ManualEntrySetupCode = setupInfo.ManualEntryKey, QrCodeImageUrl = setupInfo.QrCodeSetupImageUrl };
