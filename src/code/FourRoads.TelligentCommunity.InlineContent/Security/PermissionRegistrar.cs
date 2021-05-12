@@ -19,15 +19,9 @@ namespace FourRoads.TelligentCommunity.InlineContent.Security
              
         }
 
-        public string Name
-        {
-            get { return "Permissions"; }
-        }
+        public string Name => "Permissions";
 
-        public string Description
-        {
-            get { return "Handles the registration of permissions for inline content"; }
-        }
+        public string Description => "Handles the registration of permissions for inline content";
 
         public void RegisterPermissions(IPermissionRegistrarController permissionController)
         {

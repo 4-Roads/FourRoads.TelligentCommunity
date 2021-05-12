@@ -26,6 +26,9 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
             {
                 if (Apis.Get<IUrl>().CurrentContext != null && Apis.Get<IUrl>().CurrentContext.ContextItems != null && Apis.Get<IUsers>().AccessingUser != null)
                 {
+                    //anonymous users are denied 'edit' access regardless of permissions set
+                    if (Apis.Get<IUsers>().AccessingUser.Username == Apis.Get<IUsers>().AnonymousUserName) return false;
+                    
                     var items  = Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems();
 
                     if (items.Any())
@@ -48,7 +51,7 @@ namespace FourRoads.Common.TelligentCommunity.Components.Logic
 
                 }
 
-                    return false;
+                return false;
             }
         }
 

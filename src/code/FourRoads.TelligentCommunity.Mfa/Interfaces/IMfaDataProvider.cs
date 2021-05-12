@@ -5,10 +5,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Interfaces
 {
     public interface IMfaDataProvider
     {
-        void SetUserState(int userId, string sessionId, bool passed);
-
-        bool GetUserState(int userId, string sessionId);
-
         /// <summary>
         /// Returns true if code was valid. Marks the code as used to prevent reuse.
         /// </summary>

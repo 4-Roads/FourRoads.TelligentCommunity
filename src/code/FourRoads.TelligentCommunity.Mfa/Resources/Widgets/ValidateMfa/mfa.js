@@ -7,7 +7,11 @@
         $.fourroads.widgets = {};
 
     var attachHandlers = function (context) {
-            context.selectors.submit.click(function(){save(context, context.selectors.validateInput.val());});
+            context.selectors.submit.click(function(e) {
+                e.preventDefault();
+                save(context, context.selectors.validateInput.val());
+                return false;
+            });
             
             // enter key on code entry
 			context.selectors.validateInput.bind('keypress', function(e){
@@ -37,8 +41,6 @@
                 data: data,
                 dataType: 'json',
                 success: function(response) {
-                    console.log(response);
-                    console.log(response.result);
                     if (response.result === "true") {
                         window.location = context.urls.returnUrl;
                     } else {

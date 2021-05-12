@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 
@@ -7,30 +8,24 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 {
     public class NamedItemLockSpin<T> : ILock<T>
     {
+        private readonly ConcurrentDictionary<T, object> _locks = new ConcurrentDictionary<T, object>();
 
-        private readonly ConcurrentDictionary<T, object> locks = new ConcurrentDictionary<T, object>();
-
-        private readonly int spinWait;
+        private readonly int _spinWait;
+        private readonly object _dummy = new object();
 
         public NamedItemLockSpin(int spinWait)
         {
-            this.spinWait = spinWait;
+            _spinWait = spinWait;
         }
 
         public IDisposable Enter(T id)
         {
-            while (!locks.TryAdd(id, new object()))
+            while (!_locks.TryAdd(id, _dummy))
             {
-                Thread.SpinWait(spinWait);
+                Thread.SpinWait(_spinWait);
             }
 
-            return new ActionDisposable(() => exit(id));
-        }
-
-        private void exit(T id)
-        {
-            object obj;
-            locks.TryRemove(id, out obj);
+            return new ActionDisposable(() => { _locks.TryRemove(id, out _); });
         }
     }
 }
