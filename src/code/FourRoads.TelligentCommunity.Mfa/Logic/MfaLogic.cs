@@ -96,6 +96,10 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                     SetTwoFactorState(user, TwoFactorState.Passed);
                 }
             }
+            else
+            {
+                SetTwoFactorState(user, TwoFactorState.NotEnabled);
+            }
         }
 
         /// <summary>
