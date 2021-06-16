@@ -85,8 +85,15 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             //user has authenticated
             //is 2 factor enabled for user?
             var user = _usersService.Get(new UsersGetOptions() {Username = userAfterAuthenticateEventArgs.Username});
-            if (IsImpersonator()) return;
+       
+            if (IsImpersonator()) 
+                return;
 
+            TwoFactorCheckAndSetState(user);
+        }
+
+        private bool TwoFactorCheckAndSetState(User user)
+        {
             if (IsTwoFactorEnabled(user))
             {
                 var request = HttpContext.Current.Request;
@@ -95,11 +102,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                     // Bypass mfa for emergency local access
                     SetTwoFactorState(user, TwoFactorState.Passed);
                 }
+
+                return true;
             }
-            else
-            {
-                SetTwoFactorState(user, TwoFactorState.NotEnabled);
-            }
+
+            SetTwoFactorState(user, TwoFactorState.NotEnabled);
+            return false;
         }
 
         /// <summary>
@@ -126,10 +134,22 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 RemoveTwoFactorState(request);
                 return;
             }
+
+            var jwt = GetJwt(request.HttpContext);
+            bool checkToken = true;
             
-            if (GetTwoFactorState(user , GetJwt(request.HttpContext) ) == false)
+            if (string.IsNullOrWhiteSpace(jwt)) //missing token that's ok let's add it 
             {
-                ForceRedirect(request, "/mfa" + "?ReturnUrl=" +  _urlService.Encode(request.HttpContext.Request.RawUrl));
+                checkToken = TwoFactorCheckAndSetState(user);
+            }
+
+            if (checkToken)
+            {
+                if (GetTwoFactorState(user,jwt) == false)
+                {
+                    ForceRedirect(request,
+                        "/mfa" + "?ReturnUrl=" + _urlService.Encode(request.HttpContext.Request.RawUrl));
+                }
             }
 
             if (!_enableEmailVerification || !EmailChanged(user)) 
