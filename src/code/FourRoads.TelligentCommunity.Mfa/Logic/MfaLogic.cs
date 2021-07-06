@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Security;
 using FourRoads.Common.Extensions;
@@ -30,7 +33,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private IVerifyEmailProvider _emailProvider;
         private ISocketMessage _socketMessenger;
         private bool _enableEmailVerification;
-        private string _jwtSecret;
+        private byte[] _jwtSecret;
 
         //{295391e2b78d4b7e8056868ae4fe8fb3}
         private static readonly string _defaultMfaPageLayout =
@@ -73,7 +76,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _socketMessenger = socketMessenger;
             _emailValilationCutoffDate = emailValidationCutoffDate;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
-            _jwtSecret = jwtSecret;
+            _jwtSecret = Encoding.UTF8.GetBytes(jwtSecret).Take(32).ToArray();
         }
 
         /// <summary>
@@ -119,7 +122,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         /// </summary>
         public void FilterRequest(IHttpRequest request)
         {
-            if (IsImpersonator(request.HttpContext.Request)) 
+            if (IsImpersonator(request.HttpContext.Request) || !IsPageRequest(request.HttpContext.Request)) 
                 return;
 
             var user = _usersService.AccessingUser;
@@ -273,7 +276,10 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 // this should only happen when in the second auth stage 
                 // for blocked callbacks so a bit brutal
                 response.Clear();
+                
                 httpRequest.HttpContext.ApplicationInstance.CompleteRequest();
+                
+                return;
             }
 
             // is it a suitable time to redirect the user to the second auth page
@@ -560,7 +566,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private string CreateJoseJwtToken(Dictionary<string, object> payload)
         {
-            string token = Jose.JWT.Encode(payload, _jwtSecret, Jose.JweAlgorithm.PBES2_HS256_A128KW, Jose.JweEncryption.A256CBC_HS512);
+            string token = Jose.JWT.Encode(payload, _jwtSecret, Jose.JweAlgorithm.A256KW , Jose.JweEncryption.A128CBC_HS256);
             return token;
         }
 
@@ -571,10 +577,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private bool? ValidateJwtToken(int userId, string sessionToken)
         {
+            Debug.WriteLine($"ValidateJwtToken {HttpContext.Current.Request.RawUrl}");
             PayLoad payload;
             try
             {
-                payload = Jose.JWT.Decode<PayLoad>(sessionToken, _jwtSecret, Jose.JweAlgorithm.PBES2_HS256_A128KW, Jose.JweEncryption.A256CBC_HS512);
+                payload = Jose.JWT.Decode<PayLoad>(sessionToken, _jwtSecret, Jose.JweAlgorithm.A256KW, Jose.JweEncryption.A128CBC_HS256);
             }
             catch (Exception)
             {
