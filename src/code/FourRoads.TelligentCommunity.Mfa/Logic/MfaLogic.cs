@@ -130,7 +130,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             if (user.Username == _usersService.AnonymousUserName) 
                 return;
 
-            
             if (!(request.HttpContext.Request.Url is null) &&
                 request.HttpContext.Request.Url.LocalPath.StartsWith("/logout"))
             {
@@ -138,16 +137,10 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 return;
             }
 
-            var jwt = GetJwt(request.HttpContext);
-            bool checkToken = true;
-            
-            if (string.IsNullOrWhiteSpace(jwt)) //missing token that's ok let's add it 
+            if (TwoFactorCheckAndSetState(user))
             {
-                checkToken = TwoFactorCheckAndSetState(user);
-            }
-
-            if (checkToken)
-            {
+                var jwt = GetJwt(request.HttpContext);
+                
                 if (GetTwoFactorState(user,jwt) == false)
                 {
                     ForceRedirect(request,
