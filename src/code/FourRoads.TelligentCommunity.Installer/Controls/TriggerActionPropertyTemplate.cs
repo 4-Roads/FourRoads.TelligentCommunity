@@ -39,7 +39,7 @@ namespace FourRoads.TelligentCommunity.Installer.Controls
             }
         }
 
-        public string Name => "Widget Installer - Trigger Action Property Template";
+        public string Name => "Trigger Action Property Template";
 
         public string Description => "Allows an action to be trigger via a button";
 
