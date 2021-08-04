@@ -164,6 +164,10 @@
       <Project>{8ead72ec-98cb-49b0-9870-1de3eef883f3}</Project>
       <Name>FourRoads.Common.TelligentCommunity</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FourRoads.TelligentCommunity.Installer\FourRoads.TelligentCommunity.Installer.csproj">
+      <Project>{da832372-7d04-4a24-93bd-a0992da52608}</Project>
+      <Name>FourRoads.TelligentCommunity.Installer</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

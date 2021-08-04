@@ -84,10 +84,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.ScriptedContentFragments.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Jobs, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Telligent\Telligent.Jobs.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">
@@ -100,7 +96,6 @@
     <Compile Include="Components\TCCache.cs" />
     <Compile Include="Components\TCPagedQuery.cs" />
     <Compile Include="Components\Tokenizers\TokenizedTemplateEnumerableToken.cs" />
-    <Compile Include="Components\Utility\EmbeddedResourcesBase.cs" />
     <Compile Include="Controls\ApiSafeBlogPostLookupPropertyTemplate.cs" />
     <Compile Include="Controls\ApiSafeBlogLookupPropertyTemplate.cs" />
     <Compile Include="Controls\ApiSafeUserLookupPropertyTemplate.cs" />
@@ -113,7 +108,6 @@
     <Compile Include="DryIoc\Container.cs" />
     <Compile Include="DryIoc\FastExpressionCompiler.cs" />
     <Compile Include="DryIoc\ImTools.cs" />
-    <Compile Include="Plugins\Base\CFSFilestoreInstaller.cs" />
     <Compile Include="Plugins\Base\PluginBase.cs" />
     <Compile Include="Plugins\Base\PluginGroupLoader.cs" />
     <Compile Include="Plugins\Base\VideoFileViewerBase.cs" />

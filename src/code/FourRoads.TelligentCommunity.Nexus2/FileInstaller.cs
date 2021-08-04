@@ -1,5 +1,7 @@
 ﻿using FourRoads.Common.TelligentCommunity.Components;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
+using FourRoads.TelligentCommunity.Installer;
+using FourRoads.TelligentCommunity.Installer.Components.Utility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 
 

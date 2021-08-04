@@ -1,9 +1,9 @@
 ﻿using System;
-using FourRoads.Common.TelligentCommunity.Components;
+using FourRoads.TelligentCommunity.Installer.Components.Utility;
 using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 
-namespace FourRoads.Common.TelligentCommunity.Plugins.Base
+namespace FourRoads.TelligentCommunity.Installer
 {
 
     public abstract class CfsFilestoreInstaller : IInstallablePlugin
@@ -37,7 +37,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 Uninstall();
                 string basePath = BaseResourcePath + ".Filestore.";
 
-                EmbeddedResources.EnumerateReosurces(basePath, "", resourceName =>
+                EmbeddedResources.EnumerateResources(basePath, "", resourceName =>
                 {
                     string file;
 
@@ -83,7 +83,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
             {
                 string basePath = BaseResourcePath + ".Filestore.";
 
-                EmbeddedResources.EnumerateReosurces(basePath, "", resourceName =>
+                EmbeddedResources.EnumerateResources(basePath, "", resourceName =>
                 {
                     string file;
 
