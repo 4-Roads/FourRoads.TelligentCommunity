@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -105,6 +106,20 @@ namespace FourRoads.TelligentCommunity.Installer
                     var defaultwidgets = CentralizedFileStorage.GetFileStore("defaultwidgets");
 
                     defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")), $"{instanceId:N}.xml", EmbeddedResources.GetStream(resourceName), false);
+
+                    IEnumerable<string> supplementaryResources = GetType().Assembly.GetManifestResourceNames()
+                        .Where(r => r.StartsWith(widgetPath) && !r.EndsWith(".activitystory.xml")).ToArray();
+
+                    if (!supplementaryResources.Any())
+                        return;
+
+                    foreach (string supplementPath in supplementaryResources)
+                    {
+                        string supplementName = supplementPath.Substring(widgetPath.Length);
+
+                        defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N")), supplementName, EmbeddedResources.GetStream(supplementPath), false);
+                    }
+
                 }
                 catch (Exception exception)
                 {
@@ -303,6 +318,19 @@ namespace FourRoads.TelligentCommunity.Installer
 
             var defaultwidgets = CentralizedFileStorage.GetFileStore("defaultwidgets");
             defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")), $"{instanceId:N}.xml", GenerateStreamFromString(widgetXml), false);
+
+            // Copy in any files which are siblings of activitystory.xml:
+            foreach (var supFile in Directory.EnumerateFiles(pathToWidget))
+            {
+                var fileName = Path.GetFileName(supFile);
+
+                if (fileName == "activitystory.xml")
+                {
+                    continue;
+                }
+
+                defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N")), fileName, File.Open(supFile, FileMode.Open), false);
+            }
 
             Caching.ExpireUICaches();
             Caching.ExpireAllCaches();
