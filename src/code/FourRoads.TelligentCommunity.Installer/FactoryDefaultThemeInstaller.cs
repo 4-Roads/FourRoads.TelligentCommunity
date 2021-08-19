@@ -9,7 +9,6 @@ using System.Web;
 using System.Xml;
 using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
 using FourRoads.TelligentCommunity.Installer.Components.Utility;
-using Telligent.Evolution.Caching.Services;
 using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -187,6 +186,9 @@ namespace FourRoads.TelligentCommunity.Installer
 
             _themeTypeMomento.AcceptThemeVistor(installerVisitor);
 
+            Caching.ExpireUICaches();
+            Caching.ExpireAllCaches();
+
             #endregion
         }
 
@@ -319,7 +321,8 @@ namespace FourRoads.TelligentCommunity.Installer
 
                             _themeTypeMomento.AcceptThemeVistor(fileChange);
 
-                            TelligentServices.Get<ICacheService>().Clear(CacheScope.All);
+                            Caching.ExpireUICaches();
+                            Caching.ExpireAllCaches();
                         }
                     }
                     catch (Exception pe)

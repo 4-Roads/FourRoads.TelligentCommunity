@@ -1,53 +1,43 @@
-using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Web;
 using System.Xml.Linq;
 using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
-using FourRoads.TelligentCommunity.Installer.Components.Utility;
-using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Jobs.Version1;
+using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-using Telligent.Jobs;
-using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 using File = System.IO.File;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
-using TelligentServices = Telligent.Common.Services;
+using FourRoads.TelligentCommunity.Installer.Components.Utility;
 
 namespace FourRoads.TelligentCommunity.Installer
 {
-
-    /// <summary>
-    /// NOTE: this class no longer inherits from IScriptedContentFragmentFactoryDefaultProvider this is to allow for support of the scripted panels
-    /// </summary>
-    public abstract class FactoryDefaultWidgetProviderInstaller<TScriptedContentFragmentFactoryDefaultProvider> : IHttpCallback , IInstallablePlugin, IConfigurablePlugin, IEvolutionJob where TScriptedContentFragmentFactoryDefaultProvider : class, IScriptedContentFragmentFactoryDefaultProvider
+    public abstract class FactoryDefaultActivityStoryInstaller : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob
     {
-        public abstract Guid ScriptedContentFragmentFactoryDefaultIdentifier { get; }
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }
-        private TScriptedContentFragmentFactoryDefaultProvider _sourceScriptedFragment;
+
         private IHttpCallbackController _callbackController;
 
         #region IPlugin Members
 
-        public string Name => ProjectName + " - Widgets";
+        public string Name => ProjectName + " - Activity Story Widgets";
 
-        public string Description => "Defines the default widget set for " + ProjectName + ".";
+        public string Description => "Defines the default activity story widget set for " + ProjectName + ".";
 
         public void Initialize()
         {
-            _sourceScriptedFragment = PluginManager.Get<TScriptedContentFragmentFactoryDefaultProvider>().FirstOrDefault();
-
             if (IsDebugBuild)
             {
                 if (_enableFilewatcher)
@@ -85,117 +75,53 @@ namespace FourRoads.TelligentCommunity.Installer
 
         protected void ScheduleInstall()
         {
-            JobInfo[] jobs = null;
-            try
-            {
-                var runAllJobsLocally = ConfigurationManager.AppSettings["RunJobsInternally"] != null && ConfigurationManager.AppSettings["RunJobsInternally"].ToLower() == "true";
-
-                PeekFilter filter = new PeekFilter()
-                {
-                    JobNameTypeFilter = GetType().FullName,
-                    SortBy = JobSortBy.StateAndName,
-                    SortOrder = Telligent.Jobs.SortOrder.Ascending
-                };
-
-                if (runAllJobsLocally)
-                {
-                    TelligentServices.Get<IJobCoreService>().LocalJobStore.Peek(out jobs, 0, 500, filter);
-                }
-                else
-                {
-                    TelligentServices.Get<IJobCoreService>().RemoteJobStore.Peek(out jobs, 0, 500, filter);
-                }
-            }
-            catch (Exception)
-            {
-                // failed to determine if we have an existing job queued
-            }
-
-            if (jobs == null || jobs.Count(j => j.State == JobState.Ready) == 0)
-            {
-                Apis.Get<IJobService>().Schedule(GetType(), DateTime.UtcNow.AddSeconds(15));
-            }
+            Apis.Get<IJobService>().Schedule(GetType(), DateTime.UtcNow.AddSeconds(5));
         }
 
         protected void InstallNow()
         {
-            if(_sourceScriptedFragment == null)
-            {
-                new TCException($"Couldn't load DefaultProvider plugin \"{typeof(TScriptedContentFragmentFactoryDefaultProvider).Name}\". Widgets installation aborted").Log();
-            }
 
             Uninstall();
 
-            string basePath = BaseResourcePath + "Widgets.";
+            string basePath = BaseResourcePath + "ActivityStories.";
 
-            EmbeddedResources.EnumerateResources(basePath, "widget.xml", resourceName =>
+            EmbeddedResources.EnumerateResources(basePath, "activitystory.xml", resourceName =>
             {
                 try
                 {
                     // Resource path to all files relating to this widget:
-                    string widgetPath = resourceName.Replace(".widget.xml", ".");
-
-                    // The widget's nice name:
-                    // string widgetName = widgetPath.Substring(basePath.Length);
+                    string widgetPath = resourceName.Replace(".activitystory.xml", ".");
 
                     Guid instanceId;
-                    string cssClass;
                     Guid providerId;
                     var widgetXml = EmbeddedResources.GetString(resourceName);
 
-                    if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
+                    if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out providerId))
                         return;
 
-                    Apis.Get<IEventLog>().Write($"Installing widget '{resourceName}'", new EventLogEntryWriteOptions() { Category = "Widget Installer" });
+                    Apis.Get<IEventLog>().Write($"Installing activity story '{resourceName}'", new EventLogEntryWriteOptions() { Category = "Installer" });
 
-                    // If this widget's provider ID is not the one we're installing, then ignore it:
-                    if (providerId != ScriptedContentFragmentFactoryDefaultIdentifier)
-                    {
-                        return;
-                    }
+                    //no extensible installer available so need to copy it manually
+                    var defaultwidgets = CentralizedFileStorage.GetFileStore("defaultwidgets");
 
-                    FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(
-                        _sourceScriptedFragment,
-                        instanceId.ToString("N").ToLower() + ".xml",
-                        TextAsStream(widgetXml)
-                    );
-
-                    IEnumerable<string> supplementaryResources = GetType().Assembly.GetManifestResourceNames()
-                                                .Where(r => r.StartsWith(widgetPath) && !r.EndsWith(".widget.xml")).ToArray();
-
-                    if (!supplementaryResources.Any())
-                        return;
-
-                    foreach (string supplementPath in supplementaryResources)
-                    {
-                        string supplementName = supplementPath.Substring(widgetPath.Length);
-                        var stream = EmbeddedResources.GetStream(supplementPath);
-                        FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(
-                            _sourceScriptedFragment,
-                            instanceId,
-                            supplementName,
-                            PreprocessWidgetFile(ReadStream(stream), supplementName, cssClass)
-                        );
-                    }
+                    defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")), $"{instanceId:N}.xml", EmbeddedResources.GetStream(resourceName), false);
                 }
                 catch (Exception exception)
                 {
-                    new TCException($"Couldn't load widget from '{resourceName}' embedded resource.", exception).Log();
+                    Apis.Get<IExceptions>().Log(new Exception($"Couldn't load activity story widget from '{resourceName}' embedded resource.", exception));
                 }
             });
 
             Caching.ExpireUICaches();
             Caching.ExpireAllCaches();
-
         }
 
-        private bool GetInstanceIdFromWidgetXml(string widhgetXml, out Guid instanceId, out string cssClass, out Guid providerId)
+        private bool GetInstanceIdFromWidgetXml(string widgetXml, out Guid instanceId, out Guid providerId)
         {
             instanceId = Guid.Empty;
             providerId = Guid.Empty;
-            cssClass = "";
             // GetInstanceIdFromWidgetXml widget identifier
-            XDocument xdoc = XDocument.Parse(widhgetXml);
+            XDocument xdoc = XDocument.Parse(widgetXml);
             XElement root = xdoc.Root;
 
             if (root == null)
@@ -220,9 +146,6 @@ namespace FourRoads.TelligentCommunity.Installer
 
             providerId = new Guid(providerAttr.Value);
 
-            var cssClassAttr = element.Attribute("cssClass");
-            cssClass = (cssClassAttr != null) ? cssClassAttr.Value : instanceId.ToString();
-
             return true;
         }
 
@@ -233,16 +156,26 @@ namespace FourRoads.TelligentCommunity.Installer
                 //Only in release do we want to uninstall widgets, when in development we don't want this to happen
                 try
                 {
-                    FactoryDefaultScriptedContentFragmentProviderFiles.DeleteAllFiles(_sourceScriptedFragment);
+                    //todo -- FactoryDefaultScriptedContentFragmentProviderFiles.DeleteAllFiles(_sourceScriptedFragment);
                 }
                 catch (Exception exception)
                 {
-                    new TCException($"Couldn't delete factory default widgets from provider ID: '{ScriptedContentFragmentFactoryDefaultIdentifier}'.", exception).Log();
+                    Apis.Get<IExceptions>().Log(new Exception("Couldn't delete factory default activity story widgets from provider ID: '{ScriptedContentFragmentFactoryDefaultIdentifier}'.", exception));
                 }
             }
         }
+        private static bool IsDebug()
+        {
+            object[] customAttributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(DebuggableAttribute), false);
+            if ((customAttributes != null) && (customAttributes.Length == 1))
+            {
+                DebuggableAttribute attribute = customAttributes[0] as DebuggableAttribute;
+                return (attribute.IsJITOptimizerDisabled && attribute.IsJITTrackingEnabled);
+            }
+            return false;
+        }
 
-        private bool IsDebugBuild => Diagnostics.IsDebug(GetType().Assembly);
+        private bool IsDebugBuild => IsDebug();
 
         public Version Version => GetType().Assembly.GetName().Version;
 
@@ -265,8 +198,8 @@ namespace FourRoads.TelligentCommunity.Installer
                 var updateStatusProp = new Property()
                 {
                     Id = "widgetRefresh",
-                    LabelText = "Update Custom Widgets",
-                    DescriptionResourceName = "Request a background job to refresh the custom widgets",
+                    LabelText = "Update Custom Activity Story Widgets",
+                    DescriptionResourceName = "Request a background job to refresh the custom activity story widgets",
                     DataType = "custom",
                     Template = "installer_triggerAction",
                     DefaultValue = ""
@@ -286,7 +219,7 @@ namespace FourRoads.TelligentCommunity.Installer
                     {
                         Id = "filewatcher",
                         LabelText = "Resource Watcher for Development",
-                        DescriptionText = "During development automatically refresh widgets when the are edited",
+                        DescriptionText = "During development automatically refresh custom activity story widgets when they are edited",
                         DataType = "Bool",
                         Template = "bool",
                         DefaultValue = bool.TrueString
@@ -342,89 +275,34 @@ namespace FourRoads.TelligentCommunity.Installer
             return Encoding.UTF8.GetString(data).Trim('\uFEFF', '\u200B'); ;
         }
 
-        /// <summary>
-        /// Processes the file content for a particular widget file, enabling automated formatting from pretty -> Telligent.
-        /// </summary>
-        /// <param name="fileContent"></param>
-        /// <param name="name"></param>
-        /// <param name="cssClass"></param>
-        /// <returns></returns>
-        protected virtual Stream PreprocessWidgetFile(byte[] fileContent, string name, string cssClass)
+        public static Stream GenerateStreamFromString(string s)
         {
-            if (name == "script.js")
-            {
-                fileContent = BuildJavascript(fileContent, cssClass);
-            }
-            return new MemoryStream(fileContent);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
         }
-
-        /// <summary>
-        /// Wraps widget.js with automated scope management to keep everything consistent and tidy.
-        /// </summary>
-        /// <param name="jsFile">The content of widget.js</param>
-        /// <param name="cssClass">The CSS class name from the widget</param>
-        protected virtual byte[] BuildJavascript(byte[] jsFile, string cssClass)
-        {
-            var str = @"(function($){
-                if (!$.customWidgets) { $.customWidgets = { }; }
-                $.customWidgets['" + cssClass.Replace("-", "").Replace("_", "") + @"'] = {register : function(context, __fragId){
-                    var widget = {root: $(__fragId ? '#' + __fragId : '." + cssClass + @"'), id: __fragId};
-                    " + BytesToText(jsFile) + @"
-                }};
-            })(jQuery);";
-
-            return Encoding.UTF8.GetBytes(str);
-        }
-
         /// <summary>
         /// Builds a single widget held in the given file path.
         /// </summary>
         private Guid BuildWidget(string pathToWidget)
         {
-
             // WaitForFile(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var widgetXml = BytesToText(ReadFileBytes(pathToWidget + "/widget.xml"));
+            var widgetXml = BytesToText(ReadFileBytes(pathToWidget + "/activitystory.xml"));
 
             // Get the widget ID:
             Guid instanceId;
-            string cssClass;
             Guid providerId;
 
-            if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out cssClass, out providerId))
+            if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out providerId))
             {
                 return Guid.Empty;
             }
 
-            // If this widget's provider ID is not the one we're installing, then ignore it:
-            if (providerId != ScriptedContentFragmentFactoryDefaultIdentifier)
-            {
-                return Guid.Empty;
-            }
-
-            // Update the widget's XML:
-            FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateDefinitionFile(
-                _sourceScriptedFragment,
-                instanceId.ToString("N").ToLower() + ".xml",
-                TextAsStream(widgetXml)
-            );
-
-            // Copy in any files which are siblings of widget.xml:
-            foreach (var supFile in Directory.EnumerateFiles(pathToWidget))
-            {
-                var fileName = Path.GetFileName(supFile);
-
-                if (fileName == "widget.xml")
-                {
-                    continue;
-                }
-
-                FactoryDefaultScriptedContentFragmentProviderFiles.AddUpdateSupplementaryFile(
-                    _sourceScriptedFragment,
-                    instanceId,
-                    fileName,
-                    PreprocessWidgetFile(ReadFileBytes(supFile), fileName, cssClass)
-                );
-            }
+            var defaultwidgets = CentralizedFileStorage.GetFileStore("defaultwidgets");
+            defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")), $"{instanceId:N}.xml", GenerateStreamFromString(widgetXml), false);
 
             Caching.ExpireUICaches();
             Caching.ExpireAllCaches();
@@ -442,15 +320,6 @@ namespace FourRoads.TelligentCommunity.Installer
         private bool _enableFilewatcher;
         private FileSystemWatcher _fileSystemWatcher;
 
-        public void BuildAllWidgets(string dirPath)
-        {
-            // For each widget directory..
-            foreach (var dir in Directory.EnumerateDirectories(dirPath))
-            {
-                // Build the widget:
-                BuildWidget(dir);
-            }
-        }
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
@@ -458,7 +327,7 @@ namespace FourRoads.TelligentCommunity.Installer
             //    Can be identified from the file called 'widget.xml' alongside the file that changed.
             var widgetPath = Path.GetDirectoryName(e.FullPath);
 
-            if (File.Exists(widgetPath + "/widget.xml"))
+            if (File.Exists(widgetPath + "/activitystory.xml"))
             {
                 // Build just this widget.
                 BuildWidget(widgetPath);
@@ -474,7 +343,7 @@ namespace FourRoads.TelligentCommunity.Installer
             {
                 path = Path.GetDirectoryName(path).Replace("\\", "/");
                 var directoryParts = path.Split('/').ToList();
-                var pathToFind = "/Resources/Widgets";
+                var pathToFind = "/Resources/ActivityStories";
 
                 // Go up the directory tree and check for a nearby Resources/Widgets dir.
                 for (var i = 0; i < directoryParts.Count; i++)
