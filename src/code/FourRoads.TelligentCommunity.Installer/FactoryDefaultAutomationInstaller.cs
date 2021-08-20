@@ -137,6 +137,9 @@ namespace FourRoads.TelligentCommunity.Installer
                 }
             });
 
+            Caching.ExpireUICaches();
+            Caching.ExpireAllCaches();
+
         }
 
         private bool GetInstanceIdFromWidgetXml(string widhgetXml, out Guid instanceId, out Guid providerId)
@@ -347,6 +350,9 @@ namespace FourRoads.TelligentCommunity.Installer
 
                 automations.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N")), fileName, File.Open(supFile, FileMode.Open), false);
             }
+
+            Caching.ExpireUICaches();
+            Caching.ExpireAllCaches();
 
             return instanceId;
         }
