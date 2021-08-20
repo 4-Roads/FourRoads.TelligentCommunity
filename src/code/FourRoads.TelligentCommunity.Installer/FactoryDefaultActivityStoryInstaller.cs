@@ -95,9 +95,10 @@ namespace FourRoads.TelligentCommunity.Installer
 
                     Guid instanceId;
                     Guid providerId;
+                    Guid themeId;
                     var widgetXml = EmbeddedResources.GetString(resourceName);
 
-                    if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out providerId))
+                    if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out providerId, out themeId))
                         return;
 
                     Apis.Get<IEventLog>().Write($"Installing activity story '{resourceName}'", new EventLogEntryWriteOptions() { Category = "Installer" });
@@ -105,7 +106,16 @@ namespace FourRoads.TelligentCommunity.Installer
                     //no extensible installer available so need to copy it manually
                     var defaultwidgets = CentralizedFileStorage.GetFileStore("defaultwidgets");
 
-                    defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")), $"{instanceId:N}.xml", EmbeddedResources.GetStream(resourceName), false);
+                    if (themeId == Guid.Empty)
+                    {
+                        defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")),
+                            $"{instanceId:N}.xml", EmbeddedResources.GetStream(resourceName), false);
+                    }
+                    else
+                    {
+                        defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")),
+                            $"{instanceId:N}-{themeId:N}.xml", EmbeddedResources.GetStream(resourceName), false);
+                    }
 
                     IEnumerable<string> supplementaryResources = GetType().Assembly.GetManifestResourceNames()
                         .Where(r => r.StartsWith(widgetPath) && !r.EndsWith(".activitystory.xml")).ToArray();
@@ -116,8 +126,19 @@ namespace FourRoads.TelligentCommunity.Installer
                     foreach (string supplementPath in supplementaryResources)
                     {
                         string supplementName = supplementPath.Substring(widgetPath.Length);
+                        if (themeId == Guid.Empty)
+                        {
+                            defaultwidgets.AddFile(
+                                CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N")),
+                                supplementName, EmbeddedResources.GetStream(supplementPath), false);
+                        }
+                        else
+                        {
+                            defaultwidgets.AddFile(
+                                CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N"), themeId.ToString("N")),
+                                supplementName, EmbeddedResources.GetStream(supplementPath), false);
 
-                        defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N")), supplementName, EmbeddedResources.GetStream(supplementPath), false);
+                        }
                     }
 
                 }
@@ -131,10 +152,11 @@ namespace FourRoads.TelligentCommunity.Installer
             Caching.ExpireAllCaches();
         }
 
-        private bool GetInstanceIdFromWidgetXml(string widgetXml, out Guid instanceId, out Guid providerId)
+        private bool GetInstanceIdFromWidgetXml(string widgetXml, out Guid instanceId, out Guid providerId, out Guid themeId)
         {
             instanceId = Guid.Empty;
             providerId = Guid.Empty;
+            themeId = Guid.Empty;
             // GetInstanceIdFromWidgetXml widget identifier
             XDocument xdoc = XDocument.Parse(widgetXml);
             XElement root = xdoc.Root;
@@ -160,6 +182,11 @@ namespace FourRoads.TelligentCommunity.Installer
                 return false;
 
             providerId = new Guid(providerAttr.Value);
+
+            XAttribute themeAttr = element.Attribute("theme");
+
+            if (themeAttr != null)
+                themeId = new Guid(themeAttr.Value);
 
             return true;
         }
@@ -310,14 +337,25 @@ namespace FourRoads.TelligentCommunity.Installer
             // Get the widget ID:
             Guid instanceId;
             Guid providerId;
+            Guid themeId;
 
-            if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out providerId))
+            if (!GetInstanceIdFromWidgetXml(widgetXml, out instanceId, out providerId, out themeId))
             {
                 return Guid.Empty;
             }
 
             var defaultwidgets = CentralizedFileStorage.GetFileStore("defaultwidgets");
-            defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")), $"{instanceId:N}.xml", GenerateStreamFromString(widgetXml), false);
+
+            if (themeId == Guid.Empty)
+            {
+                defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")), $"{instanceId:N}.xml",
+                    GenerateStreamFromString(widgetXml), false);
+            }
+            else
+            {
+                defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N")), $"{instanceId:N}-{themeId:N}.xml",
+                    GenerateStreamFromString(widgetXml), false);
+            }
 
             // Copy in any files which are siblings of activitystory.xml:
             foreach (var supFile in Directory.EnumerateFiles(pathToWidget))
@@ -329,7 +367,18 @@ namespace FourRoads.TelligentCommunity.Installer
                     continue;
                 }
 
-                defaultwidgets.AddFile(CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N")), fileName, File.Open(supFile, FileMode.Open), false);
+                if (themeId == Guid.Empty)
+                {
+                    defaultwidgets.AddFile(
+                        CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N")), fileName,
+                        File.Open(supFile, FileMode.Open), false);
+                }
+                else
+                {
+                    defaultwidgets.AddFile(
+                        CentralizedFileStorage.MakePath(providerId.ToString("N"), instanceId.ToString("N"), themeId.ToString("N")), fileName,
+                        File.Open(supFile, FileMode.Open), false);
+                }
             }
 
             Caching.ExpireUICaches();
