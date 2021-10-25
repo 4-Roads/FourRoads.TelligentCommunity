@@ -386,7 +386,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             
             //decrypt FormsAuthentication cookie to get its expiration date and time
             var authCookie = HttpContext.Current.Request.Cookies[FormsAuthentication.FormsCookieName];
-            return authCookie == null ? default : FormsAuthentication.Decrypt(authCookie.Value)?.Expiration;
+            return authCookie == null ? null : FormsAuthentication.Decrypt(authCookie.Value)?.Expiration;
         }
 
         public bool IsTwoFactorEnabled(User user)
