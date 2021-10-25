@@ -9,7 +9,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Interfaces
     public interface IMfaLogic
     {
 
-        void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider , ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret);
+        void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider , ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret, bool isPersistent);
         void RegisterUrls(IUrlController controller);
         bool IsTwoFactorEnabled(User user);
 

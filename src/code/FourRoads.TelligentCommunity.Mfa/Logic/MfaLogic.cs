@@ -58,6 +58,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private DateTime _emailValilationCutoffDate;
         private string _v111_4_CookieName = "Impersonator";
         private string _cookieName = "te.u";
+        private bool _isPersistent;
 
 
         public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
@@ -69,7 +70,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         }
 
         public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider,
-            ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret)
+            ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret, bool isPersistent)
         {
             _enableEmailVerification = enableEmailVerification;
             _emailProvider = emailProvider;
@@ -77,6 +78,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _emailValilationCutoffDate = emailValidationCutoffDate;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
             _jwtSecret = Encoding.UTF8.GetBytes(jwtSecret).Take(32).ToArray();
+            _isPersistent = isPersistent;
         }
 
         /// <summary>
@@ -351,22 +353,40 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             NotPassed
         }
 
-        private void SetTwoFactorState(User user, TwoFactorState passed)
+        private void SetTwoFactorState(User user, TwoFactorState twoFactorState)
         {
             var payload = new Dictionary<string, object>
             {
                 {nameof(PayLoad.userId), user.Id.Value},
-                {nameof(PayLoad.state), passed},
+                {nameof(PayLoad.state), twoFactorState},
             };
             var mfaCookieName = GetMfaCookieName();
             var token = CreateJoseJwtToken(payload);
-
-            HttpContext.Current.Response.Cookies.Add(new HttpCookie(mfaCookieName)
+            var expiration = GetMfaCookieExpirationDate();
+            
+            var mfaCookie = new HttpCookie(mfaCookieName)
             {
                 Value = token,
                 HttpOnly = true,
                 Secure = true
-            });
+            };
+            
+            if (expiration.HasValue)
+            {
+                mfaCookie.Expires = expiration.Value;
+            }
+            
+            HttpContext.Current.Response.Cookies.Add(mfaCookie);
+        }
+
+        private DateTime? GetMfaCookieExpirationDate()
+        {
+            //do not set expiration of configured to use session cookie
+            if (_isPersistent == false) return null;
+            
+            //decrypt FormsAuthentication cookie to get its expiration date and time
+            var authCookie = HttpContext.Current.Request.Cookies[FormsAuthentication.FormsCookieName];
+            return authCookie == null ? default : FormsAuthentication.Decrypt(authCookie.Value)?.Expiration;
         }
 
         public bool IsTwoFactorEnabled(User user)
