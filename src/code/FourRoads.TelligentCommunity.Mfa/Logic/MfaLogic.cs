@@ -58,6 +58,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private DateTime _emailValilationCutoffDate;
         private string _v111_4_CookieName = "Impersonator";
         private string _cookieName = "te.u";
+        private bool _isPersistent;
 
 
         public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
@@ -69,7 +70,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         }
 
         public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider,
-            ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret)
+            ISocketMessage socketMessenger, DateTime emailValidationCutoffDate, string jwtSecret, bool isPersistent)
         {
             _enableEmailVerification = enableEmailVerification;
             _emailProvider = emailProvider;
@@ -77,6 +78,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _emailValilationCutoffDate = emailValidationCutoffDate;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
             _jwtSecret = Encoding.UTF8.GetBytes(jwtSecret).Take(32).ToArray();
+            _isPersistent = isPersistent;
         }
 
         /// <summary>
@@ -130,7 +132,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             if (user.Username == _usersService.AnonymousUserName) 
                 return;
 
-            
             if (!(request.HttpContext.Request.Url is null) &&
                 request.HttpContext.Request.Url.LocalPath.StartsWith("/logout"))
             {
@@ -138,16 +139,10 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 return;
             }
 
-            var jwt = GetJwt(request.HttpContext);
-            bool checkToken = true;
-            
-            if (string.IsNullOrWhiteSpace(jwt)) //missing token that's ok let's add it 
+            if (TwoFactorCheckAndSetState(user))
             {
-                checkToken = TwoFactorCheckAndSetState(user);
-            }
-
-            if (checkToken)
-            {
+                var jwt = GetJwt(request.HttpContext);
+                
                 if (GetTwoFactorState(user,jwt) == false)
                 {
                     ForceRedirect(request,
@@ -358,22 +353,40 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             NotPassed
         }
 
-        private void SetTwoFactorState(User user, TwoFactorState passed)
+        private void SetTwoFactorState(User user, TwoFactorState twoFactorState)
         {
             var payload = new Dictionary<string, object>
             {
                 {nameof(PayLoad.userId), user.Id.Value},
-                {nameof(PayLoad.state), passed},
+                {nameof(PayLoad.state), twoFactorState},
             };
             var mfaCookieName = GetMfaCookieName();
             var token = CreateJoseJwtToken(payload);
-
-            HttpContext.Current.Response.Cookies.Add(new HttpCookie(mfaCookieName)
+            var expiration = GetMfaCookieExpirationDate();
+            
+            var mfaCookie = new HttpCookie(mfaCookieName)
             {
                 Value = token,
                 HttpOnly = true,
                 Secure = true
-            });
+            };
+            
+            if (expiration.HasValue)
+            {
+                mfaCookie.Expires = expiration.Value;
+            }
+            
+            HttpContext.Current.Response.Cookies.Add(mfaCookie);
+        }
+
+        private DateTime? GetMfaCookieExpirationDate()
+        {
+            //do not set expiration of configured to use session cookie
+            if (_isPersistent == false) return null;
+            
+            //decrypt FormsAuthentication cookie to get its expiration date and time
+            var authCookie = HttpContext.Current.Request.Cookies[FormsAuthentication.FormsCookieName];
+            return authCookie == null ? null : FormsAuthentication.Decrypt(authCookie.Value)?.Expiration;
         }
 
         public bool IsTwoFactorEnabled(User user)

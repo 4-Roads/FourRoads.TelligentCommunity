@@ -14,6 +14,7 @@ using FourRoads.TelligentCommunity.Mfa.DataProvider;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Logic;
 using FourRoads.TelligentCommunity.Mfa.Resources;
+using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -40,7 +41,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
                 PluginManager.Get<VerifyEmailPlugin>().FirstOrDefault() , 
                 PluginManager.Get<EmailVerifiedSocketMessage>().FirstOrDefault(),
                 _configuration.GetDateTime("emailCutoffDate").GetValueOrDefault(DateTime.MinValue),
-                jwtSecret
+                jwtSecret,
+                _configuration.GetBool("isPersistent").GetValueOrDefault(true)
             );
         }
 
@@ -143,14 +145,29 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
 
                 group.Properties.Add(new Property()
                 {
-                    Id = "emailVerification", LabelResourceName = "EmailVerification", DataType = "bool",
+                    Id = "emailVerification",
+                    LabelResourceName = "EmailVerification", 
+                    DataType = nameof(PropertyType.Bool),
                     DefaultValue = "true"
                 });
+                
                 group.Properties.Add(new Property()
                 {
-                    Id = "emailCutoffDate", LabelResourceName = "EmailCutoffDate",
-                    DescriptionResourceName = "EmailCutoffDateDescription", DataType = "Date", Template = "mfadate",
+                    Id = "emailCutoffDate",
+                    LabelResourceName = "EmailCutoffDate",
+                    DescriptionResourceName = "EmailCutoffDateDescription",
+                    DataType = nameof(PropertyType.Date),
+                    Template = "mfadate",
                     DefaultValue = ""
+                });
+                
+                group.Properties.Add( new Property()
+                {
+                    Id = "isPersistent",
+                    LabelResourceName = "IsPersistent",
+                    DescriptionResourceName = "IsPersistentDesc",
+                    DataType = nameof(PropertyType.Bool), 
+                    DefaultValue = "true"
                 });
                 return new[] {group};
             }
@@ -165,15 +182,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
         {
             get
             {
-                Translation tr = new Translation("en-us");
+                Translation translation = new Translation("en-us");
 
-                tr.Set("EmailVerification", "Enable Email Verification");
-                tr.Set("EmailCutoffDate", "Email Cutoff Date");
-                tr.Set("EmailCutoffDateDescription",
-                    "When enabled on an existing community this date prevents users that have joined the site before this date being asked to authenticate email address");
-                tr.Set("GroupOptions", "Options");
+                translation.Set("EmailVerification", "Enable Email Verification");
+                translation.Set("EmailCutoffDate", "Email Cutoff Date");
+                translation.Set("EmailCutoffDateDescription", "When enabled on an existing community this date prevents users that have joined the site before this date being asked to authenticate email address");
+                translation.Set("GroupOptions", "Options");
+                translation.Set("IsPersistent", "Is Persistent");
+                translation.Set("IsPersistentDesc", "When enabled, sets MFA cookie expiration date to match Community, otherwise MFA cookie is set for the duration of browser session");
 
-                return new[] {tr};
+                return new[] {translation};
             }
         }
     }
