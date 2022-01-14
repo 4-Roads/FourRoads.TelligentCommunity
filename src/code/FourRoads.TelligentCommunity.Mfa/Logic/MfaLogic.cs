@@ -373,7 +373,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             
             if (expiration.HasValue)
             {
-                mfaCookie.Expires = expiration.Value;
+                mfaCookie.Expires = expiration.Value.AddDays(1);
             }
             
             HttpContext.Current.Response.Cookies.Add(mfaCookie);
