@@ -66,6 +66,7 @@
     <Compile Include="Controls\TriggerActionPropertyTemplate.cs" />
     <Compile Include="FactoryDefaultActivityStoryInstaller.cs" />
     <Compile Include="FactoryDefaultAutomationInstaller.cs" />
+    <Compile Include="FactoryDefaultContentPeekInstaller.cs" />
     <Compile Include="FactoryDefaultThemeInstaller.cs" />
     <Compile Include="CFSFilestoreInstaller.cs" />
     <Compile Include="Plugins\InstallerCore.cs" />
