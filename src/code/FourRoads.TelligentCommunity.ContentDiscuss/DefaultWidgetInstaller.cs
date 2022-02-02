@@ -60,7 +60,7 @@ namespace FourRoads.TelligentCommunity.ContentDiscuss
             }
         }
 
-        const string _leaderAssemblyName = "Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.ScriptedContentFragments::{0}";
+        const string _leaderAssemblyName = "Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::{0}";
 
         protected string GetScriptedFragmentName(string id)
         {
