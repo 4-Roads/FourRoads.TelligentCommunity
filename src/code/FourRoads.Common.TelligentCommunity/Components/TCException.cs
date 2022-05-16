@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
+using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Exceptions.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Platform.Logging;
 
 namespace FourRoads.Common.TelligentCommunity.Components
 {
     [Serializable]
-    public class TCException : Exception, IUserRenderableException, ILoggableException
+    public class TCException : Exception, IUserRenderableException, IExceptions
     {
         private readonly Func<string> _getTranslatedMessage;
 
@@ -58,11 +61,32 @@ namespace FourRoads.Common.TelligentCommunity.Components
             return "Internal Error Occured";
         }
 
-        public string Category => "4 Roads";
-
+        private string _errorText = "Logged error";
         public void Log()
         {
-            new Error(this);
+            ExceptionHelper.Handle(this, _errorText, ExceptionCategories.UnknownError);
+        }
+
+        public AdditionalInfo Log(Exception exception)
+        {
+            ExceptionHelper.Handle(exception, _errorText, ExceptionCategories.UnknownError);
+            return new AdditionalInfo();
+        }
+
+        public AdditionalInfo Log(Exception exception,
+            [Documentation(Name = "CategoryId", Type = typeof(Guid), Description = "The exception category Id")]
+            IDictionary options)
+        {
+            if (options["CategoryId"] != null && Guid.TryParse(options["CategoryId"].ToString(), out var exCategory))
+            {
+                ExceptionHelper.Handle(exception, _errorText, exCategory);
+            }
+            else
+            {
+                ExceptionHelper.Handle(exception, _errorText, ExceptionCategories.UnknownError);
+            }
+
+            return new AdditionalInfo();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Web.UI;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FourRoads.TelligentCommunity120.MicroData")]
+[assembly: AssemblyTitle("FourRoads.TelligentCommunity121.MicroData")]
 [assembly: AssemblyDescription("Provides extensions to include schema.org microdata elements in web page markup")]
 
 
