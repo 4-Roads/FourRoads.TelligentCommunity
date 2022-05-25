@@ -21,7 +21,7 @@ function cs_openAndWriteToWindow(windowName, width, height, html) {
   jQuery('body').append(s);
   s.glowPopUpPanel({ zIndex: 200002, position: 'downright', hideOnDocumentClick: false });
   s.glowPopUpPanel('html', '<div style="width:' + wi.ContentWidth + 'px;height:' + wi.ContentHeight + 'px;background-color: #000;opacity:.75"></div>');
-  jQuery(s.glowPopUpPanel('children')).click(function () { p.glowPopUpPanel('hide'); s.glowPopUpPanel('hide'); p.remove(); s.remove(); return false; });
+  jQuery(s.glowPopUpPanel('children')).on('click', function () { p.glowPopUpPanel('hide'); s.glowPopUpPanel('hide'); p.remove(); s.remove(); return false; });
   s.glowPopUpPanel('show', wi.ScrollX, wi.ScrollY, wi.Width, 0);
 
   p.glowPopUpPanel('show', (width < wi.Width ? ((wi.Width - width) / 2) : 0) + wi.ScrollX, (height < wi.Height ? ((wi.Height - height) / 2) : 0) + wi.ScrollY, width, 0);

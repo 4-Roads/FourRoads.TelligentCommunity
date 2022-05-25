@@ -37,13 +37,13 @@
                     e.preventDefault();
                     addDiv.fadeIn();
                     
-                    jQuery('.pwa-hide-prompt', addDiv).click(function(e){
+                    jQuery('.pwa-hide-prompt', addDiv).on('click', function(e){
                       addDiv.fadeOut();
                       window.localStorage.setItem('nopwa' , '1');
                      });
                     
                     deferredPrompt = e;
-                    jQuery('.pwa-install', addDiv).click(function(e){
+                    jQuery('.pwa-install', addDiv).on('click', function(e){
                       addDiv.fadeOut();
                       deferredPrompt.prompt();
                       deferredPrompt.userChoice.then((choiceResult) => {

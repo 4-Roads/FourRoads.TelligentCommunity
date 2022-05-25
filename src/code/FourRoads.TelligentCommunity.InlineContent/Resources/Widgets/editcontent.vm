@@ -44,7 +44,7 @@
         tabs: tabs
       })
 
-      jQuery('#$save').click(function(e){
+      jQuery('#$save').on('click', function(e) {
 
       e.preventDefault();
 

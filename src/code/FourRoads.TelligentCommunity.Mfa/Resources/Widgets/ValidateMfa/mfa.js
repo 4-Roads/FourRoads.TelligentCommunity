@@ -7,7 +7,7 @@
         $.fourroads.widgets = {};
 
     var attachHandlers = function (context) {
-            context.selectors.submit.click(function(e) {
+            context.selectors.submit.on('click', function(e) {
                 e.preventDefault();
                 save(context, context.selectors.validateInput.val());
                 return false;
@@ -18,7 +18,7 @@
 				// if enter was pressed, trigger a click on the submit button
 				if (e.keyCode === 13) {
 					e.preventDefault();
-					context.selectors.submit.click();
+					context.selectors.submit.trigger('click');
 				}
 			});
         },

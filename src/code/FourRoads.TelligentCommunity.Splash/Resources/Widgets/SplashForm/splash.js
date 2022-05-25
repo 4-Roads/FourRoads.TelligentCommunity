@@ -8,26 +8,26 @@
 
     var attachHandlers = function (context) {
 
-            context.selectors.termsLink.click(function(e) {
-                context.selectors.termsLink.parent().find('.terms-container').slideDown();
-            });
+        context.selectors.termsLink.on('click', function(e) {
+            context.selectors.termsLink.parent().find('.terms-container').slideDown();
+        });
 
-            context.selectors.email.blur(function (e) {
-                //Test to see if this is a valid beta user
-                $.telligent.evolution.post({
-                    url: context.urls.testAccess,
-                    data: { email: context.selectors.email.val() },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.result == "true") {
-                            context.selectors.accessCode.closest('li').show();
-                        } else {
-                            context.selectors.accessCode.closest('li').hide();
-                        }
+        context.selectors.email.blur(function (e) {
+            //Test to see if this is a valid beta user
+            $.telligent.evolution.post({
+                url: context.urls.testAccess,
+                data: { email: context.selectors.email.val() },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.result == "true") {
+                        context.selectors.accessCode.closest('li').show();
+                    } else {
+                        context.selectors.accessCode.closest('li').hide();
                     }
-                });
+                }
             });
-        },
+        });
+    },
     scrapeElements = function (context) {
         $.each([context.selectors], function(i, set) {
             $.each(set, function(key, value) {

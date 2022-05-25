@@ -63,7 +63,7 @@
                                         j('#' + options.processingArea)
                                             .html(processingTemplate({ response: response }));
 
-                                        j('#' + options.actionLink).click(function(e) {
+                                        j('#' + options.actionLink).on('click', function(e) {
                                             e.preventDefault();
                                             j(this).hide();
 
@@ -79,7 +79,7 @@
                                         });
 
 
-                                        j('#' + options.downloadRewriteMap).click(function (e) {
+                                        j('#' + options.downloadRewriteMap).on('click', function (e) {
                                             e.preventDefault();
                                             
                                                fetch(options.downloadRewriteMapUrl)
@@ -91,7 +91,7 @@
                                                         a.href = url;
                                                         a.download = 'legacy_rewrite_map.config';
                                                         document.body.appendChild(a);
-                                                        a.click();
+                                                        a.trigger('click');
                                                         window.URL.revokeObjectURL(url);
                                                     }); 
                                         });
@@ -113,7 +113,7 @@
                                     j('#' + options.processingArea)
                                         .html(startTemplate({ response: { Action: 'Start' } }));
 
-                                    j('#' + options.actionLink).click(function(e) {
+                                    j('#' + options.actionLink).on('click', function(e) {
                                         e.preventDefault();
 
                                         var data = [];

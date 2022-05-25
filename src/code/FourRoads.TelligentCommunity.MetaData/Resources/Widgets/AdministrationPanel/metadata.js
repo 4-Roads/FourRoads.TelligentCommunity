@@ -27,7 +27,7 @@
 
         var button = $('a.save', headerList);
 
-        button.click(function(e) {
+        button.on('click', function(e) {
             e.preventDefault();
 
             var data = context.getData();

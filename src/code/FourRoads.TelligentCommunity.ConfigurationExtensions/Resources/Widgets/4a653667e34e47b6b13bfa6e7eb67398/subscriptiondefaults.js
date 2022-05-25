@@ -36,7 +36,7 @@
 	            });
 	        });
 
-	        context.selectors.resetSiteButton.click(function (e) {
+	        context.selectors.resetSiteButton.on('click', function (e) {
 	            e.preventDefault();
 	            var calendarId = context.calendarId;
 	            var groupId = context.groupId;

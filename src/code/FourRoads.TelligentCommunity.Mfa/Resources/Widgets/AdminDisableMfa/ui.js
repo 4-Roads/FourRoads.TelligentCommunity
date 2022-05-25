@@ -22,7 +22,7 @@
     $.ns.widgets.disableMFA = {
         register: function (context) {
             // The add list button
-            $('.action .disable-mfa', parent).click(function (e) {
+            $('.action .disable-mfa', parent).on('click', function (e) {
                 e.preventDefault();
                 var button = $(this);
                 button.showLoader(true);

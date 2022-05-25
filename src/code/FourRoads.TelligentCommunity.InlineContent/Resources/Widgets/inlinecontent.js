@@ -6,7 +6,7 @@
         $.fourroads.widgets = {};
 
         var attachHandlers = function (context) {
-                context.selectors.editContent.click(function(e) {
+                context.selectors.editContent.on('click', function(e) {
 
                     e.preventDefault();
 

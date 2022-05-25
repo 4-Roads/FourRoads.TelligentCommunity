@@ -7,16 +7,16 @@
         $.fourroads.widgets = {};
 
     var attachHandlers = function (context) {
-        context.selectors.submit.click(function () { save(context, context.selectors.validateInput.val()); });
+        context.selectors.submit.on('click', function () { save(context, context.selectors.validateInput.val()); });
 
-        context.selectors.newCode.click(function () { newCode(context); });
+        context.selectors.newCode.on('click', function () { newCode(context); });
             
             // enter key on code entry
 			context.selectors.validateInput.bind('keypress', function(e){
 				// if enter was pressed, trigger a click on the submit button
 				if (e.keyCode === 13) {
 					e.preventDefault();
-					context.selectors.submit.click();
+					context.selectors.submit.trigger('click');
 				}
 			});
         },
