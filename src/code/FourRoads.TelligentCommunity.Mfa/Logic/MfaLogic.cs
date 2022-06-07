@@ -6,18 +6,19 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Security;
-using FourRoads.Common.Extensions;
+using DryIoc;
 using FourRoads.Common.Interfaces;
 using FourRoads.Common.TelligentCommunity.Routing;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Model;
 using Google.Authenticator;
-using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
+using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 
 namespace FourRoads.TelligentCommunity.Mfa.Logic
 {
@@ -59,6 +60,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private string _v111_4_CookieName = "Impersonator";
         private string _cookieName = "te.u";
         private bool _isPersistent;
+        private List<string> _fileStoreNames = new List<string>();
 
 
         public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
@@ -79,6 +81,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
             _jwtSecret = Encoding.UTF8.GetBytes(jwtSecret).Take(32).ToArray();
             _isPersistent = isPersistent;
+            _fileStoreNames = PluginManager.Get<ISecuredCentralizedFileStore>()
+                .Select(fs => $"/{fs.FileStoreKey.ToLowerInvariant().Replace(".", "-")}/").ToList();
         }
 
         /// <summary>
@@ -124,7 +128,15 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         /// </summary>
         public void FilterRequest(IHttpRequest request)
         {
-            if (IsImpersonator(request.HttpContext.Request) || !IsPageRequest(request.HttpContext.Request)) 
+            if (request.HttpContext.Request.Url != null)
+            {
+                Debug.WriteLine(request.HttpContext.Request.Url);
+            }
+            if (IsImpersonator(request.HttpContext.Request) 
+                || (!IsPageRequest(request.HttpContext.Request) 
+                    && !IsSecuredFileStoreRequest(request.HttpContext.Request)
+                    )
+                ) 
                 return;
 
             var user = _usersService.AccessingUser;
@@ -287,7 +299,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 string.Compare(httpRequest.HttpContext.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) ==
                 0 &&
                 //Is this a main page and not a callback etc 
-                IsPageRequest(request))
+                (IsPageRequest(request) || IsSecuredFileStoreRequest(request)))
             {
                 //redirect to 2 factor page
                 bool force = httpRequest.HttpContext.ApplicationInstance == null;
@@ -305,6 +317,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                     request.CurrentExecutionFilePathExtension == ".htm" ||
                     request.CurrentExecutionFilePathExtension == ".ashx" ||
                     request.CurrentExecutionFilePathExtension == string.Empty);
+        }
+
+        private bool IsSecuredFileStoreRequest(HttpRequestBase request)
+        {
+            return request.Url != null && _fileStoreNames.Any(u => request.Url.AbsolutePath.Contains(u));
         }
 
         private bool IsOauthRequest(HttpRequestBase request)
