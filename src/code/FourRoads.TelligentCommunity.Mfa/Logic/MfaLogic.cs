@@ -128,10 +128,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         /// </summary>
         public void FilterRequest(IHttpRequest request)
         {
-            if (request.HttpContext.Request.Url != null)
-            {
-                Debug.WriteLine(request.HttpContext.Request.Url);
-            }
             if (IsImpersonator(request.HttpContext.Request) 
                 || (!IsPageRequest(request.HttpContext.Request) 
                     && !IsSecuredFileStoreRequest(request.HttpContext.Request)
@@ -403,7 +399,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             
             //decrypt FormsAuthentication cookie to get its expiration date and time
             var authCookie = HttpContext.Current.Request.Cookies[FormsAuthentication.FormsCookieName];
-            return authCookie == null ? null : FormsAuthentication.Decrypt(authCookie.Value)?.Expiration;
+            return authCookie == null 
+                ? DateTime.Today.AddDays(7) 
+                : FormsAuthentication.Decrypt(authCookie.Value)?.Expiration;
         }
 
         public bool IsTwoFactorEnabled(User user)
@@ -607,7 +605,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private bool? ValidateJwtToken(int userId, string sessionToken)
         {
-            Debug.WriteLine($"ValidateJwtToken {HttpContext.Current.Request.RawUrl}");
             PayLoad payload;
             try
             {
