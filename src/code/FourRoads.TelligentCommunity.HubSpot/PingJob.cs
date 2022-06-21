@@ -10,7 +10,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
         }
 
-        public string Name => "4 Roads Hubspot Ping Job";
+        public string Name => "Hubspot - Access Token Refresh Job";
         public string Description => "Keep alive service for hubspot";
 
         public void Execute(JobData jobData)
@@ -20,7 +20,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public Guid JobTypeId { get; } = new Guid("{1AA2ACFF-17BA-4FED-8E6B-9A54CAA6F614}");
 
-        public JobSchedule DefaultSchedule => new JobSchedule(ScheduleType.Hours) {Hours = 4};
+        public JobSchedule DefaultSchedule => new JobSchedule(ScheduleType.Minutes) {Minutes = 25};
         public JobContext SupportedContext => JobContext.Service;
     }
 }

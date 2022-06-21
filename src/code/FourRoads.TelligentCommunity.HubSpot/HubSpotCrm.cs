@@ -1,10 +1,11 @@
-﻿using FourRoads.Common.TelligentCommunity.Controls;
-using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
+﻿using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.HubSpot.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,6 +25,10 @@ using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using System.Web;
+using FourRoads.TelligentCommunity.HubSpot.Controls;
+using Telligent.Evolution.Extensibility.Urls.Version1;
+using IPermissions = Telligent.Evolution.Extensibility.Api.Version2.IPermissions;
+using SitePermission = Telligent.Evolution.Components.SitePermission;
 
 /*
     Auth Process
@@ -55,13 +60,13 @@ using System.Web;
     oAuth Overview
     ==============
     
-    Conigure the Auth settings for the hubspot application
+    Configure the Auth settings for the hubspot application
         -Make sure the "Read from and write to my Contacts" and "Basic OAuth functionality" scopes are defined
         -Enter the telligent site url as the redirect url: e.g. https://www.devurl.com/
         
     You can then visit the install url in a browser, this takes the format below:
         https://app.hubspot.com/oauth/authorize?client_id=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&redirect_uri=https://www.devurl.com/&scope=contacts%20oauth
-    This will prompt the user to allow access to your application and upon successfull auth will call back to the redirect_uri passing a code.
+    This will prompt the user to allow access to your application and upon successful auth will call back to the redirect_uri passing a code.
     You must ensure this redirect_uri exactly matches your hosting and is secured using https.
   
     You will receive a call back to your url with a code as below (use this in the plugin config panel)
@@ -77,34 +82,95 @@ using System.Web;
 
 namespace FourRoads.TelligentCommunity.HubSpot
 {
-    public class HubspotCrm : IConfigurablePlugin, ISingletonPlugin, ICrmPlugin, IPluginGroup, IHttpCallback
+    public class HubspotCrm : IConfigurablePlugin, ISingletonPlugin, ICrmPlugin, IPluginGroup, INavigable, IHttpCallback
     {
-        IPluginConfiguration _configuration;
-        string _accessToken;
-        string _refreshToken;
-        DateTime _expires = DateTime.Now;
-        Dictionary<string, string> _mappings;
+        private string _accessToken;
+        private string _refreshToken;
+        private DateTime _expires = DateTime.UtcNow;
+        private Dictionary<string, string> _mappings;
         private IHttpCallbackController _callbackController;
-        
+        private IPluginConfiguration _configuration;
+
         private const string HubSpotBaseUrl = "https://api.hubapi.com/";
 
         public string Description => "Hubspot plugin";
+
+        public void RegisterUrls(IUrlController controller)
+        {
+            //success page
+            controller.AddPage("fr-hubspot-authorize-done", "hubspot/authorized", null, null, "HubSpot Authorization",
+                new PageDefinitionOptions
+                {
+                    Title = "hubspot-ok",
+                    DefaultPageXml = _defaultPageXml,
+                    Validate = (ctx, urlAccessController) => { },
+                    ParseContext = _ => { }
+                });
+
+            // https://hostname.my/hubspot/authorize?code=35083c76-d7e3-4cfe-be6c-57f462773728
+            controller.AddRaw("fr-hubspot-authorize-start", "hubspot/authorize", null, null,
+                (httpContext, pageContext) =>
+                {
+                    if (httpContext.Request.Url == null)
+                    {
+                        httpContext.Response.Redirect(Apis.Get<ICoreUrls>().Message(126), true);
+                        return;
+                    }
+
+                    var code = httpContext.Request.QueryString["code"];
+                    if (code != null && Guid.TryParse(code, out var dummy))
+                    {
+                        var isAdmin = Apis.Get<IPermissions>()
+                            .CheckPermission(SitePermission.ManageSettings, pageContext.UserId)
+                            .IsAllowed;
+                        var url = httpContext.Request.Url.GetLeftPart(UriPartial.Path);
+                        if (isAdmin)
+                        {
+                            httpContext.Response.Redirect(InitialLinkoAuth(code, url)
+                                    ? "/hubspot/authorized" //success
+                                    : Apis.Get<ICoreUrls>().Message(126), //Application Authorization Not Allowed
+                                endResponse: true);
+                        }
+
+                        // non admin user might have already been redirected to login page in Validate() below
+                        if (httpContext.Response.HeadersWritten) return;
+                    }
+
+                    // any invalid or nor admin requests see fake "success" page
+                    httpContext.Response.Redirect("/hubspot/authorized", true);
+                },
+                new RawDefinitionOptions
+                {
+                    Title = "HubSpot Authorization",
+                    Validate = (pageContext, urlAccessController) =>
+                    {
+                        var isAdmin = Apis.Get<IPermissions>()
+                            .CheckPermission(SitePermission.ManageSettings, pageContext.UserId)
+                            .IsAllowed;
+                        if (!isAdmin)
+                        {
+                            var login = Apis.Get<ICoreUrls>().Message(6); //Message: "Not Found
+                            urlAccessController.Redirect(login);
+                        }
+                    },
+                    ParseContext = _ => { }
+                });
+        }
 
         public string Name => "4 Roads - Hubspot Core";
 
         public void Initialize()
         {
-
         }
 
-        private static void WriteJsonProp(JsonTextWriter JsonObject, string prop, string value)
+        private static void WriteJsonProp(JsonWriter jsonObject, string prop, string value)
         {
-            JsonObject.WriteStartObject();
-            JsonObject.WritePropertyName("property");
-            JsonObject.WriteValue(prop);
-            JsonObject.WritePropertyName("value");
-            JsonObject.WriteValue(value);
-            JsonObject.WriteEndObject();
+            jsonObject.WriteStartObject();
+            jsonObject.WritePropertyName("property");
+            jsonObject.WriteValue(prop);
+            jsonObject.WritePropertyName("value");
+            jsonObject.WriteValue(value);
+            jsonObject.WriteEndObject();
         }
 
         private Dictionary<string, string> LoadMappings()
@@ -115,7 +181,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             if (!string.IsNullOrWhiteSpace(config))
             {
-                using (XmlTextReader rd = new XmlTextReader(config, XmlNodeType.Document, new XmlParserContext(null, null, string.Empty, XmlSpace.Default)))
+                using (XmlTextReader rd = new XmlTextReader(config, XmlNodeType.Document,
+                           new XmlParserContext(null, null, string.Empty, XmlSpace.Default)))
                 {
                     if (rd.ReadToNextSibling("Fields"))
                     {
@@ -140,39 +207,43 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         private Dictionary<string, string> Mappings
         {
-            get
-            {
-                if (_mappings == null)
-                {
-                    _mappings = LoadMappings();
-                }
-
-                return _mappings;
-            }
-            set
-            {
-                _mappings = value;
-            }
+            get => _mappings ?? (_mappings = LoadMappings());
+            set => _mappings = value;
         }
 
         public PropertyGroup[] ConfigurationOptions
         {
             get
             {
-                var pg = new PropertyGroup() {Id="Options", LabelText = "Options"};
-
-                var authbtn = new Telligent.Evolution.Extensibility.Configuration.Version1.Property()
+                
+                var pg = new PropertyGroup() { Id = "Options", LabelText = "Options" };
+                var callbackUrl = Apis.Get<IUrl>()?.Absolute("/hubspot/authorize") ?? string.Empty;
+                pg.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
+                {
+                    Id = "infoLabel",
+                    LabelText = string.Empty,
+                    DefaultValue =
+                        $"Navigate to HubSpot and use <span style=\"font-weight:800\">{callbackUrl}</span> "+
+                        "as a Redirect Url in the HubSpot App configuration.</br>"+
+                        "After saving your HubSpot App configuration, use Install URL to obtain access token.",
+                    DataType = "custom",
+                    Template = "message_label",
+                    OrderNumber = 0
+                });
+#if DEBUG
+                var authBtn = new Telligent.Evolution.Extensibility.Configuration.Version1.Property()
                 {
                     Id = "AuthBtn",
                     LabelText = "Auth Code",
                     DataType = "custom",
                     Template = "hubspot_authorize",
-                    DefaultValue = ""
+                    DefaultValue = "",
                 };
-                authbtn.Options.Add("outerButtonLabel", "Press this button once you have obtained your authorization code");
-                authbtn.Options.Add("innerButtonLabel", "Authorize oAuth Code");
-                pg.Properties.Add(authbtn);
-               
+                authBtn.Options.Add("outerButtonLabel",
+                    "Press this button once you have obtained your authorization code");
+                authBtn.Options.Add("innerButtonLabel", "Authorize oAuth Code");
+                pg.Properties.Add(authBtn);
+#endif
                 pg.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
                     Id = "ClientId",
@@ -206,6 +277,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 {
                     testControl.Options.Add("callback", _callbackController.GetUrl());
                 }
+
                 testControl.Options.Add("resturl", "");
                 testControl.Options.Add("data", "refresh:true");
                 testControl.Options.Add("buttonLabel", "Test Integration");
@@ -213,7 +285,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 testControl.Options.Add("actionFailureMessage", "Failed to read contact property groups");
                 pg.Properties.Add(testControl);
 
-                var pg3 = new PropertyGroup() {Id="ProfileConfig", LabelText = "Profile Configuration"};
+                var pg3 = new PropertyGroup() { Id = "ProfileConfig", LabelText = "Profile Configuration" };
 
                 pg3.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
@@ -228,9 +300,10 @@ namespace FourRoads.TelligentCommunity.HubSpot
                         { "rows", "10" },
                         { "columns", "80" },
                         { "syntax", "xml" }
-                    }});
+                    }
+                });
 
-                var pg2 = new PropertyGroup(){Id="Running", LabelText="Running Values"};
+                var pg2 = new PropertyGroup() { Id = "Running", LabelText = "Running Values" };
 
                 pg2.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
                 {
@@ -267,10 +340,10 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     DataType = "datetime",
                     Template = "datetime",
                     OrderNumber = 0,
-                    DefaultValue = DateTime.Now.ToString()
+                    DefaultValue = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)
                 });
 
-                return new [] { pg, pg3, pg2 };
+                return new[] { pg, pg3, pg2 };
             }
         }
 
@@ -280,34 +353,43 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             _accessToken = _configuration.GetString("AccessToken");
             _refreshToken = _configuration.GetString("RefreshToken");
-            _expires = _configuration.GetDateTime("Expires").HasValue ? _configuration.GetDateTime("Expires").Value : DateTime.Now;
+            Debug.Assert(_configuration != null, nameof(_configuration) + " != null");
+            _expires = _configuration.GetDateTime("Expires").HasValue
+                ? _configuration.GetDateTime("Expires").Value
+                : DateTime.UtcNow;
 
             Mappings = null;
         }
 
         private dynamic CreateApiRequest(string requestType, string endPoint, string data)
         {
-            using (var content = new StringContent(data, Encoding.UTF8, "application/json"))
-            {
-                string token = GetAccessToken();
+            string token = GetAccessToken();
 
-                return CreateRequest(requestType, endPoint, () => content, (cli) => cli.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token));
-            }
+            return CreateRequest(requestType, endPoint,
+                () =>
+                {
+                    using (var content = new StringContent(data, Encoding.UTF8, "application/json"))
+                    {
+                        Debug.Assert(content != null, nameof(content) + " != null");
+                        return content;
+                    }
+                },
+                cli => cli.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token));
         }
 
         private dynamic CreateOauthRequest(HttpContent parameters)
         {
-            string endPoint = "oauth/v1/token";
+            const string endPoint = "oauth/v1/token";
 
             return CreateRequest("POST", endPoint, () => parameters);
         }
 
-        private dynamic CreateRequest(string requestType, string endPoint, Func<HttpContent> preContent, Action<HttpClient> action = null)
+        private dynamic CreateRequest(string requestType, string endPoint, Func<HttpContent> preContent,
+            Action<HttpClient> action = null)
         {
-            HttpClient req = new HttpClient();
+            var req = new HttpClient();
 
-            if (action != null)
-                action(req);
+            action?.Invoke(req);
 
             Task<HttpResponseMessage> task;
 
@@ -337,31 +419,48 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
                 string content = resultTask.Result;
 
+                var contentObj = JsonConvert.DeserializeObject(content);
+
                 if (!task.Result.IsSuccessStatusCode)
                 {
-                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: http status code {task.Result.StatusCode} - {content}", new EventLogEntryWriteOptions());
+                    Apis.Get<IEventLog>()
+                        .Write($"Hubspot API Issue: http status code {task.Result.StatusCode} - {content}",
+                            new EventLogEntryWriteOptions());
 
                     if (task.Result.StatusCode == HttpStatusCode.NotFound)
                     {
                         return null;
                     }
+
+                    if (task.Result.StatusCode == HttpStatusCode.Unauthorized
+                        && content.Contains("EXPIRED_AUTHENTICATION"))
+                    {
+                        //[{"status":"error","message":"The OAuth token used to make this call expired 75 second(s) ago.",
+                        //"correlationId":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx","category":"EXPIRED_AUTHENTICATION",
+                        //"context":{"expire time":["2022-06-21T10:37:52.040Z"]}}]
+                        throw new Exception($"HttpClient Unauthorized. [${content}]");
+                    }
+
                     throw new Exception($"HttpClient Failed : {task.Result.StatusCode}", new Exception(content));
                 }
 
-                return JsonConvert.DeserializeObject(content);
+                return contentObj;
             }
 
             throw new Exception("HttpClient error");
         }
 
-        private void ProcessHubspotRequestRepsonse(dynamic jsonResponse)
+        private void ProcessHubspotRequestResponse(dynamic jsonResponse)
         {
             if (jsonResponse.error != null)
             {
-                // throw new Exception("Hubspot API Issue:" + jsonResponse.error + jsonResponse.error_description);
-                Apis.Get<IEventLog>().Write("Hubspot API Issue:" + jsonResponse.error_description, new EventLogEntryWriteOptions());
+                Apis.Get<IEventLog>().Write("Hubspot API Issue:" + jsonResponse.error_description,
+                    new EventLogEntryWriteOptions
+                    {
+                        EventType = nameof(EventLogEntryType.Error)
+                    });
 
-                _expires = DateTime.Now;
+                _expires = DateTime.UtcNow.AddSeconds(-60);
                 _configuration.SetString("AccessToken", string.Empty);
                 _configuration.SetString("RefreshToken", string.Empty);
                 _configuration.SetString("Expires", string.Empty);
@@ -369,79 +468,85 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             if (jsonResponse.access_token != null)
             {
-                Apis.Get<IEventLog>().Write("Obtained access token for Hubspot", new EventLogEntryWriteOptions() {EventType = "Debug"});
+                Apis.Get<IEventLog>().Write("Obtained access token for Hubspot",
+                    new EventLogEntryWriteOptions() { EventType = nameof(EventLogEntryType.Information) });
 
                 _configuration.SetString("AccessToken", jsonResponse.access_token.ToString());
                 _configuration.SetString("RefreshToken", jsonResponse.refresh_token.ToString());
-                _configuration.SetString("Expires", DateTime.Now.AddHours(4).ToString());
+                var expiresIn = jsonResponse.expires_in.ToString();
+                _configuration.SetString("Expires", DateTime.UtcNow
+                    .AddSeconds(Convert.ToInt32(expiresIn)) // use expiration sent with response
+                    .AddSeconds(-60) // and decrease it by a minute
+                    .ToString(CultureInfo.InvariantCulture));
             }
 
             _configuration.Commit();
-
         }
 
         public string GetAccessToken()
         {
-            if (PluginManager.IsEnabled(this))
+            if (!PluginManager.IsEnabled(this)) return _accessToken;
+
+            if (DateTime.UtcNow < _expires) return _accessToken;
+
+            if (!string.IsNullOrWhiteSpace(_refreshToken))
             {
-                string url = Apis.Get<IUrl>().Absolute(Apis.Get<IUrl>().ApplicationEscape("~"));
+                var url = Apis.Get<IUrl>().Absolute(Apis.Get<IUrl>().ApplicationEscape("~"));
 
-                if (!string.IsNullOrWhiteSpace(_refreshToken))
+                var content = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
-                    if (DateTime.Now > _expires.AddHours(-1))
-                    {
-                        FormUrlEncodedContent conent = new FormUrlEncodedContent(new Dictionary<string, string> {
-                            {"grant_type","refresh_token"},
-                            {"client_id",_configuration.GetString("ClientId")},
-                            {"client_secret",_configuration.GetString("ClientSecret")},
-                            {"redirect_uri",url},
-                            {"refresh_token",_refreshToken}});
+                    { "grant_type", "refresh_token" },
+                    { "client_id", _configuration.GetString("ClientId") },
+                    { "client_secret", _configuration.GetString("ClientSecret") },
+                    { "redirect_uri", url },
+                    { "refresh_token", _refreshToken }
+                });
 
-                        dynamic repsonse = CreateOauthRequest(conent);
+                var response = CreateOauthRequest(content);
 
-                        ProcessHubspotRequestRepsonse(repsonse);
-                    }
-                }
-                else
-                {
-                    Apis.Get<IEventLog>().Write("Hubspot API Issue: Refresh token blank, youn need to re-link your account", new EventLogEntryWriteOptions());
-                }
+                ProcessHubspotRequestResponse(response);
+            }
+            else
+            {
+                Apis.Get<IEventLog>()
+                    .Write("Hubspot API Issue: Refresh token blank, you need to re-link your account",
+                        new EventLogEntryWriteOptions());
             }
 
             return _accessToken;
         }
 
-        public bool InitialLinkoAuth(string authCOde)
+        public bool InitialLinkoAuth(string authCode, string url)
         {
-            if (!string.IsNullOrWhiteSpace(authCOde))
+            if (!string.IsNullOrWhiteSpace(authCode))
             {
-                string url = Apis.Get<IUrl>().Absolute(Apis.Get<IUrl>().ApplicationEscape("~"));
-
-                FormUrlEncodedContent content = new FormUrlEncodedContent(new Dictionary<string, string> {
-                    {"grant_type","authorization_code"},
-                    {"client_id",_configuration.GetString("ClientId")},
-                    {"client_secret",_configuration.GetString("ClientSecret")},
-                    {"redirect_uri",url},
-                    {"code",authCOde}});
+                FormUrlEncodedContent content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    { "grant_type", "authorization_code" },
+                    { "client_id", _configuration.GetString("ClientId") },
+                    { "client_secret", _configuration.GetString("ClientSecret") },
+                    { "redirect_uri", url },
+                    { "code", authCode }
+                });
 
                 dynamic repsonse = CreateOauthRequest(content);
 
-                ProcessHubspotRequestRepsonse(repsonse);
+                ProcessHubspotRequestResponse(repsonse);
 
                 return repsonse.access_token != null;
             }
-            else
-            {
-                Apis.Get<IEventLog>().Write("Hubspot API Issue: auth code blank, you need to link your account", new EventLogEntryWriteOptions());
-                throw new ArgumentException("Hubspot API Issue: auth code blank, you need to link your account");
-            }
+
+            Apis.Get<IEventLog>().Write("Hubspot API Issue: auth code blank, you need to link your account",
+                new EventLogEntryWriteOptions());
+            throw new ArgumentException("Hubspot API Issue: auth code blank, you need to link your account");
         }
 
         public void SynchronizeUser(User u)
         {
             Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                Apis.Get<IEventLog>().Write($"Syncronizing {u.Username} to Hubspot", new EventLogEntryWriteOptions() { EventType = "Information" });
+                Apis.Get<IEventLog>().Write($"Synchronizing {u.Username} to Hubspot",
+                    new EventLogEntryWriteOptions() { EventType = "Information" });
 
                 string parameters = string.Empty;
                 StringBuilder sb = new StringBuilder();
@@ -476,7 +581,9 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     }
                 }
 
-                dynamic response = CreateApiRequest("POST", $"contacts/v1/contact/createOrUpdate/email/{Apis.Get<IUrl>().Encode(u.PrivateEmail)}/", "{" + sb + "}");
+                dynamic response = CreateApiRequest("POST",
+                    $"contacts/v1/contact/createOrUpdate/email/{Apis.Get<IUrl>().Encode(u.PrivateEmail)}/",
+                    "{" + sb + "}");
 
                 if (response.status != null && response.status == "error")
                 {
@@ -488,10 +595,12 @@ namespace FourRoads.TelligentCommunity.HubSpot
         public dynamic GetUserProperties(string email)
         {
             dynamic response = null;
-            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
-            {
-                response = CreateApiRequest("GET", $"contacts/v1/contact/email/{Apis.Get<IUrl>().Encode(email)}/profile", string.Empty);
-            });
+            Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName,
+                () =>
+                {
+                    response = CreateApiRequest("GET",
+                        $"contacts/v1/contact/email/{Apis.Get<IUrl>().Encode(email)}/profile", string.Empty);
+                });
             return response;
         }
 
@@ -514,7 +623,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 }
                 catch (Exception e)
                 {
-                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: Failed to map contact property groups : {response} {e.Message}",
+                    Apis.Get<IEventLog>().Write(
+                        $"Hubspot API Issue: Failed to map contact property groups : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
                 }
             });
@@ -530,13 +640,15 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                dynamic response = CreateApiRequest("POST", "properties/v1/contacts/groups", JsonConvert.SerializeObject(contactPropertyGroup));
+                dynamic response = CreateApiRequest("POST", "properties/v1/contacts/groups",
+                    JsonConvert.SerializeObject(contactPropertyGroup));
 
                 try
                 {
                     newContactPropertyGroup = response.ToObject<ContactPropertyGroup>();
 
-                    if (newContactPropertyGroup == null || string.IsNullOrWhiteSpace(newContactPropertyGroup.displayName))
+                    if (newContactPropertyGroup == null ||
+                        string.IsNullOrWhiteSpace(newContactPropertyGroup.displayName))
                     {
                         Apis.Get<IEventLog>().Write("Hubspot API Issue: Failed to create contact property group ",
                             new EventLogEntryWriteOptions());
@@ -544,7 +656,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 }
                 catch (Exception e)
                 {
-                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: Failed to create contact property group : {response} {e.Message}",
+                    Apis.Get<IEventLog>().Write(
+                        $"Hubspot API Issue: Failed to create contact property group : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
                 }
             });
@@ -562,11 +675,11 @@ namespace FourRoads.TelligentCommunity.HubSpot
             {
                 dynamic response = CreateApiRequest("POST", "properties/v1/contacts/properties",
                     JsonConvert.SerializeObject(contactProperty,
-                    Formatting.None,
-                    new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore
-                    }
+                        Formatting.None,
+                        new JsonSerializerSettings
+                        {
+                            NullValueHandling = NullValueHandling.Ignore
+                        }
                     )
                 );
 
@@ -582,7 +695,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 }
                 catch (Exception e)
                 {
-                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: Failed to create contact property : {response} {e.Message}",
+                    Apis.Get<IEventLog>().Write(
+                        $"Hubspot API Issue: Failed to create contact property : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
                 }
             });
@@ -601,7 +715,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                dynamic response = CreateApiRequest("GET", $"properties/v1/contacts/properties/named/{name.ToLower()}", string.Empty);
+                dynamic response = CreateApiRequest("GET", $"properties/v1/contacts/properties/named/{name.ToLower()}",
+                    string.Empty);
 
                 try
                 {
@@ -615,7 +730,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 }
                 catch (Exception e)
                 {
-                    Apis.Get<IEventLog>().Write($"Hubspot API Issue: Failed to locate contact property : {response} {e.Message}",
+                    Apis.Get<IEventLog>().Write(
+                        $"Hubspot API Issue: Failed to locate contact property : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
                 }
             });
@@ -627,13 +743,14 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                dynamic response = CreateApiRequest("POST", $"contacts/v1/contact/email/{Apis.Get<IUrl>().Encode(email)}/profile",
+                dynamic response = CreateApiRequest("POST",
+                    $"contacts/v1/contact/email/{Apis.Get<IUrl>().Encode(email)}/profile",
                     JsonConvert.SerializeObject(properties,
-                    Formatting.None,
-                    new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore
-                    }
+                        Formatting.None,
+                        new JsonSerializerSettings
+                        {
+                            NullValueHandling = NullValueHandling.Ignore
+                        }
                     )
                 );
             });
@@ -651,13 +768,14 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                response = CreateApiRequest("POST", $"contacts/v1/contact/createOrUpdate/email/{Apis.Get<IUrl>().Encode(email)}",
+                response = CreateApiRequest("POST",
+                    $"contacts/v1/contact/createOrUpdate/email/{Apis.Get<IUrl>().Encode(email)}",
                     JsonConvert.SerializeObject(properties,
-                    Formatting.None,
-                    new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore
-                    }
+                        Formatting.None,
+                        new JsonSerializerSettings
+                        {
+                            NullValueHandling = NullValueHandling.Ignore
+                        }
                     )
                 );
             });
@@ -676,13 +794,15 @@ namespace FourRoads.TelligentCommunity.HubSpot
             {
                 message = $"Found {listContacts.Count} contact property groups";
 
-                httpContext.Response.Write($"$.telligent.evolution.notifications.show('{ Apis.Get<IHtml>().EnsureEncoded(message)}', {{ type: 'success' }});");
+                httpContext.Response.Write(
+                    $"$.telligent.evolution.notifications.show('{Apis.Get<IHtml>().EnsureEncoded(message)}', {{ type: 'success' }});");
             }
             else
             {
                 message = "Failed to read contact property groups";
 
-                httpContext.Response.Write($"$.telligent.evolution.notifications.show('{ Apis.Get<IHtml>().EnsureEncoded(message)}', {{ type: 'error' }});");
+                httpContext.Response.Write(
+                    $"$.telligent.evolution.notifications.show('{Apis.Get<IHtml>().EnsureEncoded(message)}', {{ type: 'error' }});");
             }
 
             Apis.Get<IEventLog>().Write($"Hubspot API: {message}", new EventLogEntryWriteOptions());
@@ -693,6 +813,24 @@ namespace FourRoads.TelligentCommunity.HubSpot
             this._callbackController = controller;
         }
 
-        public IEnumerable<Type> Plugins => new Type[] { typeof(PingJob) };
+        public IEnumerable<Type> Plugins => new[]
+        {
+            typeof(AuthorizePropertyTemplate),
+            typeof(TriggerActionPropertyTemplate),
+            typeof(LabelPropertyTemplate),
+            typeof(PingJob)
+        };
+
+        private string _defaultPageXml = @"
+<contentFragmentPage pageName=""hubspot-ok"" isCustom=""true"" layout=""Content"" themeType=""0c647246-6735-42f9-875d-c8b991fe739b"" title=""HubSpot Authorization Success"" lastModified=""2022-06-21 11:30:04Z"">
+  <regions>
+    <region regionName=""Content"">
+      <contentFragments>
+        <contentFragment type=""Telligent.Evolution.ScriptedContentFragments.ScriptedContentFragment, Telligent.Evolution.Platform::42eb3aec20af4b97bd8e5ab3f84a1feb"" showHeader=""False"" cssClassAddition=""no-wrapper with-spacing"" isLocked=""False"" configuration=""title=%24%7Bresource%3ACF_RawContent%7D&amp;html=%3Ch1%3ESuccess%21%3C%2Fh1%3E%0D%0A%3Cdiv%20class%3D%22message%22%3E%0D%0AHubSpot%20authorization%20code%20has%20been%20accepted%0D%0A%3C%2Fdiv%3E&amp;backgroundImage=&amp;width=page&amp;cssClass="" />
+      </contentFragments>
+    </region>
+  </regions>
+  <contentFragmentTabs />
+</contentFragmentPage>";
     }
 }

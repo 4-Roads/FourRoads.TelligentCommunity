@@ -65,6 +65,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Controls\AuthorizePropertyTemplate.cs" />
+    <Compile Include="Controls\LabelPropertyTemplate.cs" />
     <Compile Include="Controls\TriggerActionPropertyTemplate.cs" />
     <Compile Include="HubSpotCrm.cs" />
     <Compile Include="Models\Contact.cs" />

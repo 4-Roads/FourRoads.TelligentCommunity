@@ -1,14 +1,15 @@
 ﻿using System.IO;
 using System.Web;
-using Telligent.Evolution.Components;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
 
 namespace FourRoads.TelligentCommunity.HubSpot.Controls
 {
- public class AuthorizePropertyTemplate : IPropertyTemplate, IHttpCallback
+    public class AuthorizePropertyTemplate : IPropertyTemplate, IHttpCallback
     {
-        public string[] DataTypes => new string[] { "custom", "string" };
+        public string[] DataTypes => new[] { "custom", "string" };
 
         public string TemplateName => "hubspot_authorize";
 
@@ -50,13 +51,13 @@ namespace FourRoads.TelligentCommunity.HubSpot.Controls
             string innerButtonLabel = options.Property.Options["innerButtonLabel"] ?? "";
             string outerButtonLabel = options.Property.Options["outerButtonLabel"] ?? "Authorize oAuth Code";
             string inputId = options.UniqueId + "-input";
-            string resturl = $"'{_callbackController.GetUrl()}'";
+            string restUrl = $"'{_callbackController.GetUrl()}'";
             string data = $"refresh:true, authCode: $('#{(object)inputId}').val()";
 
             if (options.Property.Editable)
             {
                 writer.Write($"<input size=\"40\" id='{inputId}' style='padding: 6px; width: 100%;'>");
-                writer.WriteLine("</br>");             
+                writer.WriteLine("</br>");
                 writer.WriteLine("</br>");
 
                 writer.Write($"<label class=\"field-item-name\" style='padding: 6px 0px;'>{outerButtonLabel}</label>");
@@ -69,16 +70,16 @@ namespace FourRoads.TelligentCommunity.HubSpot.Controls
                 writer.WriteLine("</br>");
 
                 string action = string.Empty;
-                if (!string.IsNullOrWhiteSpace(resturl))
+                if (!string.IsNullOrWhiteSpace(restUrl))
                 {
                     action = @"
                     
 
                     $.telligent.evolution.get({
-                	url : " + resturl + @",
+                	url : " + restUrl + @",
                 	data : {"
-                              + data +
-                            @"},
+                             + data +
+                             @"},
                 	success : function (response) {
                            $.telligent.evolution.notifications.show('oAuth Syncronized', { type: 'success' });
                     },
@@ -96,7 +97,7 @@ namespace FourRoads.TelligentCommunity.HubSpot.Controls
                 }
 
                 writer.Write(
-                        $@"<script type=""text/javascript"">
+                    $@"<script type=""text/javascript"">
                                 $(document).ready(function() {{
                                     var api = {(object)options.JsonApi};
                                     var button = $('#{(object)options.UniqueId}');
@@ -115,8 +116,9 @@ namespace FourRoads.TelligentCommunity.HubSpot.Controls
         public void ProcessRequest(HttpContextBase httpContext)
         {
             string authCode = httpContext.Request.Params.Get("authCode");
-
-            _hubSpotPlugin.InitialLinkoAuth(authCode);
+            string url = Apis.Get<IUrl>().Absolute(Apis.Get<IUrl>().ApplicationEscape("~"));
+            url = $"{url}hubspot/authorize";
+            _hubSpotPlugin.InitialLinkoAuth(authCode, url);
         }
 
         public void SetController(IHttpCallbackController controller)
