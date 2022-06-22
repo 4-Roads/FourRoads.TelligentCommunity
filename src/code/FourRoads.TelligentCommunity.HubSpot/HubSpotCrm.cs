@@ -363,18 +363,14 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         private dynamic CreateApiRequest(string requestType, string endPoint, string data)
         {
-            string token = GetAccessToken();
-
-            return CreateRequest(requestType, endPoint,
-                () =>
-                {
-                    using (var content = new StringContent(data, Encoding.UTF8, "application/json"))
-                    {
-                        Debug.Assert(content != null, nameof(content) + " != null");
-                        return content;
-                    }
-                },
-                cli => cli.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token));
+            using (var content = new StringContent(data, Encoding.UTF8, "application/json"))
+            {
+                var token = GetAccessToken();
+                return CreateRequest(requestType, endPoint, 
+                    // ReSharper disable once AccessToDisposedClosure
+                    () => content,
+                    cli => cli.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token));
+            }
         }
 
         private dynamic CreateOauthRequest(HttpContent parameters)
