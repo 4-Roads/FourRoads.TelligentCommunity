@@ -26,10 +26,10 @@
         container.fadeIn("slow");
     };
     var attachHandlers = function (context) {
-        context.selectors.submit.click(function () { save(context, context.selectors.validateInput.val()); });
-        context.selectors.disable.click(function () { save(context, '~~disable~~'); });
-        context.selectors.toggle.click(function () { context.selectors.activate.hide(); context.selectors.configure.show(); });
-        context.selectors.generateCodes.click(function (e) {
+        context.selectors.submit.on('click', function () { save(context, context.selectors.validateInput.val()); });
+        context.selectors.disable.on('click', function () { save(context, '~~disable~~'); });
+        context.selectors.toggle.on('click', function () { context.selectors.activate.hide(); context.selectors.configure.show(); });
+        context.selectors.generateCodes.on('click', function (e) {
             e.preventDefault();
             $.telligent.evolution.post({
                 url: context.urls.generateCodes,
@@ -48,7 +48,7 @@
             // if enter was pressed, trigger a click on the submit button
             if (e.keyCode === 13) {
                 e.preventDefault();
-                context.selectors.submit.click();
+                context.selectors.submit.trigger('click');
             }
         });
     },

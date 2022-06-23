@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Security;
-using FourRoads.Common.Extensions;
-using FourRoads.Common.Interfaces;
 using FourRoads.Common.TelligentCommunity.Routing;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Model;
@@ -16,8 +14,10 @@ using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Storage.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using User = Telligent.Evolution.Extensibility.Api.Entities.Version1.User;
+using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 
 namespace FourRoads.TelligentCommunity.Mfa.Logic
 {
@@ -28,12 +28,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private readonly IUsers _usersService;
         private readonly IUrl _urlService;
         private readonly IMfaDataProvider _mfaDataProvider;
-        private readonly ICache _cache;
-        private readonly NamedItemLockSpin<int> _namedLocks = new NamedItemLockSpin<int>(10);
         private IVerifyEmailProvider _emailProvider;
         private ISocketMessage _socketMessenger;
         private bool _enableEmailVerification;
         private byte[] _jwtSecret;
+        private readonly IAuthenticationService _authenticationService;
 
         //{295391e2b78d4b7e8056868ae4fe8fb3}
         private static readonly string _defaultMfaPageLayout =
@@ -55,18 +54,19 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private static readonly string _eakey_mfaVersion = "__mfaVersion";
         private static readonly string _eakey_emailVerified = "___emailVerified";
         private static readonly string _eakey_emailVerifyCode = "_eakey_emailVerifyCode";
-        private DateTime _emailValilationCutoffDate;
-        private string _v111_4_CookieName = "Impersonator";
-        private string _cookieName = "te.u";
+        private DateTime _emailValidationCutoffDate;
+        private const string ImpersonatorV1114CookieName = "Impersonator";
+        private const string ImpersonatorCookieName = "te.u";
         private bool _isPersistent;
+        private List<string> _fileStoreNames = new List<string>();
 
 
-        public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, ICache cache)
+        public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, IAuthenticationService authService)
         {
-            _usersService = usersService;
-            _urlService = urlService;
-            _mfaDataProvider = mfaDataProvider;
-            _cache = cache;
+            _usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
+            _urlService = urlService ?? throw new ArgumentNullException(nameof(urlService));
+            _mfaDataProvider = mfaDataProvider ?? throw new ArgumentNullException(nameof(mfaDataProvider));
+            _authenticationService = authService ?? throw new ArgumentNullException(nameof(authService));
         }
 
         public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider,
@@ -75,10 +75,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _enableEmailVerification = enableEmailVerification;
             _emailProvider = emailProvider;
             _socketMessenger = socketMessenger;
-            _emailValilationCutoffDate = emailValidationCutoffDate;
+            _emailValidationCutoffDate = emailValidationCutoffDate;
             _usersService.Events.AfterAuthenticate += EventsOnAfterAuthenticate;
             _jwtSecret = Encoding.UTF8.GetBytes(jwtSecret).Take(32).ToArray();
             _isPersistent = isPersistent;
+            _fileStoreNames = PluginManager.Get<ISecuredCentralizedFileStore>()
+                .Select(fs => $"/{fs.FileStoreKey.ToLowerInvariant().Replace(".", "-")}/").ToList();
         }
 
         /// <summary>
@@ -89,9 +91,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         {
             //user has authenticated
             //is 2 factor enabled for user?
-            var user = _usersService.Get(new UsersGetOptions() {Username = userAfterAuthenticateEventArgs.Username});
-       
-            if (IsImpersonator()) 
+            var user = _usersService.Get(new UsersGetOptions() { Username = userAfterAuthenticateEventArgs.Username });
+
+            if (IsImpersonator())
                 return;
 
             TwoFactorCheckAndSetState(user);
@@ -124,44 +126,49 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         /// </summary>
         public void FilterRequest(IHttpRequest request)
         {
-            if (IsImpersonator(request.HttpContext.Request) || !IsPageRequest(request.HttpContext.Request)) 
+            if (IsImpersonator(request.HttpContext.Request)
+                || (!IsPageRequest(request.HttpContext.Request)
+                    && !IsSecuredFileStoreRequest(request.HttpContext.Request)
+                )
+               )
                 return;
 
             var user = _usersService.AccessingUser;
-            
-            if (user.Username == _usersService.AnonymousUserName) 
+
+            if (user.Username == _usersService.AnonymousUserName)
                 return;
 
             if (!(request.HttpContext.Request.Url is null) &&
                 request.HttpContext.Request.Url.LocalPath.StartsWith("/logout"))
             {
-                RemoveTwoFactorState(request);
+                RemoveTwoFactorState();
                 return;
             }
 
             if (TwoFactorCheckAndSetState(user))
             {
                 var jwt = GetJwt(request.HttpContext);
-                
-                if (GetTwoFactorState(user,jwt) == false)
+
+                if (GetTwoFactorState(user, jwt) == false)
                 {
                     ForceRedirect(request,
                         "/mfa" + "?ReturnUrl=" + _urlService.Encode(request.HttpContext.Request.RawUrl));
                 }
             }
 
-            if (!_enableEmailVerification || !EmailChanged(user)) 
+            if (!_enableEmailVerification || !EmailChanged(user))
                 return;
 
             //Never validated and also joined before cutoff date so assumed a valid user
-            if (user.JoinDate < _emailValilationCutoffDate &&
+            if (user.JoinDate < _emailValidationCutoffDate &&
                 string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value))
             {
                 SetEmailInExtendedAttributes(user);
                 return;
             }
 
-            ForceRedirect(request, "/verifyemail" + "?ReturnUrl=" + _urlService.Encode(request.HttpContext.Request.RawUrl));
+            ForceRedirect(request,
+                "/verifyemail" + "?ReturnUrl=" + _urlService.Encode(request.HttpContext.Request.RawUrl));
 
             if (EmailNotSent(user))
             {
@@ -198,23 +205,23 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             return result;
         }
 
-        private void RemoveTwoFactorState(IHttpRequest request)
+        private void RemoveTwoFactorState()
         {
             HttpContext.Current.Response.Cookies.Add(new HttpCookie(GetMfaCookieName())
             {
                 Expires = DateTime.UtcNow.AddDays(-7)
             });
         }
-        
+
         private void SetEmailInExtendedAttributes(User user)
         {
             var attributes = new List<ExtendedAttribute>
             {
-                new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = string.Empty},
-                new ExtendedAttribute() {Key = _eakey_emailVerified, Value = user.PrivateEmail}
+                new ExtendedAttribute() { Key = _eakey_emailVerifyCode, Value = string.Empty },
+                new ExtendedAttribute() { Key = _eakey_emailVerified, Value = user.PrivateEmail }
             };
 
-            _usersService.Update(new UsersUpdateOptions() {Id = user.Id, ExtendedAttributes = attributes});
+            _usersService.Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = attributes });
         }
 
         public bool SendValidationCode(User user)
@@ -226,7 +233,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             //Send a validation code, store it in the users profile extended attributes
             var attributes = new List<ExtendedAttribute>
             {
-                new ExtendedAttribute() {Key = _eakey_emailVerifyCode, Value = code}
+                new ExtendedAttribute { Key = _eakey_emailVerifyCode, Value = code }
             };
 
             return _usersService.Update(new UsersUpdateOptions()
@@ -236,12 +243,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 .HasErrors();
         }
 
-        private bool EmailNotSent(User user)
+        private static bool EmailNotSent(User user)
         {
             return string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value);
         }
 
-        private bool EmailChanged(User user)
+        private static bool EmailChanged(User user)
         {
             return (string.Compare(user.PrivateEmail, user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value,
                 StringComparison.OrdinalIgnoreCase) != 0);
@@ -271,9 +278,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 // this should only happen when in the second auth stage 
                 // for blocked callbacks so a bit brutal
                 response.Clear();
-                
+
                 httpRequest.HttpContext.ApplicationInstance.CompleteRequest();
-                
+
                 return;
             }
 
@@ -287,15 +294,17 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 string.Compare(httpRequest.HttpContext.Request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) ==
                 0 &&
                 //Is this a main page and not a callback etc 
-                IsPageRequest(request))
+                (IsPageRequest(request) || IsSecuredFileStoreRequest(request)))
             {
                 //redirect to 2 factor page
-                bool force = httpRequest.HttpContext.ApplicationInstance == null;
+                // ReSharper disable ConditionIsAlwaysTrueOrFalse
+                var force = httpRequest.HttpContext.ApplicationInstance == null;
                 response.Redirect(page, force);
                 if (!force)
                 {
                     httpRequest.HttpContext.ApplicationInstance.CompleteRequest();
                 }
+                // ReSharper restore ConditionIsAlwaysTrueOrFalse
             }
         }
 
@@ -305,6 +314,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                     request.CurrentExecutionFilePathExtension == ".htm" ||
                     request.CurrentExecutionFilePathExtension == ".ashx" ||
                     request.CurrentExecutionFilePathExtension == string.Empty);
+        }
+
+        private bool IsSecuredFileStoreRequest(HttpRequestBase request)
+        {
+            return request.Url != null && _fileStoreNames.Any(u => request.Url.AbsolutePath.Contains(u));
         }
 
         private bool IsOauthRequest(HttpRequestBase request)
@@ -331,7 +345,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private string GetAuthCookieName()
         {
-            return FormsAuthentication.FormsCookieName;
+            return _authenticationService != null
+                ? AuthenticationService.AuthCookieName
+                : FormsAuthentication.FormsCookieName;
         }
 
         private string GetMfaCookieName()
@@ -349,33 +365,33 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private enum TwoFactorState
         {
             NotEnabled,
-            Passed,
-            NotPassed
+            Passed
         }
 
         private void SetTwoFactorState(User user, TwoFactorState twoFactorState)
         {
+            Debug.Assert(user.Id != null, "user.Id != null");
             var payload = new Dictionary<string, object>
             {
-                {nameof(PayLoad.userId), user.Id.Value},
-                {nameof(PayLoad.state), twoFactorState},
+                { nameof(PayLoad.userId), user.Id.Value },
+                { nameof(PayLoad.state), twoFactorState },
             };
             var mfaCookieName = GetMfaCookieName();
             var token = CreateJoseJwtToken(payload);
             var expiration = GetMfaCookieExpirationDate();
-            
+
             var mfaCookie = new HttpCookie(mfaCookieName)
             {
                 Value = token,
                 HttpOnly = true,
                 Secure = true
             };
-            
+
             if (expiration.HasValue)
             {
-                mfaCookie.Expires = expiration.Value.AddDays(1);
+                mfaCookie.Expires = expiration.Value;
             }
-            
+
             HttpContext.Current.Response.Cookies.Add(mfaCookie);
         }
 
@@ -383,7 +399,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         {
             //do not set expiration of configured to use session cookie
             if (_isPersistent == false) return null;
-            
+
             //decrypt FormsAuthentication cookie to get its expiration date and time
             var authCookie = HttpContext.Current.Request.Cookies[FormsAuthentication.FormsCookieName];
             return authCookie == null ? null : FormsAuthentication.Decrypt(authCookie.Value)?.Expiration;
@@ -406,27 +422,27 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             return require2F;
         }
 
-        public bool IsImpersonator()
+        private static bool IsImpersonator()
         {
             return IsImpersonator(HttpContext.Current.Request);
         }
 
-        private bool IsImpersonator(HttpRequest request)
+        private static bool IsImpersonator(HttpRequest request)
         {
             return IsImpersonator(new HttpRequestWrapper(request));
         }
 
-        private bool IsImpersonator(HttpRequestBase request)
+        private static bool IsImpersonator(HttpRequestBase request)
         {
-            var result = false;
-            var cookie = request.Cookies[_cookieName];
+            bool result;
+            var cookie = request.Cookies[ImpersonatorCookieName];
             if (cookie != null)
             {
                 result = HasImpersonatorFlag(cookie);
             }
             else
             {
-                cookie = request.Cookies[_v111_4_CookieName];
+                cookie = request.Cookies[ImpersonatorV1114CookieName];
                 result = HasOldImpersonatorFlag(cookie);
             }
 
@@ -439,7 +455,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         /// </summary>
         /// <param name="httpCookie"></param>
         /// <returns></returns>
-        private bool HasOldImpersonatorFlag(HttpCookie httpCookie)
+        private static bool HasOldImpersonatorFlag(HttpCookie httpCookie)
         {
             //just checking for existence of the cookie
             return (httpCookie != null && !string.IsNullOrEmpty(httpCookie.Value));
@@ -451,7 +467,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         /// </summary>
         /// <param name="httpCookie"></param>
         /// <returns></returns>
-        private bool HasImpersonatorFlag(HttpCookie httpCookie)
+        private static bool HasImpersonatorFlag(HttpCookie httpCookie)
         {
             if (httpCookie == null || string.IsNullOrWhiteSpace(httpCookie.Value)) return false;
             try
@@ -470,17 +486,22 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             //ensure we have access to user.ExtendedAttributes
             _usersService.RunAsUser(_usersService.ServiceUserName, () =>
             {
-                UsersUpdateOptions updateOptions = new UsersUpdateOptions()
-                    {Id = user.Id, ExtendedAttributes = user.ExtendedAttributes};
+                var updateOptions = new UsersUpdateOptions
+                {
+                    Id = user.Id, 
+                    ExtendedAttributes = user.ExtendedAttributes
+                };
+
                 if (enabled == false)
                 {
                     //old codes should be deleted
+                    Debug.Assert(user.Id != null, "user.Id != null");
                     _mfaDataProvider.ClearCodes(user.Id.Value);
                     _mfaDataProvider.ClearUserKey(user.Id.Value);
                     //remove version number
 #if !SIMULATE_OLDMFA_KEY_VERSION
                     updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
-                        {Key = _eakey_mfaVersion, Value = string.Empty});
+                        { Key = _eakey_mfaVersion, Value = string.Empty });
 #endif
                 }
                 else
@@ -488,12 +509,12 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 #if !SIMULATE_OLDMFA_KEY_VERSION
                     //store plugin version in EA
                     updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
-                        {Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture)});
+                        { Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture) });
 #endif
                 }
 
                 updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
-                    {Key = _eakey_mfaEnabled, Value = enabled.ToString()});
+                    { Key = _eakey_mfaEnabled, Value = enabled.ToString() });
                 _usersService.Update(updateOptions);
             });
         }
@@ -521,6 +542,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private bool ValidateOneTimeCode(User user, string code)
         {
+            Debug.Assert(user.Id != null, "user.Id != null");
             return _mfaDataProvider.RedeemCode(user.Id.Value, code.Hash(GetAccountSecureKey(user), user.Id.Value));
         }
 
@@ -534,7 +556,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             }
             else
             {
-                Guid userKey = _mfaDataProvider.GetUserKey(user.Id.Value);
+                Debug.Assert(user.Id != null, "user.Id != null");
+                var userKey = _mfaDataProvider.GetUserKey(user.Id.Value);
                 if (userKey == Guid.Empty)
                 {
                     userKey = Guid.NewGuid();
@@ -579,22 +602,24 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private string CreateJoseJwtToken(Dictionary<string, object> payload)
         {
-            string token = Jose.JWT.Encode(payload, _jwtSecret, Jose.JweAlgorithm.A256KW , Jose.JweEncryption.A128CBC_HS256);
+            var token = Jose.JWT.Encode(payload, _jwtSecret, Jose.JweAlgorithm.A256KW,
+                Jose.JweEncryption.A128CBC_HS256);
             return token;
         }
 
-        private bool GetTwoFactorState(User user , string token)
+        private bool GetTwoFactorState(User user, string token)
         {
+            Debug.Assert(user.Id != null, "user.Id != null");
             return ValidateJwtToken(user.Id.Value, token) ?? false;
         }
 
         private bool? ValidateJwtToken(int userId, string sessionToken)
         {
-            Debug.WriteLine($"ValidateJwtToken {HttpContext.Current.Request.RawUrl}");
             PayLoad payload;
             try
             {
-                payload = Jose.JWT.Decode<PayLoad>(sessionToken, _jwtSecret, Jose.JweAlgorithm.A256KW, Jose.JweEncryption.A128CBC_HS256);
+                payload = Jose.JWT.Decode<PayLoad>(sessionToken, _jwtSecret, Jose.JweAlgorithm.A256KW,
+                    Jose.JweEncryption.A128CBC_HS256);
             }
             catch (Exception)
             {
@@ -623,13 +648,13 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                     HasApplicationContext = false,
                     Validate = (context, accessController) =>
                     {
-                        var user = _usersService.Get(new UsersGetOptions {Id = context.UserId});
+                        var user = _usersService.Get(new UsersGetOptions { Id = context.UserId });
                         if (_usersService.AnonymousUserName == user.Username &&
                             !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["code"]) &&
                             !string.IsNullOrWhiteSpace(HttpContext.Current.Request.QueryString["userName"]))
                         {
                             var userValidation = _usersService.Get(new UsersGetOptions()
-                                {Username = HttpContext.Current.Request.QueryString["userName"]});
+                                { Username = HttpContext.Current.Request.QueryString["userName"] });
 
                             if (userValidation != null && !userValidation.HasErrors())
                             {
@@ -648,7 +673,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private void ValidateNonAnonymous(PageContext context, IUrlAccessController accessController)
         {
-            var user = _usersService.Get(new UsersGetOptions {Id = context.UserId});
+            var user = _usersService.Get(new UsersGetOptions { Id = context.UserId });
             if (_usersService.AnonymousUserName == user.Username)
             {
                 accessController.Redirect(Apis.Get<ICoreUrls>().LogIn());
@@ -658,17 +683,19 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         public List<OneTimeCode> GenerateCodes(User user)
         {
             //old codes should be deleted
+            Debug.Assert(user.Id != null, "user.Id != null");
             _mfaDataProvider.ClearCodes(user.Id.Value);
 
             var codes = new List<OneTimeCode>(_oneTimeCodesToGenerate);
 
-            for (int i = 0; i < _oneTimeCodesToGenerate; i++)
+            for (var i = 0; i < _oneTimeCodesToGenerate; i++)
             {
-                //generatig the code in form of XXXX XXXX with zero-padding
-                string plainTextCode = $"{MfaCryptoExtension.RandomInteger(0, 9999):D4} {MfaCryptoExtension.RandomInteger(0, 9999):D4}";
-                string encryptedCode = plainTextCode.Hash(GetAccountSecureKey(user), user.Id.Value);
+                //generating the code in form of XXXX XXXX with zero-padding
+                var plainTextCode =
+                    $"{MfaCryptoExtension.RandomInteger(0, 9999):D4} {MfaCryptoExtension.RandomInteger(0, 9999):D4}";
+                var encryptedCode = plainTextCode.Hash(GetAccountSecureKey(user), user.Id.Value);
                 //we store just the hash value of the code, but...
-                OneTimeCode code = _mfaDataProvider.CreateCode(user.Id.Value, encryptedCode);
+                var code = _mfaDataProvider.CreateCode(user.Id.Value, encryptedCode);
                 //..but return plain text code so users could see and print/save them
                 code.PlainTextCode = plainTextCode;
 
@@ -679,11 +706,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             _usersService.RunAsUser(_usersService.ServiceUserName, () =>
             {
                 UsersUpdateOptions updateOptions = new UsersUpdateOptions()
-                    {Id = user.Id.Value, ExtendedAttributes = user.ExtendedAttributes};
+                    { Id = user.Id.Value, ExtendedAttributes = user.ExtendedAttributes };
                 updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
-                    {Key = _eakey_codesGeneratedOnUtc, Value = DateTime.UtcNow.ToString("O")});
+                    { Key = _eakey_codesGeneratedOnUtc, Value = DateTime.UtcNow.ToString("O") });
                 updateOptions.ExtendedAttributes.Add(new ExtendedAttribute()
-                    {Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture)});
+                    { Key = _eakey_mfaVersion, Value = _mfaLogicVersion.ToString(CultureInfo.InvariantCulture) });
                 _usersService.Update(updateOptions);
             });
             return codes;
@@ -705,15 +732,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 }
 
                 var codesGenerated = user.ExtendedAttributes.Get(_eakey_codesGeneratedOnUtc);
-                if (codesGenerated != null)
+                
+                if (codesGenerated == null) return;
+                
+                if (DateTime.TryParse(codesGenerated.Value, out DateTime generatedOnUtc))
                 {
-                    if (DateTime.TryParse(codesGenerated.Value, out DateTime generatedOnUtc))
-                    {
-                        result.CodesGeneratedOn = generatedOnUtc;
-                    }
-
-                    result.CodesLeft = _mfaDataProvider.CountCodesLeft(user.Id.Value);
+                    result.CodesGeneratedOn = generatedOnUtc;
                 }
+
+                Debug.Assert(user.Id != null, "user.Id != null");
+                result.CodesLeft = _mfaDataProvider.CountCodesLeft(user.Id.Value);
             });
             return result;
         }
