@@ -82,6 +82,7 @@ using SitePermission = Telligent.Evolution.Components.SitePermission;
 
 namespace FourRoads.TelligentCommunity.HubSpot
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class HubspotCrm : IConfigurablePlugin, ISingletonPlugin, ICrmPlugin, IPluginGroup, INavigable, IHttpCallback
     {
         private string _accessToken;

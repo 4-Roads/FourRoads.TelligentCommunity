@@ -33,6 +33,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private bool _enableEmailVerification;
         private byte[] _jwtSecret;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IEncryptedCookieService _encryptedCookieService;
+        private readonly Telligent.Evolution.Extensibility.Api.Version2.IPermissions _permissions;
 
         //{295391e2b78d4b7e8056868ae4fe8fb3}
         private static readonly string _defaultMfaPageLayout =
@@ -56,17 +58,22 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private static readonly string _eakey_emailVerifyCode = "_eakey_emailVerifyCode";
         private DateTime _emailValidationCutoffDate;
         private const string ImpersonatorV1114CookieName = "Impersonator";
-        private const string ImpersonatorCookieName = "te.u";
+        private const string ImpersonatorCookieName = ".te.u";
         private bool _isPersistent;
         private List<string> _fileStoreNames = new List<string>();
 
 
-        public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, IAuthenticationService authService)
+        public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider,
+            IAuthenticationService authService, IEncryptedCookieService encryptedCookieService,
+            Telligent.Evolution.Extensibility.Api.Version2.IPermissions permissions)
         {
             _usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             _urlService = urlService ?? throw new ArgumentNullException(nameof(urlService));
             _mfaDataProvider = mfaDataProvider ?? throw new ArgumentNullException(nameof(mfaDataProvider));
             _authenticationService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _permissions = permissions ?? throw new ArgumentNullException(nameof(permissions));
+            _encryptedCookieService =
+                encryptedCookieService ?? throw new ArgumentNullException(nameof(encryptedCookieService));
         }
 
         public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider,
@@ -429,31 +436,41 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             return require2F;
         }
 
-        private static bool IsImpersonator()
+        private bool IsImpersonator()
         {
             return IsImpersonator(HttpContext.Current.Request);
         }
 
-        private static bool IsImpersonator(HttpRequest request)
+        private bool IsImpersonator(HttpRequest request)
         {
             return IsImpersonator(new HttpRequestWrapper(request));
         }
 
-        private static bool IsImpersonator(HttpRequestBase request)
+        private bool IsImpersonator(HttpRequestBase request)
         {
-            bool result;
+            var cookieValues = _encryptedCookieService.GetCookieValues(CookieUtility.UserCookieName);
+            if (cookieValues == null) return false;
+            
+            var token = cookieValues["PrivateToken"];
+            var impersonating = cookieValues["Impersonating"];
+            if (int.TryParse(cookieValues["UserID"], out var userId) 
+                && !string.IsNullOrEmpty(token)
+                && !string.IsNullOrEmpty(impersonating) 
+                )
+            {
+                var user = _usersService.Get(new UsersGetOptions { Id = userId });
+                if (user != null && !user.HasErrors())
+                {
+                    return _permissions.CheckPermission(SitePermission.ImpersonateUser, userId).IsAllowed;
+                }
+                return false;
+            }
+            
+            //pre 12.1 check
             var cookie = request.Cookies[ImpersonatorCookieName];
-            if (cookie != null)
-            {
-                result = HasImpersonatorFlag(cookie);
-            }
-            else
-            {
-                cookie = request.Cookies[ImpersonatorV1114CookieName];
-                result = HasOldImpersonatorFlag(cookie);
-            }
-
-            return result;
+            return cookie != null 
+                ? HasImpersonatorFlag(cookie) 
+                : HasOldImpersonatorFlag(request.Cookies[ImpersonatorV1114CookieName]);
         }
 
         /// <summary>
@@ -495,7 +512,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             {
                 var updateOptions = new UsersUpdateOptions
                 {
-                    Id = user.Id, 
+                    Id = user.Id,
                     ExtendedAttributes = user.ExtendedAttributes
                 };
 
@@ -739,9 +756,9 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 }
 
                 var codesGenerated = user.ExtendedAttributes.Get(_eakey_codesGeneratedOnUtc);
-                
+
                 if (codesGenerated == null) return;
-                
+
                 if (DateTime.TryParse(codesGenerated.Value, out DateTime generatedOnUtc))
                 {
                     result.CodesGeneratedOn = generatedOnUtc;
