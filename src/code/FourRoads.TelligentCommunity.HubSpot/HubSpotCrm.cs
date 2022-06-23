@@ -479,11 +479,11 @@ namespace FourRoads.TelligentCommunity.HubSpot
             _configuration.Commit();
         }
 
-        public string GetAccessToken()
+        public string GetAccessToken(bool forceRenew = false)
         {
             if (!PluginManager.IsEnabled(this)) return _accessToken;
 
-            if (DateTime.UtcNow < _expires) return _accessToken;
+            if (forceRenew == false && DateTime.UtcNow < _expires) return _accessToken;
 
             if (!string.IsNullOrWhiteSpace(_refreshToken))
             {
