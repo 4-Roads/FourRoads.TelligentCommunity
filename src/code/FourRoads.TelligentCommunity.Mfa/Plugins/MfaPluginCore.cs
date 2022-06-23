@@ -75,7 +75,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
         public IEnumerable<Type> Plugins => new[]
         {
             typeof (InstallerCore),
-            typeof(DependencyInjectionPlugin),
+            typeof (DependencyInjectionPlugin),
             typeof (MfaSqlScriptsInstaller),
             typeof (DefaultWidgetInstaller),
             typeof (MfaAuthenticatorExtension),

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
+using FourRoads.TelligentCommunity.Mfa.Logic;
 using FourRoads.TelligentCommunity.Mfa.Model;
 using Google.Authenticator;
 using Telligent.Evolution.Extensibility;
@@ -21,7 +22,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
 
             if (user.Username != userService.AnonymousUserName)
             {
-                TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
+                var tfa = new FourRoadsTwoFactorAuthenticator();
 
                 var secretKey = Injector.Get<IMfaLogic>().GetAccountSecureKey(user);
                 var setupInfo = tfa.GenerateSetupCode(groupsService.GetRootGroup().Name, user.PrivateEmail, secretKey, 300, 300);

@@ -9,7 +9,6 @@ using System.Web.Security;
 using FourRoads.Common.TelligentCommunity.Routing;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Model;
-using Google.Authenticator;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
@@ -556,7 +555,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 }
             }
 
-            var tfa = new TwoFactorAuthenticator();
+            var tfa = new FourRoadsTwoFactorAuthenticator();
 
             if (!tfa.ValidateTwoFactorPIN(GetAccountSecureKey(user), code)) return false;
 
