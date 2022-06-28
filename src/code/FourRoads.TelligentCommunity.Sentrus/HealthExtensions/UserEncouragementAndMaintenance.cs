@@ -14,6 +14,7 @@ using System.Web;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Entities.Version1;
 using Telligent.Evolution.Extensibility.Api.Version1;
+using Telligent.Evolution.Extensibility.Caching.Version1;
 using Telligent.Evolution.Extensibility.Email.Version1;
 using Telligent.Evolution.Extensibility.Templating.Version1;
 using Telligent.Evolution.Extensibility.UI.Version1;
@@ -205,19 +206,19 @@ namespace FourRoads.TelligentCommunity.Sentrus.HealthExtensions
             //In the event that exception occurs we do not want this to prevent authentication, it is not system critical
             try
             {
-                var lastLoginData = Telligent.Evolution.Extensibility.Caching.Version1.CacheService.Get(LastLoginDetails.CacheKey(contentId), Telligent.Evolution.Extensibility.Caching.Version1.CacheScope.All) as LastLoginDetails;
-
+                var lastLoginData = CacheService.Get(LastLoginDetails.CacheKey(contentId), CacheScope.All) as LastLoginDetails;
+                
                 if (lastLoginData == null || lastLoginData.LastLogonDate < DateTime.Now.AddHours(-1))
                 {
                     lastLoginData = UserHealth.GetLastLoginDetails(contentId) ?? new LastLoginDetails {MembershipId = contentId};
-
+                
                     lastLoginData.LastLogonDate = DateTime.Now;
                     lastLoginData.EmailCountSent = 0;
                     lastLoginData.FirstEmailSentAt = null;
-
+                
                     UserHealth.CreateUpdateLastLoginDetails(lastLoginData);
-
-                    Telligent.Evolution.Extensibility.Caching.Version1.CacheService.Put(LastLoginDetails.CacheKey(contentId), lastLoginData, Telligent.Evolution.Extensibility.Caching.Version1.CacheScope.All);
+                
+                    CacheService.Put(LastLoginDetails.CacheKey(contentId), lastLoginData, CacheScope.All);
                 }
             }
             catch (Exception ex)

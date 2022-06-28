@@ -92,10 +92,6 @@
     <Reference Include="Telligent.Evolution.VelocityExtensions">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.VelocityExtensions.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Jobs, Version=1.0.53.36856, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Telligent\Telligent.Jobs.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">

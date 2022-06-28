@@ -66,10 +66,6 @@
     <Reference Include="Telligent.Evolution.Platform">
       <HintPath>..\..\lib\Telligent\Telligent.Evolution.Platform.dll</HintPath>
     </Reference>
-    <Reference Include="Telligent.Jobs, Version=1.2.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Telligent\Telligent.Jobs.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\properties\GlobalAssemblyInfo.cs">

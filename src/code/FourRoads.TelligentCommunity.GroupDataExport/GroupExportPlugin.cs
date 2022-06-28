@@ -50,7 +50,8 @@ namespace FourRoads.TelligentCommunity.GroupDataExport
 
             if (user != null)
             {
-                return Apis.Get<IPermissions>().Get(Telligent.Evolution.Components.SitePermission.ManageMembership, userId).IsAllowed;
+                return Apis.Get<Telligent.Evolution.Extensibility.Api.Version2.IPermissions>()
+                    .CheckPermission(Telligent.Evolution.Components.SitePermission.ManageMembership, userId).IsAllowed;
             }
 
             return false;

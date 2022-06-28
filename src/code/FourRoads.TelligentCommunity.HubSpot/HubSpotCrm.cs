@@ -476,7 +476,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     .AddSeconds(-60) // and decrease it by a minute
                     .ToString(CultureInfo.InvariantCulture));
             }
-
+            
             _configuration.Commit();
         }
 
