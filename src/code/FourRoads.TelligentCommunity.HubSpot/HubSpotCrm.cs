@@ -26,6 +26,7 @@ using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigur
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using System.Web;
 using FourRoads.TelligentCommunity.HubSpot.Controls;
+using FourRoads.TelligentCommunity.HubSpot.Interfaces;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using IPermissions = Telligent.Evolution.Extensibility.Api.Version2.IPermissions;
 using SitePermission = Telligent.Evolution.Components.SitePermission;
@@ -85,12 +86,11 @@ namespace FourRoads.TelligentCommunity.HubSpot
     // ReSharper disable once ClassNeverInstantiated.Global
     public class HubspotCrm : IConfigurablePlugin, ISingletonPlugin, ICrmPlugin, IPluginGroup, INavigable, IHttpCallback
     {
-        private string _accessToken;
-        private string _refreshToken;
-        private DateTime _expires = DateTime.UtcNow;
         private Dictionary<string, string> _mappings;
         private IHttpCallbackController _callbackController;
         private IPluginConfiguration _configuration;
+        private IAuthInfoDbConfiguration _authInfoDbConfiguration;
+        private AuthInfo _authInfo;
 
         private const string HubSpotBaseUrl = "https://api.hubapi.com/";
 
@@ -162,6 +162,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public void Initialize()
         {
+            _authInfoDbConfiguration = new AuthInfoAuthInfoDbConfiguration();
+            _authInfo = _authInfoDbConfiguration.Get(_configuration.GetString("ClientId"));
         }
 
         private static void WriteJsonProp(JsonWriter jsonObject, string prop, string value)
@@ -216,7 +218,6 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             get
             {
-                
                 var pg = new PropertyGroup() { Id = "Options", LabelText = "Options" };
                 var callbackUrl = Apis.Get<IUrl>()?.Absolute("/hubspot/authorize") ?? string.Empty;
                 pg.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
@@ -224,8 +225,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     Id = "infoLabel",
                     LabelText = string.Empty,
                     DefaultValue =
-                        $"Navigate to HubSpot and use <span style=\"font-weight:800\">{callbackUrl}</span> "+
-                        "as a Redirect Url in the HubSpot App configuration.</br>"+
+                        $"Navigate to HubSpot and use <span style=\"font-weight:800\">{callbackUrl}</span> " +
+                        "as a Redirect Url in the HubSpot App configuration.</br>" +
                         "After saving your HubSpot App configuration, use Install URL to obtain access token.",
                     DataType = "custom",
                     Template = "message_label",
@@ -304,60 +305,14 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     }
                 });
 
-                var pg2 = new PropertyGroup() { Id = "Running", LabelText = "Running Values" };
 
-                pg2.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
-                {
-                    Id = "AccessToken",
-                    LabelText = "Access Token",
-                    DataType = "string",
-                    Template = "string",
-                    OrderNumber = 0,
-                    DefaultValue = "",
-                    Options = new NameValueCollection
-                    {
-                        { "obscure", "true" },
-                    }
-                });
-
-                pg2.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
-                {
-                    Id = "RefreshToken",
-                    LabelText = "Refresh Token",
-                    DataType = "string",
-                    Template = "string",
-                    OrderNumber = 0,
-                    DefaultValue = "",
-                    Options = new NameValueCollection
-                    {
-                        { "obscure", "true" },
-                    }
-                });
-
-                pg2.Properties.Add(new Telligent.Evolution.Extensibility.Configuration.Version1.Property
-                {
-                    Id = "Expires",
-                    LabelText = "Expires",
-                    DataType = "datetime",
-                    Template = "datetime",
-                    OrderNumber = 0,
-                    DefaultValue = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)
-                });
-
-                return new[] { pg, pg3, pg2 };
+                return new[] { pg, pg3 };
             }
         }
 
         public void Update(IPluginConfiguration configuration)
         {
             _configuration = configuration;
-
-            _accessToken = _configuration.GetString("AccessToken");
-            _refreshToken = _configuration.GetString("RefreshToken");
-            Debug.Assert(_configuration != null, nameof(_configuration) + " != null");
-            _expires = _configuration.GetDateTime("Expires").HasValue
-                ? _configuration.GetDateTime("Expires").Value
-                : DateTime.UtcNow;
 
             Mappings = null;
         }
@@ -366,11 +321,12 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             using (var content = new StringContent(data, Encoding.UTF8, "application/json"))
             {
-                var token = GetAccessToken();
-                return CreateRequest(requestType, endPoint, 
+                var token = GetAccessToken() ?? string.Empty;
+                return CreateRequest(requestType, endPoint,
                     // ReSharper disable once AccessToDisposedClosure
                     () => content,
-                    cli => cli.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token));
+                    cli => cli.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", token));
             }
         }
 
@@ -447,20 +403,18 @@ namespace FourRoads.TelligentCommunity.HubSpot
             throw new Exception("HttpClient error");
         }
 
-        private void ProcessHubspotRequestResponse(dynamic jsonResponse)
+        private void StoreAuthCredentials(dynamic jsonResponse)
         {
             if (jsonResponse.error != null)
             {
+                _authInfoDbConfiguration.Clear(_configuration.GetString("ClientId"));
+                _authInfo = null;
+
                 Apis.Get<IEventLog>().Write("Hubspot API Issue:" + jsonResponse.error_description,
                     new EventLogEntryWriteOptions
                     {
                         EventType = nameof(EventLogEntryType.Error)
                     });
-
-                _expires = DateTime.UtcNow.AddSeconds(-60);
-                _configuration.SetString("AccessToken", string.Empty);
-                _configuration.SetString("RefreshToken", string.Empty);
-                _configuration.SetString("Expires", string.Empty);
             }
 
             if (jsonResponse.access_token != null)
@@ -468,25 +422,25 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 Apis.Get<IEventLog>().Write("Obtained access token for Hubspot",
                     new EventLogEntryWriteOptions() { EventType = nameof(EventLogEntryType.Information) });
 
-                _configuration.SetString("AccessToken", jsonResponse.access_token.ToString());
-                _configuration.SetString("RefreshToken", jsonResponse.refresh_token.ToString());
                 var expiresIn = jsonResponse.expires_in.ToString();
-                _configuration.SetString("Expires", DateTime.UtcNow
+                var expiryUtc = DateTime.UtcNow
                     .AddSeconds(Convert.ToInt32(expiresIn)) // use expiration sent with response
-                    .AddSeconds(-60) // and decrease it by a minute
-                    .ToString(CultureInfo.InvariantCulture));
+                    .AddSeconds(-60); // and decrease it by a minute
+
+                _authInfo = _authInfoDbConfiguration.Update(_configuration.GetString("ClientId"),
+                    jsonResponse.access_token.ToString(),
+                    jsonResponse.refresh_token.ToString(),
+                    expiryUtc);
             }
-            
-            _configuration.Commit();
         }
 
         public string GetAccessToken(bool forceRenew = false)
         {
-            if (!PluginManager.IsEnabled(this)) return _accessToken;
+            if (_authInfo == null || !PluginManager.IsEnabled(this)) return null;
 
-            if (forceRenew == false && DateTime.UtcNow < _expires) return _accessToken;
+            if (forceRenew == false && !_authInfo.Expired) return _authInfo.AccessToken;
 
-            if (!string.IsNullOrWhiteSpace(_refreshToken))
+            if (!string.IsNullOrWhiteSpace(_authInfo.RefreshToken))
             {
                 var url = Apis.Get<IUrl>().Absolute(Apis.Get<IUrl>().ApplicationEscape("~"));
 
@@ -496,21 +450,21 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     { "client_id", _configuration.GetString("ClientId") },
                     { "client_secret", _configuration.GetString("ClientSecret") },
                     { "redirect_uri", url },
-                    { "refresh_token", _refreshToken }
+                    { "refresh_token", _authInfo.RefreshToken }
                 });
 
                 var response = CreateOauthRequest(content);
 
-                ProcessHubspotRequestResponse(response);
-            }
-            else
-            {
-                Apis.Get<IEventLog>()
-                    .Write("Hubspot API Issue: Refresh token blank, you need to re-link your account",
-                        new EventLogEntryWriteOptions());
+                StoreAuthCredentials(response);
+
+                return _authInfo.AccessToken;
             }
 
-            return _accessToken;
+            Apis.Get<IEventLog>()
+                .Write("Hubspot API Issue: Refresh token blank, you need to re-link your account",
+                    new EventLogEntryWriteOptions());
+
+            return null;
         }
 
         public bool InitialLinkoAuth(string authCode, string url)
@@ -526,11 +480,11 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     { "code", authCode }
                 });
 
-                dynamic repsonse = CreateOauthRequest(content);
+                var response = CreateOauthRequest(content);
 
-                ProcessHubspotRequestResponse(repsonse);
+                StoreAuthCredentials(response);
 
-                return repsonse.access_token != null;
+                return response.access_token != null;
             }
 
             Apis.Get<IEventLog>().Write("Hubspot API Issue: auth code blank, you need to link your account",
@@ -545,17 +499,16 @@ namespace FourRoads.TelligentCommunity.HubSpot
                 Apis.Get<IEventLog>().Write($"Synchronizing {u.Username} to Hubspot",
                     new EventLogEntryWriteOptions() { EventType = "Information" });
 
-                string parameters = string.Empty;
                 StringBuilder sb = new StringBuilder();
 
                 using (var tw = new StringWriter(sb))
                 {
-                    using (var JsonObject = new Newtonsoft.Json.JsonTextWriter(tw))
+                    using (var jsonObject = new JsonTextWriter(tw))
                     {
-                        JsonObject.WritePropertyName("properties");
-                        JsonObject.WriteStartArray();
+                        jsonObject.WritePropertyName("properties");
+                        jsonObject.WriteStartArray();
 
-                        WriteJsonProp(JsonObject, "email", u.PrivateEmail);
+                        WriteJsonProp(jsonObject, "email", u.PrivateEmail);
 
                         var fields = u.ProfileFields.ToLookup(k => k.Label, v => v.Value);
 
@@ -570,11 +523,11 @@ namespace FourRoads.TelligentCommunity.HubSpot
                                     data = data.Replace(",", ";");
                                 }
 
-                                WriteJsonProp(JsonObject, Mappings[src], data);
+                                WriteJsonProp(jsonObject, Mappings[src], data);
                             }
                         }
 
-                        JsonObject.WriteEndArray();
+                        jsonObject.WriteEndArray();
                     }
                 }
 
@@ -623,6 +576,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
                     Apis.Get<IEventLog>().Write(
                         $"Hubspot API Issue: Failed to map contact property groups : {response} {e.Message}",
                         new EventLogEntryWriteOptions());
+                    throw;
                 }
             });
 
@@ -712,7 +666,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
             Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                dynamic response = CreateApiRequest("GET", $"properties/v1/contacts/properties/named/{name.ToLower()}",
+                var response = CreateApiRequest("GET", $"properties/v1/contacts/properties/named/{name.ToLower()}",
                     string.Empty);
 
                 try
@@ -740,7 +694,7 @@ namespace FourRoads.TelligentCommunity.HubSpot
         {
             Apis.Get<IUsers>().RunAsUser(Apis.Get<IUsers>().ServiceUserName, () =>
             {
-                dynamic response = CreateApiRequest("POST",
+                CreateApiRequest("POST",
                     $"contacts/v1/contact/email/{Apis.Get<IUrl>().Encode(email)}/profile",
                     JsonConvert.SerializeObject(properties,
                         Formatting.None,
@@ -782,8 +736,8 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public void ProcessRequest(HttpContextBase httpContext)
         {
-            List<ContactPropertyGroup> listContacts = GetContactPropertyGroups();
-            string message = string.Empty;
+            var listContacts = GetContactPropertyGroups();
+            string message;
 
             httpContext.Response.ContentType = "text/javascript";
 
@@ -807,11 +761,12 @@ namespace FourRoads.TelligentCommunity.HubSpot
 
         public void SetController(IHttpCallbackController controller)
         {
-            this._callbackController = controller;
+            _callbackController = controller;
         }
 
         public IEnumerable<Type> Plugins => new[]
         {
+            typeof(HubSpotSqlScriptsInstaller),
             typeof(AuthorizePropertyTemplate),
             typeof(TriggerActionPropertyTemplate),
             typeof(LabelPropertyTemplate),

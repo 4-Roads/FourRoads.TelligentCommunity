@@ -91,7 +91,11 @@ namespace FourRoads.TelligentCommunity.HubSpot.Controls
                             + data +
                             $@"}},
                 	success : function (response) {{
-                           $.telligent.evolution.notifications.show('{actionSuccessMessage}', {{ type: 'success' }});
+                            if(response === '') {{
+                                $.telligent.evolution.notifications.show('{actionFailureMessage}', {{ type: 'error' }});
+                            }} else {{
+                                $.telligent.evolution.notifications.show('{actionSuccessMessage}', {{ type: 'success' }});
+                            }}
                     }},
                     error : function(xhr, desc, ex) {{
                             var error = desc;
