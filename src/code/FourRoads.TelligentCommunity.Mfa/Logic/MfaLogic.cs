@@ -209,9 +209,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
             if (IsOauthRequest(request)) return true;
 
-            if (IsPageRequest(request) == false) return true;
-
-            if (IsSecuredFileStoreRequest(request) == false) return true;
+            if (IsPageRequest(request) == false && IsSecuredFileStoreRequest(request) == false) return true;
 
             if (request.Url != null && request.IsLocal &&
                 request.Url.LocalPath.ToLower().EndsWith("/controlpanel/localaccess.aspx"))
