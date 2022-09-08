@@ -4,5 +4,6 @@
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity101.MetaData")]
+[assembly: AssemblyProduct("FourRoads.TelligentCommunity.MetaData")]
 [assembly: AssemblyDescription("Enables custom meta data tags to be configured and rendered on community pages")]
 

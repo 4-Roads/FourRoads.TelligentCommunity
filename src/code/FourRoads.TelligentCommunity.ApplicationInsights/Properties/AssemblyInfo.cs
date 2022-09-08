@@ -8,6 +8,7 @@ using FourRoads.TelligentCommunity.ApplicationInsights;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity101.ApplicationInsights")]
+[assembly: AssemblyProduct("FourRoads.TelligentCommunity.ApplicationInsights")]
 [assembly: AssemblyDescription("Integration into Azure's application insights engine")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

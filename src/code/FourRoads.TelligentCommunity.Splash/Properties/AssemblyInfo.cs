@@ -4,4 +4,5 @@
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity101.Splash")]
+[assembly: AssemblyProduct("FourRoads.TelligentCommunity.Splash")]
 [assembly: AssemblyDescription("Enables a community splash page to be configured")]

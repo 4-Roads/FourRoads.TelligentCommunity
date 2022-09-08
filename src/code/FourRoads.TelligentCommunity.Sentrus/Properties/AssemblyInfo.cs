@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity101.Sentrus")]
+[assembly: AssemblyProduct("FourRoads.TelligentCommunity.Sentrus")]
 [assembly: AssemblyDescription("Provides several features to enhance community performance")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

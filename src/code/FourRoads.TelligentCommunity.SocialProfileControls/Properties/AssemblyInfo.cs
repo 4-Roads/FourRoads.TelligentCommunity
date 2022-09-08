@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity101.SocialProfileControls")]
 [assembly: AssemblyDescription("Provides enhanced social media profile fields")]
-
+[assembly: AssemblyProduct("FourRoads.TelligentCommunity.SocialProfileControls")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

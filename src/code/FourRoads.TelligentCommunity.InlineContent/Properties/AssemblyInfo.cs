@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FourRoads.TelligentCommunity101.InlineContent")]
+[assembly: AssemblyProduct("FourRoads.TelligentCommunity.InlineContent")]
 [assembly: AssemblyDescription("Allows administrators and content managers to edit content directly within community pages")]
 
 
