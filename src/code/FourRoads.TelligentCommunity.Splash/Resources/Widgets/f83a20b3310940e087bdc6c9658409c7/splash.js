@@ -1,5 +1,4 @@
-(function($, global)
-{
+(function ($, global) {
     if (typeof $.fourroads === 'undefined')
         $.fourroads = {};
 
@@ -8,45 +7,62 @@
 
     var attachHandlers = function (context) {
 
-            context.selectors.termsLink.click(function(e) {
-                context.selectors.termsLink.parent().find('.terms-container').slideDown();
-            });
+        context.selectors.termsLink.click(function (e) {
+            context.selectors.termsLink.parent().find('.terms-container').slideDown();
+        });
 
-            context.selectors.email.blur(function (e) {
-                //Test to see if this is a valid beta user
-                $.telligent.evolution.post({
-                    url: context.urls.testAccess,
-                    data: { email: context.selectors.email.val() },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.result == "true") {
-                            context.selectors.accessCode.closest('li').show();
-                        } else {
-                            context.selectors.accessCode.closest('li').hide();
-                        }
+        function testAccess() {
+            //Test to see if this is a valid beta user
+            $.telligent.evolution.post({
+                url: context.urls.testAccess,
+                data: { email: context.selectors.email.val() },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.result == "true") {
+                        context.selectors.accessCode.closest('li').show();
+                    } else {
+                        context.selectors.accessCode.closest('li').hide();
                     }
+                }
+            });
+        }
+
+        var typingTimer;
+
+        context.selectors.email.on("keydown", function (e) {
+            clearTimeout(typingTimer);
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                testAccess();
+            }
+        });
+
+        context.selectors.email.on('keyup', function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(testAccess, 500);
+        });
+
+        context.selectors.email.blur(testAccess);
+    },
+        scrapeElements = function (context) {
+            $.each([context.selectors], function (i, set) {
+                $.each(set, function (key, value) {
+                    set[key] = $(value);
                 });
             });
         },
-    scrapeElements = function (context) {
-        $.each([context.selectors], function(i, set) {
-            $.each(set, function(key, value) {
-                set[key] = $(value);
-            });
-        });
-    },
-    addValidation = function(context) {
-        var saveButton = context.selectors.submit;
+        addValidation = function (context) {
+            var saveButton = context.selectors.submit;
 
-        saveButton.evolutionValidation({
-            onValidated: function(isValid, buttonClicked, c) {
+            saveButton.evolutionValidation({
+                onValidated: function (isValid, buttonClicked, c) {
                     if (isValid)
                         saveButton.removeClass('disabled');
                     else {
                         saveButton.addClass('disabled');
                     }
                 },
-                onSuccessfulClick: function(e) {
+                onSuccessfulClick: function (e) {
                     $('.processing', saveButton.parent()).css("visibility", "visible");
                     saveButton.addClass('disabled');
                     save(context);
@@ -64,27 +80,27 @@
                     }
                 },
                 context.selectors.email.closest('.field-item').find('.field-item-validation'), null)
-            .evolutionValidation('addField',
-                context.selectors.displayName,
-                {
-                    required: true,
-                    messages: {
-                        required: context.resources.requiredField
-                    }
-                },
-                context.selectors.displayName.closest('.field-item').find('.field-item-validation'), null)
-            .evolutionValidation('addField',
-                context.selectors.terms,
-                {
-                    required: true,
-                    messages: {
-                        required: context.resources.requiredField
-                    }
-                },
-                context.selectors.terms.closest('.field-item').find('.field-item-validation'), null);
+                .evolutionValidation('addField',
+                    context.selectors.displayName,
+                    {
+                        required: true,
+                        messages: {
+                            required: context.resources.requiredField
+                        }
+                    },
+                    context.selectors.displayName.closest('.field-item').find('.field-item-validation'), null)
+                .evolutionValidation('addField',
+                    context.selectors.terms,
+                    {
+                        required: true,
+                        messages: {
+                            required: context.resources.requiredField
+                        }
+                    },
+                    context.selectors.terms.closest('.field-item').find('.field-item-validation'), null);
 
         },
-        save = function(context) {
+        save = function (context) {
             var data = {
                 email: context.selectors.email.val(),
                 displayName: context.selectors.displayName.val(),
@@ -95,7 +111,7 @@
                 url: context.urls.submitForm,
                 data: data,
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     if (response.result == "true") {
                         if (response.redirect !== undefined) {
                             window.location = context.urls.returnUrl;
@@ -111,7 +127,7 @@
         };
 
     $.fourroads.widgets.splash = {
-        register: function(context) {
+        register: function (context) {
             scrapeElements(context);
 
             addValidation(context);

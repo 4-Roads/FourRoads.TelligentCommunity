@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using DryIoc;
+﻿using DryIoc;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.Common.TelligentCommunity.Plugins.Interfaces;
 using FourRoads.TelligentCommunity.RenderingHelper;
 using FourRoads.TelligentCommunity.Splash.Interfaces;
 using FourRoads.TelligentCommunity.Splash.Logic;
+using System;
+using System.Collections.Generic;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
@@ -47,6 +47,7 @@ namespace FourRoads.TelligentCommunity.Splash.Plugins
                 RemoveFooter = configuration.GetBool("removeFooter"),
                 RemoveHeader = configuration.GetBool("removeHeader"),
                 Password = configuration.GetString("password"),
+                WhitelistedPages = configuration.GetString("whitelistedPages"),
             };
         }
 
@@ -59,6 +60,10 @@ namespace FourRoads.TelligentCommunity.Splash.Plugins
                 group.Properties.Add(new Property("password", "Password", PropertyType.String, 1, string.Empty));
                 group.Properties.Add(new Property("removeHeader", "Remove Header", PropertyType.Bool, 2, bool.TrueString));
                 group.Properties.Add(new Property("removeFooter", "Remove Footer", PropertyType.Bool, 3, bool.TrueString));
+                group.Properties.Add(new Property("whitelistedPages", "Whitelist page", PropertyType.String, 4, string.Empty)
+                {
+                    DescriptionText = "Comma-delimited list of page name, url name or just url to exclude"
+                });
 
                 return new[] {group};
             }

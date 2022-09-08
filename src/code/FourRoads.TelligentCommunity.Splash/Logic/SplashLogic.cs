@@ -42,15 +42,41 @@ namespace FourRoads.TelligentCommunity.Splash.Logic
 
                     var pageContext = Apis.Get<IUrl>().ParsePageContext(HttpContext.Current.Request.Url.OriginalString);
 
-                    if (pageContext != null && pageContext.PageName != _pageName && !CentralizedFileStorage.IsCentralizedFileUrl(urlRequest) && !(urlRequest.EndsWith(".js") || urlRequest.EndsWith(".axd") || urlRequest.EndsWith(".ashx") || urlRequest.IndexOf("socket.ashx") >= 0 || urlRequest.StartsWith("/resized-image/__size/")))
-                    {
-                        HttpCookie cookie = HttpContext.Current.Request.Cookies["Splash"];
+                    var whitelisted = _configuration.Value.WhitelistedPages.Split(',');
 
-                        if (cookie == null || cookie["hash"] != GetPasswordHash())
+                    if (whitelisted.Length > 0 && whitelisted.Any(w => w.Trim().Equals(urlRequest.Trim(), StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        return;
+                    }
+
+                    if (pageContext != null)
+                    {
+                        if(whitelisted.Length > 0 &&
+                            (!string.IsNullOrWhiteSpace(pageContext.PageName) && whitelisted.Any(w => w.Trim().Equals(pageContext.PageName.Trim(), StringComparison.InvariantCultureIgnoreCase))
+                            || !string.IsNullOrWhiteSpace(pageContext.UrlName) && whitelisted.Any(w => w.Trim().Equals(pageContext.UrlName.Trim(), StringComparison.InvariantCultureIgnoreCase)))
+                            )
                         {
-                            HttpContext.Current.Response.Redirect("/splash" + "?ReturnUrl=" + Apis.Get<ICoreUrls>().Home(false), true);
+                            return;
+                        }
+                        
+                        if (pageContext.PageName != _pageName 
+                            && !CentralizedFileStorage.IsCentralizedFileUrl(urlRequest) 
+                            && !(urlRequest.EndsWith(".js") 
+                                || urlRequest.EndsWith(".axd") 
+                                || urlRequest.EndsWith(".ashx") 
+                                || urlRequest.IndexOf("socket.ashx") >= 0 
+                                || urlRequest.StartsWith("/resized-image/__size/")))
+                        {
+                            HttpCookie cookie = HttpContext.Current.Request.Cookies["Splash"];
+
+                            if (cookie == null || cookie["hash"] != GetPasswordHash())
+                            {
+                                HttpContext.Current.Response.Redirect("/splash" + "?ReturnUrl=" + Apis.Get<ICoreUrls>().Home(false), true);
+                            }
                         }
                     }
+
+                    
                 }
             }
         }
