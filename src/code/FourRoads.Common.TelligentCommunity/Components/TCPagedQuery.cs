@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -127,7 +128,23 @@ namespace FourRoads.Common.TelligentCommunity.Components
         {
             if (defaultValue != baseObjectValue)
             {
-                cachekeys.Add(KeyName(cka, mi) + ":" + (baseObjectValue != null ? baseObjectValue.ToString() : string.Empty));
+                if (baseObjectValue is IEnumerable)
+                {
+                    StringBuilder key = new StringBuilder();
+
+                    foreach (var listItem in (IEnumerable)baseObjectValue)
+                    {
+                        key.Append(listItem.ToString());
+                        key.Append("~");
+                    }
+
+                    cachekeys.Add(KeyName(cka, mi) + ":" + key.ToString());
+                }
+                else
+                {
+                    cachekeys.Add(KeyName(cka, mi) + ":" + (baseObjectValue != null ? baseObjectValue.ToString() : string.Empty));
+                }
+              
             }
         }
 

@@ -7,6 +7,7 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Exceptions.Version1;
 using Telligent.Evolution.Extensibility.Version1;
 using Telligent.Evolution.Platform.Logging;
+using ExceptionCategories = Telligent.Evolution.Extensibility.Exceptions.Version1.ExceptionCategories;
 
 namespace FourRoads.Common.TelligentCommunity.Components
 {
