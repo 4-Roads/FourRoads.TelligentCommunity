@@ -7,8 +7,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
+using FourRoads.Common.TelligentCommunity.Controls;
 using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
 using FourRoads.TelligentCommunity.Installer.Components.Utility;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 using Telligent.Evolution.Components.Jobs;
 using Telligent.Evolution.Extensibility;
 using Telligent.Evolution.Extensibility.Api.Version1;
@@ -30,7 +32,7 @@ namespace FourRoads.TelligentCommunity.Installer
     /// Theme source files are located in themefiles/
     /// </summary>
 
-    public abstract class FactoryDefaultThemeInstaller : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob
+    public abstract class FactoryDefaultThemeInstaller : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob, IPluginGroup
     {
         #region IPlugin Members
 
@@ -66,6 +68,8 @@ namespace FourRoads.TelligentCommunity.Installer
         }
 
         #endregion
+
+        public IEnumerable<Type> Plugins => new[] { typeof(InstallerCore) };
 
         private void EnumerateResourceFolder(string basePath, string extension, Action<string, string> handleResource)
         {

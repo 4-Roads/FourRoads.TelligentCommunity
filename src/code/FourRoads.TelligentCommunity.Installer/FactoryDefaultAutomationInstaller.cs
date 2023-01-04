@@ -22,11 +22,14 @@ using File = System.IO.File;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using FourRoads.TelligentCommunity.Installer.Components.Utility;
+using FourRoads.Common.TelligentCommunity.Controls;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 
 namespace FourRoads.TelligentCommunity.Installer
 {
-    public abstract class FactoryDefaultAutomationInstallerBase<TAutomationFactoryDefaultProvider> : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob where TAutomationFactoryDefaultProvider : class, IAutomationFactoryDefaultProvider
+    public abstract class FactoryDefaultAutomationInstallerBase<TAutomationFactoryDefaultProvider> : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob where TAutomationFactoryDefaultProvider : class, IAutomationFactoryDefaultProvider, IPluginGroup
     {
+        public IEnumerable<Type> Plugins => new[] { typeof(InstallerCore) };
         public abstract Guid AutomationFactoryDefaultIdentifier { get; }
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }

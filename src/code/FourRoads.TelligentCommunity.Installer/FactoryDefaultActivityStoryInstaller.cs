@@ -20,10 +20,12 @@ using File = System.IO.File;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using FourRoads.TelligentCommunity.Installer.Components.Utility;
+using FourRoads.Common.TelligentCommunity.Controls;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 
 namespace FourRoads.TelligentCommunity.Installer
 {
-    public abstract class FactoryDefaultActivityStoryInstaller : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob
+    public abstract class FactoryDefaultActivityStoryInstaller : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob,IPluginGroup
     {
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
@@ -457,5 +459,7 @@ namespace FourRoads.TelligentCommunity.Installer
         {
             this._callbackController = controller;
         }
+
+        public IEnumerable<Type> Plugins => new []{typeof(InstallerCore) };
     }
 }

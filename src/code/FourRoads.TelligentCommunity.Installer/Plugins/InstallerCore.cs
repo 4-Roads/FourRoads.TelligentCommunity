@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using FourRoads.TelligentCommunity.Installer.Controls;
+using FourRoads.Common.TelligentCommunity.Controls;
 using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.Installer.Plugins

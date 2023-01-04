@@ -20,11 +20,14 @@ using File = System.IO.File;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using FourRoads.TelligentCommunity.Installer.Components.Utility;
+using FourRoads.Common.TelligentCommunity.Controls;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 
 namespace FourRoads.TelligentCommunity.Installer
 {
-    public abstract class FactoryDefaultContentPeekInstaller : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob
+    public abstract class FactoryDefaultContentPeekInstaller : IHttpCallback, IInstallablePlugin, IConfigurablePlugin, IEvolutionJob,IPluginGroup
     {
+        public IEnumerable<Type> Plugins => new[] { typeof(InstallerCore) };
         protected abstract string ProjectName { get; }
         protected abstract string BaseResourcePath { get; }
         protected abstract EmbeddedResourcesBase EmbeddedResources { get; }

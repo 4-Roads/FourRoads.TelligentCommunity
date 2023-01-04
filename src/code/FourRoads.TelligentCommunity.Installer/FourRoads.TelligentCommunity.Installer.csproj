@@ -63,7 +63,6 @@
     </Compile>
     <Compile Include="Components\Interfaces\IContentLogic.cs" />
     <Compile Include="Components\Utility\Caching.cs" />
-    <Compile Include="Controls\TriggerActionPropertyTemplate.cs" />
     <Compile Include="FactoryDefaultActivityStoryInstaller.cs" />
     <Compile Include="FactoryDefaultAutomationInstaller.cs" />
     <Compile Include="FactoryDefaultContentPeekInstaller.cs" />

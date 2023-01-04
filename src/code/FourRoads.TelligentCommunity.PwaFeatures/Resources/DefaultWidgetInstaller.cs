@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FourRoads.Common.TelligentCommunity.Controls;
 using FourRoads.TelligentCommunity.Installer;
 using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
 using FourRoads.TelligentCommunity.Installer.Components.Utility;
@@ -19,6 +20,6 @@ namespace FourRoads.TelligentCommunity.PwaFeatures.Resources
         protected override string ProjectName => "4 Roads PWA Features";
         protected override string BaseResourcePath => "FourRoads.TelligentCommunity.PwaFeatures.Resources.";
         protected override EmbeddedResourcesBase EmbeddedResources => new EmbeddedResources();
-        public IEnumerable<Type> Plugins => new[] { typeof(WidgetScriptedFragmentPlugin) };
+        IEnumerable<Type> IPluginGroup.Plugins =>  new[] { typeof(WidgetScriptedFragmentPlugin), typeof(TriggerActionPropertyTemplate) };
     }
 }

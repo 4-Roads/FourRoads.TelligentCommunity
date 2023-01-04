@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Telligent.Evolution.Extensibility.Configuration.Version1;
 
-namespace FourRoads.TelligentCommunity.Installer.Controls
+namespace FourRoads.Common.TelligentCommunity.Controls
 {
     public class TriggerActionPropertyTemplate : IPropertyTemplate
     {

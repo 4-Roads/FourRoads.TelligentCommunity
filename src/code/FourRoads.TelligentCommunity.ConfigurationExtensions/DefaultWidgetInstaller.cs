@@ -5,6 +5,7 @@ using FourRoads.TelligentCommunity.Installer;
 using FourRoads.TelligentCommunity.Installer.Components.Interfaces;
 using FourRoads.TelligentCommunity.Installer.Components.Utility;
 using Telligent.Evolution.Extensibility.UI.Version1;
+using Telligent.Evolution.Extensibility.Version1;
 
 namespace FourRoads.TelligentCommunity.ConfigurationExtensions
 {

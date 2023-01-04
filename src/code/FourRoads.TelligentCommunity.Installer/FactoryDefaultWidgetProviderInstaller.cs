@@ -23,6 +23,8 @@ using File = System.IO.File;
 using IConfigurablePlugin = Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using TelligentServices = Telligent.Common.Services;
+using FourRoads.Common.TelligentCommunity.Controls;
+using FourRoads.TelligentCommunity.Installer.Plugins;
 
 namespace FourRoads.TelligentCommunity.Installer
 {
@@ -30,7 +32,7 @@ namespace FourRoads.TelligentCommunity.Installer
     /// <summary>
     /// NOTE: this class no longer inherits from IScriptedContentFragmentFactoryDefaultProvider this is to allow for support of the scripted panels
     /// </summary>
-    public abstract class FactoryDefaultWidgetProviderInstaller<TScriptedContentFragmentFactoryDefaultProvider> : IHttpCallback , IInstallablePlugin, IConfigurablePlugin, IEvolutionJob where TScriptedContentFragmentFactoryDefaultProvider : class, IScriptedContentFragmentFactoryDefaultProvider
+    public abstract class FactoryDefaultWidgetProviderInstaller<TScriptedContentFragmentFactoryDefaultProvider> : IPluginGroup, IHttpCallback , IInstallablePlugin, IConfigurablePlugin, IEvolutionJob where TScriptedContentFragmentFactoryDefaultProvider : class, IScriptedContentFragmentFactoryDefaultProvider
     {
         public abstract Guid ScriptedContentFragmentFactoryDefaultIdentifier { get; }
         protected abstract string ProjectName { get; }
@@ -39,6 +41,7 @@ namespace FourRoads.TelligentCommunity.Installer
         private TScriptedContentFragmentFactoryDefaultProvider _sourceScriptedFragment;
         private IHttpCallbackController _callbackController;
 
+        public IEnumerable<Type> Plugins => new[] { typeof(InstallerCore) };
         #region IPlugin Members
 
         public string Name => ProjectName + " - Widgets";
