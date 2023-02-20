@@ -32,7 +32,6 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private ISocketMessage _socketMessenger;
         private bool _enableEmailVerification;
         private byte[] _jwtSecret;
-        private readonly IAuthenticationService _authenticationService;
 
         //{295391e2b78d4b7e8056868ae4fe8fb3}
         private static readonly string _defaultMfaPageLayout =
@@ -61,12 +60,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private List<string> _fileStoreNames = new List<string>();
 
 
-        public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider, IAuthenticationService authService)
+        public MfaLogic(IUsers usersService, IUrl urlService, IMfaDataProvider mfaDataProvider)
         {
             _usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             _urlService = urlService ?? throw new ArgumentNullException(nameof(urlService));
             _mfaDataProvider = mfaDataProvider ?? throw new ArgumentNullException(nameof(mfaDataProvider));
-            _authenticationService = authService ?? throw new ArgumentNullException(nameof(authService));
         }
 
         public void Initialize(bool enableEmailVerification, IVerifyEmailProvider emailProvider,
@@ -345,9 +343,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
         private string GetAuthCookieName()
         {
-            return _authenticationService != null
-                ? AuthenticationService.AuthCookieName
-                : FormsAuthentication.FormsCookieName;
+            return FormsAuthentication.FormsCookieName;
         }
 
         private string GetMfaCookieName()

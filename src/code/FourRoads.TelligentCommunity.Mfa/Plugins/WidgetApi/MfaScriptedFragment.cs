@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using FourRoads.Common.TelligentCommunity.Plugins.Base;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Model;
@@ -24,13 +25,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
                 TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
 
                 var secretKey = Injector.Get<IMfaLogic>().GetAccountSecureKey(user);
-                var setupInfo = tfa.GenerateSetupCode(groupsService.GetRootGroup().Name, user.PrivateEmail, secretKey, 300, 300);
+                var setupInfo = tfa.GenerateSetupCode(groupsService.GetRootGroup().Name, user.PrivateEmail, ConvertSecretToBytes(secretKey, false));
 
                 return new SetupInfo() { ManualEntrySetupCode = setupInfo.ManualEntryKey, QrCodeImageUrl = setupInfo.QrCodeSetupImageUrl };
             }
 
             return null;
         }
+
+        private static byte[] ConvertSecretToBytes(string secret, bool secretIsBase32) =>
+            secretIsBase32 ? Base32Encoding.ToBytes(secret) : Encoding.UTF8.GetBytes(secret);
 
         public bool TwoFactorEnabled()
         {
