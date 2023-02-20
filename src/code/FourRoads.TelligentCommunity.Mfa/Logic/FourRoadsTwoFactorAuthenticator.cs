@@ -7,7 +7,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
     {
         public FourRoadsTwoFactorAuthenticator()
         {
-            DefaultClockDriftTolerance = TimeSpan.FromSeconds(60);
+
         }
     }
 }

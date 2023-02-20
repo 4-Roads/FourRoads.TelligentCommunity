@@ -18,10 +18,20 @@
     </metadata>
     <files>
         <file src="bin\**\FourRoads.TelligentCommunity.Mfa.dll" target="lib\net47" exclude="*Tests*" />
+
     </files>
-    <!--<ItemGroup>
-        <PackageReference Include="GoogleAuthenticator" version="1.2.1">
+    <ItemGroup>
+        <PackageReference Include="GoogleAuthenticator" version="3.0.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-    </ItemGroup>-->
+		<PackageReference Include="FourRoads.Common" version="5.2.29">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+		<PackageReference Include="jose-jwt" version="4.1.0">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+		<PackageReference Include="QRCoder" version="1.4.3">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
 </package>
