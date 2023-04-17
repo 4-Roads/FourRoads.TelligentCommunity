@@ -62,6 +62,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
         private static readonly string _eakey_codesGeneratedOnUtc = "__mfaCodesGeneratedOnUtc";
         private static readonly string _eakey_mfaVersion = "__mfaVersion";
         private static readonly string _eakey_emailVerified = "___emailVerified";
+        private static readonly string _eakey_emailVerifiedDate = "___emailVerifiedDate"; 
         private static readonly string _eakey_emailVerifyCode = "_eakey_emailVerifyCode";
         private DateTime _emailValidationCutoffDate;
         private const string ImpersonatorV1114CookieName = "Impersonator";
@@ -174,7 +175,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
                 EnsureJwtCookieExpirationMatchesAuthCookie(payload);
             }
 
-            if (!_enableEmailVerification || !EmailChanged(user))
+            if (!_enableEmailVerification || !EmailVerificationOutOfDate(user) || !EmailChanged(user))
             {
                 //To get here must have validated email and 
                 if (!mfaEnabled)
@@ -301,7 +302,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             var attributes = new List<ExtendedAttribute>
             {
                 new ExtendedAttribute { Key = _eakey_emailVerifyCode, Value = string.Empty },
-                new ExtendedAttribute { Key = _eakey_emailVerified, Value = user.PrivateEmail }
+                new ExtendedAttribute { Key = _eakey_emailVerified, Value = user.PrivateEmail },
+                new ExtendedAttribute { Key = _eakey_emailVerifiedDate, Value = DateTime.Now.ToShortDateString() }
             };
 
             _usersService.Update(new UsersUpdateOptions() { Id = user.Id, ExtendedAttributes = attributes });
@@ -331,10 +333,48 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
             return string.IsNullOrWhiteSpace(user.ExtendedAttributes.Get(_eakey_emailVerifyCode)?.Value);
         }
 
+
+        private bool EmailVerificationOutOfDate(User user)
+        {
+            if (_emailVerificationExpiry > 0)
+            {
+                string dateStr = user.ExtendedAttributes.Get(_eakey_emailVerifiedDate)?.Value;
+
+                if (dateStr != null)
+                {
+                    DateTime date;
+
+                    if (DateTime.TryParse(dateStr, out date))
+                    {
+                        if (date.Add(new TimeSpan(_emailVerificationExpiry, 0, 0, 0)) < DateTime.Now)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    //Edge case of user with no set value, set it today 
+                    var attributes = new List<ExtendedAttribute>
+                    {
+                        new ExtendedAttribute
+                            { Key = _eakey_emailVerifiedDate, Value = DateTime.Now.ToShortDateString() }
+                    };
+
+                    _usersService.Update(new UsersUpdateOptions()
+                    {
+                        Id = user.Id,
+                        ExtendedAttributes = attributes
+                    });
+                }
+            }
+
+            return false;
+        }
+
         private static bool EmailChanged(User user)
         {
-            return (string.Compare(user.PrivateEmail, user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value,
-                StringComparison.OrdinalIgnoreCase) != 0);
+            return (string.Compare(user.PrivateEmail, user.ExtendedAttributes.Get(_eakey_emailVerified)?.Value, StringComparison.OrdinalIgnoreCase) != 0);
         }
 
         private void ForceRedirect(IHttpRequest httpRequest, string pageUrl)
