@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <scriptedContentFragments>
-  <scriptedContentFragment name="${resource:Mfa_Name}" version="10.0.0.4689" description="${resource:Mfa_Description}" instanceIdentifier="6d9264a6f6c4434c9d9954b87a865e57" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="splash" provider="3bd55b782e624b77b6e730f6bce17de2">
-    <contentScript><![CDATA[
+  <scriptedContentFragment name="${resource:Mfa_Name}" version="10.0.0.4689" description="${resource:Mfa_Description}" instanceIdentifier="6d9264a6f6c4434c9d9954b87a865e57" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="true" cssClass="mfa-settings" provider="3bd55b782e624b77b6e730f6bce17de2">
+    <contentScript>
+		<![CDATA[
+	      $core_v2_page.AddLink('stylesheet', $core_v2_widget.GetExecutedFileUrl('style.less'), "%{ Position = 'AfterTheme' }")
 $core_v2_widget.ExecuteFile('index.vm')
 ]]></contentScript>
     <headerScript>
@@ -13,13 +15,14 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
       <![CDATA[
 <propertyGroup id="options" resourceName="Options">
 	<property id="fragmentHeader" resourceName="Mfa_Name" dataType="string" defaultValue="${resource:Mfa_Header}" template="core_v2_tokenizedString" />
+
 </propertyGroup>
 ]]>
     </configuration>
     <languageResources>
       <language key="en-us">
         <resource name="Mfa_Name">4 Roads - MFA Configuration</resource>
-        <resource name="Mfa_Header">MFA Setup</resource>
+        <resource name="Mfa_Header">MFA Settings</resource>
         <resource name="Mfa_Description">Configures support for MFA.</resource>
         <resource name="Options">Options</resource>
         <resource name="SaveButton">Submit</resource>
@@ -51,6 +54,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
         <resource name="UpgradeStep_4">Login back to the site</resource>
         <resource name="UpgradeStep_5">Navigate to the Settings page</resource>
         <resource name="UpgradeStep_6">Enable MFA</resource>
+	    <resource name="TwoFactorReqiured">The site administrators require your account to have Multi Factor Authentication enabled, please set this up before continuing accessing the site.</resource>
       </language>
     </languageResources>
   </scriptedContentFragment>

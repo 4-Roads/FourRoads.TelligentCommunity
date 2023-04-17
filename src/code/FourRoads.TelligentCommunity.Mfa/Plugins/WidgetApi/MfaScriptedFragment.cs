@@ -131,8 +131,18 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins.WidgetApi
             return Injector.Get<IMfaLogic>().SendValidationCode(user);
         }
 
+        public string ManageMfaUrl()
+        {
+            return "/manage_mfa";
+        }
+
+        public bool CurrentUserRequiresMfa()
+        {
+            return Injector.Get<IMfaLogic>().UserRequiresMfa(Apis.Get<IUsers>().AccessingUser);
+        }
 
         const string _nonAdminAccessingException = "Accessing user does not have sufficient rights";
+        
         const string _adminRoleName = "Administrators";
     }
 }

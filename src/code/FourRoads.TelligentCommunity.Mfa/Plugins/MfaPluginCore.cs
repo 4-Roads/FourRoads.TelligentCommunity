@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,6 +15,7 @@ using FourRoads.TelligentCommunity.Mfa.DataProvider;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using FourRoads.TelligentCommunity.Mfa.Logic;
 using FourRoads.TelligentCommunity.Mfa.Resources;
+using Microsoft.Win32;
 using Telligent.DynamicConfiguration.Components;
 using Telligent.Evolution.Components;
 using Telligent.Evolution.Extensibility;
@@ -21,6 +23,7 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Configuration.Version1;
 using Telligent.Evolution.Extensibility.Urls.Version1;
 using Telligent.Evolution.Extensibility.Version1;
+using Telligent.Evolution.Extensibility.Version2;
 using IPluginConfiguration = Telligent.Evolution.Extensibility.Version2.IPluginConfiguration;
 using PluginManager = Telligent.Evolution.Extensibility.Version1.PluginManager;
 using Property = Telligent.Evolution.Extensibility.Configuration.Version1.Property;
@@ -29,7 +32,7 @@ using PropertyGroup = Telligent.Evolution.Extensibility.Configuration.Version1.P
 namespace FourRoads.TelligentCommunity.Mfa.Plugins
 {
     public class MfaPluginCore : IPluginGroup, IBindingsLoader, INavigable,
-        Telligent.Evolution.Extensibility.Version2.IConfigurablePlugin, ITranslatablePlugin, IHttpRequestFilter
+        IConfigurablePlugin, ITranslatablePlugin, IHttpRequestFilter, IInstallablePlugin
     {
         private IPluginConfiguration _configuration;
         private ITranslatablePluginController _translations;
@@ -37,13 +40,39 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
         public void Initialize()
         {
             var jwtSecret = GetJwtSecret();
+       
             Injector.Get<IMfaLogic>().Initialize(_configuration.GetBool("emailVerification").Value ,
                 PluginManager.Get<VerifyEmailPlugin>().FirstOrDefault() , 
                 PluginManager.Get<EmailVerifiedSocketMessage>().FirstOrDefault(),
                 _configuration.GetDateTime("emailCutoffDate").GetValueOrDefault(DateTime.MinValue),
                 jwtSecret,
-                _configuration.GetBool("isPersistent").GetValueOrDefault(true)
+                _configuration.GetBool("isPersistent").GetValueOrDefault(true),
+                _configuration.GetInt("emailVerificationExpirePeriod").GetValueOrDefault(0),
+                RequiredMfaRoles
             );
+        }
+
+        private int[] RequiredMfaRoles
+        {
+            get
+            {
+                if (_configuration == null)
+                    return Array.Empty<int>();
+
+                try
+                {
+                    return (_configuration.GetCustom("requireAllUsers") ?? string.Empty).Split(new[]
+                    {
+                        ','
+                    }, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+                }
+                catch (Exception ex)
+                {
+                    Apis.Get<IExceptions>().Log(ex);
+
+                    return Array.Empty<int>();
+                }
+            }
         }
 
         public string Name => "4 Roads - MFA Plugin";
@@ -102,7 +131,7 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
                     return config.DecryptionKey;
                 }
                 
-                byte[] autoGenKeyV4 = (byte[]) Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\ASP.NET\\4.0.30319.0\\", "AutoGenKeyV4", new byte[]{});
+                byte[] autoGenKeyV4 = (byte[]) Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\ASP.NET\\4.0.30319.0\\", "AutoGenKeyV4", new byte[]{});
 
                 if (autoGenKeyV4 != null)
                 {
@@ -141,17 +170,53 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
         {
             get
             {
-                PropertyGroup group = new PropertyGroup(){LabelResourceName = "GroupOptions" , Id="options"};
+                PropertyGroup mfaOptions = new PropertyGroup {LabelResourceName = "MFAOptions" , Id="options"};
 
-                group.Properties.Add(new Property()
+                mfaOptions.Properties.Add( new Property
+                {
+                    Id = "isPersistent",
+                    LabelResourceName = "IsPersistent",
+                    DescriptionResourceName = "IsPersistentDesc",
+                    DataType = nameof(PropertyType.Bool), 
+                    DefaultValue = "true"
+                });
+
+
+                mfaOptions.Properties.Add(new Property
+                {
+                    Id = "requireAllUsers",
+                    LabelResourceName = "RequireAllUsers",
+                    DescriptionResourceName = "RequireAllUsersDesc",
+                    DataType = "custom",
+                    Template = "core_v2_roleLookup",
+                    Options = new NameValueCollection
+                    {
+                        { "enableCurrent", "false" },
+                        { "maxSelections", "100" },
+                        { "format", "csv" }
+                    }
+                });
+
+                PropertyGroup group = new PropertyGroup { LabelResourceName = "EmailOptions", Id = "options" };
+
+                group.Properties.Add(new Property
                 {
                     Id = "emailVerification",
-                    LabelResourceName = "EmailVerification", 
+                    LabelResourceName = "EmailVerification",
                     DataType = nameof(PropertyType.Bool),
                     DefaultValue = "true"
                 });
-                
-                group.Properties.Add(new Property()
+
+                group.Properties.Add(new Property
+                {
+                    Id = "emailVerificationExpirePeriod",
+                    LabelResourceName = "EmailVerificationExpirePeriod",
+                    DescriptionResourceName = "EmailVerificationExpirePeriodDesc",
+                    DataType = nameof(PropertyType.Int),
+                    DefaultValue = "0"
+                });
+
+                group.Properties.Add(new Property
                 {
                     Id = "emailCutoffDate",
                     LabelResourceName = "EmailCutoffDate",
@@ -160,16 +225,8 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
                     Template = "mfadate",
                     DefaultValue = ""
                 });
-                
-                group.Properties.Add( new Property()
-                {
-                    Id = "isPersistent",
-                    LabelResourceName = "IsPersistent",
-                    DescriptionResourceName = "IsPersistentDesc",
-                    DataType = nameof(PropertyType.Bool), 
-                    DefaultValue = "true"
-                });
-                return new[] {group};
+
+                return new[] { mfaOptions, group };
             }
         }
 
@@ -184,16 +241,33 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
             {
                 Translation translation = new Translation("en-us");
 
+                translation.Set("RequireAllUsers", "Mandatory Accounts");
+                translation.Set("RequireAllUsersDesc", "Select the roles that are required to have MFA enabled");
+                translation.Set("EmailVerificationExpirePeriod", "Email Verification Expires After");
+                translation.Set("EmailVerificationExpirePeriodDesc", "The number of days after which email verification expires and the member must re-validate their email");
                 translation.Set("EmailVerification", "Enable Email Verification");
                 translation.Set("EmailCutoffDate", "Email Cutoff Date");
                 translation.Set("EmailCutoffDateDescription", "When enabled on an existing community this date prevents users that have joined the site before this date being asked to authenticate email address");
-                translation.Set("GroupOptions", "Options");
-                translation.Set("IsPersistent", "Is Persistent");
+                translation.Set("MFAOptions", "MFA Options");
+                translation.Set("EmailOptions", "Email Options");
+                translation.Set("IsPersistent", "When enabled the MFA cookie is persistent to the same expiry date of the session cookie");
                 translation.Set("IsPersistentDesc", "When enabled, sets MFA cookie expiration date to match Community, otherwise MFA cookie is set for the duration of browser session");
 
                 return new[] {translation};
             }
         }
+
+        public void Install(Version lastInstalledVersion)
+        {
+            Injector.Get<IMfaLogic>().Install();
+        }
+
+        public void Uninstall()
+        {
+
+        }
+
+        public Version Version => GetType().Assembly.GetName().Version;
     }
 
     public class PasswordPropertyTemplate : IPlugin, IPropertyTemplate

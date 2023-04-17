@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:Mfa_Name}" version="10.0.0.4689" description="${resource:Mfa_Description}" instanceIdentifier="3317de4f74eb434da129a95a41aebc5b" theme="" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" cssClass="mfa-settings" provider="3bd55b782e624b77b6e730f6bce17de2">
+    <contentScript>
+	<![CDATA[
+#registerEndOfPageHtml()
+
+#set($mfaTemplate = $core_v2_widget.UniqueId('mfaTemplate'))
+
+<script type="text/html" id="$mfaTemplate">
+    <li class="field-item mfa-settings">
+	  <span class="field-item-name">$core_v2_language.GetResource('ManageMFA')</span>
+	  <span class="field-item-description">$core_v2_language.GetResource('ManageMFADesc')</span>
+	  <a  href="$frcommon_v1_Mfa.ManageMfaUrl()">$core_v2_language.GetResource('UpdateManage')</a>
+    </li>
+</script>
+
+ <script type="text/javascript">
+          jQuery(function(j){
+	
+	            var mfaTemplate = j.telligent.evolution.template.compile('$mfaTemplate');
+
+				j('.edit-user .setting-sign-in-name').parent().append(mfaTemplate);
+          });
+  </script>
+#end
+]]></contentScript>
+    <headerScript>
+      <![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Mfa_Header}'))
+			]]>
+    </headerScript>
+    <configuration>
+      <![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="Mfa_Name" dataType="string" defaultValue="${resource:Mfa_Header}" template="core_v2_tokenizedString" />
+</propertyGroup>
+]]>
+    </configuration>
+    <languageResources>
+		<language key="en-us">
+			<resource name="Mfa_Name">4 Roads - MFA Settings</resource>
+			<resource name="Mfa_Header">MFA Settings</resource>
+			<resource name="Mfa_Description">This widget should be placed on the settings page.</resource>
+			<resource name="Options">Options</resource>
+			<resource name="ManageMFA">MFA Settings</resource>
+			<resource name="ManageMFADesc">Manage the current multi-factor authentication settings</resource>
+			<resource name="UpdateManage">Manage MFA</resource>
+		</language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>

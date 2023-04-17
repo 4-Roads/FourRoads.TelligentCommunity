@@ -127,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="FourRoads.TelligentCommunity.Mfa.nuspec" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\validate.vm" />
     <EmbeddedResource Include="Resources\Widgets\ValidateMfa\validate.vm" />
@@ -136,6 +137,9 @@
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\upgrade-notice.vm" />
     <EmbeddedResource Include="Resources\Widgets\ValidateEmail\validate.vm" />
     <EmbeddedResource Include="Resources\Widgets\ValidateEmail\newCode.vm" />
+    <EmbeddedResource Include="Resources\Widgets\SyncMfa\style.less">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\mfa.js" />
@@ -179,6 +183,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Widgets\MfaSettings\widget.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
