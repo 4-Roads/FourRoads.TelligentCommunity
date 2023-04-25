@@ -39,7 +39,7 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
         <resource name="Activate_Desc">Activate two factor authentication using Google Authenticator to provide an extra level of protection to your account </resource>
         <resource name="Disable_Desc">Disable two factor authentication for your account</resource>
         <resource name="GenerateCodes">Generate Codes</resource>
-        <resource name="GenerateCodes_Desc">Generate 10 one time codes to use in case you loose access to your phone</resource>
+        <resource name="GenerateCodes_Desc">Generate 10 one time codes to use in case you lose access to your phone</resource>
         <resource name="Codes_Left_Format">You have {count} one time codes left. Codes were generated {datetime}.</resource>
         <resource name="RegenerateCodes_Desc">If you wish, you can regenerate codes now. All the existing codes will be invalidated.</resource>
         <resource name="RegenerateCodes">Regenerate Codes</resource>

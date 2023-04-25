@@ -1,7 +1,8 @@
 $core_v2_page.SetContentType('application/json')
 #if ($core_v2_page.IsPost)
 	#set($validationCode = $core_v2_page.GetFormValue('validationCode'))
-		#if($frcommon_v1_Mfa.Validate($validationCode))
+	#set($persist = $core_v2_utility.ParseBool($core_v2_page.GetFormValue('persist')))
+		#if($frcommon_v1_Mfa.Validate($validationCode , $persist))
 			{"result":"true"}
 		#else
 			{"result":"false"}

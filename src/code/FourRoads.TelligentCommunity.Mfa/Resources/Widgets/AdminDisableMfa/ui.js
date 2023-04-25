@@ -32,9 +32,28 @@
                     success: function (r) {
                         button.showLoader(false);
                         button.hide();
-                        ev.notifications.show(context.successMsg, { type: 'information' });
-                        var doc = global.document;
-                        setTimeout(function () { doc.location.reload(); }, 5000);
+                        button.parent('.navigation-list-item').hide();
+                        ev.notifications.show(context.disableMfaSuccessMsg, { type: 'information' });
+                    },
+                    error: function (r) {
+                        button.showLoader(false);
+                        ev.notifications.show(r.message, { type: 'error' });
+                    }
+                });
+            });
+
+            $('.action .validate-email', parent).on('click', function (e) {
+                e.preventDefault();
+                var button = $(this);
+                button.showLoader(true);
+                ev.post({
+                    url: context.validateEmaolUrl,
+                    data: { userId: context.userId },
+                    success: function (r) {
+                        button.showLoader(false);
+                        button.hide();
+                        button.parent('.navigation-list-item').hide();
+                        ev.notifications.show(context.validateEmailSuccessMsg, { type: 'information' });
                     },
                     error: function (r) {
                         button.showLoader(false);

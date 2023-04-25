@@ -1,0 +1,14 @@
+﻿#set($errorMessage = "Something went wrong")
+#set($isAdmin = $core_v2_roleUsers.IsUserInRoles($core_v2_user.Accessing.Username, $core_v2_utility.MakeList("Administrators")))
+#if(!$isAdmin)
+	$core_v2_page.SendJsonError($errorMessage)
+#end
+#set($user = false)
+#set($user = $core_v2_user.Current)
+
+#if (!$frcommon_v1_Mfa.VerifyEmail($user.Id) || !$user)
+	$core_v2_page.SendJsonError($errorMessage)
+#end
+
+$core_v2_page.SetContentType('application/json')
+true

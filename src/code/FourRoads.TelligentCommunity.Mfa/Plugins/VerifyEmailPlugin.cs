@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web;
 using FourRoads.TelligentCommunity.Mfa.Interfaces;
 using Telligent.Evolution.Extensibility;
@@ -8,7 +9,8 @@ using Telligent.Evolution.Extensibility.Api.Version1;
 using Telligent.Evolution.Extensibility.Email.Version1;
 using Telligent.Evolution.Extensibility.Templating.Version1;
 using Telligent.Evolution.Extensibility.Version1;
-
+using ISendEmail = Telligent.Evolution.Extensibility.Api.Version2.ISendEmail;
+using SendEmailOptions = Telligent.Evolution.Extensibility.Api.Version2.SendEmailOptions;
 namespace FourRoads.TelligentCommunity.Mfa.Plugins
 {
     public class VerifyEmailPlugin : ISingletonPlugin, IEmailTemplatePreviewPlugin, IVerifyEmailProvider
@@ -83,14 +85,18 @@ namespace FourRoads.TelligentCommunity.Mfa.Plugins
                 { VerifyEmailTokens.VerifyCodeUrl, $"/verifyemail?code={code}&username={HttpUtility.UrlDecode(user.Username)}"}
             });
 
-            Apis.Get<ISendEmail>().Send(new SendEmailOptions()
+            Apis.Get<ISendEmail>().SendAsync( new SendEmailOptions()
             {
                 ToUserId = user.Id,
                 Header = _templateController.RenderTokenString(EmailTarget.Header.ToTemplateTypeString(), templateContext),
                 Footer = _templateController.RenderTokenString(EmailTarget.Footer.ToTemplateTypeString(), templateContext),
                 Subject = _templateController.RenderTokenString(EmailTarget.Subject.ToTemplateTypeString(), templateContext),
                 Body = _templateController.RenderTokenString(EmailTarget.Body.ToTemplateTypeString(), templateContext),
-            });
+            }).ContinueWith(t =>
+            {
+                Apis.Get<IExceptions>().Log(t.Exception);
+
+            } , TaskContinuationOptions.OnlyOnFaulted);
 
         }
 

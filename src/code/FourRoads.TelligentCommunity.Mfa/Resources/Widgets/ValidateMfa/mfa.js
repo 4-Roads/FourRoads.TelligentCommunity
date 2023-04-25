@@ -31,7 +31,8 @@
         },
         save = function(context , code) {
             var data = {
-                validationCode: code
+                validationCode: code,
+                persist: context.selectors.persistPeriod.is(':checked')
             };
 
             context.selectors.validateInput.closest('.field-item').find('.field-item-validation').hide();

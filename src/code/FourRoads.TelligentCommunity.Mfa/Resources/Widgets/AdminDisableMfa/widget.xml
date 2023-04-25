@@ -12,15 +12,27 @@
 #if(!$user)
   $core_v2_widget.Hide()
 #end
-#set($isMfaEnabled = '')
+
+#set($isMfaEnabled = false)
 #set($isMfaEnabled = $frcommon_v1_Mfa.TwoFactorEnabled($core_v2_user.Current.Id))
-#if($isMfaEnabled == '' || !$isMfaEnabled)
-  $core_v2_widget.Hide()
-#end
+
 #set($url = $core_v2_widget.GetExecutedFileUrl('disablemfa.vm'))
-  <div class="ui-links navigation-list action" data-minlinks="2" data-direction="vertical" data-minlinks="$linksToShow" data-maxlinks="$linksToShow">
+
+#set($validateEmailUrl = $core_v2_widget.GetExecutedFileUrl('validateemail.vm'))
+
+  <div class="ui-links navigation-list action" data-minlinks="2" data-direction="vertical">
     <ul class="navigation-list">
-      <li class="navigation-list-item"><a class="disable-mfa" href="#">$core_v2_language.GetResource('disableMFA')</a></li>
+      #if ($isMfaEnabled)
+		  <li class="navigation-list-item">
+			<a class="disable-mfa" href="#">$core_v2_language.GetResource('disableMFA')</a>
+	      </li>
+	  #end
+	  #if ($frcommon_v1_Mfa.EmailVerificationRequired($user.Id))<li class="navigation-list-item">
+		  <li class="navigation-list-item">
+			  <span>$core_v2_language.FormatString($core_v2_language.GetResource('EmailChanged'), $frcommon_v1_Mfa.VerifiedEmail($user.Id) , $user.PrivateEmail )</span>
+			  <a class="validate-email" href="#">$core_v2_language.GetResource('validateEmail')</a>
+		  </li>
+	  #end
     </ul>
   </div>
 #registerEndOfPageHtml('ns.widgets.disableMFA')
@@ -30,8 +42,10 @@
 <script type='text/javascript'>
   jQuery(document).ready(function() {
     jQuery.ns.widgets.disableMFA.register({
-      successMsg: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource("successMsg"))',
+	 validateEmailSuccessMsg:'$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource("validateEmailSuccessMsg"))',
+      disableMfaSuccessMsg: '$core_v2_encoding.JavascriptEncode($core_v2_language.GetResource("disableMfaSuccessMsg"))',
       disableMfaUrl: '$core_v2_encoding.JavascriptEncode($url)',
+	  validateEmaolUrl: '$core_v2_encoding.JavascriptEncode($validateEmailUrl)',
       userId: $user.Id
     });
   });
@@ -40,12 +54,15 @@
 ]]>
     </contentScript>
     <languageResources>
-      <language key="en-us">
-        <resource name="Mfa_Name">4 Roads - Admin Disable MFA</resource>
-        <resource name="Mfa_Description">Administrators can disable MFA for users by visiting their profile pages.</resource>
-        <resource name="disableMFA">Disable MFA</resource>
-        <resource name="successMsg">MFA was disabled</resource>
-      </language>
+		<language key="en-us">
+			<resource name="Mfa_Name">4 Roads - Admin Disable MFA</resource>
+			<resource name="Mfa_Description">Administrators can disable MFA for users by visiting their profile pages.</resource>
+			<resource name="disableMFA">Disable MFA</resource>
+			<resource name="disableMfaSuccessMsg">MFA was disabled</resource>
+			<resource name="validateEmailSuccessMsg">New email address validated</resource>
+			<resource name="validateEmail">Validate Email</resource>
+			<resource name="EmailChanged">The email of this user has changed from '{0}' to '{1}' </resource>
+		</language>
     </languageResources>
   </scriptedContentFragment>
 </scriptedContentFragments>

@@ -101,6 +101,8 @@
     </Compile>
     <Compile Include="DataProvider\MfaDataProvider.cs" />
     <Compile Include="Logic\FourRoadsTwoFactorAuthenticator.cs" />
+    <Compile Include="Model\PersitenceEnum.cs" />
+    <Compile Include="Plugins\DatePropertyTemplate.cs" />
     <Compile Include="Plugins\MfaAuthenticatorExtension.cs" />
     <Compile Include="Interfaces\IMfaDataProvider.cs" />
     <Compile Include="Interfaces\IMfaLogic.cs" />
@@ -113,6 +115,7 @@
     <Compile Include="Plugins\EmailVerifiedSocketMessage.cs" />
     <Compile Include="Interfaces\ISocketMessage.cs" />
     <Compile Include="Interfaces\IVerifyEmailProvider.cs" />
+    <Compile Include="Plugins\PasswordPropertyTemplate.cs" />
     <Compile Include="Plugins\VerifyEmailPlugin.cs" />
     <Compile Include="Model\OneTimeCode.cs" />
     <Compile Include="Model\OneTimeCodesStatus.cs" />
@@ -140,6 +143,7 @@
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\style.less">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Widgets\AdminDisableMfa\validateemail.vm" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Widgets\SyncMfa\mfa.js" />
