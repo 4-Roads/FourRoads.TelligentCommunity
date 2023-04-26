@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release id="FourRoads.TelligentCommunity.ForumLastPost">
+  <files>
+    <file name="FourRoads.Common.dll" />
+    <file name="FourRoads.Common.Sql.dll" />
+    <file name="FourRoads.Common.TelligentCommunity.dll" />
+    <file name="FourRoads.Common.Web.dll" />
+    <file name="FourRoads.TelligentCommunity.ForumLastPost.dll" />
+    <file name="FourRoads.TelligentCommunity.Installer.dll" />
+    <file name="RSS.NET.dll" />
+  </files>
+</release>

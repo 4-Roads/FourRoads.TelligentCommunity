@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release id="FourRoads.TelligentCommunity.PowerBI">
+  <files>
+    <file name="FourRoads.Common.dll" />
+    <file name="FourRoads.Common.Sql.dll" />
+    <file name="FourRoads.Common.TelligentCommunity.dll" />
+    <file name="FourRoads.Common.Web.dll" />
+    <file name="FourRoads.TelligentCommunity.PowerBI.dll" />
+    <file name="Microsoft.Azure.CognitiveServices.Language.dll" />
+    <file name="Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
+    <file name="Microsoft.Rest.ClientRuntime.Azure.dll" />
+    <file name="Microsoft.Rest.ClientRuntime.dll" />
+    <file name="RSS.NET.dll" />
+  </files>
+</release>

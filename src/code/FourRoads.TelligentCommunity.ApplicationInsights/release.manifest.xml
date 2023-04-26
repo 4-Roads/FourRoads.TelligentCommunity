@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release id="FourRoads.TelligentCommunity.ApplicationInsights">
+  <files>
+    <file name="FourRoads.Common.dll" />
+    <file name="FourRoads.Common.Sql.dll" />
+    <file name="FourRoads.Common.TelligentCommunity.dll" />
+    <file name="FourRoads.Common.Web.dll" />
+    <file name="FourRoads.TelligentCommunity.ApplicationInsights.dll" />
+    <file name="FourRoads.TelligentCommunity.Installer.dll" />
+    <file name="Microsoft.AI.Agent.Intercept.dll" />
+    <file name="Microsoft.AI.DependencyCollector.dll" />
+    <file name="Microsoft.AI.PerfCounterCollector.dll" />
+    <file name="Microsoft.AI.ServerTelemetryChannel.dll" />
+    <file name="Microsoft.AI.Web.dll" />
+    <file name="Microsoft.AI.WindowsServer.dll" />
+    <file name="Microsoft.ApplicationInsights.dll" />
+    <file name="Microsoft.AspNet.TelemetryCorrelation.dll" />
+    <file name="RSS.NET.dll" />
+    <file name="System.Diagnostics.DiagnosticSource.dll" />
+  </files>
+</release>

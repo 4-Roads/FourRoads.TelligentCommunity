@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release id="FourRoads.TelligentCommunity.PwaFeatures">
+  <files>
+    <file name="FirebaseAdmin.dll" />
+    <file name="FourRoads.Common.dll" />
+    <file name="FourRoads.Common.Sql.dll" />
+    <file name="FourRoads.Common.TelligentCommunity.dll" />
+    <file name="FourRoads.Common.Web.dll" />
+    <file name="FourRoads.TelligentCommunity.Installer.dll" />
+    <file name="FourRoads.TelligentCommunity.PwaFeatures.dll" />
+    <file name="Google.Api.Gax.dll" />
+    <file name="Google.Api.Gax.Rest.dll" />
+    <file name="Google.Apis.Auth.dll" />
+    <file name="Google.Apis.Auth.PlatformServices.dll" />
+    <file name="Google.Apis.Core.dll" />
+    <file name="Google.Apis.dll" />
+    <file name="Google.Apis.PlatformServices.dll" />
+    <file name="RSS.NET.dll" />
+    <file name="System.Interactive.Async.dll" />
+  </files>
+</release>

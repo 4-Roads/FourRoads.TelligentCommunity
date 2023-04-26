@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release id="FourRoads.TelligentCommunity.Mfa">
+  <files>
+    <file name="FourRoads.Common.dll" />
+    <file name="FourRoads.Common.Sql.dll" />
+    <file name="FourRoads.Common.TelligentCommunity.dll" />
+    <file name="FourRoads.Common.Web.dll" />
+    <file name="FourRoads.TelligentCommunity.Installer.dll" />
+    <file name="FourRoads.TelligentCommunity.Mfa.dll" />
+    <file name="Google.Authenticator.dll" />
+    <file name="jose-jwt.dll" />
+    <file name="QRCoder.dll" />
+    <file name="RSS.NET.dll" />
+  </files>
+</release>

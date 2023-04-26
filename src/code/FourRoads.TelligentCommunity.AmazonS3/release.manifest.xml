@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release id="FourRoads.TelligentCommunity.AmazonS3">
+  <files>
+    <file name="AWSSDK.Core.dll" />
+    <file name="AWSSDK.S3.dll" />
+    <file name="FourRoads.Common.dll" />
+    <file name="FourRoads.Common.Sql.dll" />
+    <file name="FourRoads.Common.TelligentCommunity.dll" />
+    <file name="FourRoads.Common.Web.dll" />
+    <file name="FourRoads.TelligentCommunity.AmazonS3.dll" />
+    <file name="RSS.NET.dll" />
+  </files>
+</release>

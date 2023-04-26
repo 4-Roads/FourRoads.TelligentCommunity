@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release id="FourRoads.TelligentCommunity.StopForumSpam">
+  <files>
+    <file name="FourRoads.TelligentCommunity.StopForumSpam.dll" />
+    <file name="RSS.NET.dll" />
+  </files>
+</release>
