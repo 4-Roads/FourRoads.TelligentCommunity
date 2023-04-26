@@ -18,4 +18,8 @@
     <file name="RSS.NET.dll" />
     <file name="System.Interactive.Async.dll" />
   </files>
+  <resources>
+    <resource name="Resources\Sql\PWA.install.sql" />
+  </resources>
+  <docs />
 </release>

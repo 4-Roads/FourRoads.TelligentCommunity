@@ -12,4 +12,8 @@
     <file name="QRCoder.dll" />
     <file name="RSS.NET.dll" />
   </files>
+  <resources>
+    <resource name="Resources\Sql\GoogleMFA.install.sql" />
+  </resources>
+  <docs />
 </release>

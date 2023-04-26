@@ -11,4 +11,8 @@
     <file name="RSS.NET.dll" />
     <file name="System.Text.Encoding.CodePages.dll" />
   </files>
+  <resources />
+  <docs>
+    <doc name="readme.md" />
+  </docs>
 </release>

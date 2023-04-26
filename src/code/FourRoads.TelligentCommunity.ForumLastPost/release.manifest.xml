@@ -9,4 +9,12 @@
     <file name="FourRoads.TelligentCommunity.Installer.dll" />
     <file name="RSS.NET.dll" />
   </files>
+  <resources>
+    <resource name="Resources\Sql\LastReadPosts.uninstall.sql" />
+    <resource name="Resources\Sql\LastReadPostsProcedures.install.sql" />
+    <resource name="Resources\Sql\LastReadPostsTables.install.sql" />
+  </resources>
+  <docs>
+    <doc name="readme.md" />
+  </docs>
 </release>

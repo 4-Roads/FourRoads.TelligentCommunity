@@ -7,4 +7,6 @@
     <file name="FourRoads.Common.Web.dll" />
     <file name="RSS.NET.dll" />
   </files>
+  <resources />
+  <docs />
 </release>

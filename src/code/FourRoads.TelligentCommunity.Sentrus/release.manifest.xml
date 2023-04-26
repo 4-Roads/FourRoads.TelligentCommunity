@@ -9,4 +9,12 @@
     <file name="FourRoads.TelligentCommunity.Sentrus.dll" />
     <file name="RSS.NET.dll" />
   </files>
+  <resources>
+    <resource name="Resources\Sql\LastLogin.uninstall.sql" />
+    <resource name="Resources\Sql\LastLoginProcedures.install.sql" />
+    <resource name="Resources\Sql\LastLoginTables.install.sql" />
+  </resources>
+  <docs>
+    <doc name="readme.md" />
+  </docs>
 </release>

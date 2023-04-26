@@ -18,4 +18,6 @@
     <file name="RSS.NET.dll" />
     <file name="System.Diagnostics.DiagnosticSource.dll" />
   </files>
+  <resources />
+  <docs />
 </release>

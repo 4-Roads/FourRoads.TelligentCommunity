@@ -9,4 +9,10 @@
     <file name="FourRoads.TelligentCommunity.Installer.dll" />
     <file name="RSS.NET.dll" />
   </files>
+  <resources>
+    <resource name="Resources\Sql\HubSpot.install.sql" />
+  </resources>
+  <docs>
+    <doc name="README.md" />
+  </docs>
 </release>

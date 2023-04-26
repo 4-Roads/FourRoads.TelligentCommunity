@@ -8,4 +8,8 @@
     <file name="FourRoads.TelligentCommunity.GroupMentionActivity.dll" />
     <file name="RSS.NET.dll" />
   </files>
+  <resources />
+  <docs>
+    <doc name="readme.md" />
+  </docs>
 </release>
