@@ -7,7 +7,6 @@
     <file name="FourRoads.Common.Web.dll" />
     <file name="FourRoads.TelligentCommunity.Installer.dll" />
     <file name="FourRoads.TelligentCommunity.Sentrus.dll" />
-    <file name="RSS.NET.dll" />
   </files>
   <resources>
     <resource name="Resources\Sql\LastLogin.uninstall.sql" />

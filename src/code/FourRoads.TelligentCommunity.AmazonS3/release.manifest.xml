@@ -8,7 +8,6 @@
     <file name="FourRoads.Common.TelligentCommunity.dll" />
     <file name="FourRoads.Common.Web.dll" />
     <file name="FourRoads.TelligentCommunity.AmazonS3.dll" />
-    <file name="RSS.NET.dll" />
   </files>
   <resources />
   <docs />

@@ -5,7 +5,6 @@
     <file name="FourRoads.Common.Sql.dll" />
     <file name="FourRoads.Common.TelligentCommunity.dll" />
     <file name="FourRoads.Common.Web.dll" />
-    <file name="RSS.NET.dll" />
   </files>
   <resources />
   <docs />

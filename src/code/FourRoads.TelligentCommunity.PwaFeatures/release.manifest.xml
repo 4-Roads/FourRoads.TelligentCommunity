@@ -15,7 +15,6 @@
     <file name="Google.Apis.Core.dll" />
     <file name="Google.Apis.dll" />
     <file name="Google.Apis.PlatformServices.dll" />
-    <file name="RSS.NET.dll" />
     <file name="System.Interactive.Async.dll" />
   </files>
   <resources>

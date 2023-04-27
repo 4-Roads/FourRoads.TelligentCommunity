@@ -10,7 +10,6 @@
     <file name="Google.Authenticator.dll" />
     <file name="jose-jwt.dll" />
     <file name="QRCoder.dll" />
-    <file name="RSS.NET.dll" />
   </files>
   <resources>
     <resource name="Resources\Sql\GoogleMFA.install.sql" />

@@ -75,7 +75,7 @@ public static class Builder
                 dllDir = @$"{dir}Release\";
             }
 
-            Console.WriteLine(nuspec);
+            Console.WriteLine($"Package: {nuspec.Replace(".nuspec", string.Empty)}");
             var xmlDoc = new XmlDocument();
             // var docNode = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
             // xmlDoc.AppendChild(docNode);
@@ -85,8 +85,7 @@ public static class Builder
             releaseElement.Attributes.Append(idAttr);
             xmlDoc.AppendChild(releaseElement);
             var filesElement = xmlDoc.CreateElement("files");
-            var uniqueDlls = GetFiles(dllDir, "dll").Except(libs).ToList();
-
+            var uniqueDlls = GetFiles(dllDir, "dll").Except(libs, new LibsComparer()).ToList();
             foreach (var uniqueDll in uniqueDlls)
             {
                 var fileElement = xmlDoc.CreateElement("file");
@@ -130,7 +129,7 @@ public static class Builder
             releaseElement.AppendChild(docsElement);
             File.WriteAllText(@$"{projectPath}release.manifest.xml",
                 $@"<?xml version=""1.0"" encoding=""utf-8""?>{Environment.NewLine}{Beautify(xmlDoc)}");
-            Console.WriteLine("======================================");
+            Console.WriteLine("==============================================================");
         }
     }
 
@@ -143,6 +142,7 @@ public static class Builder
             Console.WriteLine($"Cannot find 'lib/Telligent' folder in {path}");
             return false;
         }
+
         if (!Directory.Exists($@"{path}code"))
         {
             Console.WriteLine($"Cannot find 'code' folder in {path}");
@@ -150,5 +150,19 @@ public static class Builder
         }
 
         return true;
+    }
+
+    private class LibsComparer : IEqualityComparer<string>
+    {
+        public bool Equals(string? x, string? y)
+        {
+            //avoid RSS.Net.dll not matching RSS.NET.dll
+            return string.Equals(x, y, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode(string obj)
+        {
+            return obj.ToLowerInvariant().GetHashCode();
+        }
     }
 }

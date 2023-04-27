@@ -10,7 +10,6 @@
     <file name="Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
     <file name="Microsoft.Rest.ClientRuntime.Azure.dll" />
     <file name="Microsoft.Rest.ClientRuntime.dll" />
-    <file name="RSS.NET.dll" />
   </files>
   <resources />
   <docs>

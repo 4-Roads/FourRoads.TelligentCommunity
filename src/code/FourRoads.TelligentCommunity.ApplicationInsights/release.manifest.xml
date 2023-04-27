@@ -15,7 +15,6 @@
     <file name="Microsoft.AI.WindowsServer.dll" />
     <file name="Microsoft.ApplicationInsights.dll" />
     <file name="Microsoft.AspNet.TelemetryCorrelation.dll" />
-    <file name="RSS.NET.dll" />
     <file name="System.Diagnostics.DiagnosticSource.dll" />
   </files>
   <resources />

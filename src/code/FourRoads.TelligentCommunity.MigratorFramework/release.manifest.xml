@@ -2,7 +2,6 @@
 <release id="FourRoads.TelligentCommunity.MigratorFramework">
   <files>
     <file name="FourRoads.TelligentCommunity.MigratorFramework.dll" />
-    <file name="RSS.NET.dll" />
   </files>
   <resources />
   <docs />
