@@ -29,29 +29,37 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         public const string FILESTORE_KEY = "fourroads.metadata";
         private ICentralizedFileStorageProvider _metaDataStore = null;
         private readonly XmlSerializer _metaDataSerializer = new XmlSerializer(typeof(MetaData));
-        private static readonly Regex MakeSafeFileNameRegEx = new Regex(CentralizedFileStorage.ValidFileNameRegexPattern, RegexOptions.Compiled);
+
+        private static readonly Regex MakeSafeFileNameRegEx =
+            new Regex(CentralizedFileStorage.ValidFileNameRegexPattern, RegexOptions.Compiled);
+
         private MetaDataConfiguration _metaConfig;
 
-        public  bool CanEdit
+        public bool CanEdit
         {
             get
             {
-                if (Apis.Get<IUrl>().CurrentContext != null && Apis.Get<IUrl>().CurrentContext.ContextItems != null && Apis.Get<IUsers>().AccessingUser != null)
+                if (Apis.Get<IUrl>().CurrentContext != null && Apis.Get<IUrl>().CurrentContext.ContextItems != null &&
+                    Apis.Get<IUsers>().AccessingUser != null)
                 {
-                    if (Apis.Get<IPermissions>().Get(PermissionRegistrar.SiteEditMetaDataPermission, Apis.Get<IUsers>().AccessingUser.Id.GetValueOrDefault(0)).IsAllowed)
+                    if (Apis.Get<IPermissions>().Get(PermissionRegistrar.SiteEditMetaDataPermission,
+                            Apis.Get<IUsers>().AccessingUser.Id.GetValueOrDefault(0)).IsAllowed)
                     {
                         return true;
                     }
 
-                    var items  = Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems();
+                    var items = Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems();
 
                     if (items.Any())
                     {
                         foreach (var context in items)
                         {
-                            if (context.ContentId.HasValue && context.ContainerTypeId.HasValue && Apis.Get<IUsers>().AccessingUser.Id.HasValue)
+                            if (context.ContentId.HasValue && context.ContainerTypeId.HasValue &&
+                                Apis.Get<IUsers>().AccessingUser.Id.HasValue)
                             {
-                                if (Apis.Get<IPermissions>().Get(PermissionRegistrar.EditMetaDataPermission, Apis.Get<IUsers>().AccessingUser.Id.Value, context.ContentId.Value, context.ContainerTypeId.Value).IsAllowed)
+                                if (Apis.Get<IPermissions>().Get(PermissionRegistrar.EditMetaDataPermission,
+                                        Apis.Get<IUsers>().AccessingUser.Id.Value, context.ContentId.Value,
+                                        context.ContainerTypeId.Value).IsAllowed)
                                 {
                                     return true;
                                 }
@@ -68,9 +76,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
         public string FormatMetaString(string rawFieldValue, string seperator, IDictionary namedParameters)
         {
-            return matchFields.Replace(rawFieldValue , match =>
+            return matchFields.Replace(rawFieldValue, match =>
             {
-                string trimmend = match.Value.Trim(new char[]{' ' , '}', '{' });
+                string trimmend = match.Value.Trim(new char[] { ' ', '}', '{' });
 
                 if (namedParameters.Contains(trimmend))
                 {
@@ -136,7 +144,6 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 {
                     imageUrl = ExtractImage(container.AvatarUrl);
                 }
-
             }
 
             return imageUrl;
@@ -154,7 +161,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 foreach (Match match in matches)
                 {
                     Uri result;
-                    if (Uri.TryCreate(Apis.Get<IUrl>().Absolute(match.Groups["url"].Value), UriKind.Absolute, out result))
+                    if (Uri.TryCreate(Apis.Get<IUrl>().Absolute(match.Groups["url"].Value), UriKind.Absolute,
+                            out result))
                     {
                         results.Add(result.AbsoluteUri);
                     }
@@ -172,6 +180,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 {
                     _metaDataStore = CentralizedFileStorage.GetFileStore(FILESTORE_KEY);
                 }
+
                 return _metaDataStore;
             }
         }
@@ -181,9 +190,11 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             public Guid? ContainerId;
             public Guid? ApplicationId;
 
-            public string FileName => MakeSafeFileName(PageName + (ContainerId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContainerId : string.Empty) +
-                                                       (ApplicationId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ApplicationId : string.Empty) +
-                                                       (ContentId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContentId : string.Empty));
+            public string FileName => MakeSafeFileName(
+                PageName +
+                (ContainerId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContainerId : string.Empty) +
+                (ApplicationId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ApplicationId : string.Empty) +
+                (ContentId.GetValueOrDefault(Guid.Empty) != Guid.Empty ? "_" + ContentId : string.Empty));
 
             public string PageName;
             public Guid? ContainerTypeId { get; set; }
@@ -194,7 +205,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
         private ContentDetails GetCurrentContentDetails()
         {
-            ContentDetails details = (ContentDetails)CacheService.Get("ContentDetails", CacheScope.Context) ?? new ContentDetails() {PageName = "default"};
+            ContentDetails details = (ContentDetails)CacheService.Get("ContentDetails", CacheScope.Context) ??
+                                     new ContentDetails() { PageName = "default" };
 
             if (Apis.Get<IUrl>().CurrentContext != null && details.PageName == "default")
             {
@@ -204,7 +216,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 {
                     details.ContentId = coa.ContentId;
                     details.ContentTypeId = coa.ContentTypeId;
-                },a =>
+                }, a =>
                 {
                     details.ApplicationId = a.ApplicationId;
                     details.ApplicationTypeId = a.ApplicationTypeId;
@@ -215,8 +227,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                 });
             }
 
-            CacheService.Put("ContentDetails", details , CacheScope.Context);
-            
+            CacheService.Put("ContentDetails", details, CacheScope.Context);
+
             return details;
         }
 
@@ -249,21 +261,22 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
         public static byte[] GetHash(string inputString)
         {
-            HashAlgorithm algorithm = MD5.Create();  //or use SHA1.Create();
+            HashAlgorithm algorithm = MD5.Create(); //or use SHA1.Create();
             return algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
         }
 
         public static string GetHashString(string inputString)
         {
             StringBuilder sb = new StringBuilder();
-     
+
             foreach (byte b in GetHash(inputString))
                 sb.Append(b.ToString("X2"));
 
             return sb.ToString();
         }
 
-        protected void ContextualItem(Action<IContent> contentUse, Action<IApplication> applicationUse, Action<IContainer> containerUse)
+        protected void ContextualItem(Action<IContent> contentUse, Action<IApplication> applicationUse,
+            Action<IContainer> containerUse)
         {
             IApplication currentApplication = null;
             IContainer currentContainer = null;
@@ -271,18 +284,23 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             foreach (var contextItem in Apis.Get<IUrl>().CurrentContext.ContextItems.GetAllContextItems())
             {
-                var container = PluginManager.Get<IWebContextualContainerType>().FirstOrDefault(a => a.ContainerTypeId == contextItem.ContainerTypeId);
+                var container = PluginManager.Get<IWebContextualContainerType>()
+                    .FirstOrDefault(a => a.ContainerTypeId == contextItem.ContainerTypeId);
 
-                if (container != null && contextItem.ContainerId.HasValue && contextItem.ContainerTypeId == Apis.Get<IGroups>().ContainerTypeId)
+                if (container != null && contextItem.ContainerId.HasValue &&
+                    contextItem.ContainerTypeId == Apis.Get<IGroups>().ContainerTypeId)
                 {
                     currentContainer = container.Get(contextItem.ContainerId.Value);
                 }
                 else
-                {   //Only interested in context in groups
+                {
+                    //Only interested in context in groups
                     break;
                 }
 
-                var app = PluginManager.Get<IWebContextualApplicationType>().FirstOrDefault(a => a.ApplicationTypeId == contextItem.ApplicationTypeId && a.ContainerTypes.Any(ct => ct == contextItem.ContainerTypeId));
+                var app = PluginManager.Get<IWebContextualApplicationType>().FirstOrDefault(a =>
+                    a.ApplicationTypeId == contextItem.ApplicationTypeId &&
+                    a.ContainerTypes.Any(ct => ct == contextItem.ContainerTypeId));
 
                 if (app != null && contextItem.ApplicationId.HasValue)
                 {
@@ -295,7 +313,9 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                     }
                 }
 
-                var content = PluginManager.Get<IContentType>().FirstOrDefault(a => a.ContentTypeId == contextItem.ContentTypeId && a.ApplicationTypes.Any(at => at == contextItem.ApplicationTypeId));
+                var content = PluginManager.Get<IContentType>().FirstOrDefault(a =>
+                    a.ContentTypeId == contextItem.ContentTypeId &&
+                    a.ApplicationTypes.Any(at => at == contextItem.ApplicationTypeId));
 
                 if (content != null && contextItem.ContentId.HasValue && contextItem.ContentTypeId.HasValue)
                 {
@@ -305,50 +325,49 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             if (currentApplication != null)
                 applicationUse(currentApplication);
-            
+
             if (currentContent != null)
                 contentUse(currentContent);
-            
+
             if (currentContainer != null)
                 containerUse(currentContainer);
         }
 
         private MetaData GetCurrentMetaData(ContentDetails details)
         {
-            string cacheKey = GetCacheKey(details.FileName);
+            var cacheKey = GetCacheKey(details.FileName);
 
-            MetaData result = CacheService.Get(cacheKey, CacheScope.All) as MetaData;
-
-            if (result == null && MetaDataStore != null)
+            var metaData = CacheService.Get(cacheKey, () =>
             {
-                ICentralizedFile file = MetaDataStore.GetFile("", details.FileName + ".xml");
+                MetaData data = null;
+                var file = MetaDataStore?.GetFile("", details.FileName + ".xml");
 
                 if (file != null)
                 {
-                    using (Stream stream = file.OpenReadStream())
+                    using (var stream = file.OpenReadStream())
                     {
-                        result = ((MetaData)_metaDataSerializer.Deserialize(stream));
+                        data = (MetaData)_metaDataSerializer.Deserialize(stream);
 
-                        //FIlter out any tags that have oreviously been configured but then removed
-                        var lookup = _metaConfig.ExtendedEntries.ToLookup(f => f);
+                        //Filter out any tags that have previously been configured but then removed
+                        var configured = _metaConfig.ExtendedEntries.ToLookup(f => f);
+                        //create a copy, so we can iterate collection and mutate the original
+                        var actual = new SerializableDictionary<string, string>(data.ExtendedMetaTags);
 
-                        foreach (var tag in result.ExtendedMetaTags.Keys)
+                        foreach (var tag in actual.Keys.Where(tag => !configured.Contains(tag)))
                         {
-                            if (!lookup.Contains(tag))
-                                result.ExtendedMetaTags.Remove(tag);
+                            data.ExtendedMetaTags.Remove(tag);
                         }
                     }
                 }
 
-                if (result == null)
+                return data ?? new MetaData
                 {
-                    result = new MetaData() { InheritData = true, ContainerId = details.ContainerId.GetValueOrDefault(Guid.Empty), ContainerTypeId = details.ContainerTypeId.GetValueOrDefault(Guid.Empty) };
-                }
+                    InheritData = true, ContainerId = details.ContainerId.GetValueOrDefault(Guid.Empty),
+                    ContainerTypeId = details.ContainerTypeId.GetValueOrDefault(Guid.Empty)
+                };
+            }, CacheScope.All);
 
-                CacheService.Put(cacheKey, result, CacheScope.All);
-            }
-
-            return result;
+            return metaData;
         }
 
 
@@ -372,7 +391,7 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
                     if (context != null && container.ParentContainer != null)
                     {
                         details.ApplicationId = Guid.Empty;
-                        details.ApplicationTypeId = Guid.Empty; 
+                        details.ApplicationTypeId = Guid.Empty;
                         details.ContainerId = container.ParentContainer.ContainerId;
                         details.ContainerTypeId = container.ParentContainer.ContainerTypeId;
                         details.PageName = context.PageName;
@@ -393,7 +412,8 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
                         foreach (var key in data.ExtendedMetaTags.Keys)
                         {
-                            if (string.IsNullOrWhiteSpace(data.ExtendedMetaTags[key]) && inherited.ExtendedMetaTags.ContainsKey(key))
+                            if (string.IsNullOrWhiteSpace(data.ExtendedMetaTags[key]) &&
+                                inherited.ExtendedMetaTags.ContainsKey(key))
                             {
                                 data.ExtendedMetaTags[key] = inherited.ExtendedMetaTags[key];
                             }
@@ -441,9 +461,10 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
         public string[] GetAvailableExtendedMetaTags()
         {
             return _metaConfig.ExtendedEntries.ToArray();
-        } 
+        }
 
-        public void SaveMetaDataConfiguration(string title, string description, string keywords, bool inherit, IDictionary extendedTags)
+        public void SaveMetaDataConfiguration(string title, string description, string keywords, bool inherit,
+            IDictionary extendedTags)
         {
             if (CanEdit)
             {
@@ -493,10 +514,13 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
             group.PropertySubGroups.Add(subGroup);
 
             int order = 0;
-            subGroup.Properties.Add(new Property("Inherit", "Inherit From Parent", PropertyType.Bool, order++, metaData.InheritData.ToString()));
+            subGroup.Properties.Add(new Property("Inherit", "Inherit From Parent", PropertyType.Bool, order++,
+                metaData.InheritData.ToString()));
             subGroup.Properties.Add(new Property("Title", "Title", PropertyType.String, order++, metaData.Title));
-            subGroup.Properties.Add(new Property("Description", "Description", PropertyType.String, order++, metaData.Description));
-            subGroup.Properties.Add(new Property("Keywords", "Keywords", PropertyType.String, order++, metaData.Keywords));
+            subGroup.Properties.Add(new Property("Description", "Description", PropertyType.String, order++,
+                metaData.Description));
+            subGroup.Properties.Add(new Property("Keywords", "Keywords", PropertyType.String, order++,
+                metaData.Keywords));
 
             PropertySubGroup extendedGroup = new PropertySubGroup("Options", "Extended Tags", 1);
 
@@ -504,17 +528,20 @@ namespace FourRoads.TelligentCommunity.MetaData.Logic
 
             foreach (string extendedEntry in _metaConfig.ExtendedEntries)
             {
-                extendedGroup.Properties.Add(new Property(extendedEntry, extendedEntry, PropertyType.String, order++, metaData.ExtendedMetaTags.ContainsKey(extendedEntry) ? metaData.ExtendedMetaTags[extendedEntry] : string.Empty));
+                extendedGroup.Properties.Add(new Property(extendedEntry, extendedEntry, PropertyType.String, order++,
+                    metaData.ExtendedMetaTags.ContainsKey(extendedEntry)
+                        ? metaData.ExtendedMetaTags[extendedEntry]
+                        : string.Empty));
             }
 
             StringBuilder sb = new StringBuilder();
 
-            using(StringWriter sw = new StringWriter(sb))
+            using (StringWriter sw = new StringWriter(sb))
             using (XmlTextWriter tw = new XmlTextWriter(sw))
                 group.Serialize(tw);
 
             //Hack to make it render slightly nicer
-            return sb.ToString().Replace("legend>" , "h2>");
+            return sb.ToString().Replace("legend>", "h2>");
         }
     }
 }

@@ -2,13 +2,13 @@
   <scriptedContentFragment name="${resource:MetaData_Name}" cssClass="metadata" description="${resource:MetaData_Description}" instanceIdentifier="f94334edd1cb46ef98c0037741511311" isCacheable="true" varyCacheByUser="false" showHeaderByDefault="false" provider="2584523cf4054159a2055322f5957f27">
     <contentScript>
       <![CDATA[
-          #set($currentMetaData = $frcommon_v1_metaData.GetCurrentMetaData())
-          #if ($currentMetaData)
-            
-           #set($parameters = "%{}")
+        #set($currentMetaData = $frcommon_v1_metaData.GetCurrentMetaData())
+        #if ($currentMetaData)
+          
+          #set($parameters = "%{}")
 
-           #set($added = $parameters.Add("SiteName" , $core_v2_configuration.SiteName ))
-           #set($added = $parameters.Add("SiteLogoUrl" , $core_v2_configuration.SiteLogoUrl ))
+          #set($added = $parameters.Add("SiteName" , $core_v2_configuration.SiteName ))
+          #set($added = $parameters.Add("SiteLogoUrl" , $core_v2_configuration.SiteLogoUrl ))
 
           #set($added = $parameters.Add("ContainerName" , $core_v2_container.Current.HtmlName("web") ))
            #set($added = $parameters.Add("ContainerDescription" , $core_v2_container.Current.HtmlDescription("web") ))
@@ -53,28 +53,27 @@
     
             #foreach($keyValue in $currentMetaData.ExtendedMetaTags)
                 #if ($keyValue.Value && $keyValue.Value != "")
-                #set($value = $frcommon_v1_metaData.FormatMetaString($keyValue.Value,$seperator , $parameters))
-             
-                #if ($core_v2_utility.IsMatch($keyValue.Value, "og:"))
-                    #set($added =  $core_v2_page.AddOpenGraphMetaTag($keyValue.Value, $value))
-                #else
-                  #set($added = $core_v2_page.AddMetaTag($keyValue.Key,$value))
-                #end
+                  #set($value = $frcommon_v1_metaData.FormatMetaString($keyValue.Value,$seperator , $parameters))
+               
+                  #if ($core_v2_utility.IsMatch($keyValue.Value, "og:"))
+                      #set($added =  $core_v2_page.AddOpenGraphMetaTag($keyValue.Value, $value))
+                  #else
+                    #set($added = $core_v2_page.AddMetaTag($keyValue.Key,$value))
+                  #end
                 #end
             #end
-            
           #end
-			]]>
+]]>
     </contentScript>
     <headerScript>
       <![CDATA[
 $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:MetaData_Header}'))
-			]]>
+]]>
     </headerScript>
     <configuration>
       <![CDATA[
 <propertyGroup id="options" resourceName="Options">
-	<property id="fragmentHeader" resourceName="MetaData_Name" dataType="string" defaultValue="${resource:MetaData_Header}" template="core_v2_tokenizedString" />
+  <property id="fragmentHeader" resourceName="MetaData_Name" dataType="string" defaultValue="${resource:MetaData_Header}" template="core_v2_tokenizedString" />
 </propertyGroup>
 ]]>
     </configuration>
