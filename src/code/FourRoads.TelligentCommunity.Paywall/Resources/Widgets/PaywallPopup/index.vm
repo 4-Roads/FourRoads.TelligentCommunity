@@ -1,0 +1,39 @@
+$core_v2_page.AddLink('stylesheet', $core_v2_widget.GetExecutedFileUrl('styles.less'), "%{ Position = 'AfterTheme' }") 
+
+$core_v2_widget.ExecuteFile('config.vm')
+
+#set ($user = $core_v2_user.Accessing)
+
+#set($url = false) 
+#set($url = $core_v2_urls.Login())
+
+<div class="banner-wrapper">
+		<a href="#" class="close" aria-label="close registration and login banner" id="$core_v2_widget.UniqueId('CloseRegPrompt')"></a>
+
+		<h2 class="title welcome" id="$core_v2_widget.UniqueId('WelcomeTitle')">
+			$core_v2_language.GetResource("WelcomeTitle")
+		</h2>
+
+
+		<p id="desc">
+			$core_v2_language.GetResource("WelcomeMessage")
+		</p>
+
+		<a id="$core_v2_widget.UniqueId('Register')" href="$core_v2_encoding.HtmlAttributeEncode($url)" title="$core_v2_language.GetResource("WelcomeCTA")" aria-title="$core_v2_language.GetResource("WelcomeCTA")" class="btn" >
+			<span class="fr fr-fw fr-external-link"></span>
+			$core_v2_language.GetResource("WelcomeCTA")
+		</a>
+</div>
+
+#registerEndOfPageHtml('fourroads.widgets.paywall')
+	<script src="$core_v2_encoding.HtmlAttributeEncode($core_v2_widget.GetFileUrl("ui.js"))"></script>
+#end
+#registerEndOfPageHtml()
+	<script>
+		jQuery(function(){
+			jQuery.fourroads.widgets.paywall.register({
+				wrapperSelector: '#$core_v2_widget.WrapperElementId'
+			});
+		});
+	</script>
+#end

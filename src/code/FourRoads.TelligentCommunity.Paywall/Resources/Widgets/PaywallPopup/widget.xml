@@ -1,0 +1,37 @@
+<scriptedContentFragments>
+  <scriptedContentFragment name="${resource:Paywall_WidgetName}" cssClass="paywall"  description="${resource:Paywall_widget_Description}" instanceIdentifier="C1803992-CD49-4FDC-962E-05426579C7A1" isCacheable="false" varyCacheByUser="false" showHeaderByDefault="false" provider="C2A9A6BD-2C06-4A18-975A-E7FB3D94FD77">
+    <contentScript>
+      <![CDATA[
+    
+	$core_v2_widget.ExecuteFile('index.vm')
+	  
+			]]>
+    </contentScript>
+    <headerScript>
+      <![CDATA[
+$core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${resource:Paywall_Header}'))
+			]]>
+    </headerScript>
+    <configuration>
+      <![CDATA[
+<propertyGroup id="options" resourceName="Options">
+	<property id="fragmentHeader" resourceName="Widget_Title" dataType="string" defaultValue="${resource:Paywall_Header}" template="core_v2_tokenizedString" />
+</propertyGroup>
+]]>
+    </configuration>
+    <languageResources>
+      <language key="en-us">
+        <resource name="Paywall_WidgetName">4 Roads - Paywall</resource>
+        <resource name="Paywall_widget_Description">Displays a popup paywall message</resource>
+	      <resource name="Options">Options</resource>
+	      <resource name="Widget_Title">Title</resource>
+	      <resource name="Paywall_Header">Want to read more</resource>
+	      <resource name="WelcomeTitle">Welcome to the site! Please register with the community. It's free and takes less than 1 minute.</resource>
+
+	      <resource name="WelcomeMessage"></resource>
+
+	      <resource name="WelcomeCTA">Sign Up</resource>
+      </language>
+    </languageResources>
+  </scriptedContentFragment>
+</scriptedContentFragments>
