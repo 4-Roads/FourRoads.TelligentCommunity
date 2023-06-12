@@ -17,6 +17,6 @@
 	</dependencies>
     </metadata>
     <files>
-        <file src="bin\**\FourRoads.TelligentCommunity.Mfa.dll" target="lib\net47" exclude="*Tests*" />
+        <file src="bin\**\FourRoads.TelligentCommunity.Paywall.dll" target="lib\net47" exclude="*Tests*" />
     </files>
 </package>
