@@ -1,1 +1,6 @@
-## no config as yet
+
+
+#set($DisplayDelay = $core_v2_widget.GetIntValue('displayDelay',0))
+#set($PageViews = $core_v2_widget.GetIntValue('pageViews',0))
+
+#set($LoggedViews = $core_v2_utility.ParseInt($core_v2_page.GetCookieValue("PaywallLoggedViews", "%{ }")))

@@ -7,7 +7,9 @@
 
             $.telligent.evolution.messaging.subscribe('paywall.displayPopup', function (data) {
 
-                $wrapper.show();
+                window.setTimeout(function () {
+                    $wrapper.show();
+                }, context.displayDelay * 1000);
 
             });
 

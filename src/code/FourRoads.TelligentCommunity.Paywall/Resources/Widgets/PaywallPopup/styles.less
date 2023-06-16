@@ -4,30 +4,43 @@
 @defaultBaseFontSize: 14px;
 @baseFontSize: -evo-themeconfig-unit('baseFontSizeValue', @defaultBaseFontSize);
 
-@defaultForegroundColour: #333333;
-@backgroundColor: -evo-themeconfig-color('accentColor', @defaultForegroundColour);
+@defaultBackgroundColour: #22252C;
+@backgroundColor: -evo-themeconfig-color('backgroundColor', @defaultBackgroundColour);
 
 @defaultLinkColour: #ffffff;
-@linkColour: -evo-themeconfig-color('backgroundColor', @defaultLinkColour);
+@linkColour: -evo-themeconfig-color('linkFontColor', @defaultLinkColour);
 
 @defaultMinWidth: 670px;
 @minWidth: -evo-themeconfig-unit('minWidth', @defaultMinWidth);
 
+@defaulAccentdColour: #006FFF;
+@accentColor: -evo-themeconfig-color('accentColor', @defaulAccentdColour);
 
-.content .paywall {
-	display: none;
-	position: fixed;
-	width: 100%;
-	bottom: 0;
-	left: 0;
-	background-color: @backgroundColor;
-	padding: 20px;
-	opacity: 1;
-	animation: fade 2s linear;
 
-	a{
-		:link, :hover,:visited {
-			color: @linkColour;
+.content {
+	.paywall-restricted {
+
+
+	}
+	
+	.paywall {
+		display: none;
+		position: fixed;
+		width: 100%;
+		bottom: 0;
+		left: 0;
+		background-color: @backgroundColor;
+		padding: 20px;
+		opacity: 1;
+		animation: fade 2s linear;
+		border-style: inset;
+		border-color: @accentColor;
+		border-size:2px;
+
+		a{
+			:link, :hover,:visited {
+				color: @linkColour;
+			}
 		}
 	}
 }

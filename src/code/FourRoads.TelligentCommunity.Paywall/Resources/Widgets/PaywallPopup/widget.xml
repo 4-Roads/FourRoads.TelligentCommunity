@@ -16,6 +16,8 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
       <![CDATA[
 <propertyGroup id="options" resourceName="Options">
 	<property id="fragmentHeader" resourceName="Widget_Title" dataType="string" defaultValue="${resource:Paywall_Header}" template="core_v2_tokenizedString" />
+	<property id="displayDelay" resourceName="DisplayDelaySeconds" dataTyoe="int" defaultValue="0" /> 
+	<property id="pageViews" resourceName="PageViews" dataTyoe="int" defaultValue="0" /> 
 </propertyGroup>
 ]]>
     </configuration>
@@ -27,7 +29,8 @@ $core_v2_widget.ApplyTokens($core_v2_widget.GetStringValue('fragmentHeader', '${
 	      <resource name="Widget_Title">Title</resource>
 	      <resource name="Paywall_Header">Want to read more</resource>
 	      <resource name="WelcomeTitle">Welcome to the site! Please register with the community. It's free and takes less than 1 minute.</resource>
-
+		  <resource name="DisplayDelaySeconds">Display Delay (Seconds)</resource>
+		  <resource name="PageViews">Views Before Display</resource>
 	      <resource name="WelcomeMessage"></resource>
 
 	      <resource name="WelcomeCTA">Sign Up</resource>
