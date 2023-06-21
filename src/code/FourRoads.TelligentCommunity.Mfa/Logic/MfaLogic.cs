@@ -108,14 +108,16 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
             if (ShouldRemoveMfaToken(request.HttpContext.Request))
             {
-                RemoveMfaToken();
+                if (_isPersistent == PersitenceEnum.Authentication)
+                    RemoveMfaToken();
+
                 return;
             }
 
             var user = _usersService.AccessingUser;
 
             Debug.Assert(user.Id != null, "user.Id != null");
-            var mfaEnabled = TwoFactorCheckAndSetState(user);
+            var mfaEnabled = TwoFactorCheckAndSetState(user) && UserRequiresMfa(user);
             if (mfaEnabled)
             {
                 PayLoad? payload = null;
@@ -659,11 +661,11 @@ namespace FourRoads.TelligentCommunity.Mfa.Logic
 
             var token = CreateJoseJwtToken(payload);
 
-            var mfaCookie = new HttpCookie(mfaCookieName)
+            var mfaCookie = new HttpCookie(mfaCookieName, token)
             {
-                Value = token,
                 HttpOnly = true,
-                Secure = true
+                Secure = true,
+                SameSite = SameSiteMode.Strict
             };
 
             if (expiration.HasValue) mfaCookie.Expires = expiration.Value;
