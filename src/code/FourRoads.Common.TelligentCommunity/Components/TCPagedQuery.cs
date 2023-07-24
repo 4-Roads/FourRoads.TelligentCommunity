@@ -95,8 +95,16 @@ namespace FourRoads.Common.TelligentCommunity.Components
             var sb = new StringBuilder();
 
             sb.Append("-").Append(GetType().FullName).Append("-").Append(ProcessCacheKeys());
+#if DEBUG
+            string cacheKey = sb.ToString();
+
+            System.Diagnostics.Debug.WriteLine(cacheKey);
+
+            return cacheKey;
+#else
 
             return sb.ToString();
+#endif
         }
 
         private string ProcessCacheKeys()
@@ -128,17 +136,18 @@ namespace FourRoads.Common.TelligentCommunity.Components
         {
             if (defaultValue != baseObjectValue)
             {
-                if (baseObjectValue is IEnumerable)
+                if (baseObjectValue is IEnumerable && !(baseObjectValue is string))
                 {
-                    StringBuilder key = new StringBuilder();
+                    List<string> values = new List<string>();
 
                     foreach (var listItem in (IEnumerable)baseObjectValue)
                     {
-                        key.Append(listItem.ToString());
-                        key.Append("~");
+                        values.Add(listItem.ToString());
                     }
 
-                    cachekeys.Add(KeyName(cka, mi) + ":" + key.ToString());
+                    values.Sort();
+
+                    cachekeys.Add(KeyName(cka, mi) + ":" + string.Join("~", values));
                 }
                 else
                 {
