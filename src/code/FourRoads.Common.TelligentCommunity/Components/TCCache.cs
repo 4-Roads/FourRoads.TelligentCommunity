@@ -8,6 +8,7 @@
 
 using System;
 using System.Linq;
+using System.Xml;
 using FourRoads.Common.Interfaces;
 using ICache = FourRoads.Common.Interfaces.ICache;
 using Telligent.Evolution.Extensibility.Caching.Version1;
@@ -21,10 +22,11 @@ namespace FourRoads.Common.TelligentCommunity.Components
 // ReSharper restore InconsistentNaming
     {
         #region ICache Members
+        readonly TimeSpan _defaulTimeSpan =  new TimeSpan(0, 0, 10, 0);
 
         public void Insert(ICacheable value)
         {
-            Insert(value ,value.CacheTags ?? new string[0]);
+            Insert(value ,value.CacheTags ?? Array.Empty<string>());
         }
 
         public void Insert(ICacheable value, string[] additionalTags)
@@ -36,35 +38,35 @@ namespace FourRoads.Common.TelligentCommunity.Components
             }
             catch
             {
-                cacheRefreshInterval = TimeSpan.MinValue;
+                cacheRefreshInterval = _defaulTimeSpan;
             }
 
-            Insert(value.CacheID, value, (value.CacheTags ?? new string[0]).Union(additionalTags ?? new string[0]).ToArray(), cacheRefreshInterval, value.CacheScope);
+            Insert(value.CacheID, value, (value.CacheTags ?? Array.Empty<string>()).Union(additionalTags ?? Array.Empty<string>()).ToArray(), cacheRefreshInterval, value.CacheScope);
         }
 
         public void Insert(string key, object value)
 		{
-            Insert(key, value, new string[0], TimeSpan.MinValue, CacheScopeOption.All);
+            Insert(key, value, Array.Empty<string>(), _defaulTimeSpan, CacheScopeOption.All);
 		}
 
 		public void Insert(string key, object value, string[] tags)
 		{
-            Insert(key, value, tags, TimeSpan.MinValue, CacheScopeOption.All);
+            Insert(key, value, tags, _defaulTimeSpan, CacheScopeOption.All);
 		}
 
 		public void Insert(string key, object value, TimeSpan timeout)
 		{
-            Insert(key, value, new string[0], timeout, CacheScopeOption.All);
+            Insert(key, value, Array.Empty<string>(), timeout, CacheScopeOption.All);
 		}
 
 		public void Insert(string key, object value, string[] tags, TimeSpan timeout)
 		{
-            Insert(key, value, tags ?? new string[0], timeout, CacheScopeOption.All);
+            Insert(key, value, tags ?? Array.Empty<string>(), timeout, CacheScopeOption.All);
 		}
 
         public void Insert(string key, object value, string[] tags, TimeSpan timeout, CacheScopeOption scope)
         {
-            CacheService.Put(key, value, ConvertToLocalScope(scope), tags ?? new string[0], timeout);
+            CacheService.Put(key, value, ConvertToLocalScope(scope), tags ?? Array.Empty<string>(), timeout);
         }
 
         private CacheScope ConvertToLocalScope(CacheScopeOption scope)
