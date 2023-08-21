@@ -66,15 +66,16 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                 }
                 catch (Exception ex)
                 {
+                    ///TODO: re-visit this and make it filter assemblies better
                     if (ex is ReflectionTypeLoadException)
                     {
-                        ReflectionTypeLoadException rtl = ex as ReflectionTypeLoadException;
+                        //ReflectionTypeLoadException rtl = ex as ReflectionTypeLoadException;
 
-                        foreach (Exception rtlEx in rtl.LoaderExceptions)
-                        {
-                            new TCException(
-                                string.Format("Failed to load IApplicationPlugin from {0}, because of:", a.FullName), rtlEx).Log();
-                        }
+                        //foreach (Exception rtlEx in rtl.LoaderExceptions)
+                        //{
+                        //    new TCException(
+                        //        string.Format("Failed to load IApplicationPlugin from {0}, because of:", a.FullName), rtlEx).Log();
+                        //}
                     }
                     else
                     {
