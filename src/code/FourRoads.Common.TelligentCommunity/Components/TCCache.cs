@@ -10,6 +10,8 @@ using System;
 using System.Linq;
 using System.Xml;
 using FourRoads.Common.Interfaces;
+using Telligent.Evolution.Extensibility;
+using Telligent.Evolution.Extensibility.Api.Version1;
 using ICache = FourRoads.Common.Interfaces.ICache;
 using Telligent.Evolution.Extensibility.Caching.Version1;
 
@@ -22,7 +24,7 @@ namespace FourRoads.Common.TelligentCommunity.Components
 // ReSharper restore InconsistentNaming
     {
         #region ICache Members
-        readonly TimeSpan _defaulTimeSpan =  new TimeSpan(0, 0, 10, 0);
+        readonly TimeSpan _defaulTimeSpan =  new TimeSpan(0, 0, 0, 30);
 
         public void Insert(ICacheable value)
         {
@@ -75,14 +77,32 @@ namespace FourRoads.Common.TelligentCommunity.Components
         }
 
         public object Get(string key)
-		{
-            return CacheService.Get(key, CacheScope.All);
-		}
+        {
+            try
+            {
+                return CacheService.Get(key, CacheScope.All);
+            }
+            catch (Exception ex)
+            {
+                Apis.Get<IExceptions>().Log(ex);
+
+                return null;
+            }
+        }
 
         public T Get<T>(string key)
         {
-            return (T)CacheService.Get(key, CacheScope.All);
-		}
+            try
+            {
+                return (T)CacheService.Get(key, CacheScope.All);
+            }
+            catch (Exception ex)
+            {
+                Apis.Get<IExceptions>().Log(ex);
+
+                return default(T);
+            }
+        }
 
         public void Remove(string key)
         {
