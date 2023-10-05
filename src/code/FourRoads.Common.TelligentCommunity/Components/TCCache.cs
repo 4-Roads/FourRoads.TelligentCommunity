@@ -114,11 +114,6 @@ namespace FourRoads.Common.TelligentCommunity.Components
             CacheService.RemoveByTags(tags, CacheScope.All);
 		}
 
-		public void Clear()
-		{
-            CacheService.RemoveByTags(new [] { "*"}, CacheScope.All);
-		}
-
-		#endregion
+        #endregion
 	}
 }
