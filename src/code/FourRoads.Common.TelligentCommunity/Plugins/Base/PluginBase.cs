@@ -87,7 +87,7 @@ namespace FourRoads.Common.TelligentCommunity.Plugins.Base
                         {
                             try
                             {
-                                return a.ExportedTypes.Where(t => type.IsAssignableFrom(t) && !t.IsInterface() && !t.IsAbstract());
+                                return a.ExportedTypes.Where(t => type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
                             }
                             catch (Exception ex)
                             {
