@@ -5,7 +5,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 {
     internal class FileStorageFileCache : SimpleCachedCollection<FileStorageFile>
     {
-        private FilestoreProvider _provider;
+        // private FilestoreProvider _provider;
 
         public FileStorageFileCache(ICache cacheProvider , FilestoreProvider provider)
             : base(cacheProvider)
@@ -19,9 +19,9 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             };
         }
 
-        public static string CreateCacheId(string filestoreKey, string path, string file)
+        public static string CreateCacheId(string fileStoreKey, string path, string file)
         {
-            return $"$$S3Cache-{filestoreKey}-{path}|{file}";;
+            return $"$$S3Cache-{fileStoreKey}-{path}|{file}";
         }
     }
 }

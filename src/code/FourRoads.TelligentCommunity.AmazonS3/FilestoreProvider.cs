@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Util;
+using System.Collections.Concurrent; 
 using System.Xml;
 using Amazon;
 using Amazon.Runtime;
@@ -120,17 +120,17 @@ namespace FourRoads.TelligentCommunity.AmazonS3
     public class FilestoreProvider :  IEventEnabledCentralizedFileStorageProvider
     {
         private string _bucketName;
-        private AmazonS3Client s3Client;
-        private bool _acellerationEnabled;
+        private AmazonS3Client _s3Client;
+        private bool _accelerationEnabled;
         private const string PlaceHolderFilename = "__path__place__holder.cfs.s3";
         private FileStorageFileCache _fileSet;
         private int _cacheTime;
         private int _preSignMinutes;
-        private Dictionary<string, DateTime> _knownFiles = new Dictionary<string, DateTime>();
+        private ConcurrentDictionary<string, DateTime> _knownFiles = new ConcurrentDictionary<string, DateTime>();
 
         public void Initialize(string fileStoreKey, XmlNode node)
         {
-            if (s3Client != null)
+            if (_s3Client != null)
                 return;
 
             _fileSet = new FileStorageFileCache(Injector.Get<ICache>() , this);
@@ -173,7 +173,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             _cacheTime = Convert.ToInt32(node.Attributes["cacheTimeSeconds"]?.Value);
 
-            s3Client = new AmazonS3Client(credentials, configuration);
+            _s3Client = new AmazonS3Client(credentials, configuration);
 
             bool enableAcceleration;
 
@@ -188,11 +188,11 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             //    EnableAcceleration();
             //}
 
-            if (_acellerationEnabled)
+            if (_accelerationEnabled)
             {
-                configuration.UseAccelerateEndpoint = _acellerationEnabled;
+                configuration.UseAccelerateEndpoint = _accelerationEnabled;
                 //replace the client with accellerated version
-                s3Client = new AmazonS3Client(credentials, configuration);
+                _s3Client = new AmazonS3Client(credentials, configuration);
             }
         }
 
@@ -200,7 +200,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         {
             try
             {
-                if (! _acellerationEnabled)
+                if (! _accelerationEnabled)
                 {
   
                     var putRequest = new PutBucketAccelerateConfigurationRequest
@@ -211,7 +211,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
                             Status = BucketAccelerateStatus.Enabled
                         }
                     };
-                    s3Client.PutBucketAccelerateConfiguration(putRequest);
+                    _s3Client.PutBucketAccelerateConfiguration(putRequest);
 
                     TestAcceleration();
                 }
@@ -233,9 +233,9 @@ namespace FourRoads.TelligentCommunity.AmazonS3
                     BucketName = _bucketName
                 };
 
-                var response = s3Client.GetBucketAccelerateConfiguration(getRequest);
+                var response = _s3Client.GetBucketAccelerateConfiguration(getRequest);
 
-                _acellerationEnabled = response.Status == BucketAccelerateStatus.Enabled;
+                _accelerationEnabled = response.Status == BucketAccelerateStatus.Enabled;
             }
             catch (Exception ex)
             {
@@ -265,11 +265,11 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         {
             string key = MakeKey(path, fileName);
 
-            if (_knownFiles.ContainsKey(key))
+            if (_knownFiles.TryGetValue(key, out var lastKnownTime))
             {
-                if (DateTime.Now.Subtract(new TimeSpan(0, 0, 0, _cacheTime)) >= _knownFiles[key])
+                if (DateTime.Now.Subtract(new TimeSpan(0, 0, 0, _cacheTime)) >= lastKnownTime)
                 {
-                    _knownFiles.Remove(key);
+                    _knownFiles.TryRemove(key, out _); 
                 }
                 else
                 {
@@ -280,27 +280,20 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             var request = new ListObjectsRequest
             {
                 BucketName = _bucketName,
-                Prefix = MakeKey(path, fileName),
+                Prefix = key, //MakeKey(path, fileName),
                 MaxKeys = 1
             };
 
-            ListObjectsResponse response = s3Client.ListObjects(request);
+            ListObjectsResponse response = _s3Client.ListObjects(request);
 
             if (response.S3Objects.Count == 0)
                 return false;
 
-            bool exists = string.Compare(response.S3Objects[0].Key , request.Prefix, StringComparison.OrdinalIgnoreCase) == 0;
+            bool exists = string.Compare(response.S3Objects[0].Key , key, StringComparison.OrdinalIgnoreCase) == 0;
 
             if (exists)
             {
-                if (_knownFiles.ContainsKey(key))
-                {
-                    _knownFiles[response.S3Objects[0].Key] = DateTime.Now;
-                }
-                else
-                {
-                    _knownFiles.Add(response.S3Objects[0].Key, DateTime.Now);
-                }
+                _knownFiles.AddOrUpdate(key, DateTime.Now, (k, oldValue) => DateTime.Now);
             }
 
             return exists;
@@ -310,7 +303,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
         {
             string fileKey = MakeKey(path, fileName);
 
-            var metaDataAsync = s3Client.GetObjectMetadataAsync(_bucketName, fileKey);
+            var metaDataAsync = _s3Client.GetObjectMetadataAsync(_bucketName, fileKey);
 
             var metaData = metaDataAsync.Result;
 
@@ -347,7 +340,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             do
             {
-                ListObjectsV2Response response = s3Client.ListObjectsV2(request);
+                ListObjectsV2Response response = _s3Client.ListObjectsV2(request);
 
                 foreach (S3Object entry in response.S3Objects)
                 {
@@ -422,7 +415,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             EventExecutor?.OnBeforeDelete(FileStoreKey, path, fileName);
 
-            s3Client.DeleteObject(_bucketName, key);
+            _s3Client.DeleteObject(_bucketName, key);
 
             var fileToDelete = (FileStorageFile) GetFile(path, fileName);
 
@@ -431,10 +424,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             EventExecutor?.OnAfterDelete(FileStoreKey, path, fileName);
 
-            if (_knownFiles.ContainsKey(key))
-            {
-                _knownFiles.Remove(key);
-            }
+            _knownFiles.TryRemove(key, out _);
         }
 
         public void Delete()
@@ -505,7 +495,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
                 contentStream.CopyTo(tempFileStream);
             }
 
-            s3Client.PutObject(new PutObjectRequest
+            _s3Client.PutObject(new PutObjectRequest
             {
                 BucketName = _bucketName,
                 Key = MakeKey(path, fileName),
@@ -544,7 +534,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
 
             if (DoesFileExist(path, fileName))
             {
-                return s3Client.GetObject(new GetObjectRequest {BucketName = _bucketName, Key = fileKey});
+                return _s3Client.GetObject(new GetObjectRequest {BucketName = _bucketName, Key = fileKey});
             }
 
             return null;
@@ -559,7 +549,7 @@ namespace FourRoads.TelligentCommunity.AmazonS3
             {
                 string fileKey = MakeKey(path, fileName);
 
-                return s3Client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucketName, Key = fileKey, Expires = DateTime.Now.AddMinutes(_preSignMinutes)});
+                return _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest { BucketName = _bucketName, Key = fileKey, Expires = DateTime.Now.AddMinutes(_preSignMinutes)});
             }
 
             return null;
